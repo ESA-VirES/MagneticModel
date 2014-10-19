@@ -8,3 +8,4 @@ The repository contains following directories:
 
 - `wmmlib` - World Magnetic Model 2010 - Geomagnetism shared library
 - `wmmcli` - World Magnetic Model 2010 - CLI
+- `eoxmagmod` - Collection models of the Earth magnetic field - python module
