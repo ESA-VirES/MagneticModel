@@ -60,9 +60,11 @@
 /* Coordinate conversions. */
 #include "pywmm_cconv.h"
 
-/* Model evaluation */
+/* Model evaluation - simple variant */
 #include "pywmm_geomag.h"
 
+/* evaluation of the asociative Legendre functions  */
+#include "pywmm_legendre.h"
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
 
@@ -73,6 +75,7 @@
 /*define module's methods */
 static PyMethodDef pywmm_methods[] =
 {
+    {"legendre", (PyCFunction)legendre, METH_VARARGS|METH_KEYWORDS, DOC_LEGENDRE},
     {"geomag", (PyCFunction)geomag, METH_VARARGS|METH_KEYWORDS, DOC_GEOMAG},
     {"convert", (PyCFunction)convert, METH_VARARGS|METH_KEYWORDS, DOC_CONVERT},
     {NULL, NULL, 0, NULL} /* Sentinel - DO NOT REMOVE! */

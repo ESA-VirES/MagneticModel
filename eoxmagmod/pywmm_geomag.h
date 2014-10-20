@@ -1,6 +1,6 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings - coordinate conversions
+ * World Magnetic Model - C python bindings - magnetic model evaluation
  *
  * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
@@ -148,8 +148,14 @@ static void _geomag(ARRAY_DATA arrd_in, ARRAY_DATA arrd_out, MODEL *model)
 /* python function definition */
 
 #define DOC_GEOMAG "\n"\
-"   arr_out = geomag_static(arr_in, coord_type=GEODETIC_ABOVE_WGS84)\n"\
-"\n     Evaluate WMM model for a given vector of locations.\n"
+"   arr_out = geomag_static(arr_in, degree, coef_g, coef_h, coord_type=GEODETIC_ABOVE_WGS84)\n"\
+"\n     Evaluate WMM model for a given array of 3D location vectors.\n"\
+"     Parameters:\n"\
+"        arr_in - array of 3D coordinates (up to 16 dimensions).\n"\
+"        degree - degree of the spherical harmonic model.\n"\
+"        coef_g - vector of spherical harmonic model coeficients.\n"\
+"        coef_h - vector of spherical harmonic model coeficients.\n"\
+"        cood_type - type of the input coordinates.\n"
 
 
 static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
@@ -234,8 +240,8 @@ static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
         model.degree = degree;
         model.nterm = nterm;
         model.coord = ct_in;
-        model.coef_g = (double*) PyArray_DATA(arr_cg),
-        model.coef_h = (double*) PyArray_DATA(arr_ch),
+        model.coef_g = (double*) PyArray_DATA(arr_cg);
+        model.coef_h = (double*) PyArray_DATA(arr_ch);
 
         _geomag(_array_to_arrd(arr_in), _array_to_arrd(arr_out), &model);
     }
@@ -246,8 +252,8 @@ static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // decrease reference counters to the arrays
     if (arr_in){Py_DECREF(arr_in);}
-    if (arr_in){Py_DECREF(arr_cg);}
-    if (arr_in){Py_DECREF(arr_ch);}
+    if (arr_cg){Py_DECREF(arr_cg);}
+    if (arr_ch){Py_DECREF(arr_ch);}
     if (!retval && arr_out){Py_DECREF(arr_out);}
 
     return retval;

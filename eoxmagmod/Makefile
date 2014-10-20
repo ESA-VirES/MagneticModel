@@ -14,7 +14,7 @@ CCFLAGS= -c -g -DDEBUG=1 -Wall -fPIC $(INCS)
 #CCFLAGS= -c -O2 -g -DDEBUG=1 -Wall -fPIC $(INCS)
 #CCFLAGS= -c -O2 -DDEBUG=1 -Wall -fPIC $(INC)
 
-HDR=pywmm_aux.h pywmm_geomag.h pywmm_cconv.h pywmm_coord.h pywmm_exc.h
+HDR=pywmm_aux.h pywmm_geomag.h pywmm_legendre.h pywmm_cconv.h pywmm_coord.h pywmm_exc.h
 OBJ=pywmm.o
 DST=_pywmm.so
 
