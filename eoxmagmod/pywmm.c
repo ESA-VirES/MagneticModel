@@ -61,7 +61,7 @@
 #include "pywmm_cconv.h"
 
 /* Model evaluation */
-//#include "pywmm_model.h"
+#include "pywmm_geomag.h"
 
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
@@ -73,6 +73,7 @@
 /*define module's methods */
 static PyMethodDef pywmm_methods[] =
 {
+    {"geomag", (PyCFunction)geomag, METH_VARARGS|METH_KEYWORDS, DOC_GEOMAG},
     {"convert", (PyCFunction)convert, METH_VARARGS|METH_KEYWORDS, DOC_CONVERT},
     {NULL, NULL, 0, NULL} /* Sentinel - DO NOT REMOVE! */
 } ;

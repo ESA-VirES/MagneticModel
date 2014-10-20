@@ -176,17 +176,17 @@ static f_conv _get_fconv(int ct_in, int ct_out)
 static void _convert(ARRAY_DATA arrd_in, ARRAY_DATA arrd_out, f_conv fconv)
 {
     if (arrd_in.ndim > 1)
-    { 
-        npy_intp i; 
+    {
+        npy_intp i;
         for(i = 0; i < arrd_in.dim[0]; ++i)
             _convert(_get_arrd_item(&arrd_in, i), _get_arrd_item(&arrd_out, i), fconv);
-    } 
+    }
     else
     {
         #define P(a,i) ((double*)((a).data+(i)*(a).stride[0]))
         #define V(a,i) (*P(a,i))
 
-        fconv(P(arrd_out, 0), P(arrd_out, 1), P(arrd_out, 2), 
+        fconv(P(arrd_out, 0), P(arrd_out, 1), P(arrd_out, 2),
               V(arrd_in, 0), V(arrd_in, 1), V(arrd_in, 2));
 
         #undef V
@@ -217,15 +217,15 @@ static PyObject* convert(PyObject *self, PyObject *args, PyObject *kwdict)
             "O|ii:convert", keywords, &obj_in, &ct_in, &ct_out))
         goto exit;
 
-    // check the type of the coordinate transformation 
+    // check the type of the coordinate transformation
     if (CT_INVALID == _check_coord_type(ct_in, keywords[0])) goto exit;
     if (CT_INVALID == _check_coord_type(ct_out, keywords[1])) goto exit;
 
     // cast the object to an array
-    if (NULL == (arr_in=_get_as_double_array(obj_in, 1, 0, keywords[0])))
+    if (NULL == (arr_in=_get_as_double_array(obj_in, 1, 0, NPY_ALIGNED, keywords[0])))
         goto exit;
 
-    // check maximum allowed output array dimension
+    // check maximum allowed input array dimension
     if (PyArray_NDIM(arr_in) > MAX_OUT_ARRAY_NDIM)
     {
         PyErr_Format(PyExc_ValueError, "The input array dimension of '%s'"\
@@ -241,11 +241,11 @@ static PyObject* convert(PyObject *self, PyObject *args, PyObject *kwdict)
     // fast-track identity
     if (ct_in == ct_out) return arr_in;
 
-    // create the output array 
+    // create the output array
     if (NULL == (arr_out = _get_new_double_array(PyArray_NDIM(arr_in), PyArray_DIMS(arr_in), 3)))
         goto exit;
 
-    // process 
+    // process
     _convert(_array_to_arrd(arr_in), _array_to_arrd(arr_out), _get_fconv(ct_in, ct_out));
 
     //retval = Py_None; Py_INCREF(Py_None);

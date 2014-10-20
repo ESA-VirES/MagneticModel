@@ -28,6 +28,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-from common import MagneticModel
-from wmm import  GeomagWMM2010, read_prm_wmm2010
-
+from .base import MagneticModel
+from .wmm import  GeomagWMM2010, read_model_wmm2010, convert
+from .emm import  read_model_emm2010

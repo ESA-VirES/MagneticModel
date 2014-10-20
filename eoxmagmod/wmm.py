@@ -30,39 +30,49 @@
 
 import re
 import numpy as np
-from common import MagneticModel
+from base import MagneticModel
 import _pywmm
+from _pywmm import convert
 
 class GeomagWMM2010(MagneticModel):
     """ Magnetic Model based on the WMM2010 Geomagnetism library."""
 
-    def eval(self, arr_in, coord_type=MagneticModel.GEODETIC_ABOVE_WGS84):
+    def eval(self, arr_in, date, coord_type=MagneticModel.GEODETIC_ABOVE_WGS84, secvar=False):
         """Evaluate Magnetic Model for a given set of spatio-teporal
         coordinates.
 
         Input:
-            arr_in - numpy array of (time, x, y, z) coordinates.
-                     The time is passed as a decimal year value (e.g., 2015.23).
+            arr_in - numpy array of (x, y, z) coordinates.
                      The type of the x, y, z, values depends on the selected
                      input coordinate system.
 
+            date - The time as a decimal year value (e.g., 2015.23).
             coord_type - shall be set to one of the valid coordinate systesm:
                         MagneticModel.GEODETIC_ABOVE_WGS84 (default)
                         MagneticModel.GEODETIC_ABOVE_EGM96
                         MagneticModel.GEOCENTRIC_SPHERICAL
                         MagneticModel.GEOCENTRIC_CARTESIAN
 
+            secvar - if True secular variation of the magentic field is
+                     calculated rather than the magnetic fied.
+
         Output:
 
             arr_out - output numpy array with the same shape as the input
                       array contaning the calcuated magentic field parameters.
         """
-
         if coord_type not in dict(self.COORD_TYPES):
             raise ValueError("Invalid coordinate type!")
 
+        if secvar:
+            degree = self.degree_secvar
+            coef_g, coef_h = self.coef_secvar
+        else:
+            degree = self.degree_static
+            coef_g, coef_h = self.get_coef_static(date)
 
-        # call the model
+        return _pywmm.geomag(arr_in, degree, coef_g, coef_h, coord_type)
+
 
 def read_model_wmm2010(fname):
     """ Read model parameters from a coeficient file in the WMM2010 format."""
@@ -79,11 +89,11 @@ def read_model_wmm2010(fname):
         degree = 0
         lcoef = []
         for lidx, line in enumerate(fid):
-            try: 
-                n, m, g, h, dg, dh = line.split() 
+            try:
+                n, m, g, h, dg, dh = line.split()
                 n, m = int(n), int(m)
                 g, h, dg, dh = float(g), float(h), float(dg), float(dh)
-                if m > n :
+                if m > n:
                     raise ValueError
             except ValueError:
                 if not re.match(r'^\s*9+\s*$', line):

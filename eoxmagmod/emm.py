@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 #
-#  Earth Magnetic Model 2010 
+#  Earth Magnetic Model 2010
 #
 # Project: Earth magnetic field in Python.
 # Author: Martin Paces <martin.paces@eox.at>
@@ -31,8 +31,7 @@
 import re
 from gzip import GzipFile as _GzipFile
 import numpy as np
-from common import MagneticModel
-
+from base import MagneticModel
 
 # NOTE: GzipFile with statement support added in Python 2.7.
 if hasattr(_GzipFile, '__exit__'):
@@ -52,15 +51,17 @@ def _read_prm_emm2010(fname):
         prm = {'sources': [fname]}
         #PASS 1
         # parse header
-        headers = [] 
+        headers = []
         line = next(fid)
         name = line.split()[0]
         if name[-1] == ',':
             name = name[:-1]
         prm['name'] = name
         headers.append(line.rstrip())
-        for lidx, line in enumerate(fid, 1):
-            #print "%d\t%s"%(lidx, line.rstrip()) 
+        lidx = 0
+        for _lidx, line in enumerate(fid, 1):
+            lidx = _lidx
+            #print "%d\t%s"%(lidx, line.rstrip())
             headers.append(line.rstrip())
             wlist = line.split()
             if wlist and wlist[0] == 'Epoch:':
@@ -83,11 +84,11 @@ def _read_prm_emm2010(fname):
         loff = lidx
         for lidx, line in enumerate(fid):
             #print loff+lidx, line.rstrip()
-            try: 
-                n, m, g, h = line.split() 
+            try:
+                n, m, g, h = line.split()
                 n, m = int(n), int(m)
                 g, h, = float(g), float(h)
-                if m > n :
+                if m > n:
                     raise ValueError
             except ValueError:
                 raise ValueError("Invalid line #%d: %s"%(loff+lidx, line.rstrip()))
@@ -95,7 +96,7 @@ def _read_prm_emm2010(fname):
                 degree_check = max(degree_check, n)
                 if degree_check > degree:
                     raise ValueError("Invalid order value! The annotated order value is too low!")
-                    
+
                 idx = m + ((n+1)*n)/2
                 coef_g[idx] = g
                 coef_h[idx] = h
@@ -103,13 +104,13 @@ def _read_prm_emm2010(fname):
 
         if degree_check > degree:
             raise ValueError("Invalid order value! The annotated order value is too high!")
-        
+
         prm['coef_g'] = coef_g
         prm['coef_h'] = coef_h
 
-        return prm 
+        return prm
 
-    try: 
+    try:
         with GzipFile(fname, 'r') as fid:
             return _read(fid)
     except IOError:
@@ -140,7 +141,7 @@ def read_model_emm2010(fname_static, fname_secvar):
     prm['coef_static_h'] = prm_static['coef_h']
     prm['coef_secvar_g'] = prm_secvar['coef_g']
     prm['coef_secvar_h'] = prm_secvar['coef_h']
-    
+
     return MagneticModel(prm)
 
 
@@ -148,14 +149,14 @@ if __name__ == "__main__":
     import time
 
     t0 = time.time()
-    mm = read_model_emm2010("../../EMM/EMM-720_V3p0_static.cof", 
+    mm = read_model_emm2010("../../EMM/EMM-720_V3p0_static.cof",
                            "../../EMM/EMM-720_V3p0_secvar.cof")
     t1 = time.time()
     print "time: %g s"%(t1-t0)
     mm.print_info()
 
     t0 = time.time()
-    mm = read_model_emm2010("../../EMM/EMM-720_V3p0_static.cof.gz", 
+    mm = read_model_emm2010("../../EMM/EMM-720_V3p0_static.cof.gz",
                            "../../EMM/EMM-720_V3p0_secvar.cof.gz")
     t1 = time.time()
     print "time: %g s"%(t1-t0)

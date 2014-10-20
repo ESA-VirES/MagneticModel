@@ -36,10 +36,11 @@
  * Check the input python object and convert it to a double precision NumPy
  * array ensuring the native byte-order.
  */
-static PyObject* _get_as_double_array(PyObject *data, int dmin, int dmax, const char *label)
+static PyObject* _get_as_double_array(PyObject *data, int dmin, int dmax,
+                int reqs, const char *label)
 {
     PyArray_Descr *dtype = PyArray_DescrFromType(NPY_FLOAT64);
-    PyObject *arr = PyArray_FromAny(data, dtype, dmin, dmax, NPY_ALIGNED, NULL);
+    PyObject *arr = PyArray_FromAny(data, dtype, dmin, dmax, reqs, NULL);
     /*
     if (NULL == arr)
         PyErr_Format(PyExc_ValueError, "Failed to cast %s to an array!", label);
@@ -48,8 +49,8 @@ static PyObject* _get_as_double_array(PyObject *data, int dmin, int dmax, const 
 }
 
 /*
- * Get new allocated NumPy array. The first (N-1) dimenstions as read from 
- * the array of dimenstions (allowing easily set the same shape as the input 
+ * Get new allocated NumPy array. The first (N-1) dimenstions as read from
+ * the array of dimenstions (allowing easily set the same shape as the input
  * matrix). The last Nth dimension is overriden by the 'dim_last' value.
  */
 static PyObject* _get_new_double_array(npy_intp ndim, const npy_intp *dims, npy_intp dim_last)
@@ -85,8 +86,8 @@ static int _check_last_array_dimension(PyObject *arr, int dim, const char *label
     return rv;
 }
 
-/* 
- * Extraction of the lover dimensional parts of the arrays. 
+/*
+ * Extraction of the lover dimensional parts of the arrays.
  */
 
 typedef struct {
@@ -94,7 +95,7 @@ typedef struct {
     npy_intp ndim;
     const npy_intp *dim;
     const npy_intp *stride;
-} ARRAY_DATA; 
+} ARRAY_DATA;
 
 static ARRAY_DATA _array_to_arrd(PyObject *arr)
 {
@@ -104,18 +105,18 @@ static ARRAY_DATA _array_to_arrd(PyObject *arr)
         PyArray_DIMS(arr),
         PyArray_STRIDES(arr)
     };
-    return arrd; 
+    return arrd;
 }
 
 static ARRAY_DATA _get_arrd_item(const ARRAY_DATA *arrd, npy_intp idx)
 {
     ARRAY_DATA arrd_sub = {
         arrd->data + idx*arrd->stride[0],
-        arrd->ndim - 1, 
+        arrd->ndim - 1,
         arrd->dim + 1,
         arrd->stride + 1
     };
-    return arrd_sub; 
+    return arrd_sub;
 }
 
 #endif  /* PYWMM_AUX_H */

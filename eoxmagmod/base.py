@@ -66,6 +66,43 @@ class MagneticModel(object):
         elif isinstance(model_prm, MagneticModel):
             self.prm = model_prm.prm
 
+    @property
+    def epoch(self):
+        return self.prm['epoch']
+
+    @property
+    def degree_static(self):
+        return self.prm['degree_static']
+
+    @property
+    def degree_secvar(self):
+        return self.prm['degree_secvar']
+
+    def get_coef_static(self, date):
+        """ Calculate model static coeficients for a date specified by a decimal year value.
+        """
+        prm = self.prm
+        ddate = date - self.epoch
+        nterm = min(prm['coef_static_g'].size, prm['coef_secvar_g'].size)
+
+        coef_static_g = np.copy(prm['coef_static_g'])
+        coef_static_h = np.copy(prm['coef_static_h'])
+        coef_static_g[:nterm] += ddate * prm['coef_secvar_g'][:nterm]
+        coef_static_h[:nterm] += ddate * prm['coef_secvar_h'][:nterm]
+
+        return coef_static_g, coef_static_h
+
+
+    @property
+    def coef_secvar(self):
+        """Get secular variation coeficients."""
+        return self.prm['coef_secvar_g'], self.prm['coef_secvar_h']
+
+    @staticmethod
+    def get_intensity(arr):
+        """Calculate intensities for array of vectors."""
+        return np.sqrt((arr*arr).sum(axis=arr.ndim-1))
+
     def print_info(self):
         def _analyse_coeficiens(degree, coef_g, coef_h, prefix):
             nz_g = coef_g.nonzero()
@@ -76,7 +113,7 @@ class MagneticModel(object):
                 if nz_max >= ((dg*(dg+1))/2):
                     degree_real = dg
                     break
-            n_all = coef_g.size + coef_h.size 
+            n_all = coef_g.size + coef_h.size
             n_zero = n_all - (nz_g[0].size + nz_h[0].size)
             sparsity = float(n_zero) / float(n_all)
 
@@ -87,9 +124,9 @@ class MagneticModel(object):
         prm = self.prm
         print "Magnetic Model:"
         print "\tclass:    ", self.__class__.__name__
-        print "\tname:     ", prm.get('name', 'n/a') 
-        print "\tversion:  ", prm.get('version', 'n/a') 
-        print "\tepoch:    ", prm.get('epoch', 'n/a') 
+        print "\tname:     ", prm.get('name', 'n/a')
+        print "\tversion:  ", prm.get('version', 'n/a')
+        print "\tepoch:    ", prm.get('epoch', 'n/a')
         print "\tsource(s):"
         for src in prm.get('sources', []):
             print "\t\t", src
