@@ -11,6 +11,16 @@ original WMM package:
 The code selection and preparation of the makefile was done by
 EOX IT Services GmbH, Vienna, Austria in October 2014.
 
+Installation:
+
+Step 1 - build the library:
+
+  $ make build
+
+Step 2 - install the library:
+
+  $ sudo make install
+
 
 ABSTRACT
 

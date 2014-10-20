@@ -12,6 +12,10 @@ included and can be obtained with the original WMM package:
 The code selection and preparation of the makefile was done by
 EOX IT Services GmbH, Vienna, Austria in October 2014.
 
+To build the executables run:
+
+  $ make build
+
 
 ABSTRACT
 
