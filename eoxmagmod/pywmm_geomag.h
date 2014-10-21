@@ -200,18 +200,18 @@ static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
     // check dimensions of the coeficient arrays
     nterm = ((degree+1)*(degree+2))/2;
 
-    if (PyArray_DIM(arr_cg, 0) != nterm)
+    if (PyArray_DIM(arr_cg, 0) < nterm)
     {
         PyErr_Format(PyExc_ValueError, "The size of '%s'"\
-            " %d does not match the required value %d!", keywords[2],
+            " %d lower than the required value %d!", keywords[2],
             (int)PyArray_DIM(arr_cg, 0), nterm);
         goto exit;
     }
 
-    if (PyArray_DIM(arr_ch, 0) != nterm)
+    if (PyArray_DIM(arr_ch, 0) < nterm)
     {
         PyErr_Format(PyExc_ValueError, "The size of '%s'"\
-            " %d does not match the required value %d!", keywords[3],
+            " %d lower than the required value %d!", keywords[3],
             (int)PyArray_DIM(arr_ch, 0), nterm);
         goto exit;
     }
