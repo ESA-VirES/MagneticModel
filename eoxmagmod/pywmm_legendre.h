@@ -1,14 +1,14 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings - asociative Legendre functions
- * evaluation
+ * World Magnetic Model - C python bindings 
+ * - asociative Legendre functions evaluation
  *
  * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2013 EOX IT Services GmbH
+ * Copyright (C) 2014 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
