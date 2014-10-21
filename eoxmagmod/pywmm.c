@@ -65,6 +65,10 @@
 
 /* evaluation of the asociative Legendre functions  */
 #include "pywmm_legendre.h"
+
+/* evaluation of the relative radius powers */
+#include "pywmm_relradpow.h"
+
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
 
@@ -75,6 +79,7 @@
 /*define module's methods */
 static PyMethodDef pywmm_methods[] =
 {
+    {"relradpow", (PyCFunction)relradpow, METH_VARARGS|METH_KEYWORDS, DOC_RELRADPOW},
     {"legendre", (PyCFunction)legendre, METH_VARARGS|METH_KEYWORDS, DOC_LEGENDRE},
     {"geomag", (PyCFunction)geomag, METH_VARARGS|METH_KEYWORDS, DOC_GEOMAG},
     {"convert", (PyCFunction)convert, METH_VARARGS|METH_KEYWORDS, DOC_CONVERT},
