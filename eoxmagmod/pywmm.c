@@ -31,8 +31,6 @@
 
 #define VERSION "0.1.0dev"
 
-#include <stdio.h>
-
 // needed to prevent dual definition
 #ifdef _POSIX_C_SOURCE
 #undef _POSIX_C_SOURCE
