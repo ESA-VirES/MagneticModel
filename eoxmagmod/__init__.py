@@ -31,3 +31,16 @@
 from .base import MagneticModel
 from .wmm import  GeomagWMM2010, read_model_wmm2010, convert
 from .emm import  read_model_emm2010
+
+__all__ = [
+    'MagneticModel',
+    'GeomagWMM2010',
+    'read_model_wmm2010',
+    'read_model_emm2010',
+    'convert',
+]
+
+__version__ = '0.1.0dev'
+__author__ = 'Martin Paces (martin.paces@eox.at)'
+__copyright__ = 'Copyright (C) 2014 EOX IT Services GmbH'
+__licence__ = 'EOX licence (MIT style)'
