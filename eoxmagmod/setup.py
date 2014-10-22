@@ -30,8 +30,11 @@
 
 import os
 import os.path
-from distutils.core import setup
+#from distutils.core import setup
+from setuptools import setup
 from distutils.extension import Extension
+#from distutils.core import setup
+#from distutils.extension import Extension
 
 del os.link
 cwd = os.path.dirname(os.path.abspath(__file__))
