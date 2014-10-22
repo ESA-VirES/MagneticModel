@@ -28,10 +28,16 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+import os.path
 import numpy as np
 
-# coordinate systems and their trasnformation
+# location of the data files
+dirname = os.path.dirname(__file__)
+DATA_WMM_2010 = os.path.join(dirname, 'data/WMM.COF')
+DATA_EMM_2010_STATIC = os.path.join(dirname, 'data/EMM-720_V3p0_static.cof')
+DATA_EMM_2010_SECVAR = os.path.join(dirname, 'data/EMM-720_V3p0_secvar.cof')
 
+# coordinate systems and their trasnformation
 from _pywmm import (
     GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96,
     GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,

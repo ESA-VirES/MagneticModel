@@ -47,7 +47,8 @@ setup(
     packages=['eoxmagmod'],
     license='EOX licence (MIT style)',
     version='0.1.0dev',
-    ext_modules = [
+    package_data={'eoxmagmod': ['data/*']},
+    ext_modules=[
         Extension(
             'eoxmagmod._pywmm',
             sources=['eoxmagmod/pywmm.c'],
