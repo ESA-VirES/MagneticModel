@@ -33,6 +33,10 @@ from .base import (
     DATA_WMM_2010,
     DATA_EMM_2010_STATIC,
     DATA_EMM_2010_SECVAR,
+    GEODETIC_ABOVE_WGS84,
+    GEODETIC_ABOVE_EGM96,
+    GEOCENTRIC_SPHERICAL,
+    GEOCENTRIC_CARTESIAN,
 )
 from .wmm import GeomagWMM2010, read_model_wmm2010, convert
 from .emm import read_model_emm2010
@@ -46,6 +50,10 @@ __all__ = [
     'DATA_WMM_2010',
     'DATA_EMM_2010_STATIC',
     'DATA_EMM_2010_SECVAR',
+    'GEODETIC_ABOVE_WGS84',
+    'GEODETIC_ABOVE_EGM96',
+    'GEOCENTRIC_SPHERICAL',
+    'GEOCENTRIC_CARTESIAN',
 ]
 
 __version__ = '0.1.0dev'

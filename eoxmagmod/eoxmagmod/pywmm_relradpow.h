@@ -43,7 +43,8 @@
 "   rrp = relradpow(radius, degree, earth_radius=6371.2)\n"\
 "\n"\
 "     For given 'radius' (geocentric spherical), evaluate relative radius power\n"\
-"     series: (earth_radius/radius)**(i+2) for i in range(0, degree+1) .\n"\
+"     series:\n"\
+"       (earth_radius/radius)**(i+2) for i in range(0, degree+1) .\n"\
 
 
 static PyObject* relradpow(PyObject *self, PyObject *args, PyObject *kwdict)
@@ -83,7 +84,7 @@ static PyObject* relradpow(PyObject *self, PyObject *args, PyObject *kwdict)
 
     { // evaluate the relative radius power
         int i;
-        double *rrp = PyArray_DATA(arr_rrp);
+        double *rrp = (double*)PyArray_DATA(arr_rrp);
         double rr = rad0/rad;
         double rr_last = rr;
 

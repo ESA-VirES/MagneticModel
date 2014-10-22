@@ -61,11 +61,15 @@
 /* Model evaluation - simple variant */
 #include "pywmm_geomag.h"
 
-/* evaluation of the asociative Legendre functions  */
+/* evaluation of the asociative Legendre functions */
 #include "pywmm_legendre.h"
 
 /* evaluation of the relative radius powers */
 #include "pywmm_relradpow.h"
+
+/* evaluation of the series of longitude sine and cosine values */
+#include "pywmm_lonsincos.h"
+
 
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
@@ -77,6 +81,7 @@
 /*define module's methods */
 static PyMethodDef pywmm_methods[] =
 {
+    {"lonsincos", (PyCFunction)lonsincos, METH_VARARGS|METH_KEYWORDS, DOC_LONSINCOS},
     {"relradpow", (PyCFunction)relradpow, METH_VARARGS|METH_KEYWORDS, DOC_RELRADPOW},
     {"legendre", (PyCFunction)legendre, METH_VARARGS|METH_KEYWORDS, DOC_LEGENDRE},
     {"geomag", (PyCFunction)geomag, METH_VARARGS|METH_KEYWORDS, DOC_GEOMAG},
