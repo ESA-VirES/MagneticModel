@@ -2,3 +2,6 @@
 *.so
 *.pyc
 *.exe
+MANIFEST
+build
+dist
