@@ -2,7 +2,7 @@ CC=gcc
 LD=gcc
 RM=rm -fv 
 
-INC_WMM=-I/usr/include/wmm -I./include
+INC_WMM=-I/usr/include/geomag -I./include
 LIB_WMM=-lgeomag -lm
 INC_PYTHON=$(shell python-config --includes )
 LIB_PYTHON=$(shell python-config --libs )
