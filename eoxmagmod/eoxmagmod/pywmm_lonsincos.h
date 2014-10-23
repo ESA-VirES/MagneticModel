@@ -47,9 +47,9 @@
 "     the following sine and cosine series: \n"\
 "        cos(i*longitude) for i in range(0, degree+1)\n"\
 "        sin(i*longitude) for i in range(0, degree+1)\n"\
-"     The longitude has to be entered in dg..\n"
-"     The 'fast_alg' boolean options selects much faster but sligtly less\n"
-"     precise evaluation algorithm.\n"
+"     The longitude has to be entered in dg..\n"\
+"     The 'fast_alg' boolean options forces the subroutine to use a faster\n"\
+"     but sligtly less precise evaluation algorithm.\n"
 
 static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
 {
@@ -96,11 +96,12 @@ static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
         lonsin[1] = sl_last = sin_lon;
         loncos[1] = cl_last = cos_lon;
 
-        // sin(a + b) = cos(a)*sin(b) + sin(a)*cos(b)
-        // cos(a + b) = cos(a)*cos(b) - sin(a)*sin(b)
-
         if (fast_alg)
         {
+            // Faster evaluation based on pure recurrent
+            // addition/substration and multiplication:
+            //  sin(a + b) = cos(a)*sin(b) + sin(a)*cos(b)
+            //  cos(a + b) = cos(a)*cos(b) - sin(a)*sin(b)
             for (i = 2; i <= degree; ++i)
             {
                 lonsin[i] = sl = cl_last*sin_lon + sl_last*cos_lon;
@@ -111,6 +112,7 @@ static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
         }
         else
         {
+            // Slower evaluation calling sin/cos for each term.
             for (i = 2; i <= degree; ++i)
             {
                 lonsin[i] = sin(i*lon_rad);
