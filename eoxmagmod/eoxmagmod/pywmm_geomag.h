@@ -33,13 +33,15 @@
 #define PYWMM_GEOMAG_H
 
 #include "GeomagnetismHeader.h"
+#include "pywmm_aux.h"
 #include "pywmm_coord.h"
 #include "pywmm_cconv.h"
 
 typedef struct {
     int degree;
     int nterm;
-    int coord;
+    int coord_in;
+    int coord_out;
     double *coef_g;
     double *coef_h;
 } MODEL;
@@ -53,7 +55,7 @@ static void _geomag_eval(double *fx, double *fy, double *fz,
     double clat, clon, cr;
 
     // convert coordinates
-    switch(model->coord)
+    switch(model->coord_in)
     {
         case CT_GEODETIC_ABOVE_WGS84:
             glat = x; glon = y; gh = z;
@@ -105,18 +107,33 @@ static void _geomag_eval(double *fx, double *fy, double *fz,
         MAG_ComputeSphericalHarmonicVariables(Ellip, CoordSpherical, model->degree, SphVariables);
         MAG_AssociatedLegendreFunction(CoordSpherical, model->degree, LegendreFunction);
 
-        // Accumulate the spherical harmonic coefficients
         MAG_Summation(LegendreFunction, &MagneticModel, *SphVariables, CoordSpherical, &MagneticResultsSph);
-
-        // Map the computed Magnetic fields to Geodeitic coordinates
-        MAG_RotateMagneticVector(CoordSpherical, CoordGeodetic, MagneticResultsSph, &MagneticResultsGeo);
 
         MAG_FreeLegendreMemory(LegendreFunction);
         MAG_FreeSphVarMemory(SphVariables);
 
-        *fx = MagneticResultsGeo.Bx;
-        *fy = MagneticResultsGeo.By;
-        *fz = MagneticResultsGeo.Bz;
+        // projecting the output vector to the desired coordinate system
+        switch(model->coord_out)
+        {
+            case CT_GEODETIC_ABOVE_WGS84:
+            case CT_GEODETIC_ABOVE_EGM96:
+                MAG_RotateMagneticVector(CoordSpherical, CoordGeodetic, MagneticResultsSph, &MagneticResultsGeo);
+                *fx = MagneticResultsGeo.Bx;
+                *fy = MagneticResultsGeo.By;
+                *fz = MagneticResultsGeo.Bz;
+                break;
+            case CT_GEOCENTRIC_SPHERICAL:
+                *fx = MagneticResultsSph.Bx;
+                *fy = MagneticResultsSph.By;
+                *fz = MagneticResultsSph.Bz;
+                break;
+            case CT_GEOCENTRIC_CARTESIAN: // TODO: conversion
+            default:
+                *fx = 0.0/0.0;
+                *fy = 0.0/0.0;
+                *fz = 0.0/0.0;
+                break;
+        }
     }
 }
 
@@ -148,21 +165,23 @@ static void _geomag(ARRAY_DATA arrd_in, ARRAY_DATA arrd_out, MODEL *model)
 /* python function definition */
 
 #define DOC_GEOMAG "\n"\
-"   arr_out = geomag_static(arr_in, degree, coef_g, coef_h, coord_type=GEODETIC_ABOVE_WGS84)\n"\
+"   arr_out = geomag_static(arr_in, degree, coef_g, coef_h, coord_type_in=GEODETIC_ABOVE_WGS84, coord_type_out=GEODETIC_ABOVE_WGS84)\n"\
 "\n     Evaluate WMM model for a given array of 3D location vectors.\n"\
 "     Parameters:\n"\
 "        arr_in - array of 3D coordinates (up to 16 dimensions).\n"\
 "        degree - degree of the spherical harmonic model.\n"\
 "        coef_g - vector of spherical harmonic model coeficients.\n"\
 "        coef_h - vector of spherical harmonic model coeficients.\n"\
-"        cood_type - type of the input coordinates.\n"
+"        coord_type_in - type of the input coordinates.\n"\
+"        coord_type_out - type of the coordinates system of the output vector.\n"
 
 
 static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
 {
     static char *keywords[] = {"arr_in", "degree", "coef_g", "coef_h",
-                               "coord_type", NULL };
+                               "coord_type_in", "coord_type_out", NULL };
     int ct_in = CT_GEODETIC_ABOVE_WGS84;
+    int ct_out = CT_GEODETIC_ABOVE_WGS84;
     int nterm, degree = 0;
     PyObject *obj_in = NULL; // input object
     PyObject *obj_cg = NULL; // coef_g object
@@ -175,8 +194,20 @@ static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "OiOO|i:geomag", keywords, &obj_in, &degree, &obj_cg, &obj_ch, &ct_in))
+            "OiOO|ii:geomag", keywords, &obj_in, &degree, &obj_cg, &obj_ch, &ct_in, &ct_out))
         goto exit;
+
+    // check the type of the coordinate transformation
+    if (CT_INVALID == _check_coord_type(ct_in, keywords[4])) goto exit;
+    if (CT_INVALID == _check_coord_type(ct_out, keywords[5])) goto exit;
+    if (CT_GEOCENTRIC_CARTESIAN == ct_out)
+    {
+        PyErr_Format(PyExc_ValueError, "Invalid value of '%s'! "
+            "Output vector trasformation to cartesian geocentic coordinates "
+            "not yet supported!", keywords[5]);
+        goto exit;
+    }
+
 
     // check the type of the coordinate transformation
     if (CT_INVALID == _check_coord_type(ct_in, keywords[4])) goto exit;
@@ -200,22 +231,6 @@ static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
     // check dimensions of the coeficient arrays
     nterm = ((degree+1)*(degree+2))/2;
 
-    if (PyArray_DIM(arr_cg, 0) < nterm)
-    {
-        PyErr_Format(PyExc_ValueError, "The size of '%s'"\
-            " %d lower than the required value %d!", keywords[2],
-            (int)PyArray_DIM(arr_cg, 0), nterm);
-        goto exit;
-    }
-
-    if (PyArray_DIM(arr_ch, 0) < nterm)
-    {
-        PyErr_Format(PyExc_ValueError, "The size of '%s'"\
-            " %d lower than the required value %d!", keywords[3],
-            (int)PyArray_DIM(arr_ch, 0), nterm);
-        goto exit;
-    }
-
     // check maximum allowed input array dimension
     if (PyArray_NDIM(arr_in) > MAX_OUT_ARRAY_NDIM)
     {
@@ -226,7 +241,14 @@ static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
     }
 
     // check the last dimension (required length of the coordinates vectors)
-    if (_check_last_array_dimension(arr_in, 3, keywords[0]))
+    if (_check_array_dim_eq(arr_in, -1, 3, keywords[0]))
+        goto exit;
+
+    // check the coeficients arrays' dimensions
+    if (_check_array_dim_le(arr_cg, 0, nterm, keywords[2]))
+        goto exit;
+
+    if (_check_array_dim_le(arr_ch, 0, nterm, keywords[3]))
         goto exit;
 
     // create the output array
@@ -239,7 +261,8 @@ static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
         MODEL model;
         model.degree = degree;
         model.nterm = nterm;
-        model.coord = ct_in;
+        model.coord_in = ct_in;
+        model.coord_out = ct_out;
         model.coef_g = (double*) PyArray_DATA(arr_cg);
         model.coef_h = (double*) PyArray_DATA(arr_ch);
 

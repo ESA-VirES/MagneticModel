@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
  * World Magnetic Model - C python bindings
- * - asociative Legendre functions evaluation
+ * - longitude sin/cos spherical terms' evaluation
  *
  * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
@@ -28,15 +28,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *-----------------------------------------------------------------------------
-*/
+ */
 
 #ifndef PYWMM_LONSINCOS_H
 #define PYWMM_LONSINCOS_H
 
-#include "GeomagnetismHeader.h"
-#include "pywmm_coord.h"
-#include "pywmm_cconv.h"
-
+#include <math.h>
+#include "pywmm_aux.h"
 
 /* python function definition */
 

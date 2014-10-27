@@ -37,7 +37,8 @@ from _pywmm import convert
 class GeomagWMM2010(MagneticModel):
     """ Magnetic Model based on the WMM2010 Geomagnetism library."""
 
-    def eval(self, arr_in, date, coord_type=MagneticModel.GEODETIC_ABOVE_WGS84, secvar=False):
+    def eval(self, arr_in, date, coord_type_in=MagneticModel.GEODETIC_ABOVE_WGS84,
+                coord_type_out=None, secvar=False):
         """Evaluate Magnetic Model for a given set of spatio-teporal
         coordinates.
 
@@ -47,11 +48,19 @@ class GeomagWMM2010(MagneticModel):
                      input coordinate system.
 
             date - The time as a decimal year value (e.g., 2015.23).
-            coord_type - shall be set to one of the valid coordinate systesm:
+            coord_type_in - shall be set to one of the valid coordinate systems:
                         MagneticModel.GEODETIC_ABOVE_WGS84 (default)
                         MagneticModel.GEODETIC_ABOVE_EGM96
                         MagneticModel.GEOCENTRIC_SPHERICAL
                         MagneticModel.GEOCENTRIC_CARTESIAN
+
+            coord_type_out - coordinate system of the output vector
+                        MagneticModel.GEODETIC_ABOVE_WGS84
+                        MagneticModel.GEODETIC_ABOVE_EGM96 (the same as WGS84)
+                        MagneticModel.GEOCENTRIC_SPHERICAL
+                        MagneticModel.GEOCENTRIC_CARTESIAN
+                    Ouput coordinate system defaults to the input coordinate
+                    system.
 
             secvar - if True secular variation of the magentic field is
                      calculated rather than the magnetic fied.
@@ -61,8 +70,14 @@ class GeomagWMM2010(MagneticModel):
             arr_out - output numpy array with the same shape as the input
                       array contaning the calcuated magentic field parameters.
         """
-        if coord_type not in dict(self.COORD_TYPES):
-            raise ValueError("Invalid coordinate type!")
+        if coord_type_in not in dict(self.COORD_TYPES):
+            raise ValueError("Invalid input coordinate type!")
+
+        if coord_type_out is None:
+            coord_type_out = coord_type_in
+
+        if coord_type_out not in dict(self.COORD_TYPES):
+            raise ValueError("Invalid output coordinate type!")
 
         if secvar:
             degree = self.degree_secvar
@@ -71,7 +86,7 @@ class GeomagWMM2010(MagneticModel):
             degree = self.degree_static
             coef_g, coef_h = self.get_coef_static(date)
 
-        return _pywmm.geomag(arr_in, degree, coef_g, coef_h, coord_type)
+        return _pywmm.geomag(arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out)
 
 
 def read_model_wmm2010(fname):

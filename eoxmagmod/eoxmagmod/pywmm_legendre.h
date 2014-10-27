@@ -34,18 +34,23 @@
 #define PYWMM_LEGENDRE_H
 
 #include "GeomagnetismHeader.h"
-#include "pywmm_coord.h"
+#include "pywmm_aux.h"
 #include "pywmm_cconv.h"
 
 
 /* python function definition */
 
 #define DOC_LEGENDRE "\n"\
-"   p, dp = legendre(latitude, degree, spherical=False)\n"\
+"   p, dp = legendre(latitude, degree, spherical=True)\n"\
 "\n"\
-"     For given 'latitude' and 'degree', evaluate asociative Legendre functions.\n"\
-"     By default the geodetic (WGS84) latitude in dg. is expected. \n"\
-"     Set 'spherical' flag to True for geocentric sperical latitude in dg..\n"
+"     For given 'latitude' and model's 'degree', evaluate asociative Legendre"\
+"     functions. The input parameters are:\n"\
+"       latitude - spherical (or geodetic) latitude in dg. of the evaluated\n"\
+"                  location.\n"\
+"       degree - degree of the spherical harmonic model.\n"\
+"       spherical - boolean flag indicating whether a geodentic spherical\n"\
+"                   (default, True) or geodetic (WGS84, False) latitude is\n"\
+"                   being used.\n"
 
 
 static PyObject* legendre(PyObject *self, PyObject *args, PyObject *kwdict)
@@ -54,7 +59,7 @@ static PyObject* legendre(PyObject *self, PyObject *args, PyObject *kwdict)
 
     int degree, nterm;
     double lat_sph, lat_in, tmp0, tmp1;
-    int is_sph = 0;
+    int is_sph = 1;
     PyObject *arr_p = NULL; // P array
     PyObject *arr_dp = NULL; // dP array
     PyObject *retval = NULL; // output tuple

@@ -95,4 +95,16 @@ static double dnorm2d(double x, double y, double l, double dx, double dy)
         return NAN;
 }
 
+/**
+ * @brief 2D vector rotation.
+ *
+ * x' = x*cos(a) - y*sin(a)
+ * y' = x*sin(a) + y*cos(a)
+ */
+static void rot2d(double *x_out, double *y_out, double x, double y, double a_sin, double a_cos)
+{
+    *x_out = x*a_cos - y*a_sin;
+    *y_out = x*a_sin + y*a_cos;
+}
+
 #endif  /*MATH_AUX_H*/

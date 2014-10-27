@@ -5,7 +5,6 @@
  * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
- *
  *-----------------------------------------------------------------------------
  * Copyright (C) 2014 EOX IT Services GmbH
  *
@@ -235,7 +234,7 @@ static PyObject* convert(PyObject *self, PyObject *args, PyObject *kwdict)
     }
 
     // check the last dimension (required length of the coordinates vectors)
-    if (_check_last_array_dimension(arr_in, 3, keywords[0]))
+    if (_check_array_dim_eq(arr_in, -1, 3, keywords[0]))
         goto exit;
 
     // fast-track identity

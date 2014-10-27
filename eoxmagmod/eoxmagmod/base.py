@@ -106,7 +106,7 @@ class MagneticModel(object):
 
     @staticmethod
     def get_intensity(arr):
-        """Calculate intensities for array of vectors."""
+        """Calculate intensities for an array of vectors."""
         return np.sqrt((arr*arr).sum(axis=arr.ndim-1))
 
     def print_info(self):

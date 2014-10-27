@@ -73,21 +73,34 @@ static PyObject* _get_new_double_array(npy_intp ndim, const npy_intp *dims, npy_
 }
 
 /*
- * Check that the last dimension of the array has the required value.
+ * Check that the dimension of the array has the required value.
  */
-static int _check_last_array_dimension(PyObject *arr, int dim, const char *label)
+static int _check_array_dim_eq(PyObject *arr, int dim, size_t size, const char *label)
 {
-    npy_intp ndim = PyArray_NDIM(arr);
-    npy_intp *dims = PyArray_DIMS(arr);
-    int rv = (ndim < 1)||(dims[ndim-1] != dim);
+    if (dim < 0)
+        dim += PyArray_NDIM(arr);
+    int rv = PyArray_DIM(arr, dim) != size;
     if (rv)
-        PyErr_Format(PyExc_ValueError, "Invalid last dimension of '%s'! %d was"\
-            " received but %d is expected!", label, (int)dims[ndim-1], dim);
+        PyErr_Format(PyExc_ValueError, "The dimension #%d of '%s'"\
+            " %ld is not equal the allowed value %ld!", dim, label,
+            (size_t)PyArray_DIM(arr, dim), size);
+    return rv;
+}
+
+static int _check_array_dim_le(PyObject *arr, int dim, size_t size, const char *label)
+{
+    if (dim < 0)
+        dim += PyArray_NDIM(arr);
+    int rv = PyArray_DIM(arr, dim) < size;
+    if (rv)
+        PyErr_Format(PyExc_ValueError, "The dimension #%d of '%s'"\
+            " %ld is lower than the minimum allowed value %ld!", dim, label,
+            (size_t)PyArray_DIM(arr, dim), size);
     return rv;
 }
 
 /*
- * Extraction of the lover dimensional parts of the arrays.
+ * Extraction of the lower dimensional parts of the arrays.
  */
 
 typedef struct {

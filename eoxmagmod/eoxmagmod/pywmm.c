@@ -70,6 +70,11 @@
 /* evaluation of the series of longitude sine and cosine values */
 #include "pywmm_lonsincos.h"
 
+/* final spherical-harmonics gradient evaluation */
+#include "pywmm_sphargrd.h"
+
+/* vector rotations */
+#include "pywmm_vrot.h"
 
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
@@ -81,6 +86,8 @@
 /*define module's methods */
 static PyMethodDef pywmm_methods[] =
 {
+    {"vrot_sph2geod", (PyCFunction)vrot_sph2geod, METH_VARARGS|METH_KEYWORDS, DOC_VROT_SPH2GEOD},
+    {"sphargrd", (PyCFunction)sphargrd, METH_VARARGS|METH_KEYWORDS, DOC_SPHARGRD},
     {"lonsincos", (PyCFunction)lonsincos, METH_VARARGS|METH_KEYWORDS, DOC_LONSINCOS},
     {"relradpow", (PyCFunction)relradpow, METH_VARARGS|METH_KEYWORDS, DOC_RELRADPOW},
     {"legendre", (PyCFunction)legendre, METH_VARARGS|METH_KEYWORDS, DOC_LEGENDRE},

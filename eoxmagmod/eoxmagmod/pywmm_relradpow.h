@@ -32,15 +32,20 @@
 #ifndef PYWMM_RELRADPOW_H
 #define PYWMM_RELRADPOW_H
 
-#include "GeomagnetismHeader.h"
-#include "pywmm_coord.h"
-#include "pywmm_cconv.h"
+#include "pywmm_aux.h"
 
+/* Earth radius in km */
+#define RADIUS  6371.2
+
+#ifndef STR
+#define SRINGIFY(x) #x
+#define STR(x) SRINGIFY(x)
+#endif
 
 /* python function definition */
 
 #define DOC_RELRADPOW "\n"\
-"   rrp = relradpow(radius, degree, earth_radius=6371.2)\n"\
+"   rrp = relradpow(radius, degree, earth_radius="STR(RADIUS)")\n"\
 "\n"\
 "     For given 'radius' (geocentric spherical), evaluate relative radius power\n"\
 "     series:\n"\
@@ -52,7 +57,7 @@ static PyObject* relradpow(PyObject *self, PyObject *args, PyObject *kwdict)
     static char *keywords[] = {"latitude", "degree", "spherical", NULL};
 
     int degree;
-    double rad, rad0=6371.2; // radius and earth radius
+    double rad, rad0 = RADIUS; // radius and reference radius
     PyObject *arr_rrp = NULL; // P array
     PyObject *retval = NULL; // output tuple
 
