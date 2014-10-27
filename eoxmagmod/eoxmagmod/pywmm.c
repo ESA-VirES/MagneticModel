@@ -74,7 +74,8 @@
 #include "pywmm_sphargrd.h"
 
 /* vector rotations */
-#include "pywmm_vrot.h"
+#include "pywmm_vrot_sph2geod.h"
+#include "pywmm_vrot_sph2cart.h"
 
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
@@ -86,6 +87,7 @@
 /*define module's methods */
 static PyMethodDef pywmm_methods[] =
 {
+    {"vrot_sph2cart", (PyCFunction)vrot_sph2cart, METH_VARARGS|METH_KEYWORDS, DOC_VROT_SPH2CART},
     {"vrot_sph2geod", (PyCFunction)vrot_sph2geod, METH_VARARGS|METH_KEYWORDS, DOC_VROT_SPH2GEOD},
     {"sphargrd", (PyCFunction)sphargrd, METH_VARARGS|METH_KEYWORDS, DOC_SPHARGRD},
     {"lonsincos", (PyCFunction)lonsincos, METH_VARARGS|METH_KEYWORDS, DOC_LONSINCOS},

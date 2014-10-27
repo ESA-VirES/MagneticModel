@@ -32,10 +32,16 @@
 #ifndef PYWMM_GEOMAG_H
 #define PYWMM_GEOMAG_H
 
+#include <math.h>
 #include "GeomagnetismHeader.h"
 #include "pywmm_aux.h"
 #include "pywmm_coord.h"
 #include "pywmm_cconv.h"
+#include "math_aux.h"
+
+#ifndef NAN
+#define NAN (0.0/0.0)
+#endif
 
 typedef struct {
     int degree;
@@ -53,6 +59,7 @@ static void _geomag_eval(double *fx, double *fy, double *fz,
 {
     double glat, glon, gh;
     double clat, clon, cr;
+    double tmp;
 
     // convert coordinates
     switch(model->coord_in)
@@ -127,11 +134,16 @@ static void _geomag_eval(double *fx, double *fy, double *fz,
                 *fy = MagneticResultsSph.By;
                 *fz = MagneticResultsSph.Bz;
                 break;
-            case CT_GEOCENTRIC_CARTESIAN: // TODO: conversion
+            case CT_GEOCENTRIC_CARTESIAN:
+                clat *= DG2RAD;
+                clon *= DG2RAD;
+                rot2d(&tmp, fz, MagneticResultsSph.Bz, MagneticResultsSph.Bx, sin(clat), cos(clat));
+                rot2d(fx, fy, tmp, MagneticResultsSph.By, sin(clon), cos(clon));
+                break;
             default:
-                *fx = 0.0/0.0;
-                *fy = 0.0/0.0;
-                *fz = 0.0/0.0;
+                *fx = NAN;
+                *fy = NAN;
+                *fz = NAN;
                 break;
         }
     }
@@ -200,14 +212,6 @@ static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
     // check the type of the coordinate transformation
     if (CT_INVALID == _check_coord_type(ct_in, keywords[4])) goto exit;
     if (CT_INVALID == _check_coord_type(ct_out, keywords[5])) goto exit;
-    if (CT_GEOCENTRIC_CARTESIAN == ct_out)
-    {
-        PyErr_Format(PyExc_ValueError, "Invalid value of '%s'! "
-            "Output vector trasformation to cartesian geocentic coordinates "
-            "not yet supported!", keywords[5]);
-        goto exit;
-    }
-
 
     // check the type of the coordinate transformation
     if (CT_INVALID == _check_coord_type(ct_in, keywords[4])) goto exit;

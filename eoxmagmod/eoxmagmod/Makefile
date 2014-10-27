@@ -16,8 +16,9 @@ CCFLAGS= -c -O2 -Wall -fPIC $(INCS)
 #CCFLAGS= -c -O2 -Wall -fPIC $(INC)
 
 HDR=pywmm_aux.h pywmm_geomag.h pywmm_sphargrd.h\
-	pywmm_legendre.h pywmm_lonsincos.h pywmm_relradpow.h\
-    pywmm_vrot.h pywmm_cconv.h pywmm_coord.h pywmm_exc.h
+    pywmm_legendre.h pywmm_lonsincos.h pywmm_relradpow.h\
+    pywmm_vrot_common.h pywmm_vrot_sph2cart.h pywmm_vrot_sph2geod.h\
+    pywmm_cconv.h pywmm_coord.h pywmm_exc.h
 OBJ=pywmm.o
 DST=_pywmm.so
 
