@@ -66,7 +66,6 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     double lat_sph, lat_in, tmp0, tmp1;
     int is_sph = 0;
 
-    PyObject *retval = NULL; // returned value
     PyObject *obj_cg = NULL; // coef_g object
     PyObject *obj_ch = NULL; // coef_h object
     PyObject *obj_lp = NULL; // P object
@@ -153,73 +152,13 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // the evaluation
     {
-        const double *cg = (double*)PyArray_DATA(arr_cg);
-        const double *ch = (double*)PyArray_DATA(arr_ch);
-        const double *lp = (double*)PyArray_DATA(arr_lp);
-        const double *ldp = (double*)PyArray_DATA(arr_ldp);
-        const double *rrp = (double*)PyArray_DATA(arr_rrp);
-        const double *lsin = (double*)PyArray_DATA(arr_lsin);
-        const double *lcos = (double*)PyArray_DATA(arr_lcos);
         double *out = (double*)PyArray_DATA(arr_out);
-        double cos_lat = cos(DG2RAD*lat_sph);
-        double dv_lat = 0.0, dv_lon = 0.0, dv_rad = 0.0;
-        int i, j;
-
-        for (i = 1; i <= degree; ++i)
-        {
-            const int i_off = (i*(i+1))/2;
-
-            for (j = 0; j <= i; ++j)
-            {
-                const int idx = i_off + j;
-                const double tmp0 = cg[idx]*lcos[j] + ch[idx]*lsin[j];
-                const double tmp1 = cg[idx]*lsin[j] - ch[idx]*lcos[j];
-
-                dv_lat += tmp0 * rrp[i] * ldp[idx];
-                dv_lon += tmp1 * rrp[i] * lp[idx] * j;
-                dv_rad += tmp0 * rrp[i] * lp[idx] * (i+1);
-            }
-        }
-
-        out[0] = -dv_lat;
-        out[1] = +dv_lon/cos_lat;
-        out[2] = -dv_rad;
-
-        // handling of the geographic poles
-        if (fabs(cos_lat) < 1e-10)
-        {
-            const double sin_lat = sin(DG2RAD*lat_sph);
-            const double lsin1 = lsin[1], lcos1 = lcos[1];
-            double sqn3, sqn1 = 1.0;
-            double ps2, ps1 = 1.0, ps0 = 1.0,
-
-            // i = 1
-            dv_lon = (cg[2]*lsin1 - ch[2]*lcos1) * rrp[1];
-
-            for (i = 2; i <= degree; ++i)
-            {
-                const int idx = 1 + (i*(i+1))/2;
-                #define FDIV(a,b) ((double)(a)/(double)(b))
-                const double tmp = FDIV((i-1)*(i-1)-1, (2*i-1)*(2*i-3));
-
-                // evaluate ratio between the Gauss-normalised and Smidth
-                // quasi-normalised associated Legendre functions.
-                //  Equivalent to: sqrt((j==0?1:2)*(i-j)!/(i+j!))*(2i-1)!!/(i-j)!
-                sqn1 = sqn1 * FDIV(2*i-1, i);
-                sqn3 = sqn1 * sqrt(FDIV(i*2, i+1));
-                #undef FDIV
-                ps2 = ps1;
-                ps1 = ps0;
-                ps0 = sin_lat*ps1 - tmp*ps2;
-
-                dv_lon += (cg[idx]*lsin1 - ch[idx]*lcos1) * rrp[i] * ps0 * sqn3;
-            }
-
-            out[1] = dv_lon;
-        }
+        sph_harm_eval(NULL, out+0, out+1, out+2, degree, 0x2,
+                DG2RAD*lat_sph, 0.0, PyArray_DATA(arr_cg),
+                PyArray_DATA(arr_ch), PyArray_DATA(arr_lp),
+                PyArray_DATA(arr_ldp), PyArray_DATA(arr_rrp),
+                PyArray_DATA(arr_lsin), PyArray_DATA(arr_lcos));
     }
-
-    retval = arr_out;
 
   exit:
 
@@ -231,9 +170,8 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     if (arr_rrp){Py_DECREF(arr_rrp);}
     if (arr_lsin){Py_DECREF(arr_lsin);}
     if (arr_lcos){Py_DECREF(arr_lcos);}
-    if (!retval && arr_out){Py_DECREF(arr_out);}
 
-    return retval;
+    return arr_out;
  }
 
 #endif  /* PYWMM_SPHARGRD_H */

@@ -29,7 +29,7 @@
 #ifndef GEO_CONV_H
 #define GEO_CONV_H 1
 
-#include<math.h>
+#include <math.h>
 #include "math_aux.h"
 
 #define DG2RAD (M_PI/180.0)

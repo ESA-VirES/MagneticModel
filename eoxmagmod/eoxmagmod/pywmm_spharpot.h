@@ -61,7 +61,6 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     int degree, nterm;
     double rad;
 
-    PyObject *retval = NULL; // returned value
     PyObject *obj_cg = NULL; // coef_g object
     PyObject *obj_ch = NULL; // coef_h object
     PyObject *obj_lp = NULL; // P object
@@ -134,33 +133,13 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // the evaluation
     {
-        const double *cg = (double*)PyArray_DATA(arr_cg);
-        const double *ch = (double*)PyArray_DATA(arr_ch);
-        const double *lp = (double*)PyArray_DATA(arr_lp);
-        const double *rrp = (double*)PyArray_DATA(arr_rrp);
-        const double *lsin = (double*)PyArray_DATA(arr_lsin);
-        const double *lcos = (double*)PyArray_DATA(arr_lcos);
         double *out = (double*)PyArray_DATA(arr_out);
-        double v_pot = 0.0;
-        int i, j;
-
-        for (i = 1; i <= degree; ++i)
-        {
-            const int i_off = (i*(i+1))/2;
-
-            for (j = 0; j <= i; ++j)
-            {
-                const int idx = i_off + j;
-                const double tmp0 = cg[idx]*lcos[j] + ch[idx]*lsin[j];
-
-                v_pot += tmp0 * rrp[i] * lp[idx];
-            }
-        }
-
-        out[0] = rad * v_pot;
+        sph_harm_eval(out, NULL, NULL, NULL, degree, 0x1,
+                0.0, rad, PyArray_DATA(arr_cg),
+                PyArray_DATA(arr_ch), PyArray_DATA(arr_lp),
+                PyArray_DATA(arr_lp), PyArray_DATA(arr_rrp),
+                PyArray_DATA(arr_lsin), PyArray_DATA(arr_lcos));
     }
-
-    retval = arr_out;
 
   exit:
 
@@ -171,9 +150,8 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     if (arr_rrp){Py_DECREF(arr_rrp);}
     if (arr_lsin){Py_DECREF(arr_lsin);}
     if (arr_lcos){Py_DECREF(arr_lcos);}
-    if (!retval && arr_out){Py_DECREF(arr_out);}
 
-    return retval;
+    return arr_out;
  }
 
 #endif  /* PYWMM_SPHARPOT_H */

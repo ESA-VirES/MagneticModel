@@ -35,6 +35,7 @@
 
 #include <math.h>
 #include "pywmm_aux.h"
+#include "sph_harm.h"
 
 /* python function definition */
 
@@ -80,44 +81,11 @@ static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
     if (NULL == (retval = Py_BuildValue("NN", arr_lonsin, arr_loncos)))
         goto exit;
 
-    {
-        int i;
-        double *lonsin = (double*)PyArray_DATA(arr_lonsin);
-        double *loncos = (double*)PyArray_DATA(arr_loncos);
-        double lon_rad = DG2RAD*lon_dg;
-        double sin_lon = sin(lon_rad);
-        double cos_lon = cos(lon_rad);
-        double sl, sl_last, cl, cl_last;
-
-        lonsin[0] = 0.0;
-        loncos[0] = 1.0;
-        lonsin[1] = sl_last = sin_lon;
-        loncos[1] = cl_last = cos_lon;
-
-        if (fast_alg)
-        {
-            // Faster evaluation based on pure recurrent
-            // addition/substration and multiplication:
-            //  sin(a + b) = cos(a)*sin(b) + sin(a)*cos(b)
-            //  cos(a + b) = cos(a)*cos(b) - sin(a)*sin(b)
-            for (i = 2; i <= degree; ++i)
-            {
-                lonsin[i] = sl = cl_last*sin_lon + sl_last*cos_lon;
-                loncos[i] = cl = cl_last*cos_lon - sl_last*sin_lon;
-                sl_last = sl;
-                cl_last = cl;
-            }
-        }
-        else
-        {
-            // Slower evaluation calling sin/cos for each term.
-            for (i = 2; i <= degree; ++i)
-            {
-                lonsin[i] = sin(i*lon_rad);
-                loncos[i] = cos(i*lon_rad);
-            }
-        }
-    }
+    // evaluate series
+    if (fast_alg)
+        azmsincos(PyArray_DATA(arr_lonsin), PyArray_DATA(arr_loncos), degree, DG2RAD*lon_dg);
+    else
+        azmsincos_ref(PyArray_DATA(arr_lonsin), PyArray_DATA(arr_loncos), degree, DG2RAD*lon_dg);
 
   exit:
 
