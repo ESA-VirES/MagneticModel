@@ -87,7 +87,7 @@ static void _vrot_sph2cart(ARRAY_DATA ad_i, ARRAY_DATA ad_lat,
 "         arr_in - array of the input vectors\n"\
 "         arr_lat - array of sherical latitudes.\n"\
 "         arr_lon - array of longitudes.\n"\
-"     Scalar lat/lon values are also accepted for a single vector roation.\n"
+"     Scalar lat/lon values are also accepted for a single vector rotation.\n"
 
 static PyObject* vrot_sph2cart(PyObject *self, PyObject *args, PyObject *kwdict)
 {

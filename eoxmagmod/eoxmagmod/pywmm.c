@@ -70,8 +70,11 @@
 /* evaluation of the series of longitude sine and cosine values */
 #include "pywmm_lonsincos.h"
 
-/* final spherical-harmonics gradient evaluation */
+/* final spherical-harmonic gradient evaluation */
 #include "pywmm_sphargrd.h"
+
+/* final spherical-harmonic gradient potential */
+#include "pywmm_spharpot.h"
 
 /* vector rotations */
 #include "pywmm_vrot_sph2geod.h"
@@ -89,6 +92,7 @@ static PyMethodDef pywmm_methods[] =
 {
     {"vrot_sph2cart", (PyCFunction)vrot_sph2cart, METH_VARARGS|METH_KEYWORDS, DOC_VROT_SPH2CART},
     {"vrot_sph2geod", (PyCFunction)vrot_sph2geod, METH_VARARGS|METH_KEYWORDS, DOC_VROT_SPH2GEOD},
+    {"spharpot", (PyCFunction)spharpot, METH_VARARGS|METH_KEYWORDS, DOC_SPHARPOT},
     {"sphargrd", (PyCFunction)sphargrd, METH_VARARGS|METH_KEYWORDS, DOC_SPHARGRD},
     {"lonsincos", (PyCFunction)lonsincos, METH_VARARGS|METH_KEYWORDS, DOC_LONSINCOS},
     {"relradpow", (PyCFunction)relradpow, METH_VARARGS|METH_KEYWORDS, DOC_RELRADPOW},

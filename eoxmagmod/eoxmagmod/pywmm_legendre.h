@@ -43,7 +43,7 @@
 #define DOC_LEGENDRE "\n"\
 "   p, dp = legendre(latitude, degree, spherical=True)\n"\
 "\n"\
-"     For given 'latitude' and model's 'degree', evaluate asociative Legendre"\
+"     For given 'latitude' and model's 'degree', evaluate asociative Legendre\n"\
 "     functions. The input parameters are:\n"\
 "       latitude - spherical (or geodetic) latitude in dg. of the evaluated\n"\
 "                  location.\n"\

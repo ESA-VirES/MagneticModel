@@ -79,7 +79,7 @@ static void _vrot_sph2geod(ARRAY_DATA ad_i, ARRAY_DATA ad_dlat,
 "     The inputs are:\n"\
 "         arr_in - array of the input vectors\n"\
 "         arr_dlat - array of differences of the latitudes.\n"\
-"               A scalar value is also accepted for a single vector roation.\n"
+"               A scalar value is also accepted for a single vector rotation.\n"
 
 static PyObject* vrot_sph2geod(PyObject *self, PyObject *args, PyObject *kwdict)
 {

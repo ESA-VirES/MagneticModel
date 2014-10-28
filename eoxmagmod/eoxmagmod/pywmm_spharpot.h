@@ -29,48 +29,42 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_SPHARGRD_H
-#define PYWMM_SPHARGRD_H
+#ifndef PYWMM_SPHARPOT_H
+#define PYWMM_SPHARPOT_H
 
 #include "pywmm_aux.h"
 #include "pywmm_cconv.h"
 
 /* python function definition */
-#define DOC_SPHARGRD "\n"\
-"  v_grad = sphargrd(latitude, degree, coef_g, coef_h, leg_p, leg_dp, rrp, lonsin, loncos, spherical=True)\n"\
+#define DOC_SPHARPOT "\n"\
+"  v_grad = spharpot(radius, degree, coef_g, coef_h, leg_p, rrp, lonsin, loncos)\n"\
 "\n"\
-"     Spherical harmonic evaluation of the gradient of the potential\n"\
+"     Spherical harmonic evaluation of the value of the potential\n"\
 "     (scalar) field in the (geocentric) spherical coordinates (latitude,\n"\
 "     longitude, radius).\n"\
 "     The input parameters are:\n"\
-"       latitude - spherical (or geodetic) latitude in dg. at the evaluated\n"\
-"                  location.\n"\
+"       radius - radius, i.e., distance from the earth centre, at the\n"\
+"                evaluated location.\n"\
 "       degree - degree of the spherical harmonic model.\n"\
 "       coef_g - vector of spherical harmonic model coeficients.\n"\
 "       coef_h - vector of spherical harmonic model coeficients.\n"\
 "       leg_p - vector the Legendre polynomials.\n"\
-"       leg_dp - vector the Legendre polynomials' derivations.\n"\
 "       rrp - vector the relative radius powers.\n"\
 "       lonsin - vector the the longitude cosines.\n"\
-"       lonsin - vector the the longitude sines.\n"\
-"       spherical - boolean flag indicating whether a geodentic spherical\n"\
-"                   (default, True) or geodetic (WGS84, False) latitude is\n"\
-"                   being used.\n"
+"       lonsin - vector the the longitude sines.\n"
 
-static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
+static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
 {
-    static char *keywords[] = {"latitude", "degree", "coef_g", "coef_h",
-        "leg_p", "leg_dp", "rpp", "lonsin", "loncos", "spherical", NULL};
+    static char *keywords[] = {"radius", "degree", "coef_g", "coef_h",
+                                "leg_p", "rpp", "lonsin", "loncos", NULL};
 
     int degree, nterm;
-    double lat_sph, lat_in, tmp0, tmp1;
-    int is_sph = 0;
+    double rad;
 
     PyObject *retval = NULL; // returned value
     PyObject *obj_cg = NULL; // coef_g object
     PyObject *obj_ch = NULL; // coef_h object
     PyObject *obj_lp = NULL; // P object
-    PyObject *obj_ldp = NULL; // dP object
     PyObject *obj_rrp = NULL; // rel.rad.pow. object
     PyObject *obj_lsin = NULL; // lonsin object
     PyObject *obj_lcos = NULL; // loncos object
@@ -79,15 +73,14 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *arr_cg = NULL; // coef_g array
     PyObject *arr_ch = NULL; // coef_h array
     PyObject *arr_lp = NULL; // P array
-    PyObject *arr_ldp = NULL; // dP array
     PyObject *arr_rrp = NULL; // rel.rad.pow. array
     PyObject *arr_lsin = NULL; // lonsin array
     PyObject *arr_lcos = NULL; // loncos array
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "diOOOOOOO|i:sphargrd", keywords,
-            &lat_in, &degree, &obj_cg, &obj_ch, &obj_lp, &obj_ldp, &obj_rrp,
-            &obj_lsin, &obj_lcos, &is_sph));
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "diOOOOOO|:spharpot", keywords,
+            &rad, &degree, &obj_cg, &obj_ch, &obj_lp, &obj_rrp,
+            &obj_lsin, &obj_lcos));
 
     if (degree < 1)
     {
@@ -96,12 +89,6 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     }
 
     nterm = ((degree+1)*(degree+2))/2;
-
-    // convert latitude to geocentric spherical latitude
-    if (is_sph)
-        lat_sph = lat_in;
-    else
-        conv_WGS84_to_sphECEF(&lat_sph, &tmp0, &tmp1, lat_in, 0.0, 0.0);
 
     // cast the objects to arrays
     if (NULL == (arr_cg=_get_as_double_array(obj_cg, 1, 1, NPY_IN_ARRAY, keywords[2])))
@@ -113,16 +100,13 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     if (NULL == (arr_lp=_get_as_double_array(obj_lp, 1, 1, NPY_IN_ARRAY, keywords[4])))
         goto exit;
 
-    if (NULL == (arr_ldp=_get_as_double_array(obj_ldp, 1, 1, NPY_IN_ARRAY, keywords[5])))
+    if (NULL == (arr_rrp=_get_as_double_array(obj_rrp, 1, 1, NPY_IN_ARRAY, keywords[5])))
         goto exit;
 
-    if (NULL == (arr_rrp=_get_as_double_array(obj_rrp, 1, 1, NPY_IN_ARRAY, keywords[6])))
+    if (NULL == (arr_lsin=_get_as_double_array(obj_lsin, 1, 1, NPY_IN_ARRAY, keywords[6])))
         goto exit;
 
-    if (NULL == (arr_lsin=_get_as_double_array(obj_lsin, 1, 1, NPY_IN_ARRAY, keywords[7])))
-        goto exit;
-
-    if (NULL == (arr_lcos=_get_as_double_array(obj_lcos, 1, 1, NPY_IN_ARRAY, keywords[8])))
+    if (NULL == (arr_lcos=_get_as_double_array(obj_lcos, 1, 1, NPY_IN_ARRAY, keywords[7])))
         goto exit;
 
     // check the arrays' dimensions
@@ -135,20 +119,17 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     if (_check_array_dim_le(arr_lp, 0, nterm, keywords[4]))
         goto exit;
 
-    if (_check_array_dim_le(arr_ldp, 0, nterm, keywords[5]))
+    if (_check_array_dim_le(arr_rrp, 0, degree+1, keywords[5]))
         goto exit;
 
-    if (_check_array_dim_le(arr_rrp, 0, degree+1, keywords[6]))
+    if (_check_array_dim_le(arr_lsin, 0, degree+1, keywords[6]))
         goto exit;
 
-    if (_check_array_dim_le(arr_lsin, 0, degree+1, keywords[7]))
+    if (_check_array_dim_le(arr_lcos, 0, degree+1, keywords[7]))
         goto exit;
 
-    if (_check_array_dim_le(arr_lcos, 0, degree+1, keywords[8]))
-        goto exit;
-
-    // allocate the output array
-    if (NULL == (arr_out = _get_new_double_array(1, NULL, 3)))
+    // allocate the output numpy scalar (zero-dimensional array)
+    if (NULL == (arr_out = PyArray_EMPTY(0, NULL, NPY_DOUBLE, 0)))
         goto exit;
 
     // the evaluation
@@ -156,13 +137,11 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
         const double *cg = (double*)PyArray_DATA(arr_cg);
         const double *ch = (double*)PyArray_DATA(arr_ch);
         const double *lp = (double*)PyArray_DATA(arr_lp);
-        const double *ldp = (double*)PyArray_DATA(arr_ldp);
         const double *rrp = (double*)PyArray_DATA(arr_rrp);
         const double *lsin = (double*)PyArray_DATA(arr_lsin);
         const double *lcos = (double*)PyArray_DATA(arr_lcos);
         double *out = (double*)PyArray_DATA(arr_out);
-        double cos_lat = cos(DG2RAD*lat_sph);
-        double dv_lat = 0.0, dv_lon = 0.0, dv_rad = 0.0;
+        double v_pot = 0.0;
         int i, j;
 
         for (i = 1; i <= degree; ++i)
@@ -173,50 +152,12 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
             {
                 const int idx = i_off + j;
                 const double tmp0 = cg[idx]*lcos[j] + ch[idx]*lsin[j];
-                const double tmp1 = cg[idx]*lsin[j] - ch[idx]*lcos[j];
 
-                dv_lat += tmp0 * rrp[i] * ldp[idx];
-                dv_lon += tmp1 * rrp[i] * lp[idx] * j;
-                dv_rad += tmp0 * rrp[i] * lp[idx] * (i+1);
+                v_pot += tmp0 * rrp[i] * lp[idx];
             }
         }
 
-        out[0] = -dv_lat;
-        out[1] = +dv_lon/cos_lat;
-        out[2] = -dv_rad;
-
-        // handling of the geographic poles
-        if (fabs(cos_lat) < 1e-10)
-        {
-            const double sin_lat = sin(DG2RAD*lat_sph);
-            const double lsin1 = lsin[1], lcos1 = lcos[1];
-            double sqn3, sqn1 = 1.0;
-            double ps2, ps1 = 1.0, ps0 = 1.0,
-
-            // i = 1
-            dv_lon = (cg[2]*lsin1 - ch[2]*lcos1) * rrp[1];
-
-            for (i = 2; i <= degree; ++i)
-            {
-                const int idx = 1 + (i*(i+1))/2;
-                #define FDIV(a,b) ((double)(a)/(double)(b))
-                const double tmp = FDIV((i-1)*(i-1)-1, (2*i-1)*(2*i-3));
-
-                // evaluate ratio between the Gauss-normalised and Smidth
-                // quasi-normalised associated Legendre functions.
-                //  Equivalent to: sqrt((j==0?1:2)*(i-j)!/(i+j!))*(2i-1)!!/(i-j)!
-                sqn1 = sqn1 * FDIV(2*i-1, i);
-                sqn3 = sqn1 * sqrt(FDIV(i*2, i+1));
-                #undef FDIV
-                ps2 = ps1;
-                ps1 = ps0;
-                ps0 = sin_lat*ps1 - tmp*ps2;
-
-                dv_lon += (cg[idx]*lsin1 - ch[idx]*lcos1) * rrp[i] * ps0 * sqn3;
-            }
-
-            out[1] = dv_lon;
-        }
+        out[0] = rad * v_pot;
     }
 
     retval = arr_out;
@@ -227,7 +168,6 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     if (arr_cg){Py_DECREF(arr_cg);}
     if (arr_ch){Py_DECREF(arr_ch);}
     if (arr_lp){Py_DECREF(arr_lp);}
-    if (arr_ldp){Py_DECREF(arr_ldp);}
     if (arr_rrp){Py_DECREF(arr_rrp);}
     if (arr_lsin){Py_DECREF(arr_lsin);}
     if (arr_lcos){Py_DECREF(arr_lcos);}
@@ -236,4 +176,4 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     return retval;
  }
 
-#endif  /* PYWMM_SPHARGRD_H */
+#endif  /* PYWMM_SPHARPOT_H */

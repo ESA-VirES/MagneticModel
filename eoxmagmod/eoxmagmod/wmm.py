@@ -33,7 +33,7 @@ import numpy as np
 from base import MagneticModel
 import _pywmm
 from _pywmm import (
-    convert, legendre, lonsincos, relradpow, sphargrd, geomag,
+    convert, legendre, lonsincos, relradpow, spharpot, sphargrd, geomag,
     vrot_sph2geod, vrot_sph2cart,
 )
 
