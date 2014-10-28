@@ -32,7 +32,10 @@ import re
 import numpy as np
 from base import MagneticModel
 import _pywmm
-from _pywmm import convert
+from _pywmm import (
+    convert, legendre, lonsincos, relradpow, sphargrd, geomag,
+    vrot_sph2geod, vrot_sph2cart,
+)
 
 class GeomagWMM2010(MagneticModel):
     """ Magnetic Model based on the WMM2010 Geomagnetism library."""
@@ -86,7 +89,7 @@ class GeomagWMM2010(MagneticModel):
             degree = self.degree_static
             coef_g, coef_h = self.get_coef_static(date)
 
-        return _pywmm.geomag(arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out)
+        return geomag(arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out)
 
 
 def read_model_wmm2010(fname):
@@ -139,25 +142,3 @@ def read_model_wmm2010(fname):
         prm['coef_secvar_h'] = coef_dh
 
     return MagneticModel(prm)
-
-
-if __name__ == "__main__":
-    mm = GeomagWMM2010(read_model_wmm2010("../wmmcli/WMM.COF"))
-    print mm.print_info()
-
-    #print np.zeros((0,0,4))
-    #_pywmm.convert(1, 0);
-    #_pywmm.convert([], 0);
-    #print _pywmm.convert(np.zeros((0,0,3)), 0);
-    #_pywmm.convert([[1,2,3],[1,2,3]], 0);
-    #print _pywmm.convert([1,2,3], 0, 0);
-    #print _pywmm.convert([[1,2,3]], 0, 0);
-
-#    print ((_pywmm.convert([
-#        [0, 0, 0],
-#        [90, +180, 0],
-#        [-90, -180, 0],
-#        [0, +90, 0],
-#        [0, -90, 0],
-#    ], mm.GEODETIC_ABOVE_WGS84, mm.GEOCENTRIC_CARTESIAN)+1e4)-1e4)
-

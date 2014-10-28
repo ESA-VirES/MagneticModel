@@ -51,6 +51,10 @@ COORD_TYPES = (
 )
 
 
+def vnorm(arr):
+    """Calculate norms for each vector form an input array of vectors."""
+    return np.sqrt((arr*arr).sum(axis=arr.ndim-1))
+
 class MagneticModel(object):
     """ Base Magnetic model class """
 
@@ -103,11 +107,6 @@ class MagneticModel(object):
     def coef_secvar(self):
         """Get secular variation coeficients."""
         return self.prm['coef_secvar_g'], self.prm['coef_secvar_h']
-
-    @staticmethod
-    def get_intensity(arr):
-        """Calculate intensities for an array of vectors."""
-        return np.sqrt((arr*arr).sum(axis=arr.ndim-1))
 
     def print_info(self):
         def _analyse_coeficiens(degree, coef_g, coef_h, prefix):

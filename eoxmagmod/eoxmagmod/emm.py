@@ -143,22 +143,3 @@ def read_model_emm2010(fname_static, fname_secvar):
     prm['coef_secvar_h'] = prm_secvar['coef_h']
 
     return MagneticModel(prm)
-
-
-if __name__ == "__main__":
-    import time
-
-    t0 = time.time()
-    mm = read_model_emm2010("../../EMM/EMM-720_V3p0_static.cof",
-                           "../../EMM/EMM-720_V3p0_secvar.cof")
-    t1 = time.time()
-    print "time: %g s"%(t1-t0)
-    mm.print_info()
-
-    t0 = time.time()
-    mm = read_model_emm2010("../../EMM/EMM-720_V3p0_static.cof.gz",
-                           "../../EMM/EMM-720_V3p0_secvar.cof.gz")
-    t1 = time.time()
-    print "time: %g s"%(t1-t0)
-
-    mm.print_info()

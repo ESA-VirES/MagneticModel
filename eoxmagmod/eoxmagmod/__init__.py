@@ -29,6 +29,7 @@
 #-------------------------------------------------------------------------------
 
 from .base import (
+    vnorm,
     MagneticModel,
     DATA_WMM_2010,
     DATA_EMM_2010_STATIC,
@@ -38,7 +39,17 @@ from .base import (
     GEOCENTRIC_SPHERICAL,
     GEOCENTRIC_CARTESIAN,
 )
-from .wmm import GeomagWMM2010, read_model_wmm2010, convert
+from .wmm import (
+    GeomagWMM2010,
+    read_model_wmm2010,
+    convert,
+    legendre,
+    lonsincos,
+    relradpow,
+    sphargrd,
+    vrot_sph2geod,
+    vrot_sph2cart,
+)
 from .emm import read_model_emm2010
 
 __all__ = [
@@ -46,7 +57,12 @@ __all__ = [
     'GeomagWMM2010',
     'read_model_wmm2010',
     'read_model_emm2010',
+    'vnorm',
     'convert',
+    'legendre',
+    'lonsincos',
+    'relradpow',
+    'sphargrd',
     'DATA_WMM_2010',
     'DATA_EMM_2010_STATIC',
     'DATA_EMM_2010_SECVAR',
