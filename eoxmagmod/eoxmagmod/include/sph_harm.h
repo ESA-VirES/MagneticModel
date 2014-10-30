@@ -71,7 +71,7 @@ static void rel_rad_pow(double *rrp, int degree, double relrad)
  * The input angle must be in radians.
  */
 
-static void azmsincos(double *lonsin, double *loncos, int degree, double lon)
+static void azm_sin_cos(double *lonsin, double *loncos, int degree, double lon)
 {
     int i;
     const double sin_lon = sin(lon);
@@ -106,7 +106,7 @@ static void azmsincos(double *lonsin, double *loncos, int degree, double lon)
  * The input angle must be in radians.
  */
 
-static void azmsincos_ref(double *lonsin, double *loncos, int degree, double lon)
+static void azm_sin_cos_ref(double *lonsin, double *loncos, int degree, double lon)
 {
     int i;
     for (i = 0; i <= degree; ++i)

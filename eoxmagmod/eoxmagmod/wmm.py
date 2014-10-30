@@ -41,7 +41,7 @@ class GeomagWMM2010(MagneticModel):
     """ Magnetic Model based on the WMM2010 Geomagnetism library."""
 
     def eval(self, arr_in, date, coord_type_in=MagneticModel.GEODETIC_ABOVE_WGS84,
-                coord_type_out=None, secvar=False):
+                coord_type_out=None, secvar=False, mode=0x2):
         """Evaluate Magnetic Model for a given set of spatio-teporal
         coordinates.
 
@@ -89,7 +89,7 @@ class GeomagWMM2010(MagneticModel):
             degree = self.degree_static
             coef_g, coef_h = self.get_coef_static(date)
 
-        return geomag(arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out)
+        return geomag(arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out, mode)
 
 
 def read_model_wmm2010(fname):

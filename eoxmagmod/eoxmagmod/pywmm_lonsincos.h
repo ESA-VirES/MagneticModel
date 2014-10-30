@@ -83,9 +83,9 @@ static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // evaluate series
     if (fast_alg)
-        azmsincos(PyArray_DATA(arr_lonsin), PyArray_DATA(arr_loncos), degree, DG2RAD*lon_dg);
+        azm_sin_cos(PyArray_DATA(arr_lonsin), PyArray_DATA(arr_loncos), degree, DG2RAD*lon_dg);
     else
-        azmsincos_ref(PyArray_DATA(arr_lonsin), PyArray_DATA(arr_loncos), degree, DG2RAD*lon_dg);
+        azm_sin_cos_ref(PyArray_DATA(arr_lonsin), PyArray_DATA(arr_loncos), degree, DG2RAD*lon_dg);
 
   exit:
 

@@ -33,188 +33,330 @@
 #define PYWMM_GEOMAG_H
 
 #include <math.h>
+#include <string.h>
+#include <stdlib.h>
+
 #include "GeomagnetismHeader.h"
+
 #include "pywmm_aux.h"
 #include "pywmm_coord.h"
 #include "pywmm_cconv.h"
 #include "math_aux.h"
+#include "geo_conv.h"
+#include "sph_harm.h"
 
 #ifndef NAN
 #define NAN (0.0/0.0)
 #endif
+
+/* Earth radius in km */
+#ifndef RADIUS
+#define RADIUS  6371.2
+#endif
+
+#ifndef STR
+#define SRINGIFY(x) #x
+#define STR(x) SRINGIFY(x)
+#endif
+
+typedef enum {
+    GM_INVALID = 0x0,
+    GM_POTENTIAL = 0x1,
+    GM_GRADIENT = 0x2,
+    GM_POTENTIAL_AND_GRADIENT = 0x3,
+} GEOMAG_MODE;
+
+/*
+ * Check the coordinate type.
+ */
+static GEOMAG_MODE _check_geomag_mode(int mode, const char *label)
+{
+    switch (mode)
+    {
+        case GM_POTENTIAL:
+            return GM_POTENTIAL;
+        case GM_GRADIENT:
+            return GM_GRADIENT;
+        case GM_POTENTIAL_AND_GRADIENT:
+            return GM_POTENTIAL_AND_GRADIENT;
+        default:
+            PyErr_Format(PyExc_ValueError, "Invalid mode '%s'!", label);
+            return GM_INVALID;
+    }
+}
+
+/* magnetic model - auxiliary object */
 
 typedef struct {
     int degree;
     int nterm;
     int coord_in;
     int coord_out;
-    double *coef_g;
-    double *coef_h;
+    double elps_a;
+    double elps_eps2;
+    double crad_ref;
+    double clat_last;
+    double clon_last;
+    double crad_last;
+    const double *cg;
+    const double *ch;
+    double *lp;
+    double *ldp;
+    double *lsin;
+    double *lcos;
+    double *rrp;
 } MODEL;
+
+static void _geomag_model_destroy(MODEL *model)
+{
+    if(NULL != model->lp)
+        free(model->lp);
+    if(NULL != model->ldp)
+        free(model->ldp);
+    if(NULL != model->lsin)
+        free(model->lsin);
+    if(NULL != model->lcos)
+        free(model->lcos);
+    if(NULL != model->rrp)
+        free(model->rrp);
+
+    memset(model, 0, sizeof(MODEL));
+}
+
+static int _geomag_model_init(MODEL *model, int degree,
+    int coord_in, int coord_out, const double *cg, const double *ch)
+{
+    const int nterm = ((degree+1)*(degree+2))/2;
+
+    memset(model, 0, sizeof(MODEL));
+
+    model->degree = degree;
+    model->nterm = nterm;
+    model->coord_in = coord_in;
+    model->coord_out = coord_out;
+    model->elps_a = WGS84_A;
+    model->elps_eps2 = WGS84_EPS2;
+    model->crad_ref = RADIUS;
+    model->clat_last = NAN;
+    model->clon_last = NAN;
+    model->crad_last = NAN;
+    model->cg = cg;
+    model->ch = ch;
+
+    if (NULL == (model->lp = (double*)malloc(nterm*sizeof(double))))
+        goto error;
+
+    if (NULL == (model->ldp = (double*)malloc(nterm*sizeof(double))))
+        goto error;
+
+    if (NULL == (model->lsin = (double*)malloc((degree+1)*sizeof(double))))
+        goto error;
+
+    if (NULL == (model->lcos = (double*)malloc((degree+1)*sizeof(double))))
+        goto error;
+
+    if (NULL == (model->rrp = (double*)malloc((degree+1)*sizeof(double))))
+        goto error;
+
+    return 0;
+
+  error:
+    _geomag_model_destroy(model);
+    return 1;
+}
 
 /* single point evaluation */
 
-static void _geomag_eval(double *fx, double *fy, double *fz,
-                double x, double y, double z, const MODEL *model)
+static void _geomag_model_eval(MODEL *model, int mode, double *fpot,
+    double *fx, double *fy, double *fz, double x, double y, double z)
 {
-    double glat, glon, gh;
-    double clat, clon, cr;
+    double glat, glon, ghgt;
+    double clat, clon, crad;
+    double flat, flon, frad;
     double tmp;
 
     // convert coordinates
     switch(model->coord_in)
     {
         case CT_GEODETIC_ABOVE_WGS84:
-            glat = x; glon = y; gh = z;
-            conv_WGS84_to_sphECEF(&clat, &clon, &cr, glat, glon, gh);
+            glat = x; glon = y; ghgt = z;
+            geodetic2geocentric_sph(&crad, &clat, &clon, glat, glon, ghgt, model->elps_a, model->elps_eps2);
             break;
         case CT_GEODETIC_ABOVE_EGM96:
-            conv_EGM96_to_WGS84(&glat, &glon, &gh, x, y, z);
-            conv_WGS84_to_sphECEF(&clat, &clon, &cr, glat, glon, gh);
+            glat = x; glon = y; ghgt = z + delta_EGM96_to_WGS84(glat, glon);
+            geodetic2geocentric_sph(&crad, &clat, &clon, glat, glon, ghgt, model->elps_a, model->elps_eps2);
             break;
         case CT_GEOCENTRIC_SPHERICAL:
-            clat = x; clon = y; cr = z;
-            conv_sphECEF_to_WGS84(&glat, &glon, &gh, clat, clon, cr);
+            clat = DG2RAD*x; clon = DG2RAD*y; crad = z;
+            geocentric_sph2geodetic(&glat, &glon, &ghgt, crad, clat, clon, model->elps_a, model->elps_eps2);
             break;
         case CT_GEOCENTRIC_CARTESIAN:
-            conv_cartECEF_to_sphECEF(&clat, &clon, &cr, x,  y, z);
-            conv_sphECEF_to_WGS84(&glat, &glon, &gh, clat, clon, cr);
+            cart2sph(&crad, &clat, &clon, x, y, z);
+            geocentric_sph2geodetic(&glat, &glon, &ghgt, crad, clat, clon, model->elps_a, model->elps_eps2);
         default:
             return;
     }
 
-    // model evaluation
+    // associative Legendre functions
+    if (model->clat_last != clat)
     {
-        MAGtype_LegendreFunction *LegendreFunction = MAG_AllocateLegendreFunctionMemory(model->nterm);
-        MAGtype_SphericalHarmonicVariables *SphVariables = MAG_AllocateSphVarMemory(model->degree);
+        MAGtype_LegendreFunction legfcn;
+        MAGtype_CoordSpherical scoord;
+        legfcn.Pcup = model->lp;
+        legfcn.dPcup = model->ldp;
+        scoord.phig = RAD2DG*clat;
+        MAG_AssociatedLegendreFunction(scoord, model->degree, &legfcn);
+    }
 
-        MAGtype_Ellipsoid Ellip;
-        MAGtype_Geoid Geoid; // not used
-        MAG_SetDefaults(&Ellip, &Geoid);
+    // relative radial powers
+    if (model->clon_last != clon)
+        azm_sin_cos(model->lsin, model->lcos, model->degree, clon);
 
-        MAGtype_MagneticModel MagneticModel;
+    // sines/cosines of the longitude
+    if (model->crad_last != crad)
+        rel_rad_pow(model->rrp, model->degree, crad/model->crad_ref);
 
-        MAGtype_CoordGeodetic CoordGeodetic;
-        MAGtype_CoordSpherical CoordSpherical;
+    // save the last evaluated coordinate
+    model->clat_last = clat;
+    model->clon_last = clon;
+    model->crad_last = crad;
 
-        MAGtype_MagneticResults MagneticResultsSph, MagneticResultsGeo;
+    // evaluate the model
+    sph_harm_eval(fpot, &flat, &flon, &frad, model->degree, mode,
+                clat, crad, model->cg, model->ch, model->lp, model->ldp,
+                model->rrp, model->lsin, model->lcos);
 
-        MagneticModel.nMax = model->degree;
-        MagneticModel.Main_Field_Coeff_G = model->coef_g;
-        MagneticModel.Main_Field_Coeff_H = model->coef_h;
-
-        CoordGeodetic.lambda = glon;
-        CoordGeodetic.phi = glat;
-        CoordGeodetic.HeightAboveEllipsoid = gh;
-
-        CoordSpherical.lambda = clon;
-        CoordSpherical.phig = clat;
-        CoordSpherical.r = cr;
-
-        MAG_ComputeSphericalHarmonicVariables(Ellip, CoordSpherical, model->degree, SphVariables);
-        MAG_AssociatedLegendreFunction(CoordSpherical, model->degree, LegendreFunction);
-
-        MAG_Summation(LegendreFunction, &MagneticModel, *SphVariables, CoordSpherical, &MagneticResultsSph);
-
-        MAG_FreeLegendreMemory(LegendreFunction);
-        MAG_FreeSphVarMemory(SphVariables);
-
-        // projecting the output vector to the desired coordinate system
+    // project the produced vectors to the desired coordinate system
+    if (mode&0x2)
+    {
         switch(model->coord_out)
         {
+            case CT_GEOCENTRIC_SPHERICAL:
+                *fx = flat;
+                *fy = flon;
+                *fz = frad;
+                break;
+
             case CT_GEODETIC_ABOVE_WGS84:
             case CT_GEODETIC_ABOVE_EGM96:
-                MAG_RotateMagneticVector(CoordSpherical, CoordGeodetic, MagneticResultsSph, &MagneticResultsGeo);
-                *fx = MagneticResultsGeo.Bx;
-                *fy = MagneticResultsGeo.By;
-                *fz = MagneticResultsGeo.Bz;
+                tmp = DG2RAD*glat - clat;
+                rot2d(fz, fx, frad, flat, sin(tmp), cos(tmp));
+                *fy = flon;
                 break;
-            case CT_GEOCENTRIC_SPHERICAL:
-                *fx = MagneticResultsSph.Bx;
-                *fy = MagneticResultsSph.By;
-                *fz = MagneticResultsSph.Bz;
-                break;
+
             case CT_GEOCENTRIC_CARTESIAN:
-                clat *= DG2RAD;
-                clon *= DG2RAD;
-                rot2d(&tmp, fz, MagneticResultsSph.Bz, MagneticResultsSph.Bx, sin(clat), cos(clat));
-                rot2d(fx, fy, tmp, MagneticResultsSph.By, sin(clon), cos(clon));
-                break;
-            default:
-                *fx = NAN;
-                *fy = NAN;
-                *fz = NAN;
+                rot2d(&tmp, fz, frad, flat, sin(clat), cos(clat));
+                rot2d(fx, fy, tmp, flon, sin(clon), cos(clon));
                 break;
         }
     }
 }
 
 /* recursive model_evaluation */
+#define S(a) ((double*)(a).data)
+#define P(a,i) ((double*)((a).data+(i)*(a).stride[0]))
+#define V(a,i) (*P(a,i))
 
-static void _geomag(ARRAY_DATA arrd_in, ARRAY_DATA arrd_out, MODEL *model)
+static void _geomag1(ARRAY_DATA arrd_in, ARRAY_DATA arrd_pot, MODEL *model)
 {
     if (arrd_in.ndim > 1)
     {
         npy_intp i;
         for(i = 0; i < arrd_in.dim[0]; ++i)
-            _geomag(_get_arrd_item(&arrd_in, i), _get_arrd_item(&arrd_out, i), model);
+            _geomag1(_get_arrd_item(&arrd_in, i), _get_arrd_item(&arrd_pot, i), model);
         return;
     }
 
-    #define P(a,i) ((double*)((a).data+(i)*(a).stride[0]))
-    #define V(a,i) (*P(a,i))
-
-    _geomag_eval(P(arrd_out, 0), P(arrd_out, 1), P(arrd_out, 2),
-              V(arrd_in, 0), V(arrd_in, 1), V(arrd_in, 2), model);
-/*
-    fconv(P(arrd_out, 0), P(arrd_out, 1), P(arrd_out, 2),
-          V(arrd_in, 0), V(arrd_in, 1), V(arrd_in, 2));
-*/
-    #undef V
-    #undef P
+    _geomag_model_eval(model, 0x1, S(arrd_pot), NULL, NULL, NULL,
+                    V(arrd_in, 0), V(arrd_in, 1), V(arrd_in, 2));
 }
+
+static void _geomag2(ARRAY_DATA arrd_in, ARRAY_DATA arrd_grd, MODEL *model)
+{
+    if (arrd_in.ndim > 1)
+    {
+        npy_intp i;
+        for(i = 0; i < arrd_in.dim[0]; ++i)
+            _geomag2(_get_arrd_item(&arrd_in, i), _get_arrd_item(&arrd_grd, i), model);
+        return;
+    }
+
+    _geomag_model_eval(model, 0x2, NULL, P(arrd_grd, 0), P(arrd_grd, 1),
+        P(arrd_grd, 2), V(arrd_in, 0), V(arrd_in, 1), V(arrd_in, 2));
+
+}
+
+static void _geomag3(ARRAY_DATA arrd_in, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_grd, MODEL *model)
+{
+    if (arrd_in.ndim > 1)
+    {
+        npy_intp i;
+        for(i = 0; i < arrd_in.dim[0]; ++i)
+            _geomag3(_get_arrd_item(&arrd_in, i), _get_arrd_item(&arrd_pot, i),
+                    _get_arrd_item(&arrd_grd, i), model);
+        return;
+    }
+
+    _geomag_model_eval(model, 0x3, S(arrd_pot), P(arrd_grd, 0), P(arrd_grd, 1),
+        P(arrd_grd, 2), V(arrd_in, 0), V(arrd_in, 1), V(arrd_in, 2));
+}
+
+#undef V
+#undef P
+#undef S
 
 /* python function definition */
 
 #define DOC_GEOMAG "\n"\
-"   arr_out = geomag_static(arr_in, degree, coef_g, coef_h, coord_type_in=GEODETIC_ABOVE_WGS84, coord_type_out=GEODETIC_ABOVE_WGS84)\n"\
-"\n     Evaluate WMM model for a given array of 3D location vectors.\n"\
+"   arr_out = geomag_static(arr_in, degree, coef_g, coef_h, coord_type_in=GEODETIC_ABOVE_WGS84,\n"\
+"                          coord_type_out=GEODETIC_ABOVE_WGS84, mode=GM_GRADIENT)"\
 "     Parameters:\n"\
-"        arr_in - array of 3D coordinates (up to 16 dimensions).\n"\
-"        degree - degree of the spherical harmonic model.\n"\
-"        coef_g - vector of spherical harmonic model coeficients.\n"\
-"        coef_h - vector of spherical harmonic model coeficients.\n"\
-"        coord_type_in - type of the input coordinates.\n"\
-"        coord_type_out - type of the coordinates system of the output vector.\n"
+"       arr_in - array of 3D coordinates (up to 16 dimensions).\n"\
+"       degree - degree of the spherical harmonic model.\n"\
+"       coef_g - vector of spherical harmonic model coeficients.\n"\
+"       coef_h - vector of spherical harmonic model coeficients.\n"\
+"       coord_type_in - type of the input coordinates.\n"\
+"       mode - quantity to be evaluated:\n"\
+"                  POTENTIAL\n"\
+"                  GRADIENT (default)\n"\
+"                  POTENTIAL_AND_GRADIENT\n"\
+"       rad_ref - reference (Earth) radius\n"
 
 
 static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
 {
     static char *keywords[] = {"arr_in", "degree", "coef_g", "coef_h",
-                               "coord_type_in", "coord_type_out", NULL };
+                 "coord_type_in", "coord_type_out", "mode", NULL};
     int ct_in = CT_GEODETIC_ABOVE_WGS84;
     int ct_out = CT_GEODETIC_ABOVE_WGS84;
-    int nterm, degree = 0;
+    int nterm, degree = 0, mode = 0x2;
     PyObject *obj_in = NULL; // input object
     PyObject *obj_cg = NULL; // coef_g object
     PyObject *obj_ch = NULL; // coef_h object
     PyObject *arr_in = NULL; // input array
     PyObject *arr_cg = NULL; // coef_g array
     PyObject *arr_ch = NULL; // coef_h array
-    PyObject *arr_out = NULL; // output array
+    PyObject *arr_pot = NULL; // output array
+    PyObject *arr_grd = NULL; // output array
     PyObject *retval = NULL;
+    MODEL model;
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "OiOO|ii:geomag", keywords, &obj_in, &degree, &obj_cg, &obj_ch, &ct_in, &ct_out))
+            "OiOO|iii:geomag", keywords, &obj_in, &degree, &obj_cg, &obj_ch,
+            &ct_in, &ct_out, &mode))
         goto exit;
 
     // check the type of the coordinate transformation
-    if (CT_INVALID == _check_coord_type(ct_in, keywords[4])) goto exit;
-    if (CT_INVALID == _check_coord_type(ct_out, keywords[5])) goto exit;
+    if (CT_INVALID == _check_coord_type(ct_in, keywords[4]))
+        goto exit;
 
-    // check the type of the coordinate transformation
-    if (CT_INVALID == _check_coord_type(ct_in, keywords[4])) goto exit;
+    if (CT_INVALID == _check_coord_type(ct_out, keywords[5]))
+        goto exit;
+
+    // check the operation mode
+    if (GM_INVALID == _check_geomag_mode(mode, keywords[6]))
+        goto exit;
 
     // cast the objects to arrays
     if (NULL == (arr_in=_get_as_double_array(obj_in, 1, 0, NPY_ALIGNED, keywords[0])))
@@ -255,25 +397,40 @@ static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
     if (_check_array_dim_le(arr_ch, 0, nterm, keywords[3]))
         goto exit;
 
-    // create the output array
-    if (NULL == (arr_out = _get_new_double_array(PyArray_NDIM(arr_in), PyArray_DIMS(arr_in), 3)))
+    // create the output arrays
+    if (mode&0x1)
+        if (NULL == (arr_pot = PyArray_EMPTY(PyArray_NDIM(arr_in)-1, PyArray_DIMS(arr_in), NPY_DOUBLE, 0)))
+            goto exit;
+
+    if (mode&0x2)
+        if (NULL == (arr_grd = _get_new_double_array(PyArray_NDIM(arr_in), PyArray_DIMS(arr_in), 3)))
+            goto exit;
+
+    // evaluate the model
+
+    if( _geomag_model_init(&model, degree, ct_in, ct_out, PyArray_DATA(arr_cg), PyArray_DATA(arr_ch)) )
         goto exit;
 
-    // process
-    //_convert(_array_to_arrd(arr_in), _array_to_arrd(arr_out), _get_fconv(ct_in, ct_out));
+    switch(mode)
     {
-        MODEL model;
-        model.degree = degree;
-        model.nterm = nterm;
-        model.coord_in = ct_in;
-        model.coord_out = ct_out;
-        model.coef_g = (double*) PyArray_DATA(arr_cg);
-        model.coef_h = (double*) PyArray_DATA(arr_ch);
+        case 0x1:
+            _geomag1(_array_to_arrd(arr_in), _array_to_arrd(arr_pot), &model);
+            retval = arr_pot;
+            break;
 
-        _geomag(_array_to_arrd(arr_in), _array_to_arrd(arr_out), &model);
+        case 0x2:
+            _geomag2(_array_to_arrd(arr_in), _array_to_arrd(arr_grd), &model);
+            retval = arr_grd;
+            break;
+
+        case 0x3:
+            _geomag3(_array_to_arrd(arr_in), _array_to_arrd(arr_pot), _array_to_arrd(arr_grd), &model);
+            if (NULL == (retval = Py_BuildValue("NN", arr_pot, arr_grd)))
+                goto exit;
+            break;
     }
-    //retval = Py_None; Py_INCREF(Py_None);
-    retval = arr_out;
+
+    _geomag_model_destroy(&model);
 
   exit:
 
@@ -281,7 +438,8 @@ static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
     if (arr_in){Py_DECREF(arr_in);}
     if (arr_cg){Py_DECREF(arr_cg);}
     if (arr_ch){Py_DECREF(arr_ch);}
-    if (!retval && arr_out){Py_DECREF(arr_out);}
+    if (!retval && arr_grd){Py_DECREF(arr_grd);}
+    if (!retval && arr_pot){Py_DECREF(arr_pot);}
 
     return retval;
 }
