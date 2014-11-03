@@ -1,6 +1,6 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings 
+ * World Magnetic Model - C python bindings
  * - asociative Legendre functions evaluation
  *
  * Project: World Magnetic Model - python interface
@@ -33,10 +33,10 @@
 #ifndef PYWMM_LEGENDRE_H
 #define PYWMM_LEGENDRE_H
 
-#include "GeomagnetismHeader.h"
+//#include "GeomagnetismHeader.h"
+#include "shc.h"
 #include "pywmm_aux.h"
 #include "pywmm_cconv.h"
-
 
 /* python function definition */
 
@@ -89,18 +89,23 @@ static PyObject* legendre(PyObject *self, PyObject *args, PyObject *kwdict)
     if (NULL == (arr_dp = _get_new_double_array(1, NULL, nterm)))
         goto exit;
 
+    {
+        // allocate and fill the precalculated square-roots
+        double *psqrt = NULL;
+        if (NULL == (psqrt = shc_presqrt(degree)))
+        {
+            PyErr_Format(PyExc_ValueError, "Memory allocation error!");
+            goto exit;
+        }
+
+        shc_legendre(PyArray_DATA(arr_p), PyArray_DATA(arr_dp), degree, DG2RAD*lat_sph, psqrt);
+
+        // free the square root array
+        free(psqrt);
+    }
+
     if (NULL == (retval = Py_BuildValue("NN", arr_p, arr_dp)))
         goto exit;
-
-    {
-        MAGtype_LegendreFunction legfcn;
-        MAGtype_CoordSpherical scoord;
-        legfcn.Pcup = (double*) PyArray_DATA(arr_p);
-        legfcn.dPcup = (double*) PyArray_DATA(arr_dp);
-        scoord.phig = lat_sph;
-
-        MAG_AssociatedLegendreFunction(scoord, degree, &legfcn);
-    }
 
   exit:
 

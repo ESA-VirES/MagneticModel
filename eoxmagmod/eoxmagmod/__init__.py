@@ -38,6 +38,9 @@ from .base import (
     GEODETIC_ABOVE_EGM96,
     GEOCENTRIC_SPHERICAL,
     GEOCENTRIC_CARTESIAN,
+    POTENTIAL,
+    GRADIENT,
+    POTENTIAL_AND_GRADIENT,
 )
 from .wmm import (
     GeomagWMM2010,
@@ -74,9 +77,12 @@ __all__ = [
     'GEODETIC_ABOVE_EGM96',
     'GEOCENTRIC_SPHERICAL',
     'GEOCENTRIC_CARTESIAN',
+    'POTENTIAL',
+    'GRADIENT',
+    'POTENTIAL_AND_GRADIENT',
 ]
 
-__version__ = '0.1.0dev'
+__version__ = '0.2.0dev'
 __author__ = 'Martin Paces (martin.paces@eox.at)'
 __copyright__ = 'Copyright (C) 2014 EOX IT Services GmbH'
 __licence__ = 'EOX licence (MIT style)'

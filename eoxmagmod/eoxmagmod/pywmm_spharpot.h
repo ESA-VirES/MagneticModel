@@ -32,6 +32,7 @@
 #ifndef PYWMM_SPHARPOT_H
 #define PYWMM_SPHARPOT_H
 
+#include "shc.h"
 #include "pywmm_aux.h"
 #include "pywmm_cconv.h"
 
@@ -134,7 +135,7 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     // the evaluation
     {
         double *out = (double*)PyArray_DATA(arr_out);
-        sph_harm_eval(out, NULL, NULL, NULL, degree, 0x1,
+        shc_eval(out, NULL, NULL, NULL, degree, 0x1,
                 0.0, rad, PyArray_DATA(arr_cg),
                 PyArray_DATA(arr_ch), PyArray_DATA(arr_lp),
                 PyArray_DATA(arr_lp), PyArray_DATA(arr_rrp),

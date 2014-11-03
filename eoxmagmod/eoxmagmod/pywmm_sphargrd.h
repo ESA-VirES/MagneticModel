@@ -32,6 +32,7 @@
 #ifndef PYWMM_SPHARGRD_H
 #define PYWMM_SPHARGRD_H
 
+#include "shc.h"
 #include "pywmm_aux.h"
 #include "pywmm_cconv.h"
 
@@ -153,7 +154,7 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     // the evaluation
     {
         double *out = (double*)PyArray_DATA(arr_out);
-        sph_harm_eval(NULL, out+0, out+1, out+2, degree, 0x2,
+        shc_eval(NULL, out+0, out+1, out+2, degree, 0x2,
                 DG2RAD*lat_sph, 0.0, PyArray_DATA(arr_cg),
                 PyArray_DATA(arr_ch), PyArray_DATA(arr_lp),
                 PyArray_DATA(arr_ldp), PyArray_DATA(arr_rrp),

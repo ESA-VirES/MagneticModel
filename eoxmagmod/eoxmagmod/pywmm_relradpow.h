@@ -32,8 +32,8 @@
 #ifndef PYWMM_RELRADPOW_H
 #define PYWMM_RELRADPOW_H
 
+#include "shc.h"
 #include "pywmm_aux.h"
-#include "sph_harm.h"
 
 /* Earth radius in km */
 #define RADIUS  6371.2
@@ -89,7 +89,7 @@ static PyObject* relradpow(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     // evaluate the relative radius power
-    rel_rad_pow(PyArray_DATA(arr_rrp), degree, rad/rad0);
+    shc_relradpow(PyArray_DATA(arr_rrp), degree, rad/rad0);
 
     retval = arr_rrp;
 

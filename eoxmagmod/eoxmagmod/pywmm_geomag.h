@@ -36,14 +36,14 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "GeomagnetismHeader.h"
+//#include "GeomagnetismHeader.h"
 
+#include "math_aux.h"
+#include "geo_conv.h"
+#include "shc.h"
 #include "pywmm_aux.h"
 #include "pywmm_coord.h"
 #include "pywmm_cconv.h"
-#include "math_aux.h"
-#include "geo_conv.h"
-#include "sph_harm.h"
 
 #ifndef NAN
 #define NAN (0.0/0.0)
@@ -59,6 +59,7 @@
 #define STR(x) SRINGIFY(x)
 #endif
 
+/* mode of evaluation enumerate */
 typedef enum {
     GM_INVALID = 0x0,
     GM_POTENTIAL = 0x1,
@@ -66,9 +67,7 @@ typedef enum {
     GM_POTENTIAL_AND_GRADIENT = 0x3,
 } GEOMAG_MODE;
 
-/*
- * Check the coordinate type.
- */
+/* mode of evaluation check */
 static GEOMAG_MODE _check_geomag_mode(int mode, const char *label)
 {
     switch (mode)
@@ -85,8 +84,7 @@ static GEOMAG_MODE _check_geomag_mode(int mode, const char *label)
     }
 }
 
-/* magnetic model - auxiliary object */
-
+/* magnetic model - auxiliary structure */
 typedef struct {
     int degree;
     int nterm;
@@ -105,8 +103,10 @@ typedef struct {
     double *lsin;
     double *lcos;
     double *rrp;
+    double *psqrt;
 } MODEL;
 
+/* model stucture destruction */
 static void _geomag_model_destroy(MODEL *model)
 {
     if(NULL != model->lp)
@@ -119,10 +119,13 @@ static void _geomag_model_destroy(MODEL *model)
         free(model->lcos);
     if(NULL != model->rrp)
         free(model->rrp);
+    if(NULL != model->psqrt)
+        free(model->psqrt);
 
     memset(model, 0, sizeof(MODEL));
 }
 
+/* model stucture initiliazation */
 static int _geomag_model_init(MODEL *model, int degree,
     int coord_in, int coord_out, const double *cg, const double *ch)
 {
@@ -158,6 +161,9 @@ static int _geomag_model_init(MODEL *model, int degree,
     if (NULL == (model->rrp = (double*)malloc((degree+1)*sizeof(double))))
         goto error;
 
+    if (NULL == (model->psqrt = shc_presqrt(degree)))
+        goto error;
+
     return 0;
 
   error:
@@ -166,7 +172,6 @@ static int _geomag_model_init(MODEL *model, int degree,
 }
 
 /* single point evaluation */
-
 static void _geomag_model_eval(MODEL *model, int mode, double *fpot,
     double *fx, double *fy, double *fz, double x, double y, double z)
 {
@@ -175,7 +180,7 @@ static void _geomag_model_eval(MODEL *model, int mode, double *fpot,
     double flat, flon, frad;
     double tmp;
 
-    // convert coordinates
+    // convert the input coordinates
     switch(model->coord_in)
     {
         case CT_GEODETIC_ABOVE_WGS84:
@@ -199,22 +204,15 @@ static void _geomag_model_eval(MODEL *model, int mode, double *fpot,
 
     // associative Legendre functions
     if (model->clat_last != clat)
-    {
-        MAGtype_LegendreFunction legfcn;
-        MAGtype_CoordSpherical scoord;
-        legfcn.Pcup = model->lp;
-        legfcn.dPcup = model->ldp;
-        scoord.phig = RAD2DG*clat;
-        MAG_AssociatedLegendreFunction(scoord, model->degree, &legfcn);
-    }
+        shc_legendre(model->lp, model->ldp, model->degree, clat, model->psqrt);
 
     // relative radial powers
     if (model->clon_last != clon)
-        azm_sin_cos(model->lsin, model->lcos, model->degree, clon);
+        shc_azmsincos(model->lsin, model->lcos, model->degree, clon);
 
     // sines/cosines of the longitude
     if (model->crad_last != crad)
-        rel_rad_pow(model->rrp, model->degree, crad/model->crad_ref);
+        shc_relradpow(model->rrp, model->degree, crad/model->crad_ref);
 
     // save the last evaluated coordinate
     model->clat_last = clat;
@@ -222,7 +220,7 @@ static void _geomag_model_eval(MODEL *model, int mode, double *fpot,
     model->crad_last = crad;
 
     // evaluate the model
-    sph_harm_eval(fpot, &flat, &flon, &frad, model->degree, mode,
+    shc_eval(fpot, &flat, &flon, &frad, model->degree, mode,
                 clat, crad, model->cg, model->ch, model->lp, model->ldp,
                 model->rrp, model->lsin, model->lcos);
 
@@ -252,7 +250,7 @@ static void _geomag_model_eval(MODEL *model, int mode, double *fpot,
     }
 }
 
-/* recursive model_evaluation */
+/* recursive batch model_evaluation for the input numpy arrays of coordinates */
 #define S(a) ((double*)(a).data)
 #define P(a,i) ((double*)((a).data+(i)*(a).stride[0]))
 #define V(a,i) (*P(a,i))
@@ -267,7 +265,7 @@ static void _geomag1(ARRAY_DATA arrd_in, ARRAY_DATA arrd_pot, MODEL *model)
         return;
     }
 
-    _geomag_model_eval(model, 0x1, S(arrd_pot), NULL, NULL, NULL,
+    _geomag_model_eval(model, GM_POTENTIAL, S(arrd_pot), NULL, NULL, NULL,
                     V(arrd_in, 0), V(arrd_in, 1), V(arrd_in, 2));
 }
 
@@ -281,7 +279,7 @@ static void _geomag2(ARRAY_DATA arrd_in, ARRAY_DATA arrd_grd, MODEL *model)
         return;
     }
 
-    _geomag_model_eval(model, 0x2, NULL, P(arrd_grd, 0), P(arrd_grd, 1),
+    _geomag_model_eval(model, GM_GRADIENT, NULL, P(arrd_grd, 0), P(arrd_grd, 1),
         P(arrd_grd, 2), V(arrd_in, 0), V(arrd_in, 1), V(arrd_in, 2));
 
 }
@@ -297,8 +295,9 @@ static void _geomag3(ARRAY_DATA arrd_in, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_gr
         return;
     }
 
-    _geomag_model_eval(model, 0x3, S(arrd_pot), P(arrd_grd, 0), P(arrd_grd, 1),
-        P(arrd_grd, 2), V(arrd_in, 0), V(arrd_in, 1), V(arrd_in, 2));
+    _geomag_model_eval(model, GM_POTENTIAL_AND_GRADIENT, S(arrd_pot),
+        P(arrd_grd, 0), P(arrd_grd, 1), P(arrd_grd, 2), V(arrd_in, 0),
+        V(arrd_in, 1), V(arrd_in, 2));
 }
 
 #undef V
@@ -398,32 +397,32 @@ static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     // create the output arrays
-    if (mode&0x1)
+    if (mode & GM_POTENTIAL)
         if (NULL == (arr_pot = PyArray_EMPTY(PyArray_NDIM(arr_in)-1, PyArray_DIMS(arr_in), NPY_DOUBLE, 0)))
             goto exit;
 
-    if (mode&0x2)
+    if (mode & GM_GRADIENT)
         if (NULL == (arr_grd = _get_new_double_array(PyArray_NDIM(arr_in), PyArray_DIMS(arr_in), 3)))
             goto exit;
 
     // evaluate the model
 
-    if( _geomag_model_init(&model, degree, ct_in, ct_out, PyArray_DATA(arr_cg), PyArray_DATA(arr_ch)) )
+    if(_geomag_model_init(&model, degree, ct_in, ct_out, PyArray_DATA(arr_cg), PyArray_DATA(arr_ch)))
         goto exit;
 
     switch(mode)
     {
-        case 0x1:
+        case GM_POTENTIAL:
             _geomag1(_array_to_arrd(arr_in), _array_to_arrd(arr_pot), &model);
             retval = arr_pot;
             break;
 
-        case 0x2:
+        case GM_GRADIENT:
             _geomag2(_array_to_arrd(arr_in), _array_to_arrd(arr_grd), &model);
             retval = arr_grd;
             break;
 
-        case 0x3:
+        case GM_POTENTIAL_AND_GRADIENT:
             _geomag3(_array_to_arrd(arr_in), _array_to_arrd(arr_pot), _array_to_arrd(arr_grd), &model);
             if (NULL == (retval = Py_BuildValue("NN", arr_pot, arr_grd)))
                 goto exit;

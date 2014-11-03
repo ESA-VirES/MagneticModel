@@ -29,7 +29,7 @@
  *-----------------------------------------------------------------------------
 */
 
-#define VERSION "0.1.0dev"
+#define VERSION "0.2.0"
 
 // needed to prevent dual definition
 #ifdef _POSIX_C_SOURCE
@@ -131,6 +131,9 @@ PyMODINIT_FUNC init_pywmm(void)
     SET_INT_ITEM(dict, "GEODETIC_ABOVE_EGM96", CT_GEODETIC_ABOVE_EGM96);
     SET_INT_ITEM(dict, "GEOCENTRIC_SPHERICAL", CT_GEOCENTRIC_SPHERICAL);
     SET_INT_ITEM(dict, "GEOCENTRIC_CARTESIAN", CT_GEOCENTRIC_CARTESIAN);
+    SET_INT_ITEM(dict, "POTENTIAL", GM_POTENTIAL);
+    SET_INT_ITEM(dict, "GRADIENT", GM_GRADIENT);
+    SET_INT_ITEM(dict, "POTENTIAL_AND_GRADIENT", GM_POTENTIAL_AND_GRADIENT);
 
     /* metadata */
     PyDict_SetItemString(dict, "__author__", PyString_FromString("Martin Paces (martin.paces@eox.at)"));

@@ -41,7 +41,7 @@ class GeomagWMM2010(MagneticModel):
     """ Magnetic Model based on the WMM2010 Geomagnetism library."""
 
     def eval(self, arr_in, date, coord_type_in=MagneticModel.GEODETIC_ABOVE_WGS84,
-                coord_type_out=None, secvar=False, mode=0x2):
+                coord_type_out=None, secvar=False, mode=MagneticModel.GRADIENT):
         """Evaluate Magnetic Model for a given set of spatio-teporal
         coordinates.
 
@@ -68,11 +68,19 @@ class GeomagWMM2010(MagneticModel):
             secvar - if True secular variation of the magentic field is
                      calculated rather than the magnetic fied.
 
+            mode - type of output to be produced. The possible values are:
+                        MagneticModel.POTENTIAL
+                        MagneticModel.GRADIENT (default)
+                        MagneticModel.POTENTIAL_AND_GRADIENT
+
         Output:
 
             arr_out - output numpy array with the same shape as the input
                       array contaning the calcuated magentic field parameters.
         """
+        if mode not in dict(self.EVAL_MODES):
+            raise ValueError("Invalid mode value!")
+
         if coord_type_in not in dict(self.COORD_TYPES):
             raise ValueError("Invalid input coordinate type!")
 

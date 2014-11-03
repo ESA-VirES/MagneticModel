@@ -41,6 +41,7 @@ DATA_EMM_2010_SECVAR = os.path.join(dirname, 'data/EMM-720_V3p0_secvar.cof')
 from _pywmm import (
     GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96,
     GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
+    POTENTIAL, GRADIENT, POTENTIAL_AND_GRADIENT
 )
 
 COORD_TYPES = (
@@ -50,6 +51,11 @@ COORD_TYPES = (
     (GEOCENTRIC_CARTESIAN, "GEOCENTRIC_CARTESIAN"),
 )
 
+EVAL_MODES = (
+    (POTENTIAL, "POTENTIAL"),
+    (GRADIENT, "GRADIENT"),
+    (POTENTIAL_AND_GRADIENT, "POTENTIAL_AND_GRADIENT"),
+)
 
 def vnorm(arr):
     """Calculate norms for each vector form an input array of vectors."""
@@ -59,6 +65,7 @@ class MagneticModel(object):
     """ Base Magnetic model class """
 
     # Supported coordinate systems:
+    COORD_TYPES = COORD_TYPES
     # Geodetic lat/lon coordinates with height above WGS84 ellipsoid. (lat, lon, height/elevation)
     GEODETIC_ABOVE_WGS84 = GEODETIC_ABOVE_WGS84
     # Geodetic lat/lon coordinates with height above EGM96 geoid. (lat, lon, height/elevation)
@@ -67,7 +74,16 @@ class MagneticModel(object):
     GEOCENTRIC_SPHERICAL = GEOCENTRIC_SPHERICAL
     # Geocentric cartesian coordinates (x, y, z), x-axis points to prime-meridian/equator intersection
     GEOCENTRIC_CARTESIAN = GEOCENTRIC_CARTESIAN
-    COORD_TYPES = COORD_TYPES
+
+    # Possible evaluation modes
+    EVAL_MODES = EVAL_MODES
+    # Scalat magentic potential
+    POTENTIAL = POTENTIAL
+    # Magentic field (gradient of the scalar magentic potential)
+    GRADIENT = GRADIENT
+    # Scalar mag. potential and magentic field (scalar magentic potential and
+    # its gradient at the same time))
+    POTENTIAL_AND_GRADIENT = POTENTIAL_AND_GRADIENT
 
     def __init__(self, model_prm):
         """ Model constructor """
