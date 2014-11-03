@@ -36,6 +36,9 @@ dirname = os.path.dirname(__file__)
 DATA_WMM_2010 = os.path.join(dirname, 'data/WMM.COF')
 DATA_EMM_2010_STATIC = os.path.join(dirname, 'data/EMM-720_V3p0_static.cof')
 DATA_EMM_2010_SECVAR = os.path.join(dirname, 'data/EMM-720_V3p0_secvar.cof')
+CHAOS5_CORE = os.path.join(dirname, 'CHAOS-5_core.shc')
+CHAOS5_STATIC = os.path.join(dirname, 'CHAOS-5_static.shc')
+IGRF11 = os.path.join(dirname, 'igrf11coeffs.txt')
 
 # coordinate systems and their trasnformation
 from _pywmm import (
