@@ -182,7 +182,6 @@ static void shc_legendre_high(double *lp, double *ldp, int degree, double sin_el
 
     pmm = rscale*psqrt[2];
     pow_cos_elv = scale;
-    printf("* pmm = %g\n", pmm);
 
     for (j = 1, idx0 = 2; j < degree; idx0 += ++j + 1)
     {
@@ -208,10 +207,9 @@ static void shc_legendre_high(double *lp, double *ldp, int degree, double sin_el
             const double f1 = (2*i-1);
             const double f2 = psqrt[i-j-1]*psqrt[i+j-1];
             const double plm = (f1*sin_elv*pm1 - f2*pm2)/f0;
-            const double tmp = pow_cos_elv*plm;
 
-            lp[idx] = tmp;
-            ldp[idx] = -pow_cos_elv_last*(i*sin_elv*plm - f0*pm1)*(tmp != 0.0);
+            lp[idx] = pow_cos_elv*plm;
+            ldp[idx] = -pow_cos_elv_last*(i*sin_elv*plm - f0*pm1);
 
             pm2 = pm1;
             pm1 = plm;
