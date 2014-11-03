@@ -41,7 +41,9 @@ DATA_EMM_2010_SECVAR = os.path.join(dirname, 'data/EMM-720_V3p0_secvar.cof')
 from _pywmm import (
     GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96,
     GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
-    POTENTIAL, GRADIENT, POTENTIAL_AND_GRADIENT
+    POTENTIAL, GRADIENT, POTENTIAL_AND_GRADIENT,
+    convert, legendre, lonsincos, relradpow, spharpot, sphargrd,
+    vrot_sph2geod, vrot_sph2cart, geomag,
 )
 
 COORD_TYPES = (
@@ -61,100 +63,118 @@ def vnorm(arr):
     """Calculate norms for each vector form an input array of vectors."""
     return np.sqrt((arr*arr).sum(axis=arr.ndim-1))
 
+
 class MagneticModel(object):
     """ Base Magnetic model class """
 
-    # Supported coordinate systems:
-    COORD_TYPES = COORD_TYPES
-    # Geodetic lat/lon coordinates with height above WGS84 ellipsoid. (lat, lon, height/elevation)
-    GEODETIC_ABOVE_WGS84 = GEODETIC_ABOVE_WGS84
-    # Geodetic lat/lon coordinates with height above EGM96 geoid. (lat, lon, height/elevation)
-    GEODETIC_ABOVE_EGM96 = GEODETIC_ABOVE_EGM96
-    # Geocentric spherical coordinates. (lat/azimut(-180,180), lon/elevation(-90,90), radius)
-    GEOCENTRIC_SPHERICAL = GEOCENTRIC_SPHERICAL
-    # Geocentric cartesian coordinates (x, y, z), x-axis points to prime-meridian/equator intersection
-    GEOCENTRIC_CARTESIAN = GEOCENTRIC_CARTESIAN
-
-    # Possible evaluation modes
-    EVAL_MODES = EVAL_MODES
-    # Scalat magentic potential
-    POTENTIAL = POTENTIAL
-    # Magentic field (gradient of the scalar magentic potential)
-    GRADIENT = GRADIENT
-    # Scalar mag. potential and magentic field (scalar magentic potential and
-    # its gradient at the same time))
-    POTENTIAL_AND_GRADIENT = POTENTIAL_AND_GRADIENT
-
     def __init__(self, model_prm):
         """ Model constructor """
-        if isinstance(model_prm, dict):
-            self.prm = model_prm
-        elif isinstance(model_prm, MagneticModel):
-            self.prm = model_prm.prm
+        self.prm = model_prm
 
     @property
-    def epoch(self):
-        return self.prm['epoch']
+    def validity(self):
+        """Get interval of model validity."""
+        raise NotImplementedError
+
+    def is_valid_date(self, date):
+        """Check whether the date is within the interval of validity."""
+        vrange = self.validity
+        return (date >= vrange[0]) and (date <= vrange[1])
 
     @property
     def degree_static(self):
-        return self.prm['degree_static']
+        """Get the degree of the static model."""
+        raise NotImplementedError
 
     @property
     def degree_secvar(self):
-        return self.prm['degree_secvar']
+        """Get the degree of the secular variation model."""
+        raise NotImplementedError
 
     def get_coef_static(self, date):
         """ Calculate model static coeficients for a date specified by a decimal year value.
         """
-        prm = self.prm
-        ddate = date - self.epoch
-        nterm = min(prm['coef_static_g'].size, prm['coef_secvar_g'].size)
+        raise NotImplementedError
 
-        coef_static_g = np.copy(prm['coef_static_g'])
-        coef_static_h = np.copy(prm['coef_static_h'])
-        coef_static_g[:nterm] += ddate * prm['coef_secvar_g'][:nterm]
-        coef_static_h[:nterm] += ddate * prm['coef_secvar_h'][:nterm]
-
-        return coef_static_g, coef_static_h
-
-
-    @property
-    def coef_secvar(self):
+    def get_coef_secvar(self, date):
         """Get secular variation coeficients."""
-        return self.prm['coef_secvar_g'], self.prm['coef_secvar_h']
+        raise NotImplementedError
 
     def print_info(self):
-        def _analyse_coeficiens(degree, coef_g, coef_h, prefix):
-            nz_g = coef_g.nonzero()
-            nz_h = coef_h.nonzero()
-            nz_max = max(np.max(nz_g[0]), np.max(nz_h[0]))
-            degree_real = 0
-            for dg in xrange(degree, 0, -1):
-                if nz_max >= ((dg*(dg+1))/2):
-                    degree_real = dg
-                    break
-            n_all = coef_g.size + coef_h.size
-            n_zero = n_all - (nz_g[0].size + nz_h[0].size)
-            sparsity = float(n_zero) / float(n_all)
+        """Print information about the model."""
+        print self
 
-            print "%sdegree:      %d"%(prefix, degree)
-            print "%strue degree: %d"%(prefix, degree_real)
-            print "%ssparsity:    %g%% (%d of %d)"%(prefix, 100*sparsity, n_zero, n_all)
 
-        prm = self.prm
-        print "Magnetic Model:"
-        print "\tclass:    ", self.__class__.__name__
-        print "\tname:     ", prm.get('name', 'n/a')
-        print "\tversion:  ", prm.get('version', 'n/a')
-        print "\tepoch:    ", prm.get('epoch', 'n/a')
-        print "\tsource(s):"
-        for src in prm.get('sources', []):
-            print "\t\t", src
-        print "\tstatic model:"
-        _analyse_coeficiens(prm['degree_static'], prm['coef_static_g'],
-                            prm['coef_static_h'], "\t\t")
-        print "\tsecvar model:"
-        _analyse_coeficiens(prm['degree_secvar'], prm['coef_secvar_g'],
-                            prm['coef_secvar_h'], "\t\t")
+    def eval(self, arr_in, date, coord_type_in=GEODETIC_ABOVE_WGS84,
+                coord_type_out=None, secvar=False, mode=GRADIENT, maxdegree=-1,
+                check_date_validity=True):
+        """Evaluate spherical harmonic model for a given set of spatio-teporal
+        coordinates.
 
+        Input:
+            model - an instance of the MagneticModel class
+            arr_in - numpy array of (x, y, z) coordinates.
+                     The type of the x, y, z, values depends on the selected
+                     input coordinate system.
+
+            date - The time as a decimal year value (e.g., 2015.23).
+            coord_type_in - shall be set to one of the valid coordinate systems:
+                        GEODETIC_ABOVE_WGS84 (default)
+                        GEODETIC_ABOVE_EGM96
+                        GEOCENTRIC_SPHERICAL
+                        GEOCENTRIC_CARTESIAN
+
+            coord_type_out - coordinate system of the output vector
+                        GEODETIC_ABOVE_WGS84
+                        GEODETIC_ABOVE_EGM96 (the same as WGS84)
+                        GEOCENTRIC_SPHERICAL
+                        GEOCENTRIC_CARTESIAN
+                    Ouput coordinate system defaults to the input coordinate
+                    system.
+
+            secvar - if True secular variation of the magentic field is
+                     calculated rather than the magnetic fied.
+
+            mode - type of output to be produced. The possible values are:
+                        POTENTIAL
+                        GRADIENT (default)
+                        POTENTIAL_AND_GRADIENT
+
+            maxdegree - an optional max. allowed modelel degree
+                    (i.e., truncated evaluation). If set to -1 no limit
+                    is imposed.
+
+            check_date_validity - boolean flag controlling  whether the date
+                    vality will is checked (True, by default) or not (False).
+
+        Output:
+
+            arr_out - output numpy array with the same shape as the input
+                      array contaning the calcuated magentic field parameters.
+        """
+        if mode not in dict(EVAL_MODES):
+            raise ValueError("Invalid mode value!")
+
+        if coord_type_in not in dict(COORD_TYPES):
+            raise ValueError("Invalid input coordinate type!")
+
+        if coord_type_out is None:
+            coord_type_out = coord_type_in
+
+        if coord_type_out not in dict(COORD_TYPES):
+            raise ValueError("Invalid output coordinate type!")
+
+        if check_date_validity and not self.is_valid_date(date):
+            raise ValueError("The date is outside of the model validity range!")
+
+        if secvar:
+            degree = self.degree_secvar
+            coef_g, coef_h = self.get_coef_secvar(date)
+        else:
+            degree = self.degree_static
+            coef_g, coef_h = self.get_coef_static(date)
+
+        if maxdegree > 0:
+            degree = min(maxdegree, degree)
+
+        return geomag(arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out, mode)

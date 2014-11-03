@@ -31,7 +31,7 @@
 import re
 from gzip import GzipFile as _GzipFile
 import numpy as np
-from base import MagneticModel
+from wmm import MagneticModelSimple
 
 # NOTE: GzipFile with statement support added in Python 2.7.
 if hasattr(_GzipFile, '__exit__'):
@@ -133,6 +133,7 @@ def read_model_emm2010(fname_static, fname_secvar):
     prm['name'] = prm_static['name']
     prm['version'] = prm_static['name']
     prm['epoch'] = prm_static['epoch']
+    prm['valid_until'] = prm_static['epoch'] + 5.0
     prm['sources'] = prm_static['sources'] + prm_secvar['sources']
     prm['headers'] = prm_static['headers'] + prm_secvar['headers']
     prm['degree_static'] = prm_static['degree']
@@ -142,4 +143,4 @@ def read_model_emm2010(fname_static, fname_secvar):
     prm['coef_secvar_g'] = prm_secvar['coef_g']
     prm['coef_secvar_h'] = prm_secvar['coef_h']
 
-    return MagneticModel(prm)
+    return MagneticModelSimple(prm)

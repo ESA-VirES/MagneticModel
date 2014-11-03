@@ -31,73 +31,85 @@
 import re
 import numpy as np
 from base import MagneticModel
-import _pywmm
-from _pywmm import (
-    convert, legendre, lonsincos, relradpow, spharpot, sphargrd, geomag,
-    vrot_sph2geod, vrot_sph2cart,
-)
 
-class GeomagWMM2010(MagneticModel):
-    """ Magnetic Model based on the WMM2010 Geomagnetism library."""
+class MagneticModelSimple(MagneticModel):
+    """ Simple Magnetic model class.
+        To be used for models with a single epoch and secular variation.
+    """
 
-    def eval(self, arr_in, date, coord_type_in=MagneticModel.GEODETIC_ABOVE_WGS84,
-                coord_type_out=None, secvar=False, mode=MagneticModel.GRADIENT):
-        """Evaluate Magnetic Model for a given set of spatio-teporal
-        coordinates.
+    def __init__(self, model_prm):
+        """ Model constructor """
+        super(MagneticModelSimple).__init__()
+        self.prm = model_prm
 
-        Input:
-            arr_in - numpy array of (x, y, z) coordinates.
-                     The type of the x, y, z, values depends on the selected
-                     input coordinate system.
+    @property
+    def epoch(self):
+        return self.prm['epoch']
 
-            date - The time as a decimal year value (e.g., 2015.23).
-            coord_type_in - shall be set to one of the valid coordinate systems:
-                        MagneticModel.GEODETIC_ABOVE_WGS84 (default)
-                        MagneticModel.GEODETIC_ABOVE_EGM96
-                        MagneticModel.GEOCENTRIC_SPHERICAL
-                        MagneticModel.GEOCENTRIC_CARTESIAN
+    @property
+    def validity(self):
+        return (self.prm['epoch'], self.prm['valid_until'])
 
-            coord_type_out - coordinate system of the output vector
-                        MagneticModel.GEODETIC_ABOVE_WGS84
-                        MagneticModel.GEODETIC_ABOVE_EGM96 (the same as WGS84)
-                        MagneticModel.GEOCENTRIC_SPHERICAL
-                        MagneticModel.GEOCENTRIC_CARTESIAN
-                    Ouput coordinate system defaults to the input coordinate
-                    system.
+    @property
+    def degree_static(self):
+        return self.prm['degree_static']
 
-            secvar - if True secular variation of the magentic field is
-                     calculated rather than the magnetic fied.
+    @property
+    def degree_secvar(self):
+        return self.prm['degree_secvar']
 
-            mode - type of output to be produced. The possible values are:
-                        MagneticModel.POTENTIAL
-                        MagneticModel.GRADIENT (default)
-                        MagneticModel.POTENTIAL_AND_GRADIENT
-
-        Output:
-
-            arr_out - output numpy array with the same shape as the input
-                      array contaning the calcuated magentic field parameters.
+    def get_coef_static(self, date):
+        """ Calculate model static coeficients for a date specified by a decimal year value.
         """
-        if mode not in dict(self.EVAL_MODES):
-            raise ValueError("Invalid mode value!")
+        prm = self.prm
+        ddate = date - self.epoch
+        nterm = min(prm['coef_static_g'].size, prm['coef_secvar_g'].size)
 
-        if coord_type_in not in dict(self.COORD_TYPES):
-            raise ValueError("Invalid input coordinate type!")
+        coef_static_g = np.copy(prm['coef_static_g'])
+        coef_static_h = np.copy(prm['coef_static_h'])
+        coef_static_g[:nterm] += ddate * prm['coef_secvar_g'][:nterm]
+        coef_static_h[:nterm] += ddate * prm['coef_secvar_h'][:nterm]
 
-        if coord_type_out is None:
-            coord_type_out = coord_type_in
+        return coef_static_g, coef_static_h
 
-        if coord_type_out not in dict(self.COORD_TYPES):
-            raise ValueError("Invalid output coordinate type!")
+    def get_coef_secvar(self, date):
+        """Get secular variation coeficients."""
+        return self.prm['coef_secvar_g'], self.prm['coef_secvar_h']
 
-        if secvar:
-            degree = self.degree_secvar
-            coef_g, coef_h = self.coef_secvar
-        else:
-            degree = self.degree_static
-            coef_g, coef_h = self.get_coef_static(date)
+    def print_info(self):
+        def _analyse_coeficiens(degree, coef_g, coef_h, prefix):
+            nz_g = coef_g.nonzero()
+            nz_h = coef_h.nonzero()
+            nz_max = max(np.max(nz_g[0]), np.max(nz_h[0]))
+            degree_real = 0
+            for dg in xrange(degree, 0, -1):
+                if nz_max >= ((dg*(dg+1))/2):
+                    degree_real = dg
+                    break
+            n_all = coef_g.size + coef_h.size
+            n_zero = n_all - (nz_g[0].size + nz_h[0].size)
+            sparsity = float(n_zero) / float(n_all)
 
-        return geomag(arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out, mode)
+            print "%sdegree:      %d"%(prefix, degree)
+            print "%strue degree: %d"%(prefix, degree_real)
+            print "%ssparsity:    %g%% (%d of %d)"%(prefix, 100*sparsity, n_zero, n_all)
+
+        prm = self.prm
+        print "Magnetic Model:"
+        print "\tclass:    ", self.__class__.__name__
+        print "\tname:     ", prm.get('name', 'n/a')
+        print "\tversion:  ", prm.get('version', 'n/a')
+        print "\tepoch:    ", prm.get('epoch', 'n/a')
+        print "\tsource(s):"
+        for src in prm.get('sources', []):
+            print "\t\t", src
+        print "\tstatic model:"
+        _analyse_coeficiens(prm['degree_static'], prm['coef_static_g'],
+                            prm['coef_static_h'], "\t\t")
+        print "\tsecvar model:"
+        _analyse_coeficiens(prm['degree_secvar'], prm['coef_secvar_g'],
+                            prm['coef_secvar_h'], "\t\t")
+
 
 
 def read_model_wmm2010(fname):
@@ -109,6 +121,7 @@ def read_model_wmm2010(fname):
         line = next(fid).rstrip()
         epoch, prm['name'], prm['version'] = line.split()
         prm['epoch'] = float(epoch)
+        prm['valid_until'] = prm['epoch'] + 5
         prm['headers'] = [line]
 
         # PASS1 - parse the input file
@@ -149,4 +162,4 @@ def read_model_wmm2010(fname):
         prm['coef_secvar_g'] = coef_dg
         prm['coef_secvar_h'] = coef_dh
 
-    return MagneticModel(prm)
+    return MagneticModelSimple(prm)
