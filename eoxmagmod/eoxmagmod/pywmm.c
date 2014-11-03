@@ -58,8 +58,8 @@
 /* Coordinate conversions. */
 #include "pywmm_cconv.h"
 
-/* Model evaluation - simple variant */
-#include "pywmm_geomag.h"
+/* spherical harmonic model evaluation */
+#include "pywmm_sheval.h"
 
 /* evaluation of the asociative Legendre functions */
 #include "pywmm_legendre.h"
@@ -97,7 +97,7 @@ static PyMethodDef pywmm_methods[] =
     {"lonsincos", (PyCFunction)lonsincos, METH_VARARGS|METH_KEYWORDS, DOC_LONSINCOS},
     {"relradpow", (PyCFunction)relradpow, METH_VARARGS|METH_KEYWORDS, DOC_RELRADPOW},
     {"legendre", (PyCFunction)legendre, METH_VARARGS|METH_KEYWORDS, DOC_LEGENDRE},
-    {"geomag", (PyCFunction)geomag, METH_VARARGS|METH_KEYWORDS, DOC_GEOMAG},
+    {"sheval", (PyCFunction)sheval, METH_VARARGS|METH_KEYWORDS, DOC_SHEVAL},
     {"convert", (PyCFunction)convert, METH_VARARGS|METH_KEYWORDS, DOC_CONVERT},
     {NULL, NULL, 0, NULL} /* Sentinel - DO NOT REMOVE! */
 } ;
@@ -131,9 +131,9 @@ PyMODINIT_FUNC init_pywmm(void)
     SET_INT_ITEM(dict, "GEODETIC_ABOVE_EGM96", CT_GEODETIC_ABOVE_EGM96);
     SET_INT_ITEM(dict, "GEOCENTRIC_SPHERICAL", CT_GEOCENTRIC_SPHERICAL);
     SET_INT_ITEM(dict, "GEOCENTRIC_CARTESIAN", CT_GEOCENTRIC_CARTESIAN);
-    SET_INT_ITEM(dict, "POTENTIAL", GM_POTENTIAL);
-    SET_INT_ITEM(dict, "GRADIENT", GM_GRADIENT);
-    SET_INT_ITEM(dict, "POTENTIAL_AND_GRADIENT", GM_POTENTIAL_AND_GRADIENT);
+    SET_INT_ITEM(dict, "POTENTIAL", SM_POTENTIAL);
+    SET_INT_ITEM(dict, "GRADIENT", SM_GRADIENT);
+    SET_INT_ITEM(dict, "POTENTIAL_AND_GRADIENT", SM_POTENTIAL_AND_GRADIENT);
 
     /* metadata */
     PyDict_SetItemString(dict, "__author__", PyString_FromString("Martin Paces (martin.paces@eox.at)"));

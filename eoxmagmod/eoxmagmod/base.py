@@ -43,7 +43,7 @@ from _pywmm import (
     GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
     POTENTIAL, GRADIENT, POTENTIAL_AND_GRADIENT,
     convert, legendre, lonsincos, relradpow, spharpot, sphargrd,
-    vrot_sph2geod, vrot_sph2cart, geomag,
+    vrot_sph2geod, vrot_sph2cart, sheval,
 )
 
 COORD_TYPES = (
@@ -177,4 +177,4 @@ class MagneticModel(object):
         if maxdegree > 0:
             degree = min(maxdegree, degree)
 
-        return geomag(arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out, mode)
+        return sheval(arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out, mode)

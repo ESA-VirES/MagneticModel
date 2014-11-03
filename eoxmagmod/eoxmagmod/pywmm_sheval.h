@@ -1,6 +1,6 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings - magnetic model evaluation
+ * World Magnetic Model - C python bindings - spherical harmoic model evaluation
  *
  * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
@@ -29,8 +29,8 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_GEOMAG_H
-#define PYWMM_GEOMAG_H
+#ifndef PYWMM_SHEVAL_H
+#define PYWMM_SHEVAL_H
 
 #include <math.h>
 #include <string.h>
@@ -61,26 +61,26 @@
 
 /* mode of evaluation enumerate */
 typedef enum {
-    GM_INVALID = 0x0,
-    GM_POTENTIAL = 0x1,
-    GM_GRADIENT = 0x2,
-    GM_POTENTIAL_AND_GRADIENT = 0x3,
-} GEOMAG_MODE;
+    SM_INVALID = 0x0,
+    SM_POTENTIAL = 0x1,
+    SM_GRADIENT = 0x2,
+    SM_POTENTIAL_AND_GRADIENT = 0x3,
+} SHEVAL_MODE;
 
 /* mode of evaluation check */
-static GEOMAG_MODE _check_geomag_mode(int mode, const char *label)
+static SHEVAL_MODE _check_sheval_mode(int mode, const char *label)
 {
     switch (mode)
     {
-        case GM_POTENTIAL:
-            return GM_POTENTIAL;
-        case GM_GRADIENT:
-            return GM_GRADIENT;
-        case GM_POTENTIAL_AND_GRADIENT:
-            return GM_POTENTIAL_AND_GRADIENT;
+        case SM_POTENTIAL:
+            return SM_POTENTIAL;
+        case SM_GRADIENT:
+            return SM_GRADIENT;
+        case SM_POTENTIAL_AND_GRADIENT:
+            return SM_POTENTIAL_AND_GRADIENT;
         default:
             PyErr_Format(PyExc_ValueError, "Invalid mode '%s'!", label);
-            return GM_INVALID;
+            return SM_INVALID;
     }
 }
 
@@ -107,7 +107,7 @@ typedef struct {
 } MODEL;
 
 /* model stucture destruction */
-static void _geomag_model_destroy(MODEL *model)
+static void _sheval_model_destroy(MODEL *model)
 {
     if(NULL != model->lp)
         free(model->lp);
@@ -126,7 +126,7 @@ static void _geomag_model_destroy(MODEL *model)
 }
 
 /* model stucture initiliazation */
-static int _geomag_model_init(MODEL *model, int degree,
+static int _sheval_model_init(MODEL *model, int degree,
     int coord_in, int coord_out, const double *cg, const double *ch)
 {
     const int nterm = ((degree+1)*(degree+2))/2;
@@ -167,12 +167,12 @@ static int _geomag_model_init(MODEL *model, int degree,
     return 0;
 
   error:
-    _geomag_model_destroy(model);
+    _sheval_model_destroy(model);
     return 1;
 }
 
 /* single point evaluation */
-static void _geomag_model_eval(MODEL *model, int mode, double *fpot,
+static void _sheval_model_eval(MODEL *model, int mode, double *fpot,
     double *fx, double *fy, double *fz, double x, double y, double z)
 {
     double glat, glon, ghgt;
@@ -255,47 +255,47 @@ static void _geomag_model_eval(MODEL *model, int mode, double *fpot,
 #define P(a,i) ((double*)((a).data+(i)*(a).stride[0]))
 #define V(a,i) (*P(a,i))
 
-static void _geomag1(ARRAY_DATA arrd_in, ARRAY_DATA arrd_pot, MODEL *model)
+static void _sheval1(ARRAY_DATA arrd_in, ARRAY_DATA arrd_pot, MODEL *model)
 {
     if (arrd_in.ndim > 1)
     {
         npy_intp i;
         for(i = 0; i < arrd_in.dim[0]; ++i)
-            _geomag1(_get_arrd_item(&arrd_in, i), _get_arrd_item(&arrd_pot, i), model);
+            _sheval1(_get_arrd_item(&arrd_in, i), _get_arrd_item(&arrd_pot, i), model);
         return;
     }
 
-    _geomag_model_eval(model, GM_POTENTIAL, S(arrd_pot), NULL, NULL, NULL,
+    _sheval_model_eval(model, SM_POTENTIAL, S(arrd_pot), NULL, NULL, NULL,
                     V(arrd_in, 0), V(arrd_in, 1), V(arrd_in, 2));
 }
 
-static void _geomag2(ARRAY_DATA arrd_in, ARRAY_DATA arrd_grd, MODEL *model)
+static void _sheval2(ARRAY_DATA arrd_in, ARRAY_DATA arrd_grd, MODEL *model)
 {
     if (arrd_in.ndim > 1)
     {
         npy_intp i;
         for(i = 0; i < arrd_in.dim[0]; ++i)
-            _geomag2(_get_arrd_item(&arrd_in, i), _get_arrd_item(&arrd_grd, i), model);
+            _sheval2(_get_arrd_item(&arrd_in, i), _get_arrd_item(&arrd_grd, i), model);
         return;
     }
 
-    _geomag_model_eval(model, GM_GRADIENT, NULL, P(arrd_grd, 0), P(arrd_grd, 1),
+    _sheval_model_eval(model, SM_GRADIENT, NULL, P(arrd_grd, 0), P(arrd_grd, 1),
         P(arrd_grd, 2), V(arrd_in, 0), V(arrd_in, 1), V(arrd_in, 2));
 
 }
 
-static void _geomag3(ARRAY_DATA arrd_in, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_grd, MODEL *model)
+static void _sheval3(ARRAY_DATA arrd_in, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_grd, MODEL *model)
 {
     if (arrd_in.ndim > 1)
     {
         npy_intp i;
         for(i = 0; i < arrd_in.dim[0]; ++i)
-            _geomag3(_get_arrd_item(&arrd_in, i), _get_arrd_item(&arrd_pot, i),
+            _sheval3(_get_arrd_item(&arrd_in, i), _get_arrd_item(&arrd_pot, i),
                     _get_arrd_item(&arrd_grd, i), model);
         return;
     }
 
-    _geomag_model_eval(model, GM_POTENTIAL_AND_GRADIENT, S(arrd_pot),
+    _sheval_model_eval(model, SM_POTENTIAL_AND_GRADIENT, S(arrd_pot),
         P(arrd_grd, 0), P(arrd_grd, 1), P(arrd_grd, 2), V(arrd_in, 0),
         V(arrd_in, 1), V(arrd_in, 2));
 }
@@ -306,9 +306,9 @@ static void _geomag3(ARRAY_DATA arrd_in, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_gr
 
 /* python function definition */
 
-#define DOC_GEOMAG "\n"\
-"   arr_out = geomag_static(arr_in, degree, coef_g, coef_h, coord_type_in=GEODETIC_ABOVE_WGS84,\n"\
-"                          coord_type_out=GEODETIC_ABOVE_WGS84, mode=GM_GRADIENT)"\
+#define DOC_SHEVAL "\n"\
+"   arr_out = sheval(arr_in, degree, coef_g, coef_h, coord_type_in=GEODETIC_ABOVE_WGS84,\n"\
+"                          coord_type_out=GEODETIC_ABOVE_WGS84, mode=GRADIENT)"\
 "     Parameters:\n"\
 "       arr_in - array of 3D coordinates (up to 16 dimensions).\n"\
 "       degree - degree of the spherical harmonic model.\n"\
@@ -322,7 +322,7 @@ static void _geomag3(ARRAY_DATA arrd_in, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_gr
 "       rad_ref - reference (Earth) radius\n"
 
 
-static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
+static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
 {
     static char *keywords[] = {"arr_in", "degree", "coef_g", "coef_h",
                  "coord_type_in", "coord_type_out", "mode", NULL};
@@ -342,7 +342,7 @@ static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "OiOO|iii:geomag", keywords, &obj_in, &degree, &obj_cg, &obj_ch,
+            "OiOO|iii:sheval", keywords, &obj_in, &degree, &obj_cg, &obj_ch,
             &ct_in, &ct_out, &mode))
         goto exit;
 
@@ -354,7 +354,7 @@ static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     // check the operation mode
-    if (GM_INVALID == _check_geomag_mode(mode, keywords[6]))
+    if (SM_INVALID == _check_sheval_mode(mode, keywords[6]))
         goto exit;
 
     // cast the objects to arrays
@@ -397,39 +397,39 @@ static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     // create the output arrays
-    if (mode & GM_POTENTIAL)
+    if (mode & SM_POTENTIAL)
         if (NULL == (arr_pot = PyArray_EMPTY(PyArray_NDIM(arr_in)-1, PyArray_DIMS(arr_in), NPY_DOUBLE, 0)))
             goto exit;
 
-    if (mode & GM_GRADIENT)
+    if (mode & SM_GRADIENT)
         if (NULL == (arr_grd = _get_new_double_array(PyArray_NDIM(arr_in), PyArray_DIMS(arr_in), 3)))
             goto exit;
 
     // evaluate the model
 
-    if(_geomag_model_init(&model, degree, ct_in, ct_out, PyArray_DATA(arr_cg), PyArray_DATA(arr_ch)))
+    if(_sheval_model_init(&model, degree, ct_in, ct_out, PyArray_DATA(arr_cg), PyArray_DATA(arr_ch)))
         goto exit;
 
     switch(mode)
     {
-        case GM_POTENTIAL:
-            _geomag1(_array_to_arrd(arr_in), _array_to_arrd(arr_pot), &model);
+        case SM_POTENTIAL:
+            _sheval1(_array_to_arrd(arr_in), _array_to_arrd(arr_pot), &model);
             retval = arr_pot;
             break;
 
-        case GM_GRADIENT:
-            _geomag2(_array_to_arrd(arr_in), _array_to_arrd(arr_grd), &model);
+        case SM_GRADIENT:
+            _sheval2(_array_to_arrd(arr_in), _array_to_arrd(arr_grd), &model);
             retval = arr_grd;
             break;
 
-        case GM_POTENTIAL_AND_GRADIENT:
-            _geomag3(_array_to_arrd(arr_in), _array_to_arrd(arr_pot), _array_to_arrd(arr_grd), &model);
+        case SM_POTENTIAL_AND_GRADIENT:
+            _sheval3(_array_to_arrd(arr_in), _array_to_arrd(arr_pot), _array_to_arrd(arr_grd), &model);
             if (NULL == (retval = Py_BuildValue("NN", arr_pot, arr_grd)))
                 goto exit;
             break;
     }
 
-    _geomag_model_destroy(&model);
+    _sheval_model_destroy(&model);
 
   exit:
 
@@ -443,4 +443,4 @@ static PyObject* geomag(PyObject *self, PyObject *args, PyObject *kwdict)
     return retval;
 }
 
-#endif  /* PYWMM_GEOMAG_H */
+#endif  /* PYWMM_SHEVAL_H */
