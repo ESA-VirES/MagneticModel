@@ -33,6 +33,9 @@ from .base import (
     DATA_WMM_2010,
     DATA_EMM_2010_STATIC,
     DATA_EMM_2010_SECVAR,
+    DATA_CHAOS5_CORE,
+    DATA_CHAOS5_STATIC,
+    DATA_IGRF11,
     GEODETIC_ABOVE_WGS84,
     GEODETIC_ABOVE_EGM96,
     GEOCENTRIC_SPHERICAL,
@@ -52,6 +55,7 @@ from .base import (
 )
 from .emm import read_model_emm2010
 from .wmm import read_model_wmm2010
+from .shc import read_model_shc
 
 __all__ = [
     'MagneticModel',
@@ -69,6 +73,9 @@ __all__ = [
     'DATA_WMM_2010',
     'DATA_EMM_2010_STATIC',
     'DATA_EMM_2010_SECVAR',
+    'DATA_CHAOS5_CORE',
+    'DATA_CHAOS5_STATIC',
+    'DATA_IGRF11',
     'GEODETIC_ABOVE_WGS84',
     'GEODETIC_ABOVE_EGM96',
     'GEOCENTRIC_SPHERICAL',

@@ -34,12 +34,13 @@ import numpy as np
 
 # location of the data files
 dirname = os.path.dirname(__file__)
-DATA_WMM_2010 = os.path.join(dirname, 'data/WMM.COF')
-DATA_EMM_2010_STATIC = os.path.join(dirname, 'data/EMM-720_V3p0_static.cof')
-DATA_EMM_2010_SECVAR = os.path.join(dirname, 'data/EMM-720_V3p0_secvar.cof')
-CHAOS5_CORE = os.path.join(dirname, 'CHAOS-5_core.shc')
-CHAOS5_STATIC = os.path.join(dirname, 'CHAOS-5_static.shc')
-IGRF11 = os.path.join(dirname, 'igrf11coeffs.txt')
+dirname = os.path.join(dirname, 'data')
+DATA_WMM_2010 = os.path.join(dirname, 'WMM.COF')
+DATA_EMM_2010_STATIC = os.path.join(dirname, 'EMM-720_V3p0_static.cof')
+DATA_EMM_2010_SECVAR = os.path.join(dirname, 'EMM-720_V3p0_secvar.cof')
+DATA_CHAOS5_CORE = os.path.join(dirname, 'CHAOS-5_core.shc')
+DATA_CHAOS5_STATIC = os.path.join(dirname, 'CHAOS-5_static.shc')
+DATA_IGRF11 = os.path.join(dirname, 'igrf11coeffs.txt')
 
 # coordinate systems and their trasnformation
 from _pywmm import (
@@ -129,7 +130,7 @@ class MagneticModel(object):
 
     def eval(self, arr_in, date, coord_type_in=GEODETIC_ABOVE_WGS84,
                 coord_type_out=None, secvar=False, mode=GRADIENT, maxdegree=-1,
-                check_date_validity=True):
+                check_validity=True):
         """Evaluate spherical harmonic model for a given set of spatio-teporal
         coordinates.
 
@@ -166,7 +167,7 @@ class MagneticModel(object):
                     (i.e., truncated evaluation). If set to -1 no limit
                     is imposed.
 
-            check_date_validity - boolean flag controlling  whether the date
+            check_validity - boolean flag controlling  whether the date
                     vality will is checked (True, by default) or not (False).
 
         Output:
@@ -190,7 +191,7 @@ class MagneticModel(object):
         if coord_type_out not in dict(COORD_TYPES):
             raise ValueError("Invalid output coordinate type!")
 
-        if check_date_validity and not self.is_valid_date(date):
+        if check_validity and not self.is_valid_date(date):
             raise ValueError("The date is outside of the model validity range!")
 
         if secvar:

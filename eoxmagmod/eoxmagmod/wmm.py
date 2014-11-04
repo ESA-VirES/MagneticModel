@@ -33,7 +33,7 @@ import numpy as np
 from base import MagneticModel
 
 class MagneticModelSimple(MagneticModel):
-    """ Simple Magnetic model class.
+    """ Simple magnetic model class.
         To be used for models with a single epoch and secular variation.
     """
 
@@ -98,7 +98,8 @@ class MagneticModelSimple(MagneticModel):
         print "\tclass:    ", self.__class__.__name__
         print "\tname:     ", prm.get('name', 'n/a')
         print "\tversion:  ", prm.get('version', 'n/a')
-        print "\tepoch:    ", prm.get('epoch', 'n/a')
+        print "\tepoch:    ", self.epoch
+        print "\tvalidity: ", self.validity
         print "\tsource(s):"
         for src in prm.get('sources', []):
             print "\t\t", src
