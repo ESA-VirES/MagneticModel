@@ -39,8 +39,7 @@ class MagneticModelSimple(MagneticModel):
 
     def __init__(self, model_prm):
         """ Model constructor """
-        super(MagneticModelSimple).__init__()
-        self.prm = model_prm
+        super(MagneticModelSimple, self).__init__(model_prm)
 
     @property
     def epoch(self):
