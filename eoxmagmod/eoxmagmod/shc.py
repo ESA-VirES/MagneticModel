@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 #
 #  World Magnetic Model 2010 / Geomagnetism Library
-#  - SHC format readerd
+#  - SHC format reader
 #
 # Project: Earth magnetic field in Python.
 # Author: Martin Paces <martin.paces@eox.at>
@@ -86,8 +86,8 @@ class MagneticModelSHCPP(MagneticModel):
         dates = self.prm['time']
         degree = self.prm['degree']
         degree_min = self.prm['degree_min']
-        src_coef_g = self.prm['coef_h']
-        src_coef_h = self.prm['coef_g']
+        src_coef_g = self.prm['coef_g']
+        src_coef_h = self.prm['coef_h']
         nterms = ((degree+2)*(degree+1))/2
         idxoff = (degree_min*(degree_min+1))/2
         # TODO: proper spline interpolation
@@ -96,8 +96,8 @@ class MagneticModelSHCPP(MagneticModel):
         coef_h = np.zeros(nterms)
 
         if dates.size == 1:
-            coef_g[idxoff:] = src_coef_h[:,0]
-            coef_h[idxoff:] = src_coef_g[:,0]
+            coef_g[idxoff:] = src_coef_g[:,0]
+            coef_h[idxoff:] = src_coef_h[:,0]
 
         elif dates.size > 1:
             # lookup the interval
@@ -108,8 +108,6 @@ class MagneticModelSHCPP(MagneticModel):
 
             a1 = (date-dates[idx])/(dates[idx+1]-dates[idx])
             a0 = 1.0 - a1
-
-            print date, (dates[idx], dates[idx+1]), a0, a1
 
             coef_g[idxoff:] = a0*src_coef_g[:,idx] + a1*src_coef_g[:,idx+1]
             coef_h[idxoff:] = a0*src_coef_h[:,idx] + a1*src_coef_h[:,idx+1]
@@ -171,9 +169,9 @@ def read_model_shc(fname):
             idx = abs(j)+((i)*(i+1)-(degree_min)*(degree_min+1))/2
             coef = np.array([float(v) for v in line[2:]])
             if j < 0:
-                coef_h[idx,:] = coef[:]
+                coef_h[idx,:] = coef
             else:
-                coef_g[idx,:] = coef[:]
+                coef_g[idx,:] = coef
 
         prm.update({
             'degree_min': degree_min,
