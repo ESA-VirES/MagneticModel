@@ -29,6 +29,7 @@
 #-------------------------------------------------------------------------------
 
 import os.path
+import datetime
 import numpy as np
 
 # location of the data files
@@ -65,6 +66,24 @@ EVAL_MODES = (
 def vnorm(arr):
     """Calculate norms for each vector form an input array of vectors."""
     return np.sqrt((arr*arr).sum(axis=arr.ndim-1))
+
+
+def to_year_fraction(date):
+    """ Converts a Python date or datetime to its decimal format.
+    """
+
+    def since_epoch(date):  # returns seconds since epoch
+        return time.mktime(date.timetuple())
+
+    year = date.year
+    start_this_year = datetime.datetime(year=year, month=1, day=1)
+    start_next_year = datetime.datetime(year=year+1, month=1, day=1)
+
+    year_elapsed = since_epoch(date) - since_epoch(start_this_year)
+    year_duration = since_epoch(start_next_year) - since_epoch(start_this_year)
+    fraction = year_elapsed / year_duration
+
+    return date.year + fraction
 
 
 class MagneticModel(object):
@@ -155,6 +174,10 @@ class MagneticModel(object):
             arr_out - output numpy array with the same shape as the input
                       array contaning the calcuated magentic field parameters.
         """
+
+        if isinstance(date, (datetime.date, datetime.datetime)):
+            date = to_year_fraction(date)
+
         if mode not in dict(EVAL_MODES):
             raise ValueError("Invalid mode value!")
 
