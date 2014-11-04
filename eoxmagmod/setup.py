@@ -28,16 +28,12 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-import os
-import os.path
-#from distutils.core import setup
-from setuptools import setup
+#import os
+from distutils.core import setup
+#from setuptools import setup
 from distutils.extension import Extension
-#from distutils.core import setup
-#from distutils.extension import Extension
 
-del os.link
-cwd = os.path.dirname(os.path.abspath(__file__))
+#del os.link
 
 setup(
     name="EOxMagMod",
@@ -51,13 +47,16 @@ setup(
     ext_modules=[
         Extension(
             'eoxmagmod._pywmm',
-            sources=['eoxmagmod/pywmm.c'],
-            libraries=['geomag', 'm'],
+            sources=[
+                'eoxmagmod/pywmm.c',
+                'eoxmagmod/geomaglib/GeomagnetismLibrary.c'
+            ],
+            libraries=[],
             library_dirs=[],
             include_dirs=[
                 './eoxmagmod',
                 './eoxmagmod/include',
-                '/usr/include/geomag',
+                './eoxmagmod/geomaglib'
             ],
         ),
     ]
