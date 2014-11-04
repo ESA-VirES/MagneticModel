@@ -29,7 +29,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-import re
 import numpy as np
 from base import MagneticModel
 

@@ -56,11 +56,14 @@ from .base import (
 from .emm import read_model_emm2010
 from .wmm import read_model_wmm2010
 from .shc import read_model_shc
+from .igrf import read_model_igrf11
 
 __all__ = [
     'MagneticModel',
     'read_model_wmm2010',
     'read_model_emm2010',
+    'read_model_shc',
+    'read_model_igrf11',
     'vnorm',
     'vrot_sph2geod',
     'vrot_sph2cart',
