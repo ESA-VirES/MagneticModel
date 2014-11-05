@@ -68,6 +68,14 @@ def vnorm(arr):
     """Calculate norms for each vector form an input array of vectors."""
     return np.sqrt((arr*arr).sum(axis=arr.ndim-1))
 
+def vincdecnorm(arr):
+    """ Calculate vector inclinations (-90:90), declinations
+    (-180,180), and the vector norms.
+    """
+    # equivalent to conversion of cartesian to spherical coordinates
+    tmp = convert(arr, GEOCENTRIC_CARTESIAN, GEOCENTRIC_SPHERICAL)
+    return tmp[...,0], tmp[...,1], tmp[...,2]
+
 
 def to_year_fraction(date):
     """ Converts a Python date or datetime to its decimal format.

@@ -53,7 +53,6 @@ def read_model_igrf11(fname):
 
         # parse model headers
         prm['labels'] = line.split()
-        print prm['labels']
 
         # parse time labels
         line = next(fid)
