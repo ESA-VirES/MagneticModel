@@ -32,6 +32,7 @@ import re
 from gzip import GzipFile as _GzipFile
 import numpy as np
 from wmm import MagneticModelSimple
+from base import DATA_EMM_2010_STATIC, DATA_EMM_2010_SECVAR
 
 # NOTE: GzipFile with statement support added in Python 2.7.
 if hasattr(_GzipFile, '__exit__'):
@@ -118,7 +119,8 @@ def _read_prm_emm2010(fname):
             return _read(fid)
 
 
-def read_model_emm2010(fname_static, fname_secvar):
+def read_model_emm2010(fname_static=DATA_EMM_2010_STATIC,
+                       fname_secvar=DATA_EMM_2010_SECVAR):
     """ Read model parameters from the coeficient files in the WMM2010 format."""
 
     prm_static = _read_prm_emm2010(fname_static)

@@ -31,8 +31,9 @@
 
 import numpy as np
 from shc import MagneticModelSHCPP
+from base import DATA_IGRF11
 
-def read_model_igrf11(fname):
+def read_model_igrf11(fname=DATA_IGRF11):
     """ Read model parameters from a coeficient file in the IGRF11 format."""
 
     prm = {'sources': [fname], 'headers': []}
