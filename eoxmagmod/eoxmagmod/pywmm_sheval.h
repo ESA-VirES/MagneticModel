@@ -198,6 +198,7 @@ static void _sheval_model_eval(MODEL *model, int mode, double *fpot,
         case CT_GEOCENTRIC_CARTESIAN:
             cart2sph(&crad, &clat, &clon, x, y, z);
             geocentric_sph2geodetic(&glat, &glon, &ghgt, crad, clat, clon, model->elps_a, model->elps_eps2);
+            break;
         default:
             return;
     }
