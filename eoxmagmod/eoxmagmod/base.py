@@ -74,7 +74,7 @@ def vincdecnorm(arr):
     """
     # equivalent to conversion of cartesian to spherical coordinates
     tmp = convert(arr, GEOCENTRIC_CARTESIAN, GEOCENTRIC_SPHERICAL)
-    return tmp[...,0], tmp[...,1], tmp[...,2]
+    return -tmp[...,0], tmp[...,1], tmp[...,2]
 
 
 def to_year_fraction(date):
