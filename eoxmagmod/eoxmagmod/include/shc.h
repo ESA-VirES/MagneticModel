@@ -388,10 +388,9 @@ static void shc_eval(double *vpot, double *dvel, double *dvaz, double *dvrd,
             const double tmp1 = (cg[idx]*lsin[j] - ch[idx]*lcos[j])*rrp[i];
 
             _vpot += tmp0 * lp[idx];
-            _dvel -= tmp0 * ldp[idx];
-            _dvaz += tmp1 * lp[idx] * j;
-            _dvrd -= tmp0 * lp[idx] * (i+1);
-
+            _dvel -= tmp0 * ldp[idx]; // north-ward
+            _dvaz += tmp1 * lp[idx] * j; // east-ward
+            _dvrd += tmp0 * lp[idx] * (i+1); // up-ward
         }
     }
 
