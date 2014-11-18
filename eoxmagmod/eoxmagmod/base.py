@@ -96,12 +96,8 @@ def to_year_fraction(date):
     return date.year + fraction
 
 
-class MagneticModel(object):
+class MagneticModelBase(object):
     """ Base Magnetic model class """
-
-    def __init__(self, model_prm):
-        """ Model constructor """
-        self.prm = model_prm
 
     @property
     def validity(self):
@@ -135,7 +131,6 @@ class MagneticModel(object):
     def print_info(self):
         """Print information about the model."""
         print self
-
 
     def eval(self, arr_in, date, coord_type_in=GEODETIC_ABOVE_WGS84,
                 coord_type_out=None, secvar=False, mode=GRADIENT, maxdegree=-1,
@@ -296,3 +291,85 @@ class MagneticModel(object):
         xx_s.reverse()
 
         return convert(np.array(xx_s[:-1] + xx_n), GEOCENTRIC_CARTESIAN, coord_type_out)
+
+
+class MagneticModelComposed(MagneticModelBase):
+    """ Composed Magnetic model."""
+
+    def __init__(self, model0, model1, c0=1.0, c1=1.0):
+        """ Model constructor """
+        super(MagneticModelComposed, self).__init__()
+        self.model0 = model0
+        self.model1 = model1
+        self.c0 = c0
+        self.c1 = c1
+
+    @property
+    def validity(self):
+        """Get interval of model validity."""
+        v0 = self.model0.validity
+        v1 = self.model1.validity
+        return (max(v0[0], v1[0]), min(v0[1], v1[1]))
+
+    @property
+    def degree_static(self):
+        """Get the degree of the static model."""
+        return max(self.model0.degree_static, self.model1.degree_static)
+
+    @property
+    def degree_secvar(self):
+        """Get the degree of the secular variation model."""
+        return max(self.model0.degree_secvar, self.model1.degree_secvar)
+
+    @staticmethod
+    def _combine_coef(f0, (cg0, ch0), f1, (cg1, ch1)):
+        cg = np.zeros(max(cg0.size, cg1.size))
+        ch = np.zeros(max(ch0.size, ch1.size))
+        cg[:cg0.size] = f0 * cg0
+        ch[:ch0.size] = f0 * ch0
+        cg[:cg1.size] += f1 * cg1
+        ch[:ch1.size] += f1 * ch1
+        return (cg, ch)
+
+    def get_coef_static(self, date):
+        """ Calculate model static coeficients for a date specified by a decimal year value.
+        """
+        return self._combine_coef(
+            self.c0, self.model0.get_coef_static(date),
+            self.c1, self.model1.get_coef_static(date),
+        )
+
+    def get_coef_secvar(self, date):
+        """Get secular variation coeficients."""
+        return self._combine_coef(
+            self.c0, self.model0.get_coef_secvar(date),
+            self.c1, self.model1.get_coef_secvar(date),
+        )
+
+    def print_info(self):
+        """Print information about the model."""
+        print "Composed Model (%g,%g) {"%(self.c0, self.c1)
+        self.model0.print_info()
+        self.model1.print_info()
+        print "}"
+
+    def __add__(self, other):
+        return MagneticModelComposed(self, other, 1.0, 1.0)
+
+    def __sub__(self, other):
+        return MagneticModelComposed(self, other, 1.0, -1.0)
+
+
+class MagneticModel(MagneticModelBase):
+    """ Magnetic model class """
+
+    def __init__(self, model_prm):
+        """ Model constructor """
+        super(MagneticModel, self).__init__()
+        self.prm = model_prm
+
+    def __add__(self, other):
+        return MagneticModelComposed(self, other, 1.0, 1.0)
+
+    def __sub__(self, other):
+        return MagneticModelComposed(self, other, 1.0, -1.0)
