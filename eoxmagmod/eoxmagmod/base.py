@@ -143,7 +143,6 @@ class MagneticModel(object):
         coordinates.
 
         Input:
-            model - an instance of the MagneticModel class
             arr_in - numpy array of (x, y, z) coordinates.
                      The type of the x, y, z, values depends on the selected
                      input coordinate system.
@@ -213,3 +212,75 @@ class MagneticModel(object):
             degree = min(maxdegree, degree)
 
         return sheval(arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out, mode)
+
+
+    def field_line(self, point, date, coord_type_in=GEODETIC_ABOVE_WGS84,
+                coord_type_out=None, maxdegree=-1, check_validity=True,
+                step=1e2, nstep=500):
+        """Trace a field line passing trough given point in space.
+        (Equivalent to ODE solution by means of the Euler method.)
+
+        Input:
+            point - as a numpy array of (x, y, z) coordinates.
+                     The type of the x, y, z, values depends on the selected
+                     input coordinate system.
+
+            date - The time as a decimal year value (e.g., 2015.23).
+            coord_type_in - shall be set to one of the valid coordinate systems:
+                        GEODETIC_ABOVE_WGS84 (default)
+                        GEODETIC_ABOVE_EGM96
+                        GEOCENTRIC_SPHERICAL
+                        GEOCENTRIC_CARTESIAN
+
+            coord_type_out - coordinate system of the output vector
+                        GEODETIC_ABOVE_WGS84
+                        GEODETIC_ABOVE_EGM96 (the same as WGS84)
+                        GEOCENTRIC_SPHERICAL
+                        GEOCENTRIC_CARTESIAN
+                    Ouput coordinate system defaults to the input coordinate
+                    system.
+
+            maxdegree - an optional max. allowed modelel degree
+                    (i.e., truncated evaluation). If set to -1 no limit
+                    is imposed.
+
+            check_validity - boolean flag controlling  whether the date
+                    vality will is checked (True, by default) or not (False).
+
+        Output:
+            arr_out - array of points in the requested coordinate system.
+        """
+
+        if coord_type_out is None:
+            coord_type_out = coord_type_in
+
+        prm = {
+            'maxdegree': maxdegree,
+            'check_validity': check_validity,
+        }
+
+        def _field_line_(x0, date, step, nstep, **mprm):
+            def f(x):
+                ff = self.eval(x, date, GEOCENTRIC_CARTESIAN, GEOCENTRIC_CARTESIAN, secvar=False, **mprm)
+                rr = vnorm(x)/6571.0
+                ffn = vnorm(ff)
+                if ffn > 0:
+                    ff /= ffn
+                return rr*ff
+            x = x0
+            lp = [x]
+            for i in xrange(nstep):
+                dx = step*f(x)
+                x = x + dx
+                y = convert(x, GEOCENTRIC_CARTESIAN, GEODETIC_ABOVE_WGS84)
+                lp.append(x)
+                if y[2] < 0.0:
+                    break
+            return lp
+
+        x0 = convert(point, coord_type_in, GEOCENTRIC_CARTESIAN)
+        xx_n = _field_line_(x0, date, +step, nstep, **prm)
+        xx_s = _field_line_(x0, date, -step, nstep, **prm)
+        xx_s.reverse()
+
+        return convert(np.array(xx_s[:-1] + xx_n), GEOCENTRIC_CARTESIAN, coord_type_out)
