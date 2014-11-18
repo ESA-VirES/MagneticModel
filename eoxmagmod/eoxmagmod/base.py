@@ -30,6 +30,7 @@
 
 import os.path
 import datetime
+import time
 import numpy as np
 
 # location of the data files
