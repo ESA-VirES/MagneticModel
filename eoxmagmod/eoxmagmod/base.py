@@ -138,7 +138,7 @@ class MagneticModel(object):
 
     def eval(self, arr_in, date, coord_type_in=GEODETIC_ABOVE_WGS84,
                 coord_type_out=None, secvar=False, mode=GRADIENT, maxdegree=-1,
-                check_validity=True):
+                mindegree=-1, check_validity=True):
         """Evaluate spherical harmonic model for a given set of spatio-teporal
         coordinates.
 
@@ -174,6 +174,11 @@ class MagneticModel(object):
                     (i.e., truncated evaluation). If set to -1 no limit
                     is imposed.
 
+            mindegree - an optional min. allowed modelel degree
+                    (i.e., truncated evaluation). When applied any coeficient
+                    below this degree are set to zero. If set to -1 no limit
+                    is imposed.
+
             check_validity - boolean flag controlling  whether the date
                     vality will is checked (True, by default) or not (False).
 
@@ -207,6 +212,12 @@ class MagneticModel(object):
         else:
             degree = self.degree_static
             coef_g, coef_h = self.get_coef_static(date)
+
+        if mindegree >= 0:
+            mindegree = min(degree, mindegree)
+            idx = ((mindegree+1)*mindegree)/2
+            coef_g[:idx] = 0
+            coef_h[:idx] = 0
 
         if maxdegree > 0:
             degree = min(maxdegree, degree)
