@@ -42,10 +42,8 @@ static int _vrot_arr_check(PyObject *arr0, PyObject *arr,
     if ((PyArray_NDIM(arr0) > 1)||(PyArray_NDIM(arr) > 0))
     {
         int d;
-        if (_check_array_dim_eq(arr, -1, 1, label))
-            return 1;
 
-        if (PyArray_NDIM(arr0) != PyArray_NDIM(arr))
+        if (PyArray_NDIM(arr0) != PyArray_NDIM(arr)+1)
         {
             PyErr_Format(PyExc_ValueError, "Shape mismatch between '%s' and "
                 "'%s'!", label0, label);
