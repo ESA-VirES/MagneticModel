@@ -131,7 +131,7 @@ def read_model_shc(fname=DATA_CHAOS5_CORE):
 
     if isinstance(fname, basestring):
         with file(fname, 'r') as fid:
-            return _read_model_shc(fid)
+            return _read_model_shc(fid, fname)
     else:
         return _read_model_shc(fname, None)
 
