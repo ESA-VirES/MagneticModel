@@ -129,57 +129,65 @@ class MagneticModelSHCPP(MagneticModel):
 def read_model_shc(fname=DATA_CHAOS5_CORE):
     """ Read model parameters from a coeficient file in the SHC format."""
 
+    if isinstance(fname, basestring):
+        with file(fname, 'r') as fid:
+            return _read_model_shc(fid)
+    else:
+        return _read_model_shc(fname, None)
+
+
+def _read_model_shc(fid, fname):
+    """ Read model parameters from a coeficient file in the SHC format."""
+
     prm = {'sources': [fname], 'headers': []}
 
-    with file(fname, 'r') as fid:
-
-        # parse text headers (comments)
-        lidx = 0
-        for line in fid:
-            lidx += 1
-            if line.strip().startswith("#"):
-                prm['headers'].append(line)
-                if lidx == 1:
-                    line = line.strip()
-                    prm['name'] = line.strip()[1:].lstrip()
-            else:
-                break
-
-        # parse model headers
-        header = [int(v) for v in line.split()]
-        degree_min, degree, ntime, spline_order, nstep = header
-
-        # parse time header
-        line = next(fid)
+    # parse text headers (comments)
+    lidx = 0
+    for line in fid:
         lidx += 1
-        time = np.array([float(v) for v in line.split()])
-        if time.size != ntime:
-            ValueError("The list of times does not match the file header!")
+        if line.strip().startswith("#"):
+            prm['headers'].append(line)
+            if lidx == 1:
+                line = line.strip()
+                prm['name'] = line.strip()[1:].lstrip()
+        else:
+            break
 
-        nterm = ((degree+1)*(degree+2)-(degree_min)*(degree_min+1))/2
+    # parse model headers
+    header = [int(v) for v in line.split()]
+    degree_min, degree, ntime, spline_order, nstep = header
 
-        coef_g = np.zeros((nterm, ntime))
-        coef_h = np.zeros((nterm, ntime))
+    # parse time header
+    line = next(fid)
+    lidx += 1
+    time = np.array([float(v) for v in line.split()])
+    if time.size != ntime:
+        ValueError("The list of times does not match the file header!")
 
-        for line in fid:
-            lidx += 1
-            line = line.split()
-            i, j = [int(v) for v in line[:2]]
-            idx = abs(j)+((i)*(i+1)-(degree_min)*(degree_min+1))/2
-            coef = np.array([float(v) for v in line[2:]])
-            if j < 0:
-                coef_h[idx,:] = coef
-            else:
-                coef_g[idx,:] = coef
+    nterm = ((degree+1)*(degree+2)-(degree_min)*(degree_min+1))/2
 
-        prm.update({
-            'degree_min': degree_min,
-            'degree': degree,
-            'spline_order': spline_order,
-            'nstep': nstep,
-            'time': time,
-            'coef_h': coef_h,
-            'coef_g': coef_g,
-        })
+    coef_g = np.zeros((nterm, ntime))
+    coef_h = np.zeros((nterm, ntime))
 
-        return MagneticModelSHCPP(prm)
+    for line in fid:
+        lidx += 1
+        line = line.split()
+        i, j = [int(v) for v in line[:2]]
+        idx = abs(j)+((i)*(i+1)-(degree_min)*(degree_min+1))/2
+        coef = np.array([float(v) for v in line[2:]])
+        if j < 0:
+            coef_h[idx,:] = coef
+        else:
+            coef_g[idx,:] = coef
+
+    prm.update({
+        'degree_min': degree_min,
+        'degree': degree,
+        'spline_order': spline_order,
+        'nstep': nstep,
+        'time': time,
+        'coef_h': coef_h,
+        'coef_g': coef_g,
+    })
+
+    return MagneticModelSHCPP(prm)
