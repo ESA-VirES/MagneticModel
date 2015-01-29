@@ -256,6 +256,7 @@ class MagneticModelBase(object):
 
         Output:
             arr_out - array of points in the requested coordinate system.
+            arr_fint - array of magentic intensity values corresponding to the arr_out points
         """
 
         if coord_type_out is None:
@@ -273,24 +274,31 @@ class MagneticModelBase(object):
                 ffn = vnorm(ff)
                 if ffn > 0:
                     ff /= ffn
-                return rr*ff
+                return rr*ff, ffn
             x = x0
             lp = [x]
+            lf = []
             for i in xrange(nstep):
-                dx = step*f(x)
+                v_dir, mf = f(x)
+                lf.append(mf)
+                dx = step*v_dir
                 x = x + dx
                 y = convert(x, GEOCENTRIC_CARTESIAN, GEODETIC_ABOVE_WGS84)
                 lp.append(x)
                 if y[2] < 0.0:
                     break
-            return lp
+            _, mf = f(x)
+            lf.append(mf)
+
+            return lp, lf
 
         x0 = convert(point, coord_type_in, GEOCENTRIC_CARTESIAN)
-        xx_n = _field_line_(x0, date, +step, nstep, **prm)
-        xx_s = _field_line_(x0, date, -step, nstep, **prm)
+        xx_n, ff_n = _field_line_(x0, date, +step, nstep, **prm)
+        xx_s, ff_s = _field_line_(x0, date, -step, nstep, **prm)
         xx_s.reverse()
+        ff_s.reverse()
 
-        return convert(np.array(xx_s[:-1] + xx_n), GEOCENTRIC_CARTESIAN, coord_type_out)
+        return convert(np.array(xx_s[:-1] + xx_n), GEOCENTRIC_CARTESIAN, coord_type_out), np.array(ff_s[:-1] + ff_n)
 
 
 class MagneticModelComposed(MagneticModelBase):
