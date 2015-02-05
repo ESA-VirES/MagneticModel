@@ -58,6 +58,7 @@ from .emm import read_model_emm2010
 from .wmm import read_model_wmm2010
 from .shc import read_model_shc
 from .igrf import read_model_igrf11
+from .qd import eval_apex, DATA_APEX_2015
 
 __all__ = [
     'MagneticModel',
@@ -88,6 +89,8 @@ __all__ = [
     'POTENTIAL',
     'GRADIENT',
     'POTENTIAL_AND_GRADIENT',
+    'eval_apex',
+    'DATA_APEX_2015',
 ]
 
 __version__ = '0.2.0dev'
