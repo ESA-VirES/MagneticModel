@@ -32,7 +32,6 @@
 #ifndef PYQD_EVAL_APEX_H
 #define PYQD_EVAL_APEX_H
 
-#include <stdio.h>
 #include "pywmm_aux.h"
 #include "cqdipole.h"
 
@@ -136,7 +135,7 @@ static PyObject* eval_apex(PyObject *self, PyObject *args, PyObject *kwdict)
     {
         int nval = ndim == 0 ? 1 : dims[0] ;
 
-        int rv = c_make_apex(
+        c_make_apex(
             (double*)PyArray_DATA(arr_qdlat),
             (double*)PyArray_DATA(arr_qdlon),
             (double*)PyArray_DATA(arr_mlt),
@@ -149,8 +148,6 @@ static PyObject* eval_apex(PyObject *self, PyObject *args, PyObject *kwdict)
             (double*)PyArray_DATA(arr_gclat),
             (double*)PyArray_DATA(arr_gclon),
             nval, model_fname);
-
-        print("rv = %d\n", rv);
     }
 
     if (NULL == (retval = Py_BuildValue("NNNNNNN", arr_qdlat, arr_qdlon,
