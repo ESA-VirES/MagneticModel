@@ -100,6 +100,36 @@ static int _check_array_dim_le(PyObject *arr, int dim, size_t size, const char *
 }
 
 /*
+ * Check that the array dimensions match the required values
+ */
+
+static int _check_arr_dims_all_eq(PyObject *arr, npy_intp ndim, const npy_intp *dims, const char *label)
+{
+    npy_intp dim;
+
+    if (PyArray_NDIM(arr) != ndim)
+    {
+        PyErr_Format(PyExc_ValueError, "The number of dimensions of '%s'"\
+            " %ld does not match the required value %ld!", label,
+            (size_t)(PyArray_NDIM(arr)), (size_t)ndim);
+        return 1;
+    }
+
+    for (dim = 0; dim < ndim; ++dim)
+    {
+        if (PyArray_DIM(arr, dim) != dims[dim])
+        {
+            PyErr_Format(PyExc_ValueError, "The dimensions #%ld of '%s'"\
+            " %ld does not match the required value %ld!", (size_t)dim, label,
+            (size_t)PyArray_DIM(arr, dim), (size_t)dims[dim]);
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/*
  * Extraction of the lower dimensional parts of the arrays.
  */
 

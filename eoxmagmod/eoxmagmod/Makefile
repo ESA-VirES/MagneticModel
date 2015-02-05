@@ -1,42 +1,53 @@
 CC=gcc
 LD=gcc
-RM=rm -fv 
+RM=rm -fv
 
 INC_WMM=-I./geomaglib -I./include
 LIB_WMM=-lgeomag -lm
+INC_QD=-I./qdipolelib -I./include
+LIB_QD=-lqdipole -lm -L/usr/lib64/qdipole
 INC_PYTHON=$(shell python-config --includes )
 LIB_PYTHON=$(shell python-config --libs )
 
-INCS=$(INC_PYTHON) $(INC_WMM)
-LIBS=$(LIB_PYTHON) $(LIB_WMM) 
+INCS=$(INC_PYTHON) $(INC_WMM) $(INC_QD)
+LIBS_WMM=$(LIB_PYTHON) $(LIB_WMM)
+LIBS_QD=$(LIB_PYTHON) $(LIB_QD)
 
 #CCFLAGS= -c -g -DDEBUG=1 -Wall -fPIC $(INCS)
-CCFLAGS= -c -O2 -Wall -fPIC $(INCS)
+CCFLAGS= -c -O2 -Wall -Wno-unused-function -fPIC $(INCS)
 #CCFLAGS= -c -O2 -g -DDEBUG=1 -Wall -fPIC $(INCS)
 #CCFLAGS= -c -O2 -Wall -fPIC $(INC)
 
-HDR=pywmm_aux.h pywmm_sheval.h pywmm_sphargrd.h pywmm_spharpot.h\
+HDR_WMM=pywmm_aux.h pywmm_sheval.h pywmm_sphargrd.h pywmm_spharpot.h\
     pywmm_legendre.h pywmm_lonsincos.h pywmm_relradpow.h\
     pywmm_vrot_common.h pywmm_vrot_sph2cart.h pywmm_vrot_sph2geod.h\
     pywmm_cconv.h pywmm_coord.h pywmm_exc.h
-OBJ=pywmm.o
-DST=_pywmm.so
+OBJ_WMM=pywmm.o
+DST_WMM=_pywmm.so
+
+HDR_QD=pydq_eval_apex.h pyqd_exc.h pywmm_aux.h
+OBJ_QD=pyqd.o
+DST_QD=_pyqd.so
 
 # --------------------------------------------
 
-all: pywmm
+all: pywmm pyqd
 
 %.o: %.c
 	$(CC) $< $(CCFLAGS) -o $@
 
-pywmm: $(OBJ)
-	$(LD) -shared -o $(DST) $(OBJ) $(LIBS) 
+pywmm: $(OBJ_WMM)
+	$(LD) -shared -o $(DST_WMM) $(OBJ_WMM) $(LIBS_WMM)
+
+pyqd: $(OBJ_QD)
+	$(LD) -shared -o $(DST_QD) $(OBJ_QD) $(LIBS_QD)
 
 clean:
 	$(RM) *.o
 
-purge: clean 
-	$(RM) $(DST)
+purge: clean
+	$(RM) $(DST_WMM)
 
-pywmm.o: pywmm.c $(HDR)
+pywmm.o: pywmm.c $(HDR_WMM)
+pyqd.o: pyqd.c $(HDR_QD)
 
