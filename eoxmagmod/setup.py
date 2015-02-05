@@ -59,5 +59,19 @@ setup(
                 './eoxmagmod/geomaglib'
             ],
         ),
+        Extension(
+            'eoxmagmod._pyqd',
+            sources=[
+                'eoxmagmod/pyqd.c',
+                'eoxmagmod/geomaglib/GeomagnetismLibrary.c'
+            ],
+            libraries=['qdipole'],
+            library_dirs=['/usr/lib64/qdipole'],
+            include_dirs=[
+                './eoxmagmod',
+                './eoxmagmod/include',
+                './eoxmagmod/qdipolelib'
+            ],
+        ),
     ]
 )
