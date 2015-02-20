@@ -34,8 +34,9 @@ import _pyqd
 dirname = os.path.dirname(__file__)
 dirname = os.path.join(dirname, 'data')
 DATA_APEX_2015 = os.path.join(dirname, 'apexsh_1995-2015.txt')
+DATA_APEX_2020 = os.path.join(dirname, 'apexsh_1980-2020.txt')
 
-def eval_apex(gclat, gclon, gcrad, time, fname=DATA_APEX_2015):
+def eval_apex(gclat, gclon, gcrad, time, fname=DATA_APEX_2020):
     """
         qdlat, qdlon, mlt = eval_apex(gclat, gclon, gcrad, fname)
 

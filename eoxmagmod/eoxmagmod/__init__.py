@@ -58,7 +58,7 @@ from .emm import read_model_emm2010
 from .wmm import read_model_wmm2010
 from .shc import read_model_shc
 from .igrf import read_model_igrf11
-from .qd import eval_apex, DATA_APEX_2015
+from .qd import eval_apex, DATA_APEX_2015, DATA_APEX_2020
 
 __all__ = [
     'MagneticModel',
