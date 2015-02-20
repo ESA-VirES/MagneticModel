@@ -91,6 +91,7 @@ __all__ = [
     'POTENTIAL_AND_GRADIENT',
     'eval_apex',
     'DATA_APEX_2015',
+    'DATA_APEX_2020',
 ]
 
 __version__ = '0.2.0dev'
