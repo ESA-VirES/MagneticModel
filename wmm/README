@@ -2,8 +2,9 @@
 World Magnetic Model 2010 - Geomagnetism Library [libgeomag]
 ============================================================
 
-This is the original NOAA Geomagnetism code compiled as a shared library.
-The technical documentation is not inluded and can be obtained with the 
+This is the original NOAA Geomagnetism code compiled as a shared library
+together with the command-line utilities and the WMM 2010 model (WMM.COF).
+The technical documentation is not included and can be obtained with the 
 original WMM package: 
 
   http://www.ngdc.noaa.gov/geomag/WMM/soft.shtml
@@ -108,3 +109,4 @@ MODIFICATIONS
  Nov 23, 2009
  Written by Manoj C Nair and Adam Woods
  Manoj.C.Nair@Noaa.Gov
+

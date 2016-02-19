@@ -1,20 +1,25 @@
 
-World Magnetic Model 2010 - CLI Tools
-=====================================
+World Magnetic Model 2010 - Geomagnetism Library [libgeomag]
+============================================================
 
-These are the original NOAA WMM 2010 CLI command line utilities and 
-the WMM 2010 mode itself (WMM.COF).  The tools require the Geomagnetism 
-shared library to be installed. The technical documentation is not 
-included and can be obtained with the original WMM package:
+This is the original NOAA Geomagnetism code compiled as a shared library.
+The technical documentation is not included and can be obtained with the 
+original WMM package: 
 
   http://www.ngdc.noaa.gov/geomag/WMM/soft.shtml
 
 The code selection and preparation of the makefile was done by
 EOX IT Services GmbH, Vienna, Austria in October 2014.
 
-To build the executables run:
+Installation:
+
+Step 1 - build the library:
 
   $ make build
+
+Step 2 - install the library:
+
+  $ sudo make install
 
 
 ABSTRACT
