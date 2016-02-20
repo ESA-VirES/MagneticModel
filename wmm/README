@@ -1,112 +1,77 @@
-
-World Magnetic Model 2010 - Geomagnetism Library [libgeomag]
-============================================================
+World Magnetic Model 2010 - Geomagnetism Library
+================================================
 
 This is the original NOAA Geomagnetism code compiled as a shared library
 together with the command-line utilities and the WMM 2010 model (WMM.COF).
-The technical documentation is not included and can be obtained with the 
-original WMM package: 
+The technical documentation is not included and can be obtained with the
+original WMM package:
 
   http://www.ngdc.noaa.gov/geomag/WMM/soft.shtml
 
-The code selection and preparation of the makefile was done by
-EOX IT Services GmbH, Vienna, Austria in October 2014.
+The software re-configuration and the minimal necessary changes were done
+by EOX IT Services, GmbH.
 
-Installation:
+See also the enclosed README_WMM2010.txt
 
-Step 1 - build the library:
+
+INSTALLATION
+------------
+
+Step 1 - configure:
+
+  $ ./configure --prefix=/usr/ --libdir='${exec_prefix}/lib64'
+
+For more detail see
+
+  $ ./configure --help
+
+
+Step 2 - build the binaries:
 
   $ make build
 
-Step 2 - install the library:
+
+Step 3 - install the software:
 
   $ sudo make install
 
 
-ABSTRACT
+CLI USAGE
+---------
 
-The purpose of Geomagnetism Library is primarily to support the World Magnetic Model (WMM) 2010-2015.
-It however is built to be used for spherical harmonic models of the Earth's magnetic field
-generally and supports models even with a large (>>12) number of degrees.  It is also used in the EMM.
+The CLI tools, by default, behave identically like the original WMM CLI tools
+and they expect the coefficients to be in file WMM.COF the current directory.
 
-REUSE NOTES
+If the coefficient file is missing then an error is printed and the program is
+gracefully terminated (unlike the original tools which ended with a
+segmentation fault without any message printed.
 
-Geomagnetism Library is intended for reuse by any application that requires
-Computation of Geomagnetic field from a spherical harmonic model.
+The location of the coefficients can be changed by means of the WMM_COF
+environment variable, e.g.,
 
-REFERENCES
+  $ export WMM_COF=/usr/share/wmm/WMM.COF
 
-   Further information on Geoid can be found in the WMM Technical Documents.
+In addition, the wmm_point.exe and wmm_grid.exe commands allow the coefficient
+file to be specified as an optional command line argument:
 
-
-LICENSES
-
- The WMM source code is in the public domain and not licensed or under copyright.
- The information and software may be used freely by the public. As required by 17 U.S.C. 403,
- third parties producing copyrighted works consisting predominantly of the material produced by
- U.S. government agencies must provide notice with such work(s) identifying the U.S. Government material
- incorporated and stating that such material is not subject to copyright protection.
-
-RESTRICTIONS
-
-   Geomagnetism library has no restrictions.
-
-ENVIRONMENT
-
-   Geomagnetism library was tested in the following environments
-
-   1. Red Hat Linux  with GCC Compiler
-   2. MS Windows XP with CodeGear C++ compiler
-   3. Sun Solaris with GCC Compiler
+  $ wmm_point.exe <wmm_cof_path>
+  $ wmm_grid.exe <wmm_cof_path>
 
 
-MODIFICATIONS
+CONTACT
+-------
 
-   Date                 Version
-   ----                 -----------
-   Jul 15, 2009         0.1
-   Nov 17, 2009         0.2
-   Nov 23, 2009	   0.3
-   Jan 28, 2010  	   1.0
+web-size:
+    http://eox.at
 
- Contact Information
+e-mail:
+    office@eox.at
 
+telephone:
+    +43 (0) 664 620 7655
 
- Sponsoring Government Agency
- National Geospatial-Intelligence Agency
- PRG / CSAT, M.S. L-41
- 3838 Vogel Road
- Arnold, MO 63010
- Attn: Craig Rollins
- Phone:  (314) 263-4186
- Email:  Craig.M.Rollins@Nga.Mil
-
-
- National Geophysical Data Center
- NOAA EGC/2
- 325 Broadway
- Boulder, CO 80303 USA
- Attn: Susan McLean
- Phone:  (303) 497-6478
- Email:  Susan.McLean@noaa.gov
-
-
- Software and Model Support
- National Geophysical Data Center
- NOAA EGC/2
- 325 Broadway"
- Boulder, CO 80303 USA
- Attn: Manoj Nair or Stefan Maus
- Phone:  (303) 497-6522 or -6522
- Email:  Manoj.C.Nair@noaa.gov or Stefan.Maus@noaa.gov
- URL: http://www.ngdc.noaa.gov/Geomagnetic/WMM/DoDWMM.shtml
-
-
- For more details on the subroutines, please consult the WMM
- Technical Documentations at
- http://www.ngdc.noaa.gov/Geomagnetic/WMM/DoDWMM.shtml
-
- Nov 23, 2009
- Written by Manoj C Nair and Adam Woods
- Manoj.C.Nair@Noaa.Gov
-
+address:
+    EOX IT Service
+    Thurngasse 8/4
+    1090 Wien
+    Austria

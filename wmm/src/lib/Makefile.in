@@ -12,7 +12,7 @@ INSTAL_DOC_DIR=@docdir@
 TARGET=libgeomag.so
 HDR=GeomagnetismHeader.h EGM9615.h
 OBJ=GeomagnetismLibrary.o
-DOC=Changelog.txt WMM_README.txt README
+DOC=Changelog.txt WMM_README.txt
 
 %.o: %.c $(HDR)
 	$(CC) -c -o $@ $< $(CFLAGS)

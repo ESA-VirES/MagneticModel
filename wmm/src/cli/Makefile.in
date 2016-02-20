@@ -7,9 +7,11 @@ RM=rm -fv
 CFLAGS=@CFLAGS@ -I../lib/
 LFLAGS=-lgeomag -lm -L../lib/
 INSTAL_BIN_DIR=@bindir@
+INSTAL_DATA_DIR=@datadir@/${PACKAGE_TARNAME}
 TARGET=wmm_file.exe wmm_grid.exe wmm_point.exe
 HDR=
 OBJ=wmm_file.o wmm_grid.o wmm_point.o
+DATA=WMM.COF
 
 %.exe: %.o $(HDR)
 	$(CC) -o $@ $< $(LFLAGS)
@@ -24,6 +26,8 @@ build: $(TARGET)
 install: $(TARGET)
 	mkdir -p $(INSTAL_BIN_DIR)
 	install -c -m 0755 $(TARGET) $(INSTAL_BIN_DIR)
+	mkdir -p $(INSTAL_DATA_DIR)
+	install -c -m 0644 $(DATA) $(INSTAL_DATA_DIR)
 
 clean:
 	$(RM) $(OBJ) $(TARGET)
