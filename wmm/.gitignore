@@ -1,0 +1,8 @@
+config.status
+config.log
+Makefile
+*.cache
+*.o
+*.so
+*.lo
+*.exe

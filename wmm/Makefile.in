@@ -1,0 +1,20 @@
+# paths set by autoconf
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+SRC_LIB_DIR=./src/lib
+SRC_CLI_DIR=./src/cli
+
+all: build
+
+build:
+	make -C $(SRC_LIB_DIR) build
+	make -C $(SRC_CLI_DIR) build
+
+install:
+	make -C $(SRC_LIB_DIR) install
+	make -C $(SRC_CLI_DIR) install
+
+clean:
+	make -C $(SRC_LIB_DIR) clean
+	make -C $(SRC_CLI_DIR) clean

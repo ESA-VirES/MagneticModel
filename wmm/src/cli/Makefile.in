@@ -1,0 +1,29 @@
+# paths set by autoconf
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+CC=@CC@
+RM=rm -fv
+CFLAGS=@CFLAGS@ -I../lib/
+LFLAGS=-lgeomag -lm -L../lib/
+INSTAL_BIN_DIR=@bindir@
+TARGET=wmm_file.exe wmm_grid.exe wmm_point.exe
+HDR=
+OBJ=wmm_file.o wmm_grid.o wmm_point.o
+
+%.exe: %.o $(HDR)
+	$(CC) -o $@ $< $(LFLAGS)
+
+%.o: %.c $(HDR)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+all: build
+
+build: $(TARGET)
+
+install: $(TARGET)
+	mkdir -p $(INSTAL_BIN_DIR)
+	install -c -m 0755 $(TARGET) $(INSTAL_BIN_DIR)
+
+clean:
+	$(RM) $(OBJ) $(TARGET)
