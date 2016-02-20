@@ -421,6 +421,11 @@ int MAG_robustReadMagneticModel_Large(char *filename, char *filenameSV, MAGtype_
     int n, nMax = 0, nMaxSV = 0, num_terms, a, epochlength=5, i;
     FILE *MODELFILE;
     MODELFILE = fopen(filename, "r");
+    if (MODELFILE == NULL)
+    {
+        fprintf(stderr, "Error opening %s for reading!\n", filename);
+        exit(EXIT_FAILURE);
+    }
     fgets(line, MAXLINELENGTH, MODELFILE);
     do
     {
@@ -432,6 +437,11 @@ int MAG_robustReadMagneticModel_Large(char *filename, char *filenameSV, MAGtype_
     } while(n < 99999 && a == 1);
     fclose(MODELFILE);
     MODELFILE = fopen(filenameSV, "r");
+    if (MODELFILE == NULL)
+    {
+        fprintf(stderr, "Error opening %s for reading!\n", filenameSV);
+        exit(EXIT_FAILURE);
+    }
     n = 0;
     fgets(line, MAXLINELENGTH, MODELFILE);
     do
@@ -467,6 +477,11 @@ int MAG_robustReadMagModels(char *filename, MAGtype_MagneticModel *(*magneticmod
     int n, nMax = 0, num_terms, a;
     FILE *MODELFILE;
     MODELFILE = fopen(filename, "r");
+    if (MODELFILE == NULL)
+    {
+        fprintf(stderr, "Error opening %s for reading!\n", filename);
+        exit(EXIT_FAILURE);
+    }
     fgets(line, MAXLINELENGTH, MODELFILE);
     if(line[0] == '%')
         MAG_readMagneticModel_SHDF(filename, magneticmodels, array_size);

@@ -8,6 +8,8 @@
 #include "EGM9615.h"
 //#include "GeomagnetismLibrary.c"
 
+#include "wmm_common.h"
+
 /*
 
 
@@ -28,7 +30,7 @@ April 21, 2011
 
 
 
-int main()
+int main(int argc, char **argv)
 {
     MAGtype_MagneticModel * MagneticModels[1];
     MAGtype_Ellipsoid Ellip;
@@ -37,10 +39,16 @@ int main()
     MAGtype_Date startdate, enddate;
     int ElementOption, PrintOption, i, epochs = 1;
     double cord_step_size, altitude_step_size, time_step_size;
-    char filename[] = "WMM.COF";
+    static char *filename = DEFAULT_WMM_COF;
     char OutputFilename[32];
     char VersionDate_Large[] = "$Date: 2012-04-25 16:23:56 -0600 (Wed, 25 Apr 2012) $";
     char VersionDate[12];
+
+    /* Set the path of the coeficients file */
+    if (argc > 1)
+        filename = argv[1];
+    else if (getenv(ENVVAR_WMM_COF) != NULL)
+        filename = getenv(ENVVAR_WMM_COF);
 
     MAG_robustReadMagModels(filename, &MagneticModels, 1);
 

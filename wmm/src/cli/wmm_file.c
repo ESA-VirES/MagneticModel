@@ -37,6 +37,7 @@ November 15, 2009
 #include "EGM9615.h"
 //#include "GeomagnetismLibrary.c"
 
+#include "wmm_common.h"
 
 #define NaN log(-1.0)
 /* constants */
@@ -109,7 +110,7 @@ int main(int argv, char**argc)
     MAGtype_GeoMagneticElements GeoMagneticElements;
     MAGtype_Geoid Geoid;
     char ans[20];
-    char filename[] = "WMM.COF";
+    static char *filename = DEFAULT_WMM_COF;
     int NumTerms, epochs = 1, epoch = 0, i, nMax = 0;
     char VersionDate_Large[] = "$Date: 2012-04-12 13:30:38 -0600 (Thu, 12 Apr 2012) $";
     char VersionDate[12];
@@ -173,6 +174,10 @@ int main(int argv, char**argc)
     int safegets(char *buffer, int n);
     int getshc();
 
+
+    /* Set the path of the coeficients file */
+    if (getenv(ENVVAR_WMM_COF) != NULL)
+        filename = getenv(ENVVAR_WMM_COF);
 
     /* Initializations. */
 
