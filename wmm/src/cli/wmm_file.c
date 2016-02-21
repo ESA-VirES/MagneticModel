@@ -13,9 +13,9 @@ The height entered is considered as height above mean sea level
 Manoj.C.Nair@Noaa.Gov
 November 15, 2009
 
- *  Revision Number: $Revision: 826 $
+ *  Revision Number: $Revision: 1287 $
  *  Last changed by: $Author: awoods $
- *  Last changed on: $Date: 2012-04-12 13:30:38 -0600 (Thu, 12 Apr 2012) $
+ *  Last changed on: $Date: 2014-12-09 15:55:09 -0700 (Tue, 09 Dec 2014) $
 
 
 
@@ -35,7 +35,7 @@ November 15, 2009
 
 #include "GeomagnetismHeader.h"
 #include "EGM9615.h"
-//#include "GeomagnetismLibrary.c"
+/*#include "GeomagnetismLibrary.c"*/
 
 #include "wmm_common.h"
 
@@ -64,32 +64,32 @@ November 15, 2009
 /* ------------------------------------------------------------------------ */
 
 /*                                                                          */
-/*   minalt     Float array of MAXMOD  Minimum height of model.             */
+/*   minalt     double array of MAXMOD  Minimum height of model.             */
 /*                                                                          */
-/*   altmin     Float                  Minimum height of selected model.    */
+/*   altmin     double                  Minimum height of selected model.    */
 /*                                                                          */
-/*   altmax     Float array of MAXMOD  Maximum height of model.             */
+/*   altmax     double array of MAXMOD  Maximum height of model.             */
 /*                                                                          */
-/*   maxalt     Float                  Maximum height of selected model.    */
+/*   maxalt     double                  Maximum height of selected model.    */
 /*                                                                          */
-/*   sdate  Scalar Float           start date inputted                      */
+/*   sdate  Scalar double           start date inputted                      */
 /*                                                                          */
-/*   alt        Scalar Float           altitude above WGS84 Ellipsoid       */
+/*   alt        Scalar double           altitude above WGS84 Ellipsoid       */
 /*                                                                          */
-/*   latitude   Scalar Float           Latitude.                            */
+/*   latitude   Scalar double           Latitude.                            */
 /*                                                                          */
-/*   longitude  Scalar Float           Longitude.                           */
+/*   longitude  Scalar double           Longitude.                           */
 /*                                                                          */
 /*   inbuff     Char a of MAXINBUF     Input buffer.                        */
 /*                                                                          */
 /*                                                                          */
-/*   minyr      Float                  Min year of all models               */
+/*   minyr      double                  Min year of all models               */
 /*                                                                          */
-/*   maxyr      Float                  Max year of all models               */
+/*   maxyr      double                  Max year of all models               */
 /*                                                                          */
-/*   yrmax      Float array of MAXMOD  Max year of model.                   */
+/*   yrmax      double array of MAXMOD  Max year of model.                   */
 /*                                                                          */
-/*   yrmin      Float array of MAXMOD  Min year of model.                   */
+/*   yrmin      double array of MAXMOD  Min year of model.                   */
 /*                                                                          */
 
 /****************************************************************************/
@@ -107,12 +107,12 @@ int main(int argv, char**argc)
     MAGtype_CoordSpherical CoordSpherical;
     MAGtype_CoordGeodetic CoordGeodetic;
     MAGtype_Date UserDate;
-    MAGtype_GeoMagneticElements GeoMagneticElements;
+    MAGtype_GeoMagneticElements GeoMagneticElements, Errors;
     MAGtype_Geoid Geoid;
     char ans[20];
     static char *filename = DEFAULT_WMM_COF;
-    int NumTerms, epochs = 1, epoch = 0, i, nMax = 0;
-    char VersionDate_Large[] = "$Date: 2012-04-12 13:30:38 -0600 (Thu, 12 Apr 2012) $";
+    int NumTerms, epochs = 1, epoch = 0, i, nMax = 0, printErrors = 0;
+    char VersionDate_Large[] = "$Date: 2014-12-09 15:55:09 -0700 (Tue, 09 Dec 2014) $";
     char VersionDate[12];
 
     /* Control variables */
@@ -148,20 +148,20 @@ int main(int argv, char**argc)
 
     char coord_fname[PATH];
     char out_fname[PATH];
-    FILE *coordfile, *outfile;
+    FILE *coordfile = NULL, *outfile = NULL;
     int iline = 0;
     int read_flag;
 
-    float minyr;
-    float maxyr;
-    float minalt;
-    float maxalt;
-    float alt = -999999;
-    float sdate = -1;
-    float step = -1;
-    float edate = -1;
-    float latitude = 200;
-    float longitude = 200;
+    double minyr;
+    double maxyr;
+    double minalt;
+    double maxalt;
+    double alt = -999999;
+    double sdate = -1;
+    double step = -1;
+    double edate = -1;
+    double latitude = 200;
+    double longitude = 200;
 
 
 
@@ -169,13 +169,13 @@ int main(int argv, char**argc)
 
     void print_result_file(FILE *outf, double d, double i, double h, double x, double y, double z, double f,
             double ddot, double idot, double hdot, double xdot, double ydot, double zdot, double fdot);
-    float degrees_to_decimal();
-    float julday();
-    int safegets(char *buffer, int n);
+    void append_errors_to_result_file(FILE *outf, MAGtype_GeoMagneticElements Errors);
+    double degrees_to_decimal();
+    double julday();
     int getshc();
 
 
-    /* Set the path of the coeficients file */
+    /* Set the path of the coefficients file */
     if (getenv(ENVVAR_WMM_COF) != NULL)
         filename = getenv(ENVVAR_WMM_COF);
 
@@ -189,7 +189,10 @@ int main(int argv, char**argc)
 
     strncpy(VersionDate, VersionDate_Large + 39, 11);
     VersionDate[11] = '\0';
-    MAG_robustReadMagModels(filename, &MagneticModels, epochs);
+    if(!MAG_robustReadMagModels(filename, &MagneticModels, epochs)) {
+        fprintf(stderr, "\n %s not found.\n ", filename);
+        return 1;
+    }
     for(i = 0; i < epochs; i++) if(MagneticModels[i]->nMax > nMax) nMax = MagneticModels[i]->nMax;
     NumTerms = ((nMax + 1) * (nMax + 2) / 2);
 
@@ -203,7 +206,6 @@ int main(int argv, char**argc)
     MAG_SetDefaults(&Ellip, &Geoid); /* Set default values and constants */
     /* Check for Geographic Poles */
 
-    //MAG_InitializeGeoid(&Geoid);    /* Read the Geoid file */
     /* Set EGM96 Geoid parameters */
     Geoid.GeoidHeightBuffer = GeoidHeightBuffer;
     Geoid.Geoid_Initialized = 1;
@@ -215,21 +217,20 @@ int main(int argv, char**argc)
         if(argc[iarg] != NULL)
             strncpy(args[iarg], argc[iarg], MAXREAD);
 
-    //printing out version number and header
     printf("\n\n-----------------------------------------------\n");
     printf(" WMM File processing program %s", VersionDate);
     printf("\n-----------------------------------------------\n");
 
     if(argv == 1 || ((argv == 2) && (*(args[1]) == 'h')))
     {
-        printf("\nWelcome to the World Magnetic Model (WMM) C-Program\nof the US National Geophysical Data Center\n               --- File Processing Program ----\n             --- Model Release Date: 15 Dec 2009 ---\n           --- Software Release Date: %s ---\nUSAGE:\n", VersionDate);
+        printf("\nWelcome to the World Magnetic Model (WMM) C-Program\nof the US National Geophysical Data Center\n               --- File Processing Program ----\n             --- Model Release Date: 15 Dec %d ---\n           --- Software Release Date: %s ---\nUSAGE:\n", (int)MagneticModels[0]->epoch - 1, VersionDate);
         printf("For example: MAG_file f input_file output_file\n");
         printf("This screen:     MAG_file h \n");
         printf("\n");
         printf("The input file may have any number of entries but they must follow\n");
         printf("the following format\n");
         printf("Date and location Formats: \n");
-        printf("   Date: xxxx.xxx for decimal  (2013.7)\n");
+        printf("   Date: xxxx.xxx for decimal  (%.1f)\n", MagneticModels[0]->epoch+3.7);
         printf("   Altitude: M - Above mean sea level: E above WGS84 Ellipsoid \n");
         printf("   Altitude: Kxxxxxx.xxx for kilometers  (K1000.13)\n");
         printf("             Mxxxxxx.xxx for meters  (m1389.24)\n");
@@ -239,9 +240,9 @@ int main(int argv, char**argc)
         printf("   Date and altitude must fit model.\n");
         printf("   Lat: -90 to 90 (Use - to denote Southern latitude.)\n");
         printf("   Lon: -180 to 180 (Use - to denote Western longitude.)\n");
-        printf("   Date: 2010.0 to 2015.0\n");
+        printf("   Date: %.1f to %.1f\n", MagneticModels[0]->epoch, MagneticModels[0]->epoch+5);
         printf("   An example of an entry in input file\n");
-        printf("   2013.7 E F30000 -70.3 -30.8 \n");
+        printf("   %.1f E F30000 -70.3 -30.8 \n", MagneticModels[0]->epoch+3.7);
         printf("\n Press enter to exit.");
         printf("\n >");
         fgets(ans, 20, stdin);
@@ -267,7 +268,7 @@ int main(int argv, char**argc)
         fprintf(outfile, "Date Coord-System Altitude Latitude Longitude D_deg D_min I_deg I_min H_nT X_nT Y_nT Z_nT F_nT dD_min dI_min dH_nT dX_nT dY_nT dZ_nT dF_nT\n");
     } /* file option */
 
-    if(argv >= 2 && argv != 4)
+    if(argv >= 2 && argv != 4 && argv != 5)
     {
         printf("\n\nERROR in 'f' switch option: wrong number of arguments\n");
         exit(2);
@@ -279,6 +280,38 @@ int main(int argv, char**argc)
         exit(2);
     }
 
+        if(argv == 5)
+    {
+        for (i = 0; i<=2; i++){
+            if((*(args[i]) == 'e') || strcmp(args[i], "--Errors") == 0 || strcmp(args[i],"--errors") == 0) 
+            {
+                printErrors = 1;
+                break;
+            }
+        }
+        if(printErrors==0){
+            printf("\n\nERROR in 'f' switch option: wrong number of arguments2\n");
+            exit(2);
+        }
+        if((*(args[1]) == 'f') || (*(args[2]) == 'f'))
+        {
+                printf("\n\n 'f' switch: converting file with multiple locations.\n");
+                printf("     The first five output columns repeat the input coordinates.\n");
+                printf("     Then follows D, I, H, X, Y, Z, and F.\n");
+                printf("     Finally the SV: dD, dI, dH, dX, dY, dZ,  and dF\n");
+
+                coords_from_file = 1;
+                strncpy(coord_fname, args[3], MAXREAD);
+                coordfile = fopen(coord_fname, "rt");
+                strncpy(out_fname, args[4], MAXREAD);
+                outfile = fopen(out_fname, "w");
+                fprintf(outfile, "Date MSL-Ellipsoid Depth(m) Latitude Longitude D_deg D_min I_deg I_min H_nT X_nT Y_nT Z_nT F_nT dD_min dI_min dH_nT dX_nT dY_nT dZ_nT dF_nT");
+                if (printErrors==1) {
+                    fprintf(outfile, " \u03B4D_min \u03B4I_min \u03B4H_nT \u03B4X_nt \u03B4Y_nT \u03B4Z_nT \u03B4F_nT");
+                }
+                fprintf(outfile,"\n");
+        } /* file option */
+    }
 
 
     while(again == 1)
@@ -491,7 +524,7 @@ int main(int argv, char**argc)
         if(coords_from_file && !arg_err && (sdate < minyr || sdate > maxyr))
         {
             printf("\nWarning:  date out of range in coordinate file line %1d\n\n", iline);
-            printf("\nExpected range = %6.1lf - %6.1lf, entered %6.1lf\n", minyr, maxyr, sdate);
+            printf("\nExpected range = %6.1f - %6.1f, entered %6.1f\n", minyr, maxyr, sdate);
         }
 
 
@@ -581,7 +614,6 @@ int main(int argv, char**argc)
 
 
 
-
         /** Above will compute everything for 1 point in time.  **/
 
 
@@ -605,6 +637,12 @@ int main(int argv, char**argc)
                     GeoMagneticElements.Ydot,
                     GeoMagneticElements.Zdot,
                     GeoMagneticElements.Fdot);
+           if(printErrors){
+                MAG_WMMErrorCalc(GeoMagneticElements.H, &Errors);
+                append_errors_to_result_file(outfile,
+                        Errors);
+            }
+            fprintf(outfile, "\n");
         }
 
         if(coords_from_file)
@@ -644,15 +682,15 @@ void print_result_file(FILE *outf, double d, double i, double h, double x, doubl
         double ddot, double idot, double hdot, double xdot, double ydot, double zdot, double fdot)
 {
     int ddeg, ideg;
-    float dmin, imin;
-
+    double dmin, imin;
     /* Change d and i to deg and min */
 
+
     ddeg = (int) d;
-    dmin = (d - (float) ddeg)*60;
+    dmin = (d - (double) ddeg)*60;
     if(ddeg != 0) dmin = fabs(dmin);
     ideg = (int) i;
-    imin = (i - (float) ideg)*60;
+    imin = (i - (double) ideg)*60;
     if(ideg != 0) imin = fabs(imin);
 
     if(MAG_isNaN(d))
@@ -667,50 +705,28 @@ void print_result_file(FILE *outf, double d, double i, double h, double x, doubl
     if(MAG_isNaN(ddot))
     {
         if(MAG_isNaN(xdot))
-            fprintf(outf, "      NaN  %7.1f     %8.1f      NaN      NaN %8.1f %8.1f\n", idot, hdot, zdot, fdot);
+            fprintf(outf, "      NaN  %7.1f     %8.1f      NaN      NaN %8.1f %8.1f", idot, hdot, zdot, fdot);
         else
-            fprintf(outf, "      NaN  %7.1f     %8.1f %8.1f %8.1f %8.1f %8.1f\n", idot, hdot, xdot, ydot, zdot, fdot);
+            fprintf(outf, "      NaN  %7.1f     %8.1f %8.1f %8.1f %8.1f %8.1f", idot, hdot, xdot, ydot, zdot, fdot);
     } else
-        fprintf(outf, " %7.1f   %7.1f     %8.1f %8.1f %8.1f %8.1f %8.1f\n", ddot, idot, hdot, xdot, ydot, zdot, fdot);
+        fprintf(outf, " %7.1f   %7.1f     %8.1f %8.1f %8.1f %8.1f %8.1f", ddot, idot, hdot, xdot, ydot, zdot, fdot);
+
     return;
 } /* print_result_file */
 
-
-/****************************************************************************/
-/*                                                                          */
-/*                       Subroutine safegets                                */
-/*                                                                          */
-/****************************************************************************/
-/*                                                                          */
-/*  Gets characters from stdin untill it has reached n characters or \n,    */
-/*     whichever comes first.  \n is converted to \0.                       */
-/*                                                                          */
-/*  Input: n - Integer number of chars                                      */
-/*         *buffer - Character array ptr which can contain n+1 characters   */
-/*                                                                          */
-/*  Output: size - integer size of sting in buffer                          */
-/*                                                                          */
-/*  Note: All strings will be null terminated.                              */
-/*                                                                          */
-/*  By: David Owens                                                         */
-/*      dio@ngdc.noaa.gov                                                   */
-
-/****************************************************************************/
-
-int safegets(char *buffer, int n)
+void append_errors_to_result_file(FILE *outf, MAGtype_GeoMagneticElements Errors)
 {
-    char *ptr; /** ptr used for finding '\n' **/
+    if(MAG_isNaN(Errors.Decl))
+    {
+        if(MAG_isNaN(Errors.X))
+            fprintf(outf, " NaN         %3.0f  %8.1f      NaN      NaN %8.1f %8.1f", 60*Errors.Incl, Errors.H, Errors.Z, Errors.F);
+        else
+            fprintf(outf, " NaN         %3.0f  %8.1f %8.1f %8.1f %8.1f %8.1f", 60*Errors.Incl, Errors.H, Errors.X, Errors.Y, Errors.Z, Errors.F);
+    } else
+        fprintf(outf, " %3.0f  %3.0f  %8.1f %8.1f %8.1f %8.1f %8.1f", 60*Errors.Decl, 60*Errors.Incl, Errors.H, Errors.X, Errors.Y, Errors.Z, Errors.F);
 
-    fgets(buffer, n, stdin); /** Get n chars **/
-    buffer[n + 1] = '\0'; /** Set last char to null **/
-    ptr = strchr(buffer, '\n'); /** If string contains '\n' **/
-    if(ptr != NULL)
-    { /** If string contains '\n' **/
-        ptr[0] = '\0'; /** Change char to '\0' **/
-    }
-
-    return strlen(buffer); /** Return the length **/
-}
+    return;
+} /* append_errors_to_result_file */
 
 
 /****************************************************************************/
@@ -737,12 +753,12 @@ int safegets(char *buffer, int n)
 
 /****************************************************************************/
 
-float degrees_to_decimal(int degrees, int minutes, int seconds)
+double degrees_to_decimal(int degrees, int minutes, int seconds)
 {
-    float deg;
-    float min;
-    float sec;
-    float decimal;
+    double deg;
+    double min;
+    double sec;
+    double decimal;
 
     deg = degrees;
     min = minutes / 60.0;
@@ -802,7 +818,7 @@ float degrees_to_decimal(int degrees, int minutes, int seconds)
 /****************************************************************************/
 
 
-float julday(i_month, i_day, i_year)
+double julday(i_month, i_day, i_year)
 int i_month;
 int i_day;
 int i_year;
@@ -810,13 +826,13 @@ int i_year;
     int aggregate_first_day_of_month[13];
     int leap_year = 0;
     int truncated_dividend;
-    float year;
-    float day;
-    float decimal_date;
-    float remainder = 0.0;
-    float divisor = 4.0;
-    float dividend;
-    float left_over;
+    double year;
+    double day;
+    double decimal_date;
+    double remainder = 0.0;
+    double divisor = 4.0;
+    double dividend;
+    double left_over;
 
     aggregate_first_day_of_month[1] = 1;
     aggregate_first_day_of_month[2] = 32;

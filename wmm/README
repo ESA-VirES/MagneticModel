@@ -1,17 +1,16 @@
-World Magnetic Model 2010 - Geomagnetism Library
+World Magnetic Model 2015 - Geomagnetism Library
 ================================================
 
 This is the original NOAA Geomagnetism code compiled as a shared library
-together with the command-line utilities and the WMM 2010 model (WMM.COF).
-The technical documentation is not included and can be obtained with the
-original WMM package:
+together with the command-line utilities and the WMM 2015 model (WMM.COF).
+The original package can be obtained from
 
   http://www.ngdc.noaa.gov/geomag/WMM/soft.shtml
 
 The software re-configuration and the minimal necessary changes were done
 by EOX IT Services, GmbH.
 
-See also the enclosed README_WMM2010.txt
+See also the enclosed doc/WMM_README.txt
 
 
 INSTALLATION

@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+/*--------------------------------------------------------------------------*/
 
 #include <stdio.h>
 #include <string.h>
@@ -7,11 +7,11 @@
 
 
 #include "GeomagnetismHeader.h"
-//#include "GeomagnetismLibrary.c"
+/*#include "GeomagnetismLibrary.c"*/
 #include "EGM9615.h"
 
 #include "wmm_common.h"
-//---------------------------------------------------------------------------
+/*---------------------------------------------------------------------------*/
 
 /* 
 WMM Point Calculation Program.
@@ -24,9 +24,9 @@ WMM.COF and EGM9615.h to be in the same directory.
 Manoj.C.Nair@Noaa.Gov
 April 21, 2011
 
- *  Revision Number: $Revision: 842 $
+ *  Revision Number: $Revision: 1270 $
  *  Last changed by: $Author: awoods $
- *  Last changed on: $Date: 2012-04-20 14:59:13 -0600 (Fri, 20 Apr 2012) $
+ *  Last changed on: $Date: 2014-11-21 10:40:43 -0700 (Fri, 21 Nov 2014) $
  */
 
 int main(int argc, char **argv)
@@ -36,11 +36,11 @@ int main(int argc, char **argv)
     MAGtype_CoordSpherical CoordSpherical;
     MAGtype_CoordGeodetic CoordGeodetic;
     MAGtype_Date UserDate;
-    MAGtype_GeoMagneticElements GeoMagneticElements;
+    MAGtype_GeoMagneticElements GeoMagneticElements, Errors;
     MAGtype_Geoid Geoid;
     char ans[20], b;
     static char *filename = DEFAULT_WMM_COF;
-    char VersionDate_Large[] = "$Date: 2012-04-20 14:59:13 -0600 (Fri, 20 Apr 2012) $";
+    char VersionDate_Large[] = "$Date: 2014-11-21 10:40:43 -0700 (Fri, 21 Nov 2014) $";
     char VersionDate[12];
     int NumTerms, Flag = 1, nMax = 0;
     int epochs = 1;
@@ -55,7 +55,10 @@ int main(int argc, char **argv)
 
     strncpy(VersionDate, VersionDate_Large + 39, 11);
     VersionDate[11] = '\0';
-    MAG_robustReadMagModels(filename, &MagneticModels, epochs);
+    if(!MAG_robustReadMagModels(filename, &MagneticModels, epochs)) {
+        fprintf(stderr, "\n %s not found.\n ", filename);
+        return 1;
+    }
     if(nMax < MagneticModels[0]->nMax) nMax = MagneticModels[0]->nMax;
     NumTerms = ((nMax + 1) * (nMax + 2) / 2);
     TimedMagneticModel = MAG_AllocateModelMemory(NumTerms); /* For storing the time modified WMM Model parameters */
@@ -67,7 +70,6 @@ int main(int argc, char **argv)
     /* Check for Geographic Poles */
 
 
-    //MAG_InitializeGeoid(&Geoid);    /* Read the Geoid file */
 
     /* Set EGM96 Geoid parameters */
     Geoid.GeoidHeightBuffer = GeoidHeightBuffer;
@@ -82,7 +84,8 @@ int main(int argc, char **argv)
             MAG_TimelyModifyMagneticModel(UserDate, MagneticModels[0], TimedMagneticModel); /* Time adjust the coefficients, Equation 19, WMM Technical report */
             MAG_Geomag(Ellip, CoordSpherical, CoordGeodetic, TimedMagneticModel, &GeoMagneticElements); /* Computes the geoMagnetic field elements and their time change*/
             MAG_CalculateGridVariation(CoordGeodetic, &GeoMagneticElements);
-            MAG_PrintUserData(GeoMagneticElements, CoordGeodetic, UserDate, TimedMagneticModel, &Geoid); /* Print the results */
+            MAG_WMMErrorCalc(GeoMagneticElements.H, &Errors);
+            MAG_PrintUserDataWithUncertainty(GeoMagneticElements, Errors, CoordGeodetic, UserDate, TimedMagneticModel, &Geoid); /* Print the results */
         }
         printf("\n\n Do you need more point data ? (y or n) \n ");
         fgets(ans, 20, stdin);

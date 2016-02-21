@@ -8,14 +8,11 @@ CFLAGS=@CFLAGS@
 LFLAGS=-shared -lm
 LIB_DIR=@libdir@
 INC_DIR=@includedir@/${PACKAGE_TARNAME}
-DOC_DIR=@docdir@
 INSTALL_LIB_DIR=${INSTALL_PREFIX}${LIB_DIR}
 INSTALL_INC_DIR=${INSTALL_PREFIX}${INC_DIR}
-INSTALL_DOC_DIR=${INSTALL_PREFIX}${DOC_DIR}
 TARGET=libgeomag.so
 HDR=GeomagnetismHeader.h EGM9615.h
 OBJ=GeomagnetismLibrary.o
-DOC=Changelog.txt WMM_README.txt
 
 %.o: %.c $(HDR)
 	$(CC) -c -o $@ $< $(CFLAGS)
@@ -30,8 +27,6 @@ install: $(TARGET) $(HDR) $(DOC)
 	[ "$(USER)" != "root" ] || ldconfig
 	mkdir -p $(INSTALL_INC_DIR)
 	install -c -m 0664 $(HDR) $(INSTALL_INC_DIR)
-	mkdir -p $(INSTALL_DOC_DIR)
-	install -c -m 0664 $(DOC) $(INSTALL_DOC_DIR)
 
 clean:
 	$(RM) $(OBJ) $(TARGET)
