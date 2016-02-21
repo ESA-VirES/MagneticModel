@@ -6,9 +6,12 @@ CC=@CC@
 RM=rm -fv
 CFLAGS=@CFLAGS@
 LFLAGS=-shared -lm
-INSTAL_LIB_DIR=@libdir@
-INSTAL_INC_DIR=@includedir@/${PACKAGE_TARNAME}
-INSTAL_DOC_DIR=@docdir@
+LIB_DIR=@libdir@
+INC_DIR=@includedir@/${PACKAGE_TARNAME}
+DOC_DIR=@docdir@
+INSTALL_LIB_DIR=${INSTALL_PREFIX}${LIB_DIR}
+INSTALL_INC_DIR=${INSTALL_PREFIX}${INC_DIR}
+INSTALL_DOC_DIR=${INSTALL_PREFIX}${DOC_DIR}
 TARGET=libgeomag.so
 HDR=GeomagnetismHeader.h EGM9615.h
 OBJ=GeomagnetismLibrary.o
@@ -22,13 +25,13 @@ all: build
 build: $(TARGET)
 
 install: $(TARGET) $(HDR) $(DOC)
-	mkdir -p $(INSTAL_LIB_DIR)
-	install -c -m 0755 $(TARGET) $(INSTAL_LIB_DIR)
+	mkdir -p $(INSTALL_LIB_DIR)
+	install -c -m 0755 $(TARGET) $(INSTALL_LIB_DIR)
 	[ "$(USER)" != "root" ] || ldconfig
-	mkdir -p $(INSTAL_INC_DIR)
-	install -c -m 0664 $(HDR) $(INSTAL_INC_DIR)
-	mkdir -p $(INSTAL_DOC_DIR)
-	install -c -m 0664 $(DOC) $(INSTAL_DOC_DIR)
+	mkdir -p $(INSTALL_INC_DIR)
+	install -c -m 0664 $(HDR) $(INSTALL_INC_DIR)
+	mkdir -p $(INSTALL_DOC_DIR)
+	install -c -m 0664 $(DOC) $(INSTALL_DOC_DIR)
 
 clean:
 	$(RM) $(OBJ) $(TARGET)

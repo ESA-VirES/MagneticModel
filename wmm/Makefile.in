@@ -4,7 +4,8 @@ exec_prefix=@exec_prefix@
 PACKAGE_TARNAME=@PACKAGE_TARNAME@
 SRC_LIB_DIR=./src/lib
 SRC_CLI_DIR=./src/cli
-INSTAL_DOC_DIR=@docdir@
+DOC_DIR=@docdir@
+INSTALL_DOC_DIR=${INSTALL_PREFIX}${DOC_DIR}
 DOC=README README_WMM2010.txt
 
 all: build
@@ -16,8 +17,8 @@ build:
 install: build
 	make -C $(SRC_LIB_DIR) install
 	make -C $(SRC_CLI_DIR) install
-	mkdir -p $(INSTAL_DOC_DIR)
-	install -c -m 0664 $(DOC) $(INSTAL_DOC_DIR)
+	mkdir -p $(INSTALL_DOC_DIR)
+	install -c -m 0664 $(DOC) $(INSTALL_DOC_DIR)
 
 clean:
 	make -C $(SRC_LIB_DIR) clean
