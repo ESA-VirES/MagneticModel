@@ -30,7 +30,7 @@
 
 import re
 import numpy as np
-from base import MagneticModel, DATA_WMM_2010
+from base import MagneticModel, DATA_WMM_2010, DATA_WMM_2015
 
 class MagneticModelSimple(MagneticModel):
     """ Simple magnetic model class.
@@ -112,8 +112,18 @@ class MagneticModelSimple(MagneticModel):
 
 
 
-def read_model_wmm2010(fname=DATA_WMM_2010):
-    """ Read model parameters from a coeficient file in the WMM2010 format."""
+def read_model_wmm2010():
+    """ Read WMM2015 model coefficients."""
+    return read_model_wmm(fDATA_WMM_2010)
+
+
+def read_model_wmm2015():
+    """ Read WMM2015 model coefficients."""
+    return read_model_wmm(fDATA_WMM_2010)
+
+
+def read_model_wmm(fname):
+    """ Read model coefficients from a WMM coefficient file. """
     prm = {'sources': [fname]}
 
     with file(fname, 'r') as fid:

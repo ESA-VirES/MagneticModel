@@ -31,6 +31,7 @@
 from .base import (
     MagneticModel,
     DATA_WMM_2010,
+    DATA_WMM_2015,
     DATA_EMM_2010_STATIC,
     DATA_EMM_2010_SECVAR,
     DATA_CHAOS5_CORE,
@@ -55,14 +56,16 @@ from .base import (
     vrot_sph2cart,
 )
 from .emm import read_model_emm2010
-from .wmm import read_model_wmm2010
+from .wmm import read_model_wmm, read_model_wmm2010, read_model_wmm2015
 from .shc import read_model_shc
 from .igrf import read_model_igrf11
 from .qd import eval_apex, DATA_APEX_2015, DATA_APEX_2020
 
 __all__ = [
     'MagneticModel',
+    'read_model_wmm',
     'read_model_wmm2010',
+    'read_model_wmm2015',
     'read_model_emm2010',
     'read_model_shc',
     'read_model_igrf11',
@@ -77,6 +80,7 @@ __all__ = [
     'spharpot',
     'sphargrd',
     'DATA_WMM_2010',
+    'DATA_WMM_2015',
     'DATA_EMM_2010_STATIC',
     'DATA_EMM_2010_SECVAR',
     'DATA_CHAOS5_CORE',

@@ -36,7 +36,8 @@ import numpy as np
 # location of the data files
 dirname = os.path.dirname(__file__)
 dirname = os.path.join(dirname, 'data')
-DATA_WMM_2010 = os.path.join(dirname, 'WMM.COF')
+DATA_WMM_2010 = os.path.join(dirname, 'WMM2010.COF')
+DATA_WMM_2015 = os.path.join(dirname, 'WMM2015.COF')
 DATA_EMM_2010_STATIC = os.path.join(dirname, 'EMM-720_V3p0_static.cof')
 DATA_EMM_2010_SECVAR = os.path.join(dirname, 'EMM-720_V3p0_secvar.cof')
 DATA_CHAOS5_CORE = os.path.join(dirname, 'CHAOS-5_core.shc')
