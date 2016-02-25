@@ -2,7 +2,7 @@ CC=gcc
 LD=gcc
 RM=rm -fv
 
-INC_WMM=-I./geomaglib -I./include
+INC_WMM=
 LIB_WMM=-lgeomag -lm
 INC_QD=-I./qdipolelib -I./include
 LIB_QD=-lqdipole -lm -L/usr/lib64/qdipole

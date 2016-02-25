@@ -33,7 +33,6 @@
 #ifndef PYWMM_LEGENDRE_H
 #define PYWMM_LEGENDRE_H
 
-//#include "GeomagnetismHeader.h"
 #include "shc.h"
 #include "pywmm_aux.h"
 #include "pywmm_cconv.h"

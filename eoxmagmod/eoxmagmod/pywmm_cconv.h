@@ -31,8 +31,8 @@
 #ifndef PYWMM_CCONV_H
 #define PYWMM_CCONV_H
 
-#include "GeomagnetismHeader.h"
-#include "EGM9615.h"
+#include "wmm/GeomagnetismHeader.h"
+#include "wmm/EGM9615.h"
 #include "geo_conv.h"
 #include "pywmm_aux.h"
 #include "pywmm_coord.h"

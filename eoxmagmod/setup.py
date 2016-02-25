@@ -42,28 +42,25 @@ setup(
     author_email="martin.paces@eox.at",
     packages=['eoxmagmod'],
     license='EOX licence (MIT style)',
-    version='0.2.0',
+    version='0.3.0dev',
     package_data={'eoxmagmod': ['data/*']},
     ext_modules=[
         Extension(
             'eoxmagmod._pywmm',
             sources=[
                 'eoxmagmod/pywmm.c',
-                'eoxmagmod/geomaglib/GeomagnetismLibrary.c'
             ],
             libraries=[],
             library_dirs=[],
             include_dirs=[
                 './eoxmagmod',
                 './eoxmagmod/include',
-                './eoxmagmod/geomaglib'
             ],
         ),
         Extension(
             'eoxmagmod._pyqd',
             sources=[
                 'eoxmagmod/pyqd.c',
-                'eoxmagmod/geomaglib/GeomagnetismLibrary.c'
             ],
             libraries=['qdipole'],
             library_dirs=['/usr/lib64/qdipole'],

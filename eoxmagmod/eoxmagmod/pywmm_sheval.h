@@ -36,8 +36,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-//#include "GeomagnetismHeader.h"
-
 #include "math_aux.h"
 #include "geo_conv.h"
 #include "shc.h"
