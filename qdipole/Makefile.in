@@ -57,4 +57,4 @@ $(LIB_TARGET): $(OBJ)
 	$(LD) -o $(LIB_TARGET) $(OBJ) $(LFLAGS)
 
 qdipole_test:
-	$(CC) -o qdipole_test qdipole_test.c -lqdipole -L$(INSTALL_LIB_DIR)
+	$(CC) -o qdipole_test qdipole_test.c -lqdipole -L./
