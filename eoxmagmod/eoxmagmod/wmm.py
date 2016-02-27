@@ -114,12 +114,12 @@ class MagneticModelSimple(MagneticModel):
 
 def read_model_wmm2010():
     """ Read WMM2015 model coefficients."""
-    return read_model_wmm(fDATA_WMM_2010)
+    return read_model_wmm(DATA_WMM_2010)
 
 
 def read_model_wmm2015():
     """ Read WMM2015 model coefficients."""
-    return read_model_wmm(fDATA_WMM_2010)
+    return read_model_wmm(DATA_WMM_2010)
 
 
 def read_model_wmm(fname):
