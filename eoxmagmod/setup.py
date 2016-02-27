@@ -50,7 +50,7 @@ setup(
             sources=[
                 'eoxmagmod/pywmm.c',
             ],
-            libraries=[],
+            libraries=['geomag'],
             library_dirs=[],
             include_dirs=[
                 './eoxmagmod',
