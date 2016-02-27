@@ -4,8 +4,8 @@ RM=rm -fv
 
 INC_WMM=
 LIB_WMM=-lgeomag -lm
-INC_QD=-I./qdipolelib -I./include
-LIB_QD=-lqdipole -lm -L/usr/lib64/qdipole
+INC_QD=-I./include
+LIB_QD=-lqdipole -lm
 INC_PYTHON=$(shell python-config --includes )
 LIB_PYTHON=$(shell python-config --libs )
 

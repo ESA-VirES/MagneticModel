@@ -33,7 +33,7 @@
 #define PYQD_EVAL_APEX_H
 
 #include "pywmm_aux.h"
-#include "cqdipole.h"
+#include "qdipole/cqdipole.h"
 
 /* python function definition */
 

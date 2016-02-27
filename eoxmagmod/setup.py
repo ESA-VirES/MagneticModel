@@ -28,12 +28,8 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-#import os
 from distutils.core import setup
-#from setuptools import setup
 from distutils.extension import Extension
-
-#del os.link
 
 setup(
     name="EOxMagMod",
@@ -42,7 +38,7 @@ setup(
     author_email="martin.paces@eox.at",
     packages=['eoxmagmod'],
     license='EOX licence (MIT style)',
-    version='0.3.0dev',
+    version='0.3.0',
     package_data={'eoxmagmod': ['data/*']},
     ext_modules=[
         Extension(
@@ -63,11 +59,10 @@ setup(
                 'eoxmagmod/pyqd.c',
             ],
             libraries=['qdipole'],
-            library_dirs=['/usr/lib64/qdipole'],
+            library_dirs=[],
             include_dirs=[
                 './eoxmagmod',
                 './eoxmagmod/include',
-                './eoxmagmod/qdipolelib'
             ],
         ),
     ]
