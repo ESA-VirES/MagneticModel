@@ -1,0 +1,60 @@
+# paths set by autoconf
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+CC=@CC@
+FC=@FC@
+LD=$(FC)
+RM_FILE=rm -fv
+RM_DIR=rm -rfv
+CFLAGS=@CFLAGS@
+LFLAGS=-shared -lm
+LIB_DIR=@libdir@
+BIN_DIR=@bindir@
+INC_DIR=@includedir@/${PACKAGE_TARNAME}
+DOC_DIR=${prefix}/share/doc/${PACKAGE_TARNAME}
+DATA_DIR=@datadir@/${PACKAGE_TARNAME}
+INSTALL_LIB_DIR=${INSTALL_PREFIX}${LIB_DIR}
+INSTALL_BIN_DIR=${INSTALL_PREFIX}${BIN_DIR}
+INSTALL_INC_DIR=${INSTALL_PREFIX}${INC_DIR}
+INSTALL_DOC_DIR=${INSTALL_PREFIX}${DOC_DIR}
+INSTALL_DATA_DIR=${INSTALL_PREFIX}${DATA_DIR}
+LIB_TARGET=libqdipole.so
+BIN_TARGET=qdipole_test
+HDR=cqdipole.h
+OBJ=cqdipole.o qdipole.o apex.o apexsh.o makeapexsh.o
+DOC=README
+DATA=apexsh_1980-2020.txt apexsh_1995-2015.txt test_result.apexsh_1980-2020.txt test_result.apexsh_1995-2015.txt
+MOD=alfbasismodule.mod apxshmodule.mod
+
+%.o: %.c $(HDR)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+%.o: %.f90 $(HDR)
+	$(FC) -c -o $@ $< $(CFLAGS)
+
+all: build
+
+build: $(LIB_TARGET) $(BIN_TARGET)
+
+install: $(LIB_TARGET) $(BIN_TARGET) $(HDR) $(DOC) $(DATA)
+	mkdir -p $(INSTALL_LIB_DIR)
+	install -c -m 0755 $(LIB_TARGET) $(INSTALL_LIB_DIR)
+	[ "$(USER)" != "root" ] || ldconfig
+	mkdir -p $(INSTALL_BIN_DIR)
+	install -c -m 0755 $(BIN_TARGET) $(INSTALL_BIN_DIR)
+	mkdir -p $(INSTALL_INC_DIR)
+	install -c -m 0664 $(HDR) $(INSTALL_INC_DIR)
+	mkdir -p $(INSTALL_DOC_DIR)
+	install -c -m 0664 $(DOC) $(INSTALL_DOC_DIR)
+	mkdir -p $(INSTALL_DATA_DIR)
+	install -c -m 0644 $(DATA) $(INSTALL_DATA_DIR)
+
+clean:
+	$(RM_FILE) $(OBJ) $(LIB_TARGET) $(BIN_TARGET) $(MOD)
+
+$(LIB_TARGET): $(OBJ)
+	$(LD) -o $(LIB_TARGET) $(OBJ) $(LFLAGS)
+
+qdipole_test:
+	$(CC) -o qdipole_test qdipole_test.c -lqdipole -L$(INSTALL_LIB_DIR)

@@ -1,0 +1,49 @@
+
+Quasi-Dipole apex coordinates evaluation.
+=========================================
+
+This is the original Fortran code (kindly provided by Nils Olsen) compiled
+as a shared library. More details to be found in the commented Fortran code
+itself.
+
+The implementation of the C wrapper and preparation of the makefile was done by
+EOX IT Services GmbH, Vienna, Austria
+
+CHANGE LOG
+----------
+
+2016-02-27 - 0.1.1 Update
+ - employing GNU/Autoconf for build configuration
+ - improving the build process
+
+2015-01-09 - 0.1.0 Initial version
+ - implementation of the C the wrapper of the Fortran subroutines
+
+
+INSTALLATION
+------------
+
+Step 1 - configure:
+
+  $ ./configure --prefix=/usr/ --libdir='${exec_prefix}/lib64'
+
+For more detail see
+
+  $ ./configure --help
+
+
+Step 2 - build the binaries:
+
+  $ make build
+
+
+Step 3 - install the software:
+
+  $ sudo make install
+
+
+TESTING
+-------
+
+  $ ./qdipole_test apexsh_1995-2015.txt | diff - test_result.apexsh_1995-2015.txt
+  $ ./qdipole_test apexsh_1980-2020.txt | diff - test_result.apexsh_1980-2020.txt

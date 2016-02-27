@@ -1,0 +1,9 @@
+config.status
+config.log
+Makefile
+*.cache
+*.o
+*.so
+*.lo
+*.mod
+qdipole_test
