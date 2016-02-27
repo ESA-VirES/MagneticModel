@@ -32,8 +32,8 @@ from distutils.core import setup
 from distutils.extension import Extension
 
 setup(
-    name="EOxMagMod",
-    description="Earth magentic field utilities.",
+    name="eoxmagmod",
+    description="Earth magnetic field utilities.",
     author="Martin Paces",
     author_email="martin.paces@eox.at",
     packages=['eoxmagmod'],
