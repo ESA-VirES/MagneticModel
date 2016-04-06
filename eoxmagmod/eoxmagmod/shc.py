@@ -68,10 +68,8 @@ class MagneticModelSHCPP(MagneticModel):
 
         if dates.size > 1:
             # lookup the interval
-            try:
-                idx = (dates <= date).nonzero()[0].max()
-            except ValueError:
-                idx = 0
+            idx = np.digitize([date], dates)[0] - 1
+            idx = min(dates.size - 2, max(0, idx))
 
             a = 1.0/(dates[idx+1]-dates[idx])
             coef_g[idxoff:] = a*(src_coef_g[:,idx+1] - src_coef_g[:,idx])
@@ -101,10 +99,8 @@ class MagneticModelSHCPP(MagneticModel):
 
         elif dates.size > 1:
             # lookup the interval
-            try:
-                idx = (dates <= date).nonzero()[0].max()
-            except ValueError:
-                idx = 0
+            idx = np.digitize([date], dates)[0] - 1
+            idx = min(dates.size - 2, max(0, idx))
 
             a1 = (date-dates[idx])/(dates[idx+1]-dates[idx])
             a0 = 1.0 - a1
