@@ -53,7 +53,7 @@ class MagneticModelSHCPP(MagneticModel):
         return self.prm['degree']
 
     def get_coef_secvar(self, date):
-        """Get secular variation coeficients."""
+        """Get secular variation coefficients."""
         dates = self.prm['time']
         degree = self.prm['degree']
         degree_min = self.prm['degree_min']
@@ -80,7 +80,8 @@ class MagneticModelSHCPP(MagneticModel):
         return coef_g, coef_h
 
     def get_coef_static(self, date):
-        """ Calculate model static coeficients for a date specified by a decimal year value.
+        """ Calculate model static coefficients for a date specified
+        by a decimal year value.
         """
         dates = self.prm['time']
         degree = self.prm['degree']
@@ -127,7 +128,7 @@ class MagneticModelSHCPP(MagneticModel):
 
 
 def read_model_shc(fname=DATA_CHAOS5_CORE):
-    """ Read model parameters from a coeficient file in the SHC format."""
+    """ Read model parameters from a coefficient file in the SHC format."""
 
     if isinstance(fname, basestring):
         with file(fname, 'r') as fid:
@@ -137,7 +138,7 @@ def read_model_shc(fname=DATA_CHAOS5_CORE):
 
 
 def _read_model_shc(fid, fname):
-    """ Read model parameters from a coeficient file in the SHC format."""
+    """ Read model parameters from a coefficient file in the SHC format."""
 
     prm = {'sources': [fname], 'headers': []}
 
