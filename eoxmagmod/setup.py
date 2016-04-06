@@ -38,7 +38,7 @@ setup(
     author_email="martin.paces@eox.at",
     packages=['eoxmagmod'],
     license='EOX licence (MIT style)',
-    version='0.3.0',
+    version='0.3.1',
     package_data={'eoxmagmod': ['data/*']},
     ext_modules=[
         Extension(
