@@ -39,10 +39,15 @@ class MagneticModelSHCPP(MagneticModel):
     def __init__(self, model_prm):
         """ Model constructor """
         super(MagneticModelSHCPP, self).__init__(model_prm)
+        if model_prm.get('validity'):
+            self._validity_start, self._validity_stop = model_prm['validity']
+        else:
+            self._validity_start = np.amin(self.prm['time'])
+            self._validity_stop = np.amax(self.prm['time'])
 
     @property
     def validity(self):
-        return (np.min(self.prm['time']), np.max(self.prm['time']))
+        return (self._validity_start, self._validity_stop)
 
     @property
     def degree_static(self):
@@ -151,8 +156,14 @@ def _read_model_shc(fid, fname):
             break
 
     # parse model headers
-    header = [int(v) for v in line.split()]
-    degree_min, degree, ntime, spline_order, nstep = header
+    split_line = line.split()
+    degree_min, degree, ntime, spline_order, nstep = (
+        int(v) for v in split_line[:5]
+    )
+    if split_line[5:7]:
+        _, _ = validity = tuple(float(v) for v in split_line[5:7])
+    else:
+        validity = None
 
     # parse time header
     line = next(fid)
@@ -185,6 +196,7 @@ def _read_model_shc(fid, fname):
         'time': time,
         'coef_h': coef_h,
         'coef_g': coef_g,
+        'validity': validity,
     })
 
     return MagneticModelSHCPP(prm)
