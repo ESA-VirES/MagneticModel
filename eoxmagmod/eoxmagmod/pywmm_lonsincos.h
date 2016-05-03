@@ -6,7 +6,6 @@
  * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
- *
  *-----------------------------------------------------------------------------
  * Copyright (C) 2014 EOX IT Services GmbH
  *
@@ -48,7 +47,7 @@
 "        sin(i*longitude) for i in range(0, degree+1)\n"\
 "     The longitude has to be entered in dg..\n"\
 "     The 'fast_alg' boolean options forces the subroutine to use a faster\n"\
-"     but sligtly less precise evaluation algorithm.\n"
+"     but slightly less precise evaluation algorithm.\n"
 
 static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
 {

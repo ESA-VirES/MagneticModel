@@ -35,9 +35,7 @@
 #include <math.h>
 
 /**
- * @brief Allocate and evaluate precalculated square-root series
- *
- * @brief Allocate and evaluate precalculated square-root series
+ * @brief Allocate and evaluate pre-calculated square-root series
  *
  *   sqrt(i) for i = 0..(2*degree+1)
  *
@@ -75,7 +73,7 @@ static void shc_legendre_low(double *lp, double *ldp, int degree, double sin_elv
     int i, j;
 
     // Gauss normalised associated Legendre functions (aLf)
-    // Note the ldp sign change because of the derivate being calculated
+    // Note the ldp sign change because of the derivative being calculated
     // with respect to the elevation (latitude) instead of the
     // inclination (co-latitude).
     lp[0] = 1.0;
@@ -148,7 +146,7 @@ static void shc_legendre_low(double *lp, double *ldp, int degree, double sin_elv
  *
  * Evaluate the Schmidt semi-normalised associated Legendre functions.
  *
- * This subroutine tries to compensate the effect of underfow for high degree
+ * This subroutine tries to compensate the effect of underflow for high degree
  * values near the poles by scaling of the of the powers of the .
  * [Holmes and Featherstone 2002, J. Geodesy, 76, 279-299]
  */
@@ -238,7 +236,7 @@ static void shc_legendre_high(double *lp, double *ldp, int degree, double sin_el
  *      ldp ... output array of the associated Legendre functions' derivatives
  *      degree ... model degree
  *      elv ... elevation (latitude) angle in radians
- *      psqrt ... array of the precalculated square roots
+ *      psqrt ... array of the pre-calculated square roots
  */
 
 static void shc_legendre(double *lp, double *ldp, int degree, double elv, const double *psqrt)
@@ -282,9 +280,9 @@ static void shc_relradpow(double *rrp, int degree, double relrad)
 }
 
 /**
- * @brief Evaluate the series of azimut angle (lonigitude) sines and cosines.
+ * @brief Evaluate the series of azimuth angle (longitude) sines and cosines.
  *
- * Evaluate the series of azimut angle (lonigitude - 'lon') sines and cosines.
+ * Evaluate the series of azimuth angle (longitude - 'lon') sines and cosines.
  *
  *   cos(i*lon) for i = 0...degree
  *   sin(i*lon) for i = 0...degree
@@ -320,9 +318,9 @@ static void shc_azmsincos(double *lonsin, double *loncos, int degree, double lon
 }
 
 /**
- * @brief Evaluate the series of azimut angle (lonigitude) sines and cosines.
+ * @brief Evaluate the series of azimuth angle (longitude) sines and cosines.
  *
- * Evaluate the series of azimut angle (lonigitude - 'lon') sines and cosines.
+ * Evaluate the series of azimuth angle (longitude - 'lon') sines and cosines.
  *
  *   cos(i*lon) for i = 0...degree
  *   sin(i*lon) for i = 0...degree
@@ -345,15 +343,15 @@ static void shc_azmsincos_ref(double *lonsin, double *loncos, int degree, double
 }
 
 /**
- * @brief Evaluate the scalar potential and its (sherica) gradient/
+ * @brief Evaluate the scalar potential and its (spherical) gradient/
  *
- * Sperical harmonic evaluation of the scalar potential and
+ * Spherical harmonic evaluation of the scalar potential and
  * the gradient in the spherical coordinates.
  *
  *  outputs:
  *    vpot - value of the scalar potential
  *    dvel - elevation component of the gradient
- *    dvaz - azimut component of the gradient
+ *    dvaz - azimuth component of the gradient
  *    dvrd - radial component of the gradient
  *
  *  inputs:
@@ -363,11 +361,11 @@ static void shc_azmsincos_ref(double *lonsin, double *loncos, int degree, double
  *           2 - evaluate both gradient only
  *    elv - elevation angle in radians (coordinate - needed in mode 3 and 2)
  *    rad - radius (coordinate needed in mode 3 and 1)
- *    cg, ch - spherical harmonic coeficients [(degree+1)*(degree+2)/2]
- *    lp, ldp - Legendre associative function and their derivtives (with
+ *    cg, ch - spherical harmonic coefficients [(degree+1)*(degree+2)/2]
+ *    lp, ldp - Legendre associative function and their derivatives (with
  *              respect to the elevation coordinate) [(degree+1)*(degree+2)/2]
  *    rrp - relative radius power series [degree+1]
- *    lsin, lcos - series of azimut angle sines and cosines [degree+1]
+ *    lsin, lcos - series of azimuth angle sines and cosines [degree+1]
  *
  */
 
@@ -425,7 +423,7 @@ static void shc_eval(double *vpot, double *dvel, double *dvaz, double *dvrd,
                 const int idx = 1 + (i*(i+1))/2;
                 const double tmp = FDIV((i-1)*(i-1)-1, (2*i-1)*(2*i-3));
 
-                // evaluate ratio between the Gauss-normalised and Smidth
+                // evaluate ratio between the Gauss-normalised and Schmidt
                 // quasi-normalised associated Legendre functions.
                 //  Equivalent to: sqrt((j==0?1:2)*(i-j)!/(i+j!))*(2i-1)!!/(i-j)!
                 sqn1 = sqn1 * FDIV(2*i-1, i);

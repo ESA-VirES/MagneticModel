@@ -4,7 +4,7 @@
  * @brief Auxiliary mathematical subroutines.
  *
  * This file contains definitions of auxiliary mathematical subroutines 
- * to be used allover the whole program.
+ * to be used all over the whole program.
  *
  * Copyright (C) 2014 EOX IT Services GmbH
  *

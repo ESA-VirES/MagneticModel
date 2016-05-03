@@ -5,7 +5,6 @@
  * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
- *
  *-----------------------------------------------------------------------------
  * Copyright (C) 2014 EOX IT Services GmbH
  *
@@ -61,7 +60,7 @@
 /* spherical harmonic model evaluation */
 #include "pywmm_sheval.h"
 
-/* evaluation of the asociative Legendre functions */
+/* evaluation of the associative Legendre functions */
 #include "pywmm_legendre.h"
 
 /* evaluation of the relative radius powers */

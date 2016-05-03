@@ -1,6 +1,6 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings - spherical harmoic model evaluation
+ * World Magnetic Model - C python bindings - spherical harmonic model evaluation
  *
  * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>

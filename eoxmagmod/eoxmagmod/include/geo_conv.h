@@ -45,17 +45,17 @@
 #define WGS84_RADIUS 6371.2
 
 /**
- * @brief Convert geodetic to geocentric cartesian coordinates.
+ * @brief Convert geodetic to geocentric Cartesian coordinates.
  *
  * Covert geodetic coordinates (latitude, longitude, elevation(above ellipsoid)
- * to geocentric cartesian (ECEF) coordinates.
+ * to geocentric Cartesian (ECEF) coordinates.
  *
  * The input geodetic coordinates shall be in degrees. The units of the output
- * cartesian coordinates are the same as the one of the ellipsid semi-major axis.
+ * Cartesian coordinates are the same as the one of the ellipsoid semi-major axis.
  *
  * Required ellipsoid parameters:
  *  elp_a - semi-major axis
- *  elp_e2 - squared first excentricity
+ *  elp_e2 - squared first eccentricity
  */
 
 static void geodetic2geocentric_cart(
@@ -81,19 +81,19 @@ static void geodetic2geocentric_cart(
 
 
 /**
- * @brief Convert geocentric coordinates to geocentric sherical coordinates
+ * @brief Convert geocentric coordinates to geocentric spherical coordinates
  *
  * Covert geodetic coordinates (latitude, longitude, elevation(above ellipsoid)
- * to geocentric sperical coordinates (radius, elevation/theta, azimut/phi).
+ * to geocentric spherical coordinates (radius, elevation/theta, azimuth/phi).
  *
  * The input geodetic coordinates shall be in degrees. The units of the output
- * cartesian coordinates as well as the unit of the radial coordinate are
- * the same as the one of the ellipsid semi-major axis. The output sperical
+ * Cartesian coordinates as well as the unit of the radial coordinate are
+ * the same as the one of the ellipsoid semi-major axis. The output spherical
  * coordinates are in radians.
  *
  * Required ellipsoid parameters:
  *  elp_a - semi-major axis
- *  elp_e2 - squared first excentricity
+ *  elp_e2 - squared first eccentricity
  */
 
 static void geodetic2geocentric_sph(
@@ -120,24 +120,24 @@ static void geodetic2geocentric_sph(
 
 
 /**
- * @brief Convert geodetic coordinates to geocentric cartesian and shperical ones.
+ * @brief Convert geodetic coordinates to geocentric Cartesian and spherical ones.
  *
  * Covert geodetic coordinates (latitude, longitude, elevation(above ellipsoid))
- * to geocentric coordinates both cartesian (x, y, z) and sperical (radius,
- * elevation/theta, azimut/phi). The input geodetic coordinates shall be in
- * degrees. The output sperical coordinates are in radians.
+ * to geocentric coordinates both Cartesian (x, y, z) and spherical (radius,
+ * elevation/theta, azimuth/phi). The input geodetic coordinates shall be in
+ * degrees. The output spherical coordinates are in radians.
  * The input geodetic coordinates shall be in degrees. The unit of the output
- * the radial coordinate is  the same as the one of the ellipsid semi-major
- * axis. The output sperical coordinates are in radians.
+ * the radial coordinate is  the same as the one of the ellipsoid semi-major
+ * axis. The output spherical coordinates are in radians.
  *
- * Use when both, shperical and cartesian, coordinates are needed.
- * Note that this function is more efficent that two calls to
+ * Use when both, spherical and Cartesian, coordinates are needed.
+ * Note that this function is more efficient that two calls to
  *  geodetic2geocentric_cart
  *  geodetic2geocentric_sph
  *
  * Required ellipsoid parameters:
  *  elp_a - semi-major axis
- *  elp_e2 - squared first excentricity
+ *  elp_e2 - squared first eccentricity
  */
 
 static void geodetic2geocentric(
@@ -167,10 +167,10 @@ static void geodetic2geocentric(
 }
 
 /**
- * @brief Convert spherical to cartesian coordinates
+ * @brief Convert spherical to Cartesian coordinates
  *
- * Covert spherical coordinates(radius, elevation/theta, azimut/phi)
- * to cartesian coordinates (x, y, z).
+ * Covert spherical coordinates(radius, elevation/theta, azimuth/phi)
+ * to Cartesian coordinates (x, y, z).
  *
  * The spherical coordinates shall be in radians.
  */
@@ -184,7 +184,7 @@ static void sph2cart(
     double sin_ph = sin(ph);
     double cos_ph = cos(ph);
 
-    /* radius on the azimut plane (z=0)*/
+    /* radius on the azimuth plane (z=0)*/
     double ra = r*cos_th;
 
     *x = ra*cos_ph;
@@ -193,10 +193,10 @@ static void sph2cart(
 }
 
 /**
- * @brief Convert cartesian to spherical coordinates
+ * @brief Convert Cartesian to spherical coordinates
  *
- * Covert cartesian coordinates (x, y, z) to spherical
- * coordinates (radius, elevation/theta, azimut/phi)
+ * Covert Cartesian coordinates (x, y, z) to spherical
+ * coordinates (radius, elevation/theta, azimuth/phi)
  *
  * The spherical coordinates are produced in radians.
  */
@@ -211,13 +211,13 @@ static void cart2sph(
 
 
 /**
- * @brief Convert cartesian geocentric to geodetic coordinates
+ * @brief Convert Cartesian geocentric to geodetic coordinates
  *
- * Covert cartesian (ECEF) coordinates (x, y, z) to geodetic coordinates
+ * Covert Cartesian (ECEF) coordinates (x, y, z) to geodetic coordinates
  * (latitude, longitude, elevation(above ellipsoid).
  *
  * The geodetic coordinates are produced in degrees. The unit of the elevation
- * is the same as the unit of the cartesian coordinates and of the ellipsoid
+ * is the same as the unit of the Cartesian coordinates and of the ellipsoid
  * semi-major axis.
  */
 
@@ -227,7 +227,7 @@ static void geocentric_cart2geodetic(
     double elp_a, double elp_e2)
 {
     double p = norm2d(x, y);
-    /* Ferraris's solution */
+    /* Ferrari's solution */
     double pa = p/elp_a;
     double za = z/elp_a;
     double pa2 = pa*pa;
@@ -253,7 +253,7 @@ static void geocentric_cart2geodetic(
 /**
  * @brief Convert spherical geocentric to geodetic coordinates
  *
- * Convert geocentric spherical coordinates (radius, elevation/theta, azimut/phi)
+ * Convert geocentric spherical coordinates (radius, elevation/theta, azimuth/phi)
  * to geodetic coordinates (latitude, longitude, elevation(above ellipsoid).
  *
  * The spherical coordinates are expect to be in radians.

@@ -60,7 +60,7 @@ static void _vrot_sph2geod(ARRAY_DATA ad_i, ARRAY_DATA ad_dlat,
 
         const double dlat = DG2RAD*SV(ad_dlat);
 
-        // rotate arround the elevation axis
+        // rotate around the elevation axis
         rot2d(P(ad_o,2), P(ad_o,0), V(ad_i,2), V(ad_i,0), sin(dlat), cos(dlat));
         V(ad_o,1) = V(ad_i,1);
 
@@ -122,7 +122,7 @@ static PyObject* vrot_sph2geod(PyObject *self, PyObject *args, PyObject *kwdict)
     if (NULL == (arr_out = _get_new_double_array(PyArray_NDIM(arr_in), PyArray_DIMS(arr_in), 3)))
         goto exit;
 
-    // rorate the vector(s)
+    // rotate the vector(s)
     _vrot_sph2geod(_array_to_arrd(arr_in), _array_to_arrd(arr_dlat), _array_to_arrd(arr_out));
 
     retval = arr_out;

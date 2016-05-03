@@ -1,11 +1,10 @@
 /*-----------------------------------------------------------------------------
  *
  * World Magnetic Model - C python bindings
- * - asociative Legendre functions evaluation
+ * - associative Legendre functions evaluation
  *
  * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
- *
  *
  *-----------------------------------------------------------------------------
  * Copyright (C) 2014 EOX IT Services GmbH
@@ -42,12 +41,12 @@
 #define DOC_LEGENDRE "\n"\
 "   p, dp = legendre(latitude, degree, spherical=True)\n"\
 "\n"\
-"     For given 'latitude' and model's 'degree', evaluate asociative Legendre\n"\
+"     For given 'latitude' and model's 'degree', evaluate associative Legendre\n"\
 "     functions. The input parameters are:\n"\
 "       latitude - spherical (or geodetic) latitude in dg. of the evaluated\n"\
 "                  location.\n"\
 "       degree - degree of the spherical harmonic model.\n"\
-"       spherical - boolean flag indicating whether a geodentic spherical\n"\
+"       spherical - boolean flag indicating whether a geodetic spherical\n"\
 "                   (default, True) or geodetic (WGS84, False) latitude is\n"\
 "                   being used.\n"
 
@@ -89,7 +88,7 @@ static PyObject* legendre(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     {
-        // allocate and fill the precalculated square-roots
+        // allocate and fill the pre-calculated square-roots
         double *psqrt = NULL;
         if (NULL == (psqrt = shc_presqrt(degree)))
         {

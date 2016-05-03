@@ -42,7 +42,7 @@
 "     Inputs:\n"\
 "       gclat - geocentric latitude(s).\n"\
 "       gclon - geocentric longitudes(s).\n"\
-"       gcrad - geocentric radial cordinate(s) in km.\n"\
+"       gcrad - geocentric radial coordinate(s) in km.\n"\
 "       fname - file-name of the model text file.\n"\
 "     Outputs:\n"\
 "       qdlat - quasi-dipole latitude(s).\n"\

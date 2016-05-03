@@ -64,10 +64,10 @@ static void _vrot_sph2cart(ARRAY_DATA ad_i, ARRAY_DATA ad_lat,
         const double lon = DG2RAD*SV(ad_lon);
         double tmp;
 
-        // rotate arround the elevation axis
+        // rotate around the elevation axis
         rot2d(&tmp, P(ad_o,2), V(ad_i,2), V(ad_i,0), sin(lat), cos(lat));
 
-        // rotate arround the azimut axis
+        // rotate around the azimuth axis
         rot2d(P(ad_o,0), P(ad_o,1), tmp, V(ad_i,1), sin(lon), cos(lon));
 
         #undef V
@@ -81,7 +81,7 @@ static void _vrot_sph2cart(ARRAY_DATA ad_i, ARRAY_DATA ad_lat,
 "   arr_out = vrot_sph2cart(arr_in, arr_lat, arr_lon)\n"\
 "\n"\
 "     Rotate vectors from the geocentric spherical to \n"\
-"     the geocentric cartesian coordinats for given latitude\n"\
+"     the geocentric Cartesian coordinates for given latitude\n"\
 "     and longitude in dg.\n"\
 "     The inputs are:\n"\
 "         arr_in - array of the input vectors\n"\
@@ -138,7 +138,7 @@ static PyObject* vrot_sph2cart(PyObject *self, PyObject *args, PyObject *kwdict)
     if (NULL == (arr_out = _get_new_double_array(PyArray_NDIM(arr_in), PyArray_DIMS(arr_in), 3)))
         goto exit;
 
-    // rorate the vector(s)
+    // rotate the vector(s)
     _vrot_sph2cart(_array_to_arrd(arr_in), _array_to_arrd(arr_lat),
                    _array_to_arrd(arr_lon), _array_to_arrd(arr_out));
 

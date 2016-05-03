@@ -5,7 +5,6 @@
  * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
- *
  *-----------------------------------------------------------------------------
  * Copyright (C) 2015 EOX IT Services GmbH
  *

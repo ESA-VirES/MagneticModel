@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
  * World Magnetic Model - C python bindings - spherical-harmonics
- * - evaluation of the potential gradient in the sherical coordinate system
+ * - evaluation of the potential gradient in the spherical coordinate system
  *
  * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
@@ -47,8 +47,8 @@
 "       radius - radius, i.e., distance from the earth centre, at the\n"\
 "                evaluated location.\n"\
 "       degree - degree of the spherical harmonic model.\n"\
-"       coef_g - vector of spherical harmonic model coeficients.\n"\
-"       coef_h - vector of spherical harmonic model coeficients.\n"\
+"       coef_g - vector of spherical harmonic model coefficients.\n"\
+"       coef_h - vector of spherical harmonic model coefficients.\n"\
 "       leg_p - vector the Legendre polynomials.\n"\
 "       rrp - vector the relative radius powers.\n"\
 "       lonsin - vector the the longitude cosines.\n"\
