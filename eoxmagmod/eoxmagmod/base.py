@@ -164,7 +164,8 @@ class MagneticModelBase(object):
         raise NotImplementedError
 
     def get_coef_static(self, date):
-        """ Calculate model static coefficients for a date specified by a decimal year value.
+        """ Calculate model static coefficients for a date specified
+        by a decimal year value.
         """
         raise NotImplementedError
 
@@ -179,7 +180,7 @@ class MagneticModelBase(object):
     def eval(self, arr_in, date, coord_type_in=GEODETIC_ABOVE_WGS84,
                 coord_type_out=None, secvar=False, mode=GRADIENT, maxdegree=-1,
                 mindegree=-1, check_validity=True):
-        """Evaluate spherical harmonic model for a given set of spatio-teporal
+        """Evaluate spherical harmonic model for a given set of spatio-temporal
         coordinates.
 
         Input:
@@ -262,7 +263,9 @@ class MagneticModelBase(object):
         if maxdegree > 0:
             degree = min(maxdegree, degree)
 
-        return sheval(arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out, mode)
+        return sheval(
+            arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out, mode
+        )
 
 
     def field_line(self, point, date, coord_type_in=GEODETIC_ABOVE_WGS84,
@@ -401,7 +404,8 @@ class MagneticModelComposed(MagneticModelBase):
         return (cg, ch)
 
     def get_coef_static(self, date):
-        """ Calculate model static coefficients for a date specified by a decimal year value.
+        """ Calculate model static coefficients for a date specified
+        by a decimal year value.
         """
         return self._combine_coef(
             self.c0, self.model0.get_coef_static(date),

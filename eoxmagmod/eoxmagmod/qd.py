@@ -46,16 +46,16 @@ def eval_apex(gclat, gclon, gcrad, time, fname=DATA_APEX_2020):
           Inputs:
             gclat - geocentric latitude(s).
             gclon - geocentric longitudes(s).
-            gcrad - geocentric radial cordinate(s) in km.
+            gcrad - geocentric radial coordinate(s) in km.
             fname - file-name of the model text file.
 
           Outputs:
             qdlat - quasi-dipole latitude(s).
             qdlon - quasi-dipole longitudes(s).
-            mlt - magnetic local times (s).
+            mlt - magnetic local time(s).
     """
 
     if not os.path.isfile(fname):
-        raise IOError("File not found! fname=%r"%fname)
+        raise IOError("File not found! fname=%r" % fname)
 
     return _pyqd.eval_apex(gclat, gclon, gcrad, time, fname)[:3]

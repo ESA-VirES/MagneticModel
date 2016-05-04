@@ -34,7 +34,7 @@ from shc import MagneticModelSHCPP
 from base import DATA_IGRF11
 
 def read_model_igrf11(fname=DATA_IGRF11):
-    """ Read model parameters from a coeficient file in the IGRF11 format."""
+    """ Read model parameters from a coefficient file in the IGRF11 format."""
 
     prm = {'sources': [fname], 'headers': []}
 
@@ -63,7 +63,7 @@ def read_model_igrf11(fname=DATA_IGRF11):
         time.append(float(item[-1][:2]+item[-1][-2:]))
         time = np.array(time)
 
-        # parse coeficients
+        # parse coefficients
         degree = 0
         lcoef = []
         for line in fid:
@@ -74,9 +74,11 @@ def read_model_igrf11(fname=DATA_IGRF11):
             lcoef.append(item)
             degree = max(item[1], degree)
             if item[0] not in ('g', 'h'):
-               raise ValueError("Unexpected row label '%s' at line %d!"%(item[0], lidx))
+                raise ValueError(
+                    "Unexpected row label '%s' at line %d!" % (item[0], lidx)
+                )
 
-        # fill the coeficient arrays
+        # fill the coefficient arrays
         ntime = time.size
         nterm = ((degree+1)*(degree+2))/2
         coef_g = np.zeros((nterm, ntime))

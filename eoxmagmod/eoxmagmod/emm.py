@@ -46,7 +46,7 @@ else:
 
 
 def _read_prm_emm2010(fname):
-    """ read single coeficient file """
+    """ read single coefficient file """
 
     def _read(fid):
         prm = {'sources': [fname]}
@@ -72,7 +72,7 @@ def _read_prm_emm2010(fname):
             if re.match(r'^\s*-+\s*$', line):
                 break
 
-        # parse coeficients
+        # parse coefficients
         prm['headers'] = ["\n".join(headers)]
         prm['degree'] = degree
         prm['epoch'] = epoch
@@ -92,11 +92,16 @@ def _read_prm_emm2010(fname):
                 if m > n:
                     raise ValueError
             except ValueError:
-                raise ValueError("Invalid line #%d: %s"%(loff+lidx, line.rstrip()))
+                raise ValueError(
+                    "Invalid line #%d: %s" % (loff + lidx, line.rstrip())
+                )
             else:
                 degree_check = max(degree_check, n)
                 if degree_check > degree:
-                    raise ValueError("Invalid order value! The annotated order value is too low!")
+                    raise ValueError(
+                        "Invalid order value! The annotated order value is too "
+                        "low!"
+                    )
 
                 idx = m + ((n+1)*n)/2
                 coef_g[idx] = g
@@ -104,7 +109,9 @@ def _read_prm_emm2010(fname):
                 #lcoef.append((n, m, g, h, dg, dh))
 
         if degree_check > degree:
-            raise ValueError("Invalid order value! The annotated order value is too high!")
+            raise ValueError(
+                "Invalid order value! The annotated order value is too high!"
+            )
 
         prm['coef_g'] = coef_g
         prm['coef_h'] = coef_h
@@ -121,15 +128,16 @@ def _read_prm_emm2010(fname):
 
 def read_model_emm2010(fname_static=DATA_EMM_2010_STATIC,
                        fname_secvar=DATA_EMM_2010_SECVAR):
-    """ Read model parameters from the coeficient files in the WMM2010 format."""
+    """ Read model parameters from the coefficient files in the WMM2010 format.
+    """
 
     prm_static = _read_prm_emm2010(fname_static)
     prm_secvar = _read_prm_emm2010(fname_secvar)
 
     if prm_static['name'] != prm_secvar['name']:
-        raise ValueError("Model name missmatch in the coeficients' files!")
+        raise ValueError("Model name mismatch in the coefficients' files!")
     if prm_static['epoch'] != prm_secvar['epoch']:
-        raise ValueError("Model epoch missmatch in the coeficients' files!")
+        raise ValueError("Model epoch mismatch in the coefficients' files!")
 
     prm = {}
     prm['name'] = prm_static['name']

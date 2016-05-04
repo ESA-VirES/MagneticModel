@@ -58,7 +58,8 @@ class MagneticModelSimple(MagneticModel):
         return self.prm['degree_secvar']
 
     def get_coef_static(self, date):
-        """ Calculate model static coeficients for a date specified by a decimal year value.
+        """ Calculate model static coefficients for a date specified
+        by a decimal year value.
         """
         prm = self.prm
         ddate = date - self.epoch
@@ -72,7 +73,7 @@ class MagneticModelSimple(MagneticModel):
         return coef_static_g, coef_static_h
 
     def get_coef_secvar(self, date):
-        """Get secular variation coeficients."""
+        """Get secular variation coefficients."""
         return self.prm['coef_secvar_g'], self.prm['coef_secvar_h']
 
     def print_info(self):
@@ -89,9 +90,11 @@ class MagneticModelSimple(MagneticModel):
             n_zero = n_all - (nz_g[0].size + nz_h[0].size)
             sparsity = float(n_zero) / float(n_all)
 
-            print "%sdegree:      %d"%(prefix, degree)
-            print "%strue degree: %d"%(prefix, degree_real)
-            print "%ssparsity:    %g%% (%d of %d)"%(prefix, 100*sparsity, n_zero, n_all)
+            print "%sdegree:      %d" % (prefix, degree)
+            print "%strue degree: %d" % (prefix, degree_real)
+            print "%ssparsity:    %g%% (%d of %d)" % (
+                prefix, 100*sparsity, n_zero, n_all
+            )
 
         prm = self.prm
         print "Magnetic Model:"
@@ -151,7 +154,7 @@ def read_model_wmm(fname):
                 lcoef.append((n, m, g, h, dg, dh))
                 degree = max(degree, n)
 
-        # PASS2 - fill the coeficient arrays
+        # PASS2 - fill the coefficient arrays
         nterm = ((degree+2)*(degree+1))/2
         coef_g = np.zeros(nterm)
         coef_h = np.zeros(nterm)
