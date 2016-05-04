@@ -47,7 +47,7 @@ DATA_IGRF11 = os.path.join(dirname, 'igrf11coeffs.txt')
 DATA_IGRF12 = os.path.join(dirname, 'IGRF12.shc')
 DATA_SIFM = os.path.join(dirname, 'SIFM.shc')
 
-# coordinate systems and their trasnformation
+# coordinate systems and their transformation
 from _pywmm import (
     GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96,
     GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
@@ -116,13 +116,14 @@ def vincdecnorm(arr):
     """ Calculate vector inclinations (-90:90), declinations
     (-180,180), and the vector norms.
     """
-    # equivalent to conversion of cartesian to spherical coordinates
+    # equivalent to conversion of Cartesian to spherical coordinates
     tmp = convert(arr, GEOCENTRIC_CARTESIAN, GEOCENTRIC_SPHERICAL)
     return -tmp[...,0], tmp[...,1], tmp[...,2]
 
 
 def to_year_fraction(date):
-    """ Converts a Python date or datetime to its decimal format.
+    """ Converts a Python `datetime.date` or `datetime.datetime` to a decimal
+    year value.
     """
 
     def since_epoch(date):  # returns seconds since epoch
@@ -163,12 +164,12 @@ class MagneticModelBase(object):
         raise NotImplementedError
 
     def get_coef_static(self, date):
-        """ Calculate model static coeficients for a date specified by a decimal year value.
+        """ Calculate model static coefficients for a date specified by a decimal year value.
         """
         raise NotImplementedError
 
     def get_coef_secvar(self, date):
-        """Get secular variation coeficients."""
+        """Get secular variation coefficients."""
         raise NotImplementedError
 
     def print_info(self):
@@ -201,30 +202,30 @@ class MagneticModelBase(object):
                     Ouput coordinate system defaults to the input coordinate
                     system.
 
-            secvar - if True secular variation of the magentic field is
-                     calculated rather than the magnetic fied.
+            secvar - if True secular variation of the magnetic field is
+                     calculated rather than the magnetic field.
 
             mode - type of output to be produced. The possible values are:
                         POTENTIAL
                         GRADIENT (default)
                         POTENTIAL_AND_GRADIENT
 
-            maxdegree - an optional max. allowed modelel degree
+            maxdegree - an optional maximum allowed modelled degree
                     (i.e., truncated evaluation). If set to -1 no limit
                     is imposed.
 
-            mindegree - an optional min. allowed modelel degree
-                    (i.e., truncated evaluation). When applied any coeficient
+            mindegree - an optional min. allowed modelled degree
+                    (i.e., truncated evaluation). When applied any coefficient
                     below this degree are set to zero. If set to -1 no limit
                     is imposed.
 
             check_validity - boolean flag controlling  whether the date
-                    vality will is checked (True, by default) or not (False).
+                    validity will is checked (True, by default) or not (False).
 
         Output:
 
             arr_out - output numpy array with the same shape as the input
-                      array contaning the calcuated magentic field parameters.
+                      array containing the calculated magnetic field parameters.
         """
 
         if isinstance(date, (datetime.date, datetime.datetime)):
@@ -290,16 +291,17 @@ class MagneticModelBase(object):
                     Ouput coordinate system defaults to the input coordinate
                     system.
 
-            maxdegree - an optional max. allowed modelel degree
+            maxdegree - an optional maximum allowed modelled degree
                     (i.e., truncated evaluation). If set to -1 no limit
                     is imposed.
 
             check_validity - boolean flag controlling  whether the date
-                    vality will is checked (True, by default) or not (False).
+                    validity is checked (True, by default) or not (False).
 
         Output:
             arr_out - array of points in the requested coordinate system.
-            arr_fint - array of magentic intensity values corresponding to the arr_out points
+            arr_fint - array of magentic intensity values corresponding
+            to the arr_out points
         """
 
         if coord_type_out is None:
@@ -383,7 +385,7 @@ class MagneticModelComposed(MagneticModelBase):
         return (cg, ch)
 
     def get_coef_static(self, date):
-        """ Calculate model static coeficients for a date specified by a decimal year value.
+        """ Calculate model static coefficients for a date specified by a decimal year value.
         """
         return self._combine_coef(
             self.c0, self.model0.get_coef_static(date),
@@ -391,7 +393,7 @@ class MagneticModelComposed(MagneticModelBase):
         )
 
     def get_coef_secvar(self, date):
-        """Get secular variation coeficients."""
+        """Get secular variation coefficients."""
         return self._combine_coef(
             self.c0, self.model0.get_coef_secvar(date),
             self.c1, self.model1.get_coef_secvar(date),
