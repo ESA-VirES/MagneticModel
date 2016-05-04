@@ -199,7 +199,7 @@ class MagneticModelBase(object):
                         GEODETIC_ABOVE_EGM96 (the same as WGS84)
                         GEOCENTRIC_SPHERICAL
                         GEOCENTRIC_CARTESIAN
-                    Ouput coordinate system defaults to the input coordinate
+                    Output coordinate system defaults to the input coordinate
                     system.
 
             secvar - if True secular variation of the magnetic field is
@@ -288,7 +288,7 @@ class MagneticModelBase(object):
                         GEODETIC_ABOVE_EGM96 (the same as WGS84)
                         GEOCENTRIC_SPHERICAL
                         GEOCENTRIC_CARTESIAN
-                    Ouput coordinate system defaults to the input coordinate
+                    Output coordinate system defaults to the input coordinate
                     system.
 
             maxdegree - an optional maximum allowed modelled degree
@@ -299,11 +299,11 @@ class MagneticModelBase(object):
                     validity is checked (True, by default) or not (False).
 
         Output:
-            arr_out - array of points in the requested coordinate system.
-            arr_fint - array of magentic intensity values corresponding
-            to the arr_out points
+            arr_coord - array of point coordinates in the requested coordinate
+                    system.
+            arr_field - array of magnetic field vectors in the requested
+                    coordinate system corresponding to the point coordinates.
         """
-
         if coord_type_out is None:
             coord_type_out = coord_type_in
 
@@ -312,38 +312,54 @@ class MagneticModelBase(object):
             'check_validity': check_validity,
         }
 
-        def _field_line_(x0, date, step, nstep, **mprm):
-            def f(x):
-                ff = self.eval(x, date, GEOCENTRIC_CARTESIAN, GEOCENTRIC_CARTESIAN, secvar=False, **mprm)
-                rr = vnorm(x)/6571.0
-                ffn = vnorm(ff)
-                if ffn > 0:
-                    ff /= ffn
-                return rr*ff, ffn
-            x = x0
-            lp = [x]
-            lf = []
-            for i in xrange(nstep):
-                v_dir, mf = f(x)
-                lf.append(mf)
-                dx = step*v_dir
-                x = x + dx
-                y = convert(x, GEOCENTRIC_CARTESIAN, GEODETIC_ABOVE_WGS84)
-                lp.append(x)
-                if y[2] < 0.0:
+        def _field_line_(coord_cart0, date, step, nstep, **mprm):
+
+            def feval(coord_cart):
+                field_vector = self.eval(
+                    coord_cart, date, GEOCENTRIC_CARTESIAN,
+                    GEOCENTRIC_CARTESIAN, secvar=False, **mprm
+                )
+                relative_radius = vnorm(coord_cart) / 6571.0
+                field_vector_norm = vnorm(field_vector)
+                if field_vector_norm > 0:
+                    normalised_field_vector = field_vector / field_vector_norm
+                else:
+                    normalised_field_vector = field_vector
+                return relative_radius * normalised_field_vector, field_vector
+
+            coord_cart = coord_cart0
+            coords_cart = [coord_cart]
+            field_vectors = []
+            for _ in xrange(nstep):
+                direction, field_vector = feval(coord_cart)
+                field_vectors.append(field_vector)
+                coord_cart = coord_cart + step * direction
+                coord_gdt = convert(
+                    coord_cart, GEOCENTRIC_CARTESIAN, GEODETIC_ABOVE_WGS84
+                )
+                coords_cart.append(coord_cart)
+                if coord_gdt[2] < 0.0:
                     break
-            _, mf = f(x)
-            lf.append(mf)
+            _, field_vector = feval(coord_cart)
+            field_vectors.append(field_vector)
+            return coords_cart, field_vectors
 
-            return lp, lf
-
-        x0 = convert(point, coord_type_in, GEOCENTRIC_CARTESIAN)
-        xx_n, ff_n = _field_line_(x0, date, +step, nstep, **prm)
-        xx_s, ff_s = _field_line_(x0, date, -step, nstep, **prm)
-        xx_s.reverse()
-        ff_s.reverse()
-
-        return convert(np.array(xx_s[:-1] + xx_n), GEOCENTRIC_CARTESIAN, coord_type_out), np.array(ff_s[:-1] + ff_n)
+        # initial coordinate conversion
+        coord_cart = convert(point, coord_type_in, GEOCENTRIC_CARTESIAN)
+        # trace the field-lines both to the north and south
+        coords_n, field_n = _field_line_(coord_cart, date, +step, nstep, **prm)
+        coords_s, field_s = _field_line_(coord_cart, date, -step, nstep, **prm)
+        # join the north and reversed south segments
+        coords_s.reverse()
+        field_s.reverse()
+        coords_cart = np.array(coords_s[:-1] + coords_n)
+        field_cart = np.array(field_s[:-1] + field_n)
+        # final coordinate system conversions
+        coords_out = convert(coords_cart, GEOCENTRIC_CARTESIAN, coord_type_out)
+        field_out = vrotate(
+            field_cart, None, coords_out, GEOCENTRIC_CARTESIAN, coord_type_out
+        )
+        return (coords_out, field_out)
 
 
 class MagneticModelComposed(MagneticModelBase):
