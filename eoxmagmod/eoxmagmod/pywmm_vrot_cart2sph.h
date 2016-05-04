@@ -1,6 +1,6 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings - vector rotation - sph2cart
+ * World Magnetic Model - C python bindings - vector rotation - cart2sph
  *  (i.e., vector coordinate system transformation)
  *
  * Project: World Magnetic Model - python interface
@@ -29,8 +29,8 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_VROT_SPH2CART_H
-#define PYWMM_VROT_SPH2CART_H
+#ifndef PYWMM_VROT_CART2SPH_H
+#define PYWMM_VROT_CART2SPH_H
 
 #include <math.h>
 #include "math_aux.h"
@@ -40,14 +40,14 @@
 
 /* recursive vector rotation */
 
-static void _vrot_sph2cart(ARRAY_DATA ad_i, ARRAY_DATA ad_lat,
+static void _vrot_cart2sph(ARRAY_DATA ad_i, ARRAY_DATA ad_lat,
                            ARRAY_DATA ad_lon, ARRAY_DATA ad_o)
 {
     if (ad_i.ndim > 1)
     {
         npy_intp i;
         for(i = 0; i < ad_i.dim[0]; ++i)
-            _vrot_sph2cart(
+            _vrot_cart2sph(
                 _get_arrd_item(&ad_i, i),
                 _get_arrd_item(&ad_lat, i),
                 _get_arrd_item(&ad_lon, i),
@@ -60,15 +60,15 @@ static void _vrot_sph2cart(ARRAY_DATA ad_i, ARRAY_DATA ad_lat,
         #define P(a,i) ((double*)((a).data+(i)*(a).stride[0]))
         #define V(a,i) (*P(a,i))
 
-        const double lat = DG2RAD*SV(ad_lat);
-        const double lon = DG2RAD*SV(ad_lon);
+        const double lat = -DG2RAD*SV(ad_lat);
+        const double lon = -DG2RAD*SV(ad_lon);
         double tmp;
 
-        // rotate around the elevation axis
-        rot2d(&tmp, P(ad_o,2), V(ad_i,2), V(ad_i,0), sin(lat), cos(lat));
-
         // rotate around the azimuth axis
-        rot2d(P(ad_o,0), P(ad_o,1), tmp, V(ad_i,1), sin(lon), cos(lon));
+        rot2d(&tmp, P(ad_o,1), V(ad_i,0), V(ad_i,1), sin(lon), cos(lon));
+
+        // rotate around the elevation axis
+        rot2d(P(ad_o,2), P(ad_o,0), tmp, V(ad_i,2), sin(lat), cos(lat));
 
         #undef V
         #undef P
@@ -77,11 +77,11 @@ static void _vrot_sph2cart(ARRAY_DATA ad_i, ARRAY_DATA ad_lat,
 
 /* python function definition */
 
-#define DOC_VROT_SPH2CART "\n"\
-"   arr_out = vrot_sph2cart(arr_in, arr_lat, arr_lon)\n"\
+#define DOC_VROT_CART2SPH "\n"\
+"   arr_out = vrot_cart2sph(arr_in, arr_lat, arr_lon)\n"\
 "\n"\
-"     Rotate vectors from the geocentric spherical to \n"\
-"     the geocentric Cartesian coordinates for given latitude\n"\
+"     Rotate vectors from the geocentric Cartesian to \n"\
+"     the geocentric spherical coordinates for given latitude\n"\
 "     and longitude in dg.\n"\
 "     The inputs are:\n"\
 "         arr_in - array of the input vectors\n"\
@@ -89,7 +89,7 @@ static void _vrot_sph2cart(ARRAY_DATA ad_i, ARRAY_DATA ad_lat,
 "         arr_lon - array of longitudes.\n"\
 "     Scalar lat/lon values are also accepted for a single vector rotation.\n"
 
-static PyObject* vrot_sph2cart(PyObject *self, PyObject *args, PyObject *kwdict)
+static PyObject* vrot_cart2sph(PyObject *self, PyObject *args, PyObject *kwdict)
 {
     static char *keywords[] = {"arr_in", "arr_lat", "arr_lon", NULL};
     PyObject *obj_in = NULL; // input object
@@ -103,7 +103,7 @@ static PyObject* vrot_sph2cart(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "OOO|:vrot_sph2cart", keywords, &obj_in, &obj_lat, &obj_lon));
+            "OOO|:vrot_cart2sph", keywords, &obj_in, &obj_lat, &obj_lon));
 
     // cast the objects to arrays
     if (NULL == (arr_in=_get_as_double_array(obj_in, 1, 0, NPY_ALIGNED, keywords[0])))
@@ -139,7 +139,7 @@ static PyObject* vrot_sph2cart(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     // rotate the vector(s)
-    _vrot_sph2cart(_array_to_arrd(arr_in), _array_to_arrd(arr_lat),
+    _vrot_cart2sph(_array_to_arrd(arr_in), _array_to_arrd(arr_lat),
                    _array_to_arrd(arr_lon), _array_to_arrd(arr_out));
 
     retval = arr_out;
@@ -155,4 +155,4 @@ static PyObject* vrot_sph2cart(PyObject *self, PyObject *args, PyObject *kwdict)
     return retval;
 }
 
-#endif  /* PYWMM_VROT_SPH2CART_H */
+#endif  /* PYWMM_VROT_CART2SPH_H */

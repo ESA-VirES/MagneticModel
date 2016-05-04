@@ -55,8 +55,10 @@ from .base import (
     relradpow,
     spharpot,
     sphargrd,
+    vrotate,
     vrot_sph2geod,
     vrot_sph2cart,
+    vrot_cart2sph,
 )
 from .emm import read_model_emm2010
 from .wmm import read_model_wmm, read_model_wmm2010, read_model_wmm2015
@@ -74,8 +76,10 @@ __all__ = [
     'read_model_igrf11',
     'vnorm',
     'vincdecnorm',
+    'vrotate',
     'vrot_sph2geod',
     'vrot_sph2cart',
+    'vrot_cart2sph',
     'convert',
     'legendre',
     'lonsincos',

@@ -21,7 +21,7 @@ CCFLAGS= -c -O2 -Wall -Wno-unused-function -fPIC $(INCS)
 HDR_WMM=pywmm_aux.h pywmm_sheval.h pywmm_sphargrd.h pywmm_spharpot.h\
     pywmm_legendre.h pywmm_lonsincos.h pywmm_relradpow.h\
     pywmm_vrot_common.h pywmm_vrot_sph2cart.h pywmm_vrot_sph2geod.h\
-    pywmm_cconv.h pywmm_coord.h pywmm_exc.h
+    pywmm_vrot_cart2sph.h pywmm_cconv.h pywmm_coord.h pywmm_exc.h
 OBJ_WMM=pywmm.o
 DST_WMM=_pywmm.so
 

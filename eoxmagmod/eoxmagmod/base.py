@@ -53,7 +53,7 @@ from _pywmm import (
     GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
     POTENTIAL, GRADIENT, POTENTIAL_AND_GRADIENT,
     convert, legendre, lonsincos, relradpow, spharpot, sphargrd,
-    vrot_sph2geod, vrot_sph2cart, sheval,
+    vrot_sph2geod, vrot_sph2cart, vrot_cart2sph, sheval,
 )
 
 COORD_TYPES = (
@@ -63,11 +63,50 @@ COORD_TYPES = (
     (GEOCENTRIC_CARTESIAN, "GEOCENTRIC_CARTESIAN"),
 )
 
+_GEODETIC_COORD_TYPES = (GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96)
+
 EVAL_MODES = (
     (POTENTIAL, "POTENTIAL"),
     (GRADIENT, "GRADIENT"),
     (POTENTIAL_AND_GRADIENT, "POTENTIAL_AND_GRADIENT"),
 )
+
+def vrotate(arr, coord_in, coord_out, coord_type_in, coord_type_out):
+    """ Rotate vectors from one coordinate system to another.
+        Input:
+            arr - array of the source vectors
+            coord_in - source coordinates
+            coord_out - destination coordinates
+            coord_type_in - source coordinate system type
+            coord_type_out - destination coordinate system type
+        Output:
+            arr_out - array of the rotated vectors
+    """
+    if coord_type_in == coord_type_out:
+        return arr
+
+    if coord_type_in in _GEODETIC_COORD_TYPES:
+        if coord_type_out in _GEODETIC_COORD_TYPES:
+            return arr
+        elif coord_type_out == GEOCENTRIC_SPHERICAL:
+            return vrot_sph2geod(arr, coord_out[..., 0] - coord_in[..., 0])
+        elif coord_type_out == GEOCENTRIC_CARTESIAN:
+            return vrot_sph2cart(arr, coord_in[..., 0], coord_in[..., 1])
+
+    elif coord_type_in == GEOCENTRIC_SPHERICAL:
+        if coord_type_out in _GEODETIC_COORD_TYPES:
+            return vrot_sph2geod(arr, coord_out[..., 0] - coord_in[..., 0])
+        elif coord_type_out == GEOCENTRIC_CARTESIAN:
+            return vrot_sph2cart(arr, coord_in[..., 0], coord_in[..., 1])
+
+    elif coord_type_in == GEOCENTRIC_CARTESIAN:
+        if coord_type_out in _GEODETIC_COORD_TYPES:
+            return vrot_cart2sph(arr, coord_out[..., 0], coord_out[..., 1])
+        elif coord_type_out == GEOCENTRIC_SPHERICAL:
+            return vrot_cart2sph(arr, coord_out[..., 0], coord_out[..., 1])
+
+    raise ValueError("Unsupported coordinate type!")
+
 
 def vnorm(arr):
     """Calculate norms for each vector form an input array of vectors."""

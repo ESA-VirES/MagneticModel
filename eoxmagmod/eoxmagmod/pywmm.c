@@ -78,18 +78,20 @@
 /* vector rotations */
 #include "pywmm_vrot_sph2geod.h"
 #include "pywmm_vrot_sph2cart.h"
+#include "pywmm_vrot_cart2sph.h"
 
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
 
 #define DOC_PYWMM \
-"This module provides bindings to the World Magenic Model libary."
+"This module provides bindings to the World Magnetic Model library."
 
 /*---------------------------------------------------------------------------*/
 /*define module's methods */
 static PyMethodDef pywmm_methods[] =
 {
     {"vrot_sph2cart", (PyCFunction)vrot_sph2cart, METH_VARARGS|METH_KEYWORDS, DOC_VROT_SPH2CART},
+    {"vrot_cart2sph", (PyCFunction)vrot_cart2sph, METH_VARARGS|METH_KEYWORDS, DOC_VROT_CART2SPH},
     {"vrot_sph2geod", (PyCFunction)vrot_sph2geod, METH_VARARGS|METH_KEYWORDS, DOC_VROT_SPH2GEOD},
     {"spharpot", (PyCFunction)spharpot, METH_VARARGS|METH_KEYWORDS, DOC_SPHARPOT},
     {"sphargrd", (PyCFunction)sphargrd, METH_VARARGS|METH_KEYWORDS, DOC_SPHARGRD},
