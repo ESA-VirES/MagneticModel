@@ -236,7 +236,7 @@ static void _sheval_model_eval(MODEL *model, int mode, double *fpot,
 
             case CT_GEODETIC_ABOVE_WGS84:
             case CT_GEODETIC_ABOVE_EGM96:
-                tmp = DG2RAD*glat - clat;
+                tmp = clat - DG2RAD*glat;
                 rot2d(fz, fx, frad, flat, sin(tmp), cos(tmp));
                 *fy = flon;
                 break;

@@ -58,7 +58,7 @@ static void _vrot_sph2geod(ARRAY_DATA ad_i, ARRAY_DATA ad_dlat,
         #define P(a,i) ((double*)((a).data+(i)*(a).stride[0]))
         #define V(a,i) (*P(a,i))
 
-        const double dlat = DG2RAD*SV(ad_dlat);
+        const double dlat = -DG2RAD*SV(ad_dlat);
 
         // rotate around the elevation axis
         rot2d(P(ad_o,2), P(ad_o,0), V(ad_i,2), V(ad_i,0), sin(dlat), cos(dlat));
