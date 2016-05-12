@@ -38,15 +38,16 @@ DATA_APEX_2020 = os.path.join(dirname, 'apexsh_1980-2020.txt')
 
 def eval_apex(gclat, gclon, gcrad, time, fname=DATA_APEX_2020):
     """
-        qdlat, qdlon, mlt = eval_apex(gclat, gclon, gcrad, fname)
+        qdlat, qdlon, mlt = eval_apex(gclat, gclon, gcrad, time, fname)
 
           Evaluate magnetic quasi-dipole coordinates and the magnetic
           local time for a single or multiple input coordinates.
 
           Inputs:
             gclat - geocentric latitude(s).
-            gclon - geocentric longitudes(s).
+            gclon - geocentric longitude(s).
             gcrad - geocentric radial coordinate(s) in km.
+            time  - decimal year time(s)
             fname - file-name of the model text file.
 
           Outputs:
