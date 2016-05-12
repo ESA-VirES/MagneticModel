@@ -55,7 +55,7 @@
 #include "pyqd_exc.h"
 
 /* quasi dipole coordinates evaluation */
-#include "pydq_eval_apex.h"
+#include "pyqd_eval_apex.h"
 
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
