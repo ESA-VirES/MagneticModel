@@ -1,8 +1,8 @@
 /*-----------------------------------------------------------------------------
  *
- * Qausi-Dipole Magnetic Coordinates - C/Fotran interface test
+ * Quasi-Dipole Magnetic Coordinates - Fortran wrapper test
  *
- * Project: World Magnetic Model - python interface
+ * Project: EOX Magnetic Model
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------

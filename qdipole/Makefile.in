@@ -20,17 +20,20 @@ INSTALL_INC_DIR=${INSTALL_PREFIX}${INC_DIR}
 INSTALL_DOC_DIR=${INSTALL_PREFIX}${DOC_DIR}
 INSTALL_DATA_DIR=${INSTALL_PREFIX}${DATA_DIR}
 LIB_TARGET=libqdipole.so
-BIN_TARGET=qdipole_test
+BIN_TARGET=qdipole_test subsol_test
+INC=
 HDR=cqdipole.h
-OBJ=cqdipole.o qdipole.o apex.o apexsh.o makeapexsh.o
+OBJ=cqdipole.o qdipole.o apex.o apexsh.o makeapexsh.o eval_subsol.o
 DOC=README
-DATA=apexsh_1980-2020.txt apexsh_1995-2015.txt test_result.apexsh_1980-2020.txt test_result.apexsh_1995-2015.txt
+DATA=apexsh_1980-2020.txt apexsh_1995-2015.txt \
+ test_result.apexsh_1980-2020.txt test_result.apexsh_1995-2015.txt \
+ test_result.subsol.txt
 MOD=alfbasismodule.mod apxshmodule.mod
 
 %.o: %.c $(HDR)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-%.o: %.f90 $(HDR)
+%.o: %.f90 $(INC)
 	$(FC) -c -o $@ $< $(CFLAGS)
 
 all: build
@@ -56,5 +59,8 @@ clean:
 $(LIB_TARGET): $(OBJ)
 	$(LD) -o $(LIB_TARGET) $(OBJ) $(LFLAGS)
 
-qdipole_test:
+qdipole_test: $(LIB_TARGET) qdipole_test.c
 	$(CC) -o qdipole_test qdipole_test.c -lqdipole -L./
+
+subsol_test: $(LIB_TARGET) subsol_test.c
+	$(CC) -o subsol_test subsol_test.c -lqdipole -lm -L./

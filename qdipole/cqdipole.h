@@ -1,8 +1,8 @@
 /*-----------------------------------------------------------------------------
  *
- * Qausi-Dipole Magnetic Coordinates - C interface (wrapper arround the F code)
+ * Quasi-Dipole Magnetic Coordinates - C wrapper around the Fortran code
  *
- * Project: World Magnetic Model - python interface
+ * Project: EOX Magnetic Model
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
@@ -40,6 +40,15 @@ void c_make_apex(
     double* qdlat, double* qdlon, double* xmlt,
     double* f11, double* f12, double* f21, double* f22,
     const double* time, const double* gcrad, const double* gclat,
-    const double* gclon, int n_data, const char *fname);
+    const double* gclon, const int n_data, const char *fname);
+
+
+/**
+ * @brief Batch evaluation of the sub-solar point latitude and longitude
+ *
+ */
+
+void c_eval_subsol(double* sbsllat, double* sbsllon, const double* time_mjd2k,
+                   const int n_data);
 
 #endif /*CQDIPOLE_H*/

@@ -1,12 +1,12 @@
 /*-----------------------------------------------------------------------------
  *
- * Quasi-Dipole Magnetic Coordinates - C wrapper around the Fortran code
+ * Sub-solar point - Fortran wrapper test
  *
  * Project: EOX Magnetic Model
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2015 EOX IT Services GmbH
+ * Copyright (C) 2016 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,41 +27,40 @@
  * THE SOFTWARE.
  *-----------------------------------------------------------------------------
 */
-
-/*
- * NOTE: The C/Fortran interface conventions may differ between various
- *       compilers. This code uses the GCC conventions.
-*/
-
-#include <string.h>
+#include <stdio.h>
+#include <math.h>
 #include "cqdipole.h"
 
-void make_apex_(
-    double*, double*, double*, double *, double *, double *, double*,
-    const double*, const double*, const double*, const double*,
-    const int*, const char*);
+#define N 5
 
-void c_make_apex(
-    double* qdlat, double* qdlon, double* xmlt,
-    double* f11, double* f12, double* f21, double* f22,
-    const double* time, const double* gcrad, const double* gclat,
-    const double* gclon, const int n_data, const char *fname)
+int main(int argc, char* argv[])
 {
-    /* NOTE: Fortran code expects the file name as a 128-character string.*/
-    char fname128[129];
-    strncpy(fname128, fname, 128);
-    fname128[128] = '\0' ;
+    int i;
+    int n_data = N;
+    double time[N] = {
+        0.0, // MJD200 origin 2000-01-01T00:00:00
+        902.558333333, // summer solstice 2002
+        5013.86388889, // autumn equinox 2013
+        5923.1875, // spring equinox 2016
+        6929.93263889, // winter solstice 2018
+    };
+    double sbsllat[N], sbsllon[N];
 
-    /* call the Fortran subroutine */
-    make_apex_(qdlat, qdlon, xmlt, f11, f12, f21, f22,
-               time, gcrad, gclat, gclon, &n_data, fname128);
-}
+    for (i = 0; i < N; ++i)
+    {
+        sbsllon[i] = 0.0;
+        sbsllat[i] = 0.0;
+    }
 
-void eval_subsol_(double*, double*, const double*, const int*);
+    c_eval_subsol(sbsllat, sbsllon, time, n_data);
 
-void c_eval_subsol(double* sbsllat, double* sbsllon, const double* time_mjd2k,
-                   const int n_data)
-{
-    /* call the Fortran subroutine */
-    eval_subsol_(sbsllat, sbsllon, time_mjd2k, &n_data);
+    for (i = 0; i < N; ++i)
+    {
+        printf("#%i\n", i+1);
+        printf("    time:  %.12g\n", time[i]);
+        printf("    sbsllat: %g\n", sbsllat[i]);
+        printf("    sbsllon: %g (%g)\n", sbsllon[i], 360.0 * (0.5 - fmod(time[i], 1.0)));
+    }
+
+    return 0;
 }
