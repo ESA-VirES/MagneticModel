@@ -33,7 +33,7 @@
 !    gc_lat   vector of geocentric latitudes (degrees)
 !    gd_lon   vector of geocentric longitudes (degrees)
 !    N_data   number of points, i.e., vector size
-!    filnam   path to the coeficients (string up to 128 characters) 
+!    filnam   path to the coefficients (string up to 128 characters)
 !
 !  OUTPUT ARGUMENTS
 !    qdlat     array of Quasi-Dipole latitudes

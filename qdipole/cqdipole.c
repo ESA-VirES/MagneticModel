@@ -65,3 +65,40 @@ void c_eval_subsol(double* sbsllat, double* sbsllon, const double* time_mjd2k,
     /* call the Fortran subroutine */
     eval_subsol_(sbsllat, sbsllon, time_mjd2k, &n_data);
 }
+
+void eval_qdlatlon_(double*, double*, const double*, const double*,
+                    const double*, const double*, const int*, const char*);
+
+void c_eval_qdlatlon(
+     double* qdlat, double* qdlon, const double* time_dy, const double* gcrad,
+     const double* gclat, const double* gclon, const int n_data,
+     const char* coeff_file)
+{
+    /* NOTE: Fortran code expects the file name as a 128-character string.*/
+    char fname256[257];
+    strncpy(fname256, coeff_file, 256);
+    fname256[256] = '\0' ;
+
+    /* call the Fortran subroutine */
+    eval_qdlatlon_(qdlat, qdlon, time_dy, gcrad, gclat, gclon, &n_data, fname256);
+}
+
+void eval_qdlatlonvb_(double*, double*, double*, double*, double*, double*,
+                      double*, const double*, const double*, const double*,
+                      const double*, const int*, const char*);
+
+void c_eval_qdlatlonvb(
+     double* qdlat, double* qdlon, double* f11, double* f12, double* f21,
+     double* f22, double* f, const double* time_dy, const double* gcrad,
+     const double* gclat, const double* gclon,
+     const int n_data, const char* coeff_file)
+{
+    /* NOTE: Fortran code expects the file name as a 128-character string.*/
+    char fname256[257];
+    strncpy(fname256, coeff_file, 256);
+    fname256[256] = '\0' ;
+
+    /* call the Fortran subroutine */
+    eval_qdlatlonvb_(qdlat, qdlon, f11, f12, f21, f22, f,
+                   time_dy, gcrad, gclat, gclon, &n_data, fname256);
+}
