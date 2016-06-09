@@ -12,6 +12,11 @@ EOX IT Services GmbH, Vienna, Austria
 CHANGE LOG
 ----------
 
+2016-06-09 - 0.2.0 Update
+ - review and re-factoring of the C interface
+ - separating MLT calculation from the DQ latitude/longitude evaluation
+ - new interface to the sub-solar point calculation
+
 2016-02-27 - 0.1.1 Update
  - employing GNU/Autoconf for build configuration
  - improving the build process
@@ -47,3 +52,8 @@ TESTING
 
   $ ./qdipole_test apexsh_1995-2015.txt | diff - test_result.apexsh_1995-2015.txt
   $ ./qdipole_test apexsh_1980-2020.txt | diff - test_result.apexsh_1980-2020.txt
+  $ ./qdlatlon_test apexsh_1995-2015.txt | diff - test_result.qdlatlon.apexsh_1995-2015.txt
+  $ ./qdlatlon_test apexsh_1980-2020.txt | diff - test_result.qdlatlon.apexsh_1980-2020.txt
+  $ ./mlt_test apexsh_1995-2015.txt | diff - test_result.mlt.apexsh_1995-2015.txt
+  $ ./mlt_test apexsh_1980-2020.txt | diff - test_result.mlt.apexsh_1980-2020.txt
+  $ ./subsol_test | diff - test_result.subsol.txt

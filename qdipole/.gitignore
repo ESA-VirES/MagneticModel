@@ -6,4 +6,4 @@ Makefile
 *.so
 *.lo
 *.mod
-qdipole_test
+*_test
