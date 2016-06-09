@@ -42,10 +42,10 @@ void make_apex_(
     const int*, const char*);
 
 void c_make_apex(
-    double* qdlat, double* qdlon, double* xmlt,
-    double* f11, double* f12, double* f21, double* f22,
-    const double* time, const double* gcrad, const double* gclat,
-    const double* gclon, const int n_data, const char *fname)
+    double *qdlat, double *qdlon, double *xmlt,
+    double *f11, double *f12, double *f21, double *f22,
+    const double *time, const double *gcrad, const double *gclat,
+    const double *gclon, const int n_data, const char *fname)
 {
     /* NOTE: Fortran code expects the file name as a 128-character string.*/
     char fname128[129];
@@ -57,9 +57,25 @@ void c_make_apex(
                time, gcrad, gclat, gclon, &n_data, fname128);
 }
 
+
+void eval_mlt_(double*, const double*, const double*, const int*, const char*);
+
+void c_eval_mlt(double *t_mlt, const double *qdlon, const double *t_mjd2k,
+                const int n_data, const char *coeff_file)
+{
+    /* NOTE: Fortran code expects the file name as a 256-character string.*/
+    char fname256[257];
+    strncpy(fname256, coeff_file, 256);
+    fname256[256] = '\0' ;
+
+    /* call the Fortran subroutine */
+    eval_mlt_(t_mlt, qdlon, t_mjd2k, &n_data, fname256);
+}
+
+
 void eval_subsol_(double*, double*, const double*, const int*);
 
-void c_eval_subsol(double* sbsllat, double* sbsllon, const double* time_mjd2k,
+void c_eval_subsol(double *sbsllat, double *sbsllon, const double *time_mjd2k,
                    const int n_data)
 {
     /* call the Fortran subroutine */
@@ -69,12 +85,13 @@ void c_eval_subsol(double* sbsllat, double* sbsllon, const double* time_mjd2k,
 void eval_qdlatlon_(double*, double*, const double*, const double*,
                     const double*, const double*, const int*, const char*);
 
+
 void c_eval_qdlatlon(
-     double* qdlat, double* qdlon, const double* time_dy, const double* gcrad,
-     const double* gclat, const double* gclon, const int n_data,
-     const char* coeff_file)
+     double *qdlat, double *qdlon, const double *time_dy, const double *gcrad,
+     const double *gclat, const double *gclon, const int n_data,
+     const char *coeff_file)
 {
-    /* NOTE: Fortran code expects the file name as a 128-character string.*/
+    /* NOTE: Fortran code expects the file name as a 256-character string.*/
     char fname256[257];
     strncpy(fname256, coeff_file, 256);
     fname256[256] = '\0' ;
@@ -83,17 +100,18 @@ void c_eval_qdlatlon(
     eval_qdlatlon_(qdlat, qdlon, time_dy, gcrad, gclat, gclon, &n_data, fname256);
 }
 
+
 void eval_qdlatlonvb_(double*, double*, double*, double*, double*, double*,
                       double*, const double*, const double*, const double*,
                       const double*, const int*, const char*);
 
 void c_eval_qdlatlonvb(
-     double* qdlat, double* qdlon, double* f11, double* f12, double* f21,
-     double* f22, double* f, const double* time_dy, const double* gcrad,
-     const double* gclat, const double* gclon,
-     const int n_data, const char* coeff_file)
+     double *qdlat, double *qdlon, double *f11, double *f12, double *f21,
+     double *f22, double *f, const double *time_dy, const double *gcrad,
+     const double *gclat, const double *gclon,
+     const int n_data, const char *coeff_file)
 {
-    /* NOTE: Fortran code expects the file name as a 128-character string.*/
+    /* NOTE: Fortran code expects the file name as a 256-character string.*/
     char fname256[257];
     strncpy(fname256, coeff_file, 256);
     fname256[256] = '\0' ;

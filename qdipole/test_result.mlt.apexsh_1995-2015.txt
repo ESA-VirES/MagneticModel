@@ -1,0 +1,37 @@
+Using: apexsh_1995-2015.txt
+#1
+    time:  0
+    qdlon: 0
+    mlt:   18.8709
+#2
+    time:  0
+    qdlon: 90
+    mlt:   0.870874
+#3
+    time:  0
+    qdlon: 180
+    mlt:   6.87087
+#4
+    time:  0
+    qdlon: -90
+    mlt:   12.8709
+#5
+    time:  5923
+    qdlon: 0
+    mlt:   19.0121
+#6
+    time:  5923.25
+    qdlon: 0
+    mlt:   1.04182
+#7
+    time:  5923.5
+    qdlon: 0
+    mlt:   7.01404
+#8
+    time:  5923.75
+    qdlon: 0
+    mlt:   13.0451
+#9
+    time:  5924
+    qdlon: 0
+    mlt:   19.0212

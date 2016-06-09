@@ -40,33 +40,46 @@ void c_make_apex(
     double* qdlat, double* qdlon, double* xmlt,
     double* f11, double* f12, double* f21, double* f22,
     const double* time, const double* gcrad, const double* gclat,
-    const double* gclon, const int n_data, const char *fname);
+    const double* gclon, const int n_data, const char *fname
+);
 
 /**
  * @brief Batch evaluation of the Quasi-Dipole apex coordinates with the vector base
  */
 
 void c_eval_qdlatlonvb(
-     double* qdlat, double* qdlon, double* f11, double* f12, double* f21,
-     double* f22, double* f, const double* time_dy, const double* gcrad,
-     const double* gclat, const double* gclon, const int n_data,
-     const char* coeff_file);
+    double* qdlat, double* qdlon, double* f11, double* f12, double* f21,
+    double* f22, double* f, const double* time_dy, const double* gcrad,
+    const double* gclat, const double* gclon, const int n_data,
+    const char* coeff_file
+);
 
 /**
  * @brief Batch evaluation of the Quasi-Dipole apex coordinates
  */
 
 void c_eval_qdlatlon(
-     double* qdlat, double* qdlon, const double* time_dy, const double* gcrad,
-     const double* gclat, const double* gclon, const int n_data,
-     const char* coeff_file);
+    double* qdlat, double* qdlon, const double* time_dy, const double* gcrad,
+    const double* gclat, const double* gclon, const int n_data,
+    const char* coeff_file
+);
+
+/**
+ * @brief Batch evaluation of the Magnetic Local Time
+ */
+
+void c_eval_mlt(
+    double *t_mlt, const double *qdlon, const double *t_mjd2k, const int n_data,
+    const char *coeff_file
+);
 
 /**
  * @brief Batch evaluation of the sub-solar point latitude and longitude
  *
  */
 
-void c_eval_subsol(double* sbsllat, double* sbsllon, const double* time_mjd2k,
-                   const int n_data);
+void c_eval_subsol(
+    double* sbsllat, double* sbsllon, const double* time_mjd2k, const int n_data
+);
 
 #endif /*CQDIPOLE_H*/
