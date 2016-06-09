@@ -30,6 +30,8 @@ DATA=apexsh_1980-2020.txt apexsh_1995-2015.txt \
  test_result.apexsh_1995-2015.txt \
  test_result.qdlatlon.apexsh_1980-2020.txt \
  test_result.qdlatlon.apexsh_1995-2015.txt \
+ test_result.mlt.apexsh_1980-2020.txt \
+ test_result.mlt.apexsh_1995-2015.txt \
  test_result.subsol.txt
 MOD=alfbasismodule.mod apxshmodule.mod
 
