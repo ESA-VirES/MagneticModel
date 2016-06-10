@@ -2,7 +2,7 @@
  *
  * Magnetic Quasi Dipole Coordinates - C python bindings
  *
- * Project: World Magnetic Model - python interface
+ * Project: EOX Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
@@ -28,7 +28,7 @@
  *-----------------------------------------------------------------------------
 */
 
-#define VERSION "0.1.0"
+#define VERSION "0.2.0"
 
 // needed to prevent dual definition
 #ifdef _POSIX_C_SOURCE
@@ -54,9 +54,17 @@
 /* module specific exceptions */
 #include "pyqd_exc.h"
 
-/* quasi dipole coordinates evaluation */
+/* quasi dipole coordinates evaluation - old API with wrong MLT */
 #include "pyqd_eval_apex.h"
 
+/* Quasi-Dipole coordinates evaluation */
+#include "pyqd_eval_qdlatlon.h"
+
+/* Magnetic Local Time coordinates evaluation */
+#include "pyqd_eval_mlt.h"
+
+/* sub-solar point coordinates evaluation */
+#include "pyqd_eval_subsol.h"
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
 
@@ -67,6 +75,9 @@
 /*define module's methods */
 static PyMethodDef pyqd_methods[] =
 {
+    {"eval_qdlatlon", (PyCFunction)eval_qdlatlon, METH_VARARGS|METH_KEYWORDS, DOC_EVAL_QDLATLON},
+    {"eval_mlt", (PyCFunction)eval_mlt, METH_VARARGS|METH_KEYWORDS, DOC_EVAL_MLT},
+    {"eval_subsol", (PyCFunction)eval_subsol, METH_VARARGS|METH_KEYWORDS, DOC_EVAL_SUBSOL},
     {"eval_apex", (PyCFunction)eval_apex, METH_VARARGS|METH_KEYWORDS, DOC_EVAL_APEX},
     {NULL, NULL, 0, NULL} /* Sentinel - DO NOT REMOVE! */
 } ;
@@ -105,4 +116,3 @@ PyMODINIT_FUNC init_pyqd(void)
 }
 
 /*---------------------------------------------------------------------------*/
-

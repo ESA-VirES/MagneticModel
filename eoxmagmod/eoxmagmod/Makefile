@@ -25,7 +25,8 @@ HDR_WMM=pywmm_aux.h pywmm_sheval.h pywmm_sphargrd.h pywmm_spharpot.h\
 OBJ_WMM=pywmm.o
 DST_WMM=_pywmm.so
 
-HDR_QD=pyqd_eval_apex.h pyqd_exc.h pywmm_aux.h
+HDR_QD=pywmm_aux.h pyqd_exc.h\
+    pyqd_eval_qdlatlon.h pyqd_eval_mlt.h pyqd_eval_subsol.h pyqd_eval_apex.h
 OBJ_QD=pyqd.o
 DST_QD=_pyqd.so
 

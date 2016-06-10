@@ -3,7 +3,7 @@
  * Magnetic Quasi Dipole Coordinates - C python bindings 
  * - module specific exception
  *
- * Project: World Magnetic Model - python interface
+ * Project: EOX Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
