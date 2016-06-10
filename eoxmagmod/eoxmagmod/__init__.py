@@ -64,7 +64,10 @@ from .emm import read_model_emm2010
 from .wmm import read_model_wmm, read_model_wmm2010, read_model_wmm2015
 from .shc import read_model_shc
 from .igrf import read_model_igrf11
-from .qd import eval_apex, DATA_APEX_2015, DATA_APEX_2020
+from .qd import (
+    DATA_APEX_2015, DATA_APEX_2020,
+    eval_qdlatlon, eval_mlt, eval_subsol, eval_apex,
+)
 
 __all__ = [
     'MagneticModel',
@@ -104,11 +107,14 @@ __all__ = [
     'GRADIENT',
     'POTENTIAL_AND_GRADIENT',
     'eval_apex',
+    'eval_qdlatlon',
+    'eval_mlt',
+    'eval_subsol',
     'DATA_APEX_2015',
     'DATA_APEX_2020',
 ]
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 __author__ = 'Martin Paces (martin.paces@eox.at)'
 __copyright__ = 'Copyright (C) 2014 EOX IT Services GmbH'
 __licence__ = 'EOX licence (MIT style)'
