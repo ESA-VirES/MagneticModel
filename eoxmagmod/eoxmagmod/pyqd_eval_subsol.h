@@ -64,7 +64,7 @@ static PyObject* eval_subsol(PyObject *self, PyObject *args, PyObject *kwdict)
     #define NPY_REQ (NPY_ALIGNED|NPY_CONTIGUOUS)
 
     // cast the objects to arrays
-    if (NULL == (arr_time=_get_as_double_array(obj_time, 0, 1, NPY_REQ, keywords[3])))
+    if (NULL == (arr_time=_get_as_double_array(obj_time, 0, 1, NPY_REQ, keywords[0])))
         goto exit;
 
     // create the output arrays
