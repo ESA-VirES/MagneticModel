@@ -30,7 +30,17 @@
 #-------------------------------------------------------------------------------
 
 import numpy as np
-from base import MagneticModel, DATA_CHAOS5_CORE, DATA_CHAOS5_STATIC
+from base import (
+    MagneticModel,
+    DATA_CHAOS5_CORE,
+    DATA_CHAOS5_CORE_V4,
+    DATA_CHAOS5_STATIC,
+    DATA_CHAOS6_CORE,
+    DATA_CHAOS6_CORE_X3,
+    DATA_CHAOS6_STATIC,
+    DATA_IGRF12,
+    DATA_SIFM,
+)
 
 class MagneticModelSHCPP(MagneticModel):
     """ SHC piecewise polynomial magnetic model class.
@@ -128,7 +138,7 @@ class MagneticModelSHCPP(MagneticModel):
             print "\t\t", src
 
 
-def read_model_shc(fname=DATA_CHAOS5_CORE):
+def read_model_shc(fname):
     """ Read model parameters from a coefficient file in the SHC format."""
 
     if isinstance(fname, basestring):

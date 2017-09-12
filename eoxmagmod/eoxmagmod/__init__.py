@@ -37,6 +37,9 @@ from .base import (
     DATA_CHAOS5_CORE,
     DATA_CHAOS5_CORE_V4,
     DATA_CHAOS5_STATIC,
+    DATA_CHAOS6_CORE,
+    DATA_CHAOS6_CORE_X3,
+    DATA_CHAOS6_STATIC,
     DATA_IGRF11,
     DATA_IGRF12,
     DATA_SIFM,
@@ -114,7 +117,7 @@ __all__ = [
     'DATA_APEX_2020',
 ]
 
-__version__ = '0.3.3'
+__version__ = '0.3.4'
 __author__ = 'Martin Paces (martin.paces@eox.at)'
 __copyright__ = 'Copyright (C) 2014 EOX IT Services GmbH'
 __licence__ = 'EOX licence (MIT style)'
