@@ -258,7 +258,8 @@ class MagneticModelBase(object):
             coef_g, coef_h = self.get_coef_static(date)
 
         if mindegree >= 0:
-            mindegree = min(degree, mindegree)
+            # TODO: skip pointless evaluation when all coefficients are zero
+            mindegree = min(degree + 1, mindegree)
             idx = ((mindegree+1)*mindegree)/2
             coef_g[:idx] = 0
             coef_h[:idx] = 0

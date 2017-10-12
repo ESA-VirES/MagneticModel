@@ -117,7 +117,7 @@ __all__ = [
     'DATA_APEX_2020',
 ]
 
-__version__ = '0.3.4'
+__version__ = '0.3.5'
 __author__ = 'Martin Paces (martin.paces@eox.at)'
 __copyright__ = 'Copyright (C) 2014 EOX IT Services GmbH'
 __licence__ = 'EOX licence (MIT style)'
