@@ -357,8 +357,8 @@ static void shc_azmsincos_ref(double *lonsin, double *loncos, int degree, double
  *  inputs:
  *    degree - degree of the model
  *    mode - 3 - evaluate both gradient and potential
- *           1 - evaluate both potential only
- *           2 - evaluate both gradient only
+ *           1 - evaluate potential only
+ *           2 - evaluate gradient only
  *    elv - elevation angle in radians (coordinate - needed in mode 3 and 2)
  *    rad - radius (coordinate needed in mode 3 and 1)
  *    cg, ch - spherical harmonic coefficients [(degree+1)*(degree+2)/2]
@@ -378,7 +378,10 @@ static void shc_eval(double *vpot, double *dvel, double *dvaz, double *dvrd,
     int i, j;
     const double sin_elv = sin(elv);
     const double cos_elv = cos(elv);
-    double _vpot = 0.0, _dvel = 0.0, _dvaz = 0.0, _dvrd = 0.0;
+    double _vpot = cg[0] * rrp[0];
+    double _dvrd = -_vpot;
+    double _dvel = 0.0;
+    double _dvaz = 0.0;
 
     for (i = 1; i <= degree; ++i)
     {
@@ -409,7 +412,7 @@ static void shc_eval(double *vpot, double *dvel, double *dvaz, double *dvrd,
         *dvrd = _dvrd;
 
         // handling of the poles
-        if (fabs(cos_elv) < 1e-10)
+        if ((degree > 0) && (fabs(cos_elv) < 1e-10))
         {
             const double lsin1 = lsin[1], lcos1 = lcos[1];
             double sqn3, sqn1 = 1.0;

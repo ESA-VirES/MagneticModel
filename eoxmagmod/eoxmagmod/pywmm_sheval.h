@@ -366,7 +366,7 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
     if (NULL == (arr_ch=_get_as_double_array(obj_ch, 1, 1, NPY_IN_ARRAY, keywords[3])))
         goto exit;
 
-    if (degree < 1)
+    if (degree < 0)
     {
         PyErr_Format(PyExc_ValueError, "Invalid value %d of '%s'!", degree, keywords[1]);
         goto exit;

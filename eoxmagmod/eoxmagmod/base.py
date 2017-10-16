@@ -258,14 +258,17 @@ class MagneticModelBase(object):
             coef_g, coef_h = self.get_coef_static(date)
 
         if mindegree >= 0:
-            # TODO: skip pointless evaluation when all coefficients are zero
             mindegree = min(degree + 1, mindegree)
             idx = ((mindegree+1)*mindegree)/2
             coef_g[:idx] = 0
             coef_h[:idx] = 0
 
-        if maxdegree > 0:
+        if maxdegree >= 0:
             degree = min(maxdegree, degree)
+
+        if mindegree > degree:
+            # skip pointless evaluation when all coefficients are zero
+            degree = 0
 
         return sheval(
             arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out, mode
