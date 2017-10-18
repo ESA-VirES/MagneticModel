@@ -129,6 +129,38 @@ static int _check_arr_dims_all_eq(PyObject *arr, npy_intp ndim, const npy_intp *
 }
 
 /*
+ * Check that two arrays have the same shape
+ */
+
+static int _check_equal_shape(PyObject *arr0, PyObject *arr1, const char *label0, const char *label1)
+{
+    npy_intp dim;
+
+    if (PyArray_NDIM(arr0) != PyArray_NDIM(arr1))
+    {
+        PyErr_Format(
+            PyExc_ValueError, "Array dimension mismatch between '%s' and '%s'!",
+            label0, label1
+        );
+        return 1;
+    }
+
+    for (dim = 0; dim < PyArray_NDIM(arr0); ++dim)
+    {
+        if (PyArray_DIM(arr0, dim) != PyArray_DIM(arr1, dim))
+        {
+            PyErr_Format(
+                PyExc_ValueError, "Array shape mismatch between '%s' and '%s'!",
+                label0, label1
+            );
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/*
  * Extraction of the lower dimensional parts of the arrays.
  */
 
@@ -152,13 +184,20 @@ static ARRAY_DATA _array_to_arrd(PyObject *arr)
 
 static ARRAY_DATA _get_arrd_item(const ARRAY_DATA *arrd, npy_intp idx)
 {
-    ARRAY_DATA arrd_sub = {
-        arrd->data + idx*arrd->stride[0],
-        arrd->ndim - 1,
-        arrd->dim + 1,
-        arrd->stride + 1
-    };
-    return arrd_sub;
+    if (arrd->ndim > 0) // extract sub-dimension
+    {
+        ARRAY_DATA arrd_sub = {
+            arrd->data + idx*arrd->stride[0],
+            arrd->ndim - 1,
+            arrd->dim + 1,
+            arrd->stride + 1
+        };
+        return arrd_sub;
+    }
+    else // treat as scalar
+    {
+        return *arrd;
+    }
 }
 
 #endif  /* PYWMM_AUX_H */

@@ -38,7 +38,7 @@ setup(
     author_email="martin.paces@eox.at",
     packages=['eoxmagmod'],
     license='EOX licence (MIT style)',
-    version='0.3.5',
+    version='0.4.0dev0',
     package_data={'eoxmagmod': ['data/*']},
     ext_modules=[
         Extension(
@@ -59,6 +59,18 @@ setup(
                 'eoxmagmod/pyqd.c',
             ],
             libraries=['qdipole'],
+            library_dirs=[],
+            include_dirs=[
+                './eoxmagmod',
+                './eoxmagmod/include',
+            ],
+        ),
+        Extension(
+            'eoxmagmod._pysunpos',
+            sources=[
+                'eoxmagmod/pysunpos.c',
+            ],
+            libraries=[],
             library_dirs=[],
             include_dirs=[
                 './eoxmagmod',

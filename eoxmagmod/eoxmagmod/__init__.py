@@ -71,6 +71,7 @@ from .qd import (
     DATA_APEX_2015, DATA_APEX_2020,
     eval_qdlatlon, eval_mlt, eval_subsol, eval_apex,
 )
+from .sunpos import sunpos
 
 __all__ = [
     'MagneticModel',
@@ -115,9 +116,10 @@ __all__ = [
     'eval_subsol',
     'DATA_APEX_2015',
     'DATA_APEX_2020',
+    'sunpos',
 ]
 
-__version__ = '0.3.5'
+__version__ = '0.4.0dev0'
 __author__ = 'Martin Paces (martin.paces@eox.at)'
 __copyright__ = 'Copyright (C) 2014 EOX IT Services GmbH'
 __licence__ = 'EOX licence (MIT style)'

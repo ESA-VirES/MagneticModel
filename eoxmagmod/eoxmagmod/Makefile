@@ -6,11 +6,14 @@ INC_WMM=
 LIB_WMM=-lgeomag -lm
 INC_QD=-I./include
 LIB_QD=-lqdipole -lm
+INC_SP=-I./include
+LIB_SP=-lm
 INC_PYTHON=$(shell python-config --includes )
 LIB_PYTHON=$(shell python-config --libs )
 
 INCS=$(INC_PYTHON) $(INC_WMM) $(INC_QD)
 LIBS_WMM=$(LIB_PYTHON) $(LIB_WMM)
+LIBS_QD=$(LIB_PYTHON) $(LIB_QD)
 LIBS_QD=$(LIB_PYTHON) $(LIB_QD)
 
 #CCFLAGS= -c -g -DDEBUG=1 -Wall -fPIC $(INCS)
@@ -30,9 +33,13 @@ HDR_QD=pywmm_aux.h pyqd_exc.h\
 OBJ_QD=pyqd.o
 DST_QD=_pyqd.so
 
+HDR_SP=pywmm_aux.h
+OBJ_SP=pysunpos.o
+DST_SP=_pysunpos.so
+
 # --------------------------------------------
 
-all: pywmm pyqd
+all: pywmm pyqd pysunpos
 
 %.o: %.c
 	$(CC) $< $(CCFLAGS) -o $@
@@ -43,6 +50,10 @@ pywmm: $(OBJ_WMM)
 pyqd: $(OBJ_QD)
 	$(LD) -shared -o $(DST_QD) $(OBJ_QD) $(LIBS_QD)
 
+pysunpos: $(OBJ_SP)
+	$(LD) -shared -o $(DST_SP) $(OBJ_SP) $(LIBS_SP)
+
+
 clean:
 	$(RM) *.o
 
@@ -51,4 +62,4 @@ purge: clean
 
 pywmm.o: pywmm.c $(HDR_WMM)
 pyqd.o: pyqd.c $(HDR_QD)
-
+pysunpos.o: pysunpos.c $(HDR_SP)
