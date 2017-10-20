@@ -46,11 +46,15 @@
 #endif
 
 #ifndef PI
-#define PI 3.14159265358979
+#define PI M_PI
 #endif
 
-#define PI2 6.28318530717959 // 2*PI
-#define PIM 1.57079632679490 // PI/2
+#define PI2 (2*M_PI) // 2*PI
+#define PIM M_PI_2   // PI/2
+
+#ifndef FMOD_FLOOR
+#define FMOD_FLOOR(a,b) ((a)-(b)*floor((a)/(b)))
+#endif
 
 // external - to be removed
 void sunpos5(
@@ -161,7 +165,7 @@ void sunpos5original(
     *decl = asin(sl*se);
 
     *hang = 1.7528311 + 6.300388099*t + lon - *rasc + 0.92*dlam;
-    *hang = fmod(*hang + PI, PI2) - PI;
+    *hang = FMOD_FLOOR(*hang + PI, PI2) - PI;
 
     const double sp = sin(lat);
     const double cp = sqrt((1-sp*sp));
@@ -177,8 +181,9 @@ void sunpos5original(
     if ((press > 0.0) && (ep > 0.0))
         de = (0.08422*press) / ((273.0+temp)*tan(ep + 0.003138/(ep + 0.08919)));
 
-    *azimuth = atan2(sh, ch*sp - sd*cp/cd);
     *zenith = PIM - ep - de;
+    *azimuth = atan2(sh, ch*sp - sd*cp/cd);
+    *azimuth = FMOD_FLOOR(*azimuth, PI2) - PI;
 }
 
 /**
@@ -247,7 +252,7 @@ void sunpos5equat(
         // 1.7528311 + 6.300388099*t Greenwich Sideral Time approximation [rad]
         1.7528311 + 6.300388099*t + lon - _rasc + 0.92*dlam
     );
-    const double _hang = fmod(_hang0 + PI, PI2) - PI;
+    const double _hang = FMOD_FLOOR(_hang0 + PI, PI2) - PI;
 
     *rasc = _rasc;
     *decl = _decl;
@@ -299,8 +304,9 @@ void sunpos5eq2hor(
     // NOTE: refraction correction is skipped
     //const double de = ep > 0.0 ? (0.08422*pres) / ((273.0+temp)*tan(ep + 0.003138/(ep + 0.08919))) : 0.0;
 
-    *azimuth = atan2(sh, ch*sp - sd*cp/cd);
     *zenith = PIM - ep; // - de;
+    *azimuth = atan2(sh, ch*sp - sd*cp/cd);
+    *azimuth = FMOD_FLOOR(*azimuth, PI2) - PI;
 }
 
 #endif /* SUNPOS_H */
