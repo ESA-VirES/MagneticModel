@@ -71,7 +71,7 @@ from .qd import (
     DATA_APEX_2015, DATA_APEX_2020,
     eval_qdlatlon, eval_mlt, eval_subsol, eval_apex,
 )
-from .sunpos import sunpos
+from .sunpos import sunpos, sunpos_original
 
 __all__ = [
     'MagneticModel',
@@ -117,6 +117,7 @@ __all__ = [
     'DATA_APEX_2015',
     'DATA_APEX_2020',
     'sunpos',
+    'sunpos_original',
 ]
 
 __version__ = '0.4.0dev0'

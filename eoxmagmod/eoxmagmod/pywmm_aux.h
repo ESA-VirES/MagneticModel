@@ -35,6 +35,22 @@
  * Check the input python object and convert it to a double precision NumPy
  * array ensuring the native byte-order.
  */
+static PyObject* _get_as_int_array(PyObject *data, int dmin, int dmax,
+                int reqs, const char *label)
+{
+    PyArray_Descr *dtype = PyArray_DescrFromType(NPY_INT32);
+    PyObject *arr = PyArray_FromAny(data, dtype, dmin, dmax, reqs, NULL);
+    /*
+    if (NULL == arr)
+        PyErr_Format(PyExc_ValueError, "Failed to cast %s to an array!", label);
+    */
+    return arr;
+}
+
+/*
+ * Check the input python object and convert it to a double precision NumPy
+ * array ensuring the native byte-order.
+ */
 static PyObject* _get_as_double_array(PyObject *data, int dmin, int dmax,
                 int reqs, const char *label)
 {

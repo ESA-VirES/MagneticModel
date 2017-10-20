@@ -28,7 +28,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-# coordinate systems and their transformation
 import _pysunpos
 
 
@@ -49,9 +48,39 @@ def sunpos(time_mjd2k, lat, lon, rad=6371.2, dtt=0):
 
       Parameters:
         time_mjd2k - array of MJD2000 times (up to 15 dimensions).
-        lat - array of latitudes in deg.
-        lon - array of longitudes in deg.
-        rad - array of radii in km (0 means no parallax correction).
-        dtt - array of offsets to TT in sec.
+        lat - array of latitudes [deg]
+        lon - array of longitudes [deg]
+        rad - array of radii [km] (parallax correction)
+        dtt - array of offsets to TT [sec]
     """
     return _pysunpos.sunpos(time_mjd2k, lat, lon, rad, dtt)
+
+
+def sunpos_original(time_mjd2k, lat, lon, rad=6371.2, dtt=0, pres=1.0, temp=20.0):
+    """ Calculate solar equatorial and horizontal coordinates
+    for given MJD2000 times and geocentric coordinates (lat, lon, rad).
+    This is the original implementation.
+
+    arr_out = sunpos_original(time_mjd2k, lat, lon, rad, dtt, pres, temp)
+
+      Output:
+        arr_out - array of the Sun equatorial and horizontal coordinates:
+                  - declination
+                  - right ascension
+                  - hour angle
+                  - azimuth
+                  - zenith
+                  All angles are in deg.
+
+      Parameters:
+        time_mjd2k - array of MJD2000 times (up to 15 dimensions).
+        lat - array of latitudes [deg]
+        lon - array of longitudes [deg]
+        rad - array of radii [km] (parallax correction)
+        dtt - array of offsets to TT [sec]
+        pres - array of offsets of pressures [atm] (refraction correction)
+        temp - array of offsets to temperatures [dgC] (refraction coorection)
+    """
+    return _pysunpos.sunpos_original(
+        time_mjd2k, lat, lon, rad, dtt, pres, temp
+    )

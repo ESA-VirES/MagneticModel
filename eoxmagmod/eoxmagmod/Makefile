@@ -1,4 +1,5 @@
 CC=gcc
+CPP=g++
 LD=gcc
 RM=rm -fv
 
@@ -33,7 +34,7 @@ HDR_QD=pywmm_aux.h pyqd_exc.h\
 OBJ_QD=pyqd.o
 DST_QD=_pyqd.so
 
-HDR_SP=pywmm_aux.h
+HDR_SP=pywmm_aux.h pysunpos.h pysunpos_original.h
 OBJ_SP=pysunpos.o
 DST_SP=_pysunpos.so
 
@@ -42,6 +43,9 @@ DST_SP=_pysunpos.so
 all: pywmm pyqd pysunpos
 
 %.o: %.c
+	$(CC) $< $(CCFLAGS) -o $@
+
+%.o: %.cpp
 	$(CC) $< $(CCFLAGS) -o $@
 
 pywmm: $(OBJ_WMM)
