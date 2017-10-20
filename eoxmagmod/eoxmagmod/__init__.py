@@ -120,7 +120,7 @@ __all__ = [
     'sunpos_original',
 ]
 
-__version__ = '0.4.0dev0'
+__version__ = '0.4.0'
 __author__ = 'Martin Paces (martin.paces@eox.at)'
 __copyright__ = 'Copyright (C) 2014 EOX IT Services GmbH'
 __licence__ = 'EOX licence (MIT style)'
