@@ -85,6 +85,31 @@ void mjd2k_to_date(int *year, int *month, int *day, double *hours, double mjd2k)
     *hours = 24.0 * (mjd2k - day2k);
 }
 
+
+/**
+ * @brief Convert year, month, day and number of decimal hours to MJD2000
+ *
+ * Convert year, month, day and number of decimal hours to MJD2000 approximation
+ * used by the original sunpos algorithm implementation.
+ *
+ * This approximation gives correct MJD2000 days from 2000-03-01 to 2400-02-29.
+
+ * The deviations outside this range are caused by:
+ *  1) use of truncation instead of rounding towards negative infinity (floor),
+ *  2) no compensation for the extra leap year every 400years.
+ */
+
+void date_to_sunposmjd2k(double *sunpos_mjd2k, int year, int month, int day, double hours) {
+    const int mt = month + 12 * (month <= 2);
+    const int yt = year - (month <= 2);
+    *sunpos_mjd2k = (
+        (int)(365.25*(yt - 2000)) +
+        (int)(30.6001*(mt + 1)) -
+        (int)(0.01*yt) +
+        day
+    ) + (1.0/24.0)*hours - 43.0;
+}
+
 /**
  * @brief Evaluate solar position in equatorial coordinate system.
  *
@@ -111,7 +136,7 @@ void mjd2k_to_date(int *year, int *month, int *day, double *hours, double mjd2k)
  *      lat - longitude [rad]
  *      rad - distance from earth centre [km] (set 0 to skip parallax correction)
  *      dtt - UTC offset to TT [seconds]
- *      pres - pressure [atm] (set 0 to skip refraction corection)
+ *      pres - pressure [atm] (set 0 to skip refraction correction)
  *      temp - temperature [dgC]
  */
 
@@ -174,9 +199,11 @@ void sunpos5original(
     const double sh = sin(*hang);
     const double ch = cos(*hang);
     const double se0 = sp*sd + cp*cd*ch;
+
+    // elevation including parallax correction with radius in km
     const double ep = asin(se0) - sqrt(1.0-se0*se0)*rad*(1.0/149597871.0);
 
-    // refraction correction skipped
+    // refraction correction
     double de = 0.0;
     if ((press > 0.0) && (ep > 0.0))
         de = (0.08422*press) / ((273.0+temp)*tan(ep + 0.003138/(ep + 0.08919)));
@@ -214,8 +241,8 @@ void sunpos5equat(
     double mjd2k, double dtt ,double lon
 )
 {
-    // t is decimal number of days since 1939-12-31
-    const double t = mjd2k + 42.0 - 21958.0;
+    // t is decimal number of days since 1940-01-01
+    const double t = mjd2k + 43.0 - 21958.0;
     const double te = SEC2DAYS*dtt + t; // Terestrial Time correction
     const double wte = 0.0172019715*te;
     const double s1 = sin(wte);
@@ -281,11 +308,13 @@ void sunpos5equat(
  *      lat - latitude [rad]
  *      rad - radius (distance from Earth centre) [km]
  *            (set to zero to disable paralax correction)
+ *      pres - pressure [atm] (set 0 to skip refraction correction)
+ *      temp - temperature [dgC]
  */
 
 void sunpos5eq2hor(
     double *azimuth, double *zenith,
-    double decl, double hang, double lat, double rad
+    double decl, double hang, double lat, double rad, double press, double temp
 )
 {
     // horizontal coordinates
@@ -301,10 +330,12 @@ void sunpos5eq2hor(
     // elevation including parallax correction with radius in km
     const double ep = asin(se0) - sqrt(1.0-se0*se0)*rad*(1.0/149597871.0);
 
-    // NOTE: refraction correction is skipped
-    //const double de = ep > 0.0 ? (0.08422*pres) / ((273.0+temp)*tan(ep + 0.003138/(ep + 0.08919))) : 0.0;
+    // refraction correction
+    double de = 0.0;
+    if ((press > 0.0) && (ep > 0.0))
+        de = (0.08422*press) / ((273.0+temp)*tan(ep + 0.003138/(ep + 0.08919)));
 
-    *zenith = PIM - ep; // - de;
+    *zenith = PIM - ep - de;
     *azimuth = atan2(sh, ch*sp - sd*cp/cd);
     *azimuth = FMOD_FLOOR(*azimuth, PI2) - PI;
 }

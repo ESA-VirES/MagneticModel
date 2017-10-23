@@ -75,9 +75,7 @@ static void _sunpos(
         #define V(a,i) (*P(a,i))
 
         double rasc, decl, hang, zenith, azimuth;
-        double mjd2k, dtt, lat, lon, rad;
-        double hours, pres, temp;
-        int year, month, day;
+        double mjd2k, dtt, lat, lon, rad, pres, temp;
 
         mjd2k = V(arrd_mjd,0); // decimal days since 2000-01-01T00:00:00
         dtt = V(arrd_dtt,0); // seconds (TT to UT offset)
@@ -87,17 +85,8 @@ static void _sunpos(
         pres = 0; // atm
         temp = 0; // dgC
 
-        /*
         sunpos5equat(&decl, &rasc, &hang, mjd2k, dtt, lon);
-        sunpos5eq2hor(&azimuth, &zenith, decl, hang, lat, rad);
-        */
-
-        mjd2k_to_date(&year, &month, &day, &hours, mjd2k);
-
-        sunpos5original(
-            &decl, &rasc, &hang, &azimuth, &zenith,
-            year, month, day, hours, lat, lon, rad, dtt, pres, temp
-        );
+        sunpos5eq2hor(&azimuth, &zenith, decl, hang, lat, rad, pres, temp);
 
         V(arrd_out,0) = RAD2DEG * decl; // rad --> deg
         V(arrd_out,1) = RAD2DEG * rasc; // rad --> deg
