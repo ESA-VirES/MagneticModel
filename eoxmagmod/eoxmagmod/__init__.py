@@ -69,7 +69,7 @@ from .shc import read_model_shc
 from .igrf import read_model_igrf11
 from .qd import (
     DATA_APEX_2015, DATA_APEX_2020,
-    eval_qdlatlon, eval_mlt, eval_subsol, eval_apex,
+    eval_qdlatlon, eval_mlt, eval_subsol,
 )
 from .sunpos import sunpos, sunpos_original
 

@@ -37,34 +37,6 @@ DATA_APEX_2015 = join(_DIRNAME, 'apexsh_1995-2015.txt')
 DATA_APEX_2020 = join(_DIRNAME, 'apexsh_1980-2020.txt')
 DATA_APEX = DATA_APEX_2020
 
-def eval_apex(gclat, gclon, gcrad, time, fname=DATA_APEX):
-    """
-        The use of this function is not recommended as the MLT values
-        is not correct! Use eval_qdlatlon() and eval_mlt() instead!
-
-          Evaluate magnetic quasi-dipole coordinates and the magnetic
-          local time for a single or multiple input coordinates.
-
-          Inputs:
-            gclat - geocentric latitude(s).
-            gclon - geocentric longitude(s).
-            gcrad - geocentric radial coordinate(s) in km.
-            time  - decimal year time(s)
-            fname - file-name of the model text file.
-
-          Outputs:
-            qdlat - quasi-dipole latitude(s).
-            qdlon - quasi-dipole longitude(s).
-            mlt - magnetic local time(s).
-    """
-    warn(
-        "You are calling eval_apex() which returns incorrect MLT values! "
-        "Use eval_qdlatlon() and eval_mlt() instead!", Warning
-    )
-    if not isfile(fname):
-        raise IOError("File not found! fname=%r" % fname)
-    return _pyqd.eval_apex(gclat, gclon, gcrad, time, fname)[:3]
-
 
 def eval_qdlatlon(gclat, gclon, gcrad, time, fname=DATA_APEX):
     """
