@@ -58,7 +58,7 @@
 !               base vectors F1 (eastward).
 !    f21,f22   arrays of components of the Quasi-Dipole coordinate
 !               base vectors F2 (northward).
-!    f         array of F = |F1 x F2|
+!    f         array of F = |F1 x F2| (see apexsh.f90)
 !
 !***********************************************************************
 

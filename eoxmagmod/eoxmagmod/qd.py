@@ -59,6 +59,33 @@ def eval_qdlatlon(gclat, gclon, gcrad, time, fname=DATA_APEX):
     return _pyqd.eval_qdlatlon(gclat, gclon, gcrad, time, fname)
 
 
+def eval_qdlatlon_with_base_vectors(gclat, gclon, gcrad, time, fname=DATA_APEX):
+    """
+          Evaluate magnetic quasi-dipole coordinates a single or multiple input
+          coordinates.
+
+          Inputs:
+            gclat - geocentric latitude(s).
+            gclon - geocentric longitude(s).
+            gcrad - geocentric radial coordinate(s) in km.
+            time  - decimal year time(s)
+            fname - file-name of the model text file.
+
+          Outputs:
+            qdlat - quasi-dipole latitude(s).
+            qdlon - quasi-dipole longitude(s).
+            qdlon - quasi-dipole longitude(s).
+            f11 - base vector F1 component 1
+            f12 - base vector F1 component 2
+            f21 - base vector F2 component 1
+            f22 - base vector F2 component 2
+            f - | F1 x F2 | value
+    """
+    if not isfile(fname):
+        raise IOError("File not found! fname=%r" % fname)
+    return _pyqd.eval_qdlatlon(gclat, gclon, gcrad, time, fname, True)
+
+
 def eval_mlt(qdlon, time, fname=DATA_APEX):
     """
           Evaluate magnetic local time for given quasi dipole longitudes.

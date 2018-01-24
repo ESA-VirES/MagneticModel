@@ -70,6 +70,7 @@ from .igrf import read_model_igrf11
 from .qd import (
     DATA_APEX_2015, DATA_APEX_2020,
     eval_qdlatlon, eval_mlt, eval_subsol,
+    eval_qdlatlon_with_base_vectors,
 )
 from .sunpos import sunpos, sunpos_original
 
