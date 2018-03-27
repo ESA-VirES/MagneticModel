@@ -62,8 +62,10 @@ static PyObject* legendre(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *retval = NULL; // output tuple
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "di|i:legendre", keywords, &lat_in, &degree, &is_sph));
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "di|i:legendre", keywords, &lat_in, &degree, &is_sph
+    ))
+        goto exit;
 
     if (degree < 1)
     {

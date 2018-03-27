@@ -62,8 +62,10 @@ static PyObject* relradpow(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *retval = NULL; // output tuple
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "di|d:relradpow", keywords, &rad, &degree, &rad0));
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "di|d:relradpow", keywords, &rad, &degree, &rad0
+    ))
+        goto exit;
 
     if (degree < 1)
     {

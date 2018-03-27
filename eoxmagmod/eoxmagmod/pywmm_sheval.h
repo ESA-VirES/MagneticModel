@@ -338,9 +338,10 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
     MODEL model;
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "OiOO|iii:sheval", keywords, &obj_in, &degree, &obj_cg, &obj_ch,
-            &ct_in, &ct_out, &mode))
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "OiOO|iii:sheval", keywords,
+        &obj_in, &degree, &obj_cg, &obj_ch, &ct_in, &ct_out, &mode
+    ))
         goto exit;
 
     // check the type of the coordinate transformation

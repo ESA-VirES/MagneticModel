@@ -58,7 +58,8 @@ static PyObject* eval_subsol(PyObject *self, PyObject *args, PyObject *kwdict)
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
         args, kwdict, "O:eval_subsol", keywords, &obj_time
-    )) goto exit;
+    ))
+        goto exit;
 
     #define NPY_REQ (NPY_ALIGNED|NPY_CONTIGUOUS)
 

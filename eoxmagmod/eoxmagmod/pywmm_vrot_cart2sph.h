@@ -101,8 +101,11 @@ static PyObject* vrot_cart2sph(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *retval = NULL;
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "OOO|:vrot_cart2sph", keywords, &obj_in, &obj_lat, &obj_lon));
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "OOO|:vrot_cart2sph", keywords,
+        &obj_in, &obj_lat, &obj_lon
+    ))
+        goto exit;
 
     // cast the objects to arrays
     if (NULL == (arr_in=_get_as_double_array(obj_in, 1, 0, NPY_ALIGNED, keywords[0])))

@@ -84,9 +84,12 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *arr_lcos = NULL; // loncos array
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "diOOOOOOO|i:sphargrd", keywords,
-            &lat_in, &degree, &obj_cg, &obj_ch, &obj_lp, &obj_ldp, &obj_rrp,
-            &obj_lsin, &obj_lcos, &is_sph));
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "diOOOOOOO|i:sphargrd", keywords,
+        &lat_in, &degree, &obj_cg, &obj_ch, &obj_lp, &obj_ldp, &obj_rrp,
+        &obj_lsin, &obj_lcos, &is_sph
+    ))
+        goto exit;
 
     if (degree < 1)
     {

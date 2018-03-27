@@ -60,8 +60,10 @@ static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *retval = NULL; // output tuple
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "di|i:lonsincos", keywords, &lon_dg, &degree, &fast_alg));
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "di|i:lonsincos", keywords, &lon_dg, &degree, &fast_alg
+    ))
+        goto exit;
 
     if (degree < 1)
     {

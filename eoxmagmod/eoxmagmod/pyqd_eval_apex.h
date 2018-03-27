@@ -77,9 +77,10 @@ static PyObject* eval_apex(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *retval = NULL;
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "OOOOs:eval_apex", keywords, &obj_gclat, &obj_gclon,
-            &obj_gcrad, &obj_time, &model_fname))
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "OOOOs:eval_apex", keywords,
+        &obj_gclat, &obj_gclon, &obj_gcrad, &obj_time, &model_fname
+    ))
         goto exit;
 
     #define NPY_REQ (NPY_ALIGNED|NPY_CONTIGUOUS)

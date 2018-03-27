@@ -77,9 +77,11 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *arr_lcos = NULL; // loncos array
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "diOOOOOO|:spharpot", keywords,
-            &rad, &degree, &obj_cg, &obj_ch, &obj_lp, &obj_rrp,
-            &obj_lsin, &obj_lcos));
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "diOOOOOO|:spharpot", keywords,
+        &rad, &degree, &obj_cg, &obj_ch, &obj_lp, &obj_rrp, &obj_lsin, &obj_lcos
+    ))
+        goto exit;
 
     if (degree < 1)
     {

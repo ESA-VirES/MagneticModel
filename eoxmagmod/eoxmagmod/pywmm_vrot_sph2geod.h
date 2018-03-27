@@ -91,8 +91,10 @@ static PyObject* vrot_sph2geod(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *retval = NULL;
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "OO|:vrot_sph2geod", keywords, &obj_in, &obj_dlat));
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "OO|:vrot_sph2geod", keywords, &obj_in, &obj_dlat
+    ))
+        goto exit;
 
     // cast the objects to arrays
     if (NULL == (arr_in=_get_as_double_array(obj_in, 1, 0, NPY_ALIGNED, keywords[0])))

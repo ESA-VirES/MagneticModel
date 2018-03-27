@@ -130,9 +130,10 @@ static PyObject* pysunpos_sunpos(PyObject *self, PyObject *args, PyObject *kwdic
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "OOOOO|:sunpos", keywords, &obj_mjd, &obj_lat, &obj_lon,
-        &obj_rad, &obj_dtt
-    )) goto exit;
+        args, kwdict, "OOOOO|:sunpos", keywords,
+        &obj_mjd, &obj_lat, &obj_lon, &obj_rad, &obj_dtt
+    ))
+        goto exit;
 
     // cast the objects to arrays
     if (NULL == (arr_mjd = _get_as_double_array(obj_mjd, 0, 0, NPY_ALIGNED, keywords[0])))

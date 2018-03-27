@@ -211,8 +211,9 @@ static PyObject* convert(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *retval = NULL;
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "O|ii:convert", keywords, &obj_in, &ct_in, &ct_out))
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "O|ii:convert", keywords, &obj_in, &ct_in, &ct_out
+    ))
         goto exit;
 
     // check the type of the coordinate transformation
