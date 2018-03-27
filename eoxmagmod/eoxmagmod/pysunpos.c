@@ -2,7 +2,6 @@
  *
  * Solar position
  *
- * Project: VirES
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
@@ -62,7 +61,7 @@
 /* module's doc string */
 
 #define DOC_PYSUNPOS \
-"This module provides bindings to the World Magnetic Model library."
+"This module provides bindings to the solar model."
 
 /*---------------------------------------------------------------------------*/
 /*define module's methods */

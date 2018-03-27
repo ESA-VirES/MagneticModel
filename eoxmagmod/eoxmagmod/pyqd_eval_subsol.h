@@ -3,7 +3,6 @@
  * Magnetic Quasi Dipole Coordinates - C python bindings
  * -  sub-solar point evaluation
  *
- * Project: EOX Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------

@@ -5,7 +5,6 @@
  *
  * NOTE: This subroutine does not return correct MLT values!
  *
- * Project: EOX Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------

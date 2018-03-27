@@ -2,7 +2,6 @@
  *
  * Magnetic Quasi Dipole Coordinates - C python bindings
  *
- * Project: EOX Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------

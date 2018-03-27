@@ -1,9 +1,8 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings
+ * Geomagnetic Model - C python bindings
  * - evaluation of the relative radius power series
  *
- * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------

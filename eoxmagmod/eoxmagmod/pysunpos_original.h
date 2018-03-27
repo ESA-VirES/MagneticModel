@@ -2,7 +2,6 @@
  *
  * Solar position - original algorithms
  *
- * Project: VirES
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------

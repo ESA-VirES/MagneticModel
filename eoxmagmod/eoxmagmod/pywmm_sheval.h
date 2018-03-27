@@ -1,10 +1,8 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings - spherical harmonic model evaluation
+ * Geomagnetic Model - C python bindings - spherical harmonic model evaluation
  *
- * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
- *
  *
  *-----------------------------------------------------------------------------
  * Copyright (C) 2014 EOX IT Services GmbH

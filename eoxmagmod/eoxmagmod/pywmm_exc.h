@@ -1,8 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings - module specific exceptions
+ * Geomagnetic Model - C python bindings - module specific exceptions
  *
- * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------

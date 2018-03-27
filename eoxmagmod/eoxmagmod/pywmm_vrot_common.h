@@ -1,9 +1,8 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings - vector rotation - common
+ * Geomagnetic Model - C python bindings - vector rotation - common
  *  (i.e., vector coordinate system transformation)
  *
- * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------

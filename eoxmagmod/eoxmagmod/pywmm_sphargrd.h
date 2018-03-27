@@ -1,9 +1,8 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings - spherical-harmonics
+ * Geomagnetic Model - C python bindings - spherical-harmonics
  * - evaluation of the potential gradient in the spherical coordinate system
  *
- * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------

@@ -1,8 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings - coordinate conversions
+ * Geomagnetic Model - C python bindings - coordinate conversions
  *
- * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------

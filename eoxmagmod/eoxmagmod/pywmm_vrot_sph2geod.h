@@ -1,9 +1,8 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings - vector rotation - sph2geod
+ * Geomagnetic Model - C python bindings - vector rotation - sph2geod
  *  (i.e., vector coordinate system transformation)
  *
- * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
