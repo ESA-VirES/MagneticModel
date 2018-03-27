@@ -46,16 +46,16 @@
 /* python function definition */
 
 #define DOC_RELRADPOW "\n"\
-"   rrp = relradpow(radius, degree, earth_radius="STR(RADIUS)")\n"\
+"   rrp = relradpow(radius, degree, reference_radius="STR(RADIUS)")\n"\
 "\n"\
-"     For given 'radius' (geocentric spherical), evaluate relative radius power\n"\
+"     For given 'radius' and 'reference_radius' evaluate relative radius power\n"\
 "     series:\n"\
-"       (earth_radius/radius)**(i+2) for i in range(0, degree+1) .\n"\
+"       (reference_radius/radius)**(i+2) for i in range(0, degree+1) .\n"\
 
 
 static PyObject* relradpow(PyObject *self, PyObject *args, PyObject *kwdict)
 {
-    static char *keywords[] = {"latitude", "degree", "spherical", NULL};
+    static char *keywords[] = {"latitude", "degree", "reference_radius", NULL};
 
     int degree;
     double rad, rad0 = RADIUS; // radius and reference radius

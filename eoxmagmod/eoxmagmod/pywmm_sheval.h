@@ -307,7 +307,7 @@ static void _sheval3(ARRAY_DATA arrd_in, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_gr
 
 #define DOC_SHEVAL "\n"\
 "   arr_out = sheval(arr_in, degree, coef_g, coef_h, coord_type_in=GEODETIC_ABOVE_WGS84,\n"\
-"                          coord_type_out=GEODETIC_ABOVE_WGS84, mode=GRADIENT)"\
+"                          coord_type_out=GEODETIC_ABOVE_WGS84, mode=GRADIENT)\n"\
 "     Parameters:\n"\
 "       arr_in - array of 3D coordinates (up to 16 dimensions).\n"\
 "       degree - degree of the spherical harmonic model.\n"\

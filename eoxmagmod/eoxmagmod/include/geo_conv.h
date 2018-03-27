@@ -293,4 +293,3 @@ static void geocentric_sph2geodetic(
 }
 
 #endif  /*GEO_CONV_H*/
-
