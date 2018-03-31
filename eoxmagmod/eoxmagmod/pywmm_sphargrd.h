@@ -37,35 +37,37 @@
 
 /* python function definition */
 #define DOC_SPHARGRD "\n"\
-"  v_grad = sphargrd(latitude, degree, coef_g, coef_h, leg_p, leg_dp, rrp, lonsin, loncos, spherical=True)\n"\
+"  v_grad = sphargrd(latitude, degree, coef_g, coef_h, leg_p, leg_dp, rrp, lonsin, loncos, is_internal=True)\n"\
 "\n"\
 "     Spherical harmonic evaluation of the gradient of the potential\n"\
-"     (scalar) field in the (geocentric) spherical coordinates (latitude,\n"\
+"     (scalar) field in the geocentric spherical coordinates (latitude,\n"\
 "     longitude, radius).\n"\
 "     The input parameters are:\n"\
-"       latitude - spherical (or geodetic) latitude in dg. at the evaluated\n"\
+"       latitude - spherical (or geodetic) latitude in degrees at the evaluated\n"\
 "                  location.\n"\
 "       degree - degree of the spherical harmonic model.\n"\
-"       coef_g - vector of spherical harmonic model coeficients.\n"\
-"       coef_h - vector of spherical harmonic model coeficients.\n"\
+"       coef_g - vector of spherical harmonic model coefficients.\n"\
+"       coef_h - vector of spherical harmonic model coefficients.\n"\
 "       leg_p - vector the Legendre polynomials.\n"\
 "       leg_dp - vector the Legendre polynomials' derivations.\n"\
 "       rrp - vector the relative radius powers.\n"\
-"       lonsin - vector the the longitude cosines.\n"\
-"       lonsin - vector the the longitude sines.\n"\
-"       spherical - boolean flag indicating whether a geodentic spherical\n"\
-"                   (default, True) or geodetic (WGS84, False) latitude is\n"\
-"                   being used.\n"
+"       lonsin - vector of the longitude cosines.\n"\
+"       lonsin - vector of the longitude sines.\n"\
+"       is_internal - boolean flag set to True by default. When set to False\n"\
+"                     external field evaluation is used.\n"\
+"\n"\
 
 static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
 {
-    static char *keywords[] = {"latitude", "degree", "coef_g", "coef_h",
-        "leg_p", "leg_dp", "rpp", "lonsin", "loncos", "spherical", NULL};
+    static char *keywords[] = {
+        "latitude", "degree", "coef_g", "coef_h", "leg_p", "leg_dp",
+        "rpp", "lonsin", "loncos", "is_internal", NULL
+    };
 
-    int degree, nterm;
-    double lat_sph, lat_in, tmp0, tmp1;
-    int is_sph = 0;
+    int degree, nterm, is_internal;
+    double lat_sph;
 
+    PyObject *obj_is_internal = NULL; // boolean flag
     PyObject *obj_cg = NULL; // coef_g object
     PyObject *obj_ch = NULL; // coef_h object
     PyObject *obj_lp = NULL; // P object
@@ -85,25 +87,21 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "diOOOOOOO|i:sphargrd", keywords,
-        &lat_in, &degree, &obj_cg, &obj_ch, &obj_lp, &obj_ldp, &obj_rrp,
-        &obj_lsin, &obj_lcos, &is_sph
+        args, kwdict, "diOOOOOOO|O:sphargrd", keywords,
+        &lat_sph, &degree, &obj_cg, &obj_ch, &obj_lp, &obj_ldp, &obj_rrp,
+        &obj_lsin, &obj_lcos, &obj_is_internal
     ))
         goto exit;
 
-    if (degree < 1)
+    is_internal = (obj_is_internal == NULL) || PyObject_IsTrue(obj_is_internal);
+
+    if (degree < 0)
     {
-        PyErr_Format(PyExc_ValueError, "Invalid value %d of '%s'!", degree, keywords[1]);
+        PyErr_Format(PyExc_ValueError, "%s < 0", keywords[1]);
         goto exit;
     }
 
     nterm = ((degree+1)*(degree+2))/2;
-
-    // convert latitude to geocentric spherical latitude
-    if (is_sph)
-        lat_sph = lat_in;
-    else
-        conv_WGS84_to_sphECEF(&lat_sph, &tmp0, &tmp1, lat_in, 0.0, 0.0);
 
     // cast the objects to arrays
     if (NULL == (arr_cg=_get_as_double_array(obj_cg, 1, 1, NPY_IN_ARRAY, keywords[2])))
@@ -156,11 +154,14 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     // the evaluation
     {
         double *out = (double*)PyArray_DATA(arr_out);
-        shc_eval(NULL, out+0, out+1, out+2, degree, 0x2,
-                DG2RAD*lat_sph, 0.0, PyArray_DATA(arr_cg),
-                PyArray_DATA(arr_ch), PyArray_DATA(arr_lp),
-                PyArray_DATA(arr_ldp), PyArray_DATA(arr_rrp),
-                PyArray_DATA(arr_lsin), PyArray_DATA(arr_lcos));
+        shc_eval(
+            NULL, out+0, out+1, out+2, degree, 0x2,
+            DG2RAD*lat_sph, 0.0, PyArray_DATA(arr_cg),
+            PyArray_DATA(arr_ch), PyArray_DATA(arr_lp),
+            PyArray_DATA(arr_ldp), PyArray_DATA(arr_rrp),
+            PyArray_DATA(arr_lsin), PyArray_DATA(arr_lcos),
+            is_internal
+        );
     }
 
   exit:

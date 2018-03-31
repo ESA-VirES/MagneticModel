@@ -65,9 +65,9 @@ static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
     ))
         goto exit;
 
-    if (degree < 1)
+    if (degree < 0)
     {
-        PyErr_Format(PyExc_ValueError, "Invalid value %d of '%s'!", degree, keywords[1]);
+        PyErr_Format(PyExc_ValueError, "%s < 0", keywords[1]);
         goto exit;
     }
 

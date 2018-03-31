@@ -38,48 +38,53 @@
 /* python function definition */
 
 #define DOC_LEGENDRE "\n"\
-"   p, dp = legendre(latitude, degree, spherical=True)\n"\
+"   p, dp = legendre(latitude, degree)\n"\
 "\n"\
-"     For given 'latitude' and model's 'degree', evaluate associative Legendre\n"\
-"     functions. The input parameters are:\n"\
-"       latitude - spherical (or geodetic) latitude in dg. of the evaluated\n"\
-"                  location.\n"\
+"     For given the 'latitude' in degrees and the model's 'degree' evaluate\n"\
+"     the Schmidt semi-normalised associated Legendre functions and its\n"\
+"     and its derivatives: \n"\
+"         P_n^m(sin(latitude))  and  dP_n^m(sin(latitude))\n"\
+"     where n = 0..degree and m = 0..n \n"\
+"\n"\
+"     The input parameters are:\n"\
+"       latitude - spherical latitude in degrees.\n"\
 "       degree - degree of the spherical harmonic model.\n"\
-"       spherical - boolean flag indicating whether a geodetic spherical\n"\
-"                   (default, True) or geodetic (WGS84, False) latitude is\n"\
-"                   being used.\n"
+"\n"
 
 
 static PyObject* legendre(PyObject *self, PyObject *args, PyObject *kwdict)
 {
-    static char *keywords[] = {"latitude", "degree", "spherical", NULL};
+    static char *keywords[] = {"latitude", "degree", NULL};
 
     int degree, nterm;
-    double lat_sph, lat_in, tmp0, tmp1;
-    int is_sph = 1;
+    double lat_sph;
     PyObject *arr_p = NULL; // P array
     PyObject *arr_dp = NULL; // dP array
     PyObject *retval = NULL; // output tuple
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "di|i:legendre", keywords, &lat_in, &degree, &is_sph
+        args, kwdict, "di:legendre", keywords, &lat_sph, &degree
     ))
         goto exit;
 
-    if (degree < 1)
+    if (degree < 0)
     {
-        PyErr_Format(PyExc_ValueError, "Invalid value %d of '%s'!", degree, keywords[1]);
+        PyErr_Format(PyExc_ValueError, "%s < 0", keywords[1]);
+        goto exit;
+    }
+
+    if ((lat_sph < -90.0) || (lat_sph > 90.0))
+    {
+        if (lat_sph < 0.0) {
+            PyErr_Format(PyExc_ValueError, "%s < -90", keywords[0]);
+        } else {
+            PyErr_Format(PyExc_ValueError, "%s > 90", keywords[0]);
+        }
         goto exit;
     }
 
     nterm = ((degree+1)*(degree+2))/2;
-
-    // convert latitude to geocentric spherical latitude
-    if (is_sph)
-        lat_sph = lat_in;
-    else
-        conv_WGS84_to_sphECEF(&lat_sph, &tmp0, &tmp1, lat_in, 0.0, 0.0);
 
     // create the output arrays
     if (NULL == (arr_p = _get_new_double_array(1, NULL, nterm)))

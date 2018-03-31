@@ -257,7 +257,7 @@ static void shc_legendre(double *lp, double *ldp, int degree, double elv, const 
 }
 
 /**
- * @brief Evaluate the series of relative radius powers.
+ * @brief Evaluate the "internal" series of relative radius powers.
  *
  * Evaluate the series of relative radius powers for given relative radius ratio
  * 'relrad' (rad/rad0)
@@ -266,7 +266,7 @@ static void shc_legendre(double *lp, double *ldp, int degree, double elv, const 
  *
  */
 
-static void shc_relradpow(double *rrp, int degree, double relrad)
+static void shc_relradpow_internal(double *rrp, int degree, double relrad)
 {
     int i;
     double rr = 1.0/relrad;
@@ -276,6 +276,34 @@ static void shc_relradpow(double *rrp, int degree, double relrad)
     {
         rrp_last *= rr;
         rrp[i] = rrp_last;
+    }
+}
+
+/**
+ * @brief Evaluate the "external" series of relative radius powers.
+ *
+ * Evaluate the series of relative radius powers for given relative radius ratio
+ * 'relrad' (rad/rad0)
+ *
+ * (rad/rad0)**(i-1) for i = 0..degree
+ *
+ */
+
+static void shc_relradpow_external(double *rrp, int degree, double relrad)
+{
+    int i;
+    double rrp_val = 1.0;
+
+    if (0 <= degree)
+        rrp[0] = rrp_val/relrad;
+
+    if (1 <= degree)
+        rrp[1] = rrp_val;
+
+    for (i = 2; i <= degree; ++i)
+    {
+        rrp_val *= relrad;
+        rrp[i] = rrp_val;
     }
 }
 
@@ -366,37 +394,64 @@ static void shc_azmsincos_ref(double *lonsin, double *loncos, int degree, double
  *              respect to the elevation coordinate) [(degree+1)*(degree+2)/2]
  *    rrp - relative radius power series [degree+1]
  *    lsin, lcos - series of azimuth angle sines and cosines [degree+1]
- *
+ *    is_internal - boolean flag indicating type of the evaluated field
+                    set true for the internal or false for the external field.
  */
 
-static void shc_eval(double *vpot, double *dvel, double *dvaz, double *dvrd,
+static void shc_eval(
+    double *vpot, double *dvel, double *dvaz, double *dvrd,
     int degree, int mode, double elv, double rad,
     const double *cg, const double *ch, const double *lp, const double *ldp,
-    const double *rrp, const double *lsin, const double *lcos)
+    const double *rrp, const double *lsin, const double *lcos, int is_internal
+)
 // the evaluation
 {
-    int i, j;
+    int i, j, dr_scale, dr_offset;
     const double sin_elv = sin(elv);
     const double cos_elv = cos(elv);
-    double _vpot = cg[0] * rrp[0];
-    double _dvrd = -_vpot;
-    double _dvel = 0.0;
-    double _dvaz = 0.0;
+    double _vpot, _dvrd, _dvel, _dvaz;
+
+    if (is_internal) {
+        dr_scale = 1;
+        dr_offset = 1;
+    } else {
+        dr_scale = -1;
+        dr_offset = 0;
+    }
+
+    { // i = 0
+        const double tmp = cg[0]*rrp[0];
+        const int i_dr = dr_scale*dr_offset;
+
+        _vpot = -tmp;
+        _dvel = 0.0; // north-ward
+        _dvaz = 0.0; // east-ward
+        _dvrd = tmp * i_dr ; // up-ward
+    }
 
     for (i = 1; i <= degree; ++i)
     {
         const int i_off = (i*(i+1))/2;
+        const int i_dr = dr_scale*(i + dr_offset);
 
-        for (j = 0; j <= i; ++j)
+        {
+            const double tmp = cg[i_off]*rrp[i];
+
+            _vpot -= tmp * lp[i_off];
+            _dvel -= tmp * ldp[i_off]; // north-ward
+            _dvrd += tmp * lp[i_off] * i_dr ; // up-ward
+        }
+
+        for (j = 1; j <= i; ++j)
         {
             const int idx = i_off + j;
             const double tmp0 = (cg[idx]*lcos[j] + ch[idx]*lsin[j])*rrp[i];
             const double tmp1 = (cg[idx]*lsin[j] - ch[idx]*lcos[j])*rrp[i];
 
-            _vpot += tmp0 * lp[idx];
+            _vpot -= tmp0 * lp[idx];
             _dvel -= tmp0 * ldp[idx]; // north-ward
             _dvaz += tmp1 * lp[idx] * j; // east-ward
-            _dvrd += tmp0 * lp[idx] * (i+1); // up-ward
+            _dvrd += tmp0 * lp[idx] * i_dr ; // up-ward
         }
     }
 

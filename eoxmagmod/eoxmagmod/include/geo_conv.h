@@ -44,6 +44,74 @@
 #define WGS84_EPS sqrt(WGS84_EPS2)
 #define WGS84_RADIUS 6371.2
 
+
+/**
+ * @brief Low level conversion from geodetic to geocentric coordinates.
+ *
+ * Required ellipsoid parameters:
+ *  elp_a - semi-major axis
+ *  elp_e2 - squared first eccentricity
+ */
+
+static void _geodetic2geocentric(
+    double *rad_xy, double *z,
+    double lat_rad, double elv,
+    double elp_a, double elp_e2)
+{
+    const double sin_lat = sin(lat_rad);
+    const double cos_lat = cos(lat_rad);
+
+    /* radius of curvature of the ellipsoid */
+    const double rc = elp_a / sqrt(1.0 - elp_e2*sin_lat*sin_lat);
+
+    /* radius on the equator plane */
+    *rad_xy = (rc + elv)*cos_lat;
+
+    /* z coordinate */
+    *z = (rc*(1.0 - elp_e2) + elv)*sin_lat;
+
+}
+
+/**
+ * @brief Low level conversion from geocentric to geodetic geocentric coordinates.
+ *
+ * Uses Ferrari's solution.
+ *
+ * Required ellipsoid parameters:
+ *  elp_a - semi-major axis
+ *  elp_e2 - squared first eccentricity
+ */
+
+static void _geocentric2geodetic(
+    double *lat_rad, double *elv,
+    double rad_xy, double z,
+    double elp_a, double elp_e2)
+{
+    const double p = rad_xy;
+    /* Ferrari's solution */
+    const double pa = p/elp_a;
+    const double za = z/elp_a;
+    const double pa2 = pa*pa;
+    const double za2 = za*za;
+    const double ee4 = elp_e2*elp_e2;
+    const double rkp0 = (1.0 - elp_e2);
+    const double zt = rkp0*za2;
+    const double rh = (pa2 + zt - ee4)/6.0;
+    const double ss = 0.25*zt*ee4*pa2;
+    const double rh3 = rh*rh*rh;
+    const double tmp = rh3 + ss + sqrt(ss*(ss+2.0*rh3));
+    const double tt = copysign(pow(fabs(tmp), 1.0/3.0), tmp);
+    const double uu = rh + tt + rh*rh/tt;
+    const double vv = sqrt(uu*uu + ee4*zt);
+    const double ww = 0.5*elp_e2*(uu + vv - zt)/vv;
+    const double kp = 1.0 + elp_e2*(sqrt(uu + vv + ww*ww) + ww)/(uu + vv);
+    const double zkp = z * kp;
+
+    *lat_rad = atan2(zkp, p);
+    *elv = norm2d(p, zkp)*(1.0/kp - rkp0)/elp_e2;
+}
+
+
 /**
  * @brief Convert geodetic to geocentric Cartesian coordinates.
  *
@@ -63,20 +131,14 @@ static void geodetic2geocentric_cart(
     double lat, double lon, double elv,
     double elp_a, double elp_e2)
 {
-    double lat_rad = DG2RAD*lat;
-    double lon_rad = DG2RAD*lon;
-    double sin_lat = sin(lat_rad);
-    double cos_lat = cos(lat_rad);
+    const double lat_rad = DG2RAD*lat;
+    const double lon_rad = DG2RAD*lon;
+    double rad_xy;
 
-    /* radius of curvature of the ellipsoid */
-    double rc = elp_a / sqrt(1.0 - elp_e2*sin_lat*sin_lat);
+    _geodetic2geocentric(&rad_xy, z, lat_rad, elv, elp_a, elp_e2);
 
-    /* radius on the equator plane */
-    double re = (rc + elv)*cos_lat;
-
-    *x = re*cos(lon_rad);
-    *y = re*sin(lon_rad);
-    *z = (rc*(1.0 - elp_e2) + elv)*sin_lat;
+    *x = rad_xy * cos(lon_rad);
+    *y = rad_xy * sin(lon_rad);
 }
 
 
@@ -101,20 +163,14 @@ static void geodetic2geocentric_sph(
     double lat, double lon, double elv,
     double elp_a, double elp_e2)
 {
-    double lat_rad = DG2RAD*lat;
-    double lon_rad = DG2RAD*lon;
-    double sin_lat = sin(lat_rad);
-    double cos_lat = cos(lat_rad);
+    const double lat_rad = DG2RAD*lat;
+    const double lon_rad = DG2RAD*lon;
+    double rad_xy, z;
 
-    /* radius of curvature of the ellipsoid */
-    double rc = elp_a / sqrt(1.0 - elp_e2*sin_lat*sin_lat);
+    _geodetic2geocentric(&rad_xy, &z, lat_rad, elv, elp_a, elp_e2);
 
-    /* radius on the equator plane and the cartesian height*/
-    double re = (rc + elv)*cos_lat;
-    double  z = (rc*(1.0 - elp_e2) + elv)*sin_lat;
-
-    *r = norm2d(re, z);
-    *th = asin(z/(*r));
+    *r = norm2d(rad_xy, z);
+    *th = atan2(z, rad_xy);
     *ph = lon_rad;
 }
 
@@ -146,23 +202,17 @@ static void geodetic2geocentric(
     double lat, double lon, double elv,
     double elp_a, double elp_e2)
 {
-    double lat_rad = DG2RAD*lat;
-    double lon_rad = DG2RAD*lon;
-    double sin_lat = sin(lat_rad);
-    double cos_lat = cos(lat_rad);
+    const double lat_rad = DG2RAD*lat;
+    const double lon_rad = DG2RAD*lon;
+    double rad_xy;
 
-    /* radius of curvature of the ellipsoid */
-    double rc = elp_a / sqrt(1.0 - elp_e2*sin_lat*sin_lat);
+    _geodetic2geocentric(&rad_xy, z, lat_rad, elv, elp_a, elp_e2);
 
-    /* radius on the equator plane */
-    double re = (rc + elv)*cos_lat;
+    *x = rad_xy * cos(lon_rad);
+    *y = rad_xy * sin(lon_rad);
 
-    *x = re*cos(lon_rad);
-    *y = re*sin(lon_rad);
-    *z = (rc*(1.0 - elp_e2) + elv)*sin_lat;
-
-    *r = norm2d(re, *z);
-    *th = asin(*z/(*r));
+    *r = norm2d(rad_xy, *z);
+    *th = atan2(*z, rad_xy);
     *ph = lon_rad;
 }
 
@@ -179,13 +229,13 @@ static void sph2cart(
     double *x, double *y, double *z,
     double r, double th, double ph)
 {
-    double sin_th = sin(th);
-    double cos_th = cos(th);
-    double sin_ph = sin(ph);
-    double cos_ph = cos(ph);
+    const double sin_th = sin(th);
+    const double cos_th = cos(th);
+    const double sin_ph = sin(ph);
+    const double cos_ph = cos(ph);
 
     /* radius on the azimuth plane (z=0)*/
-    double ra = r*cos_th;
+    const double ra = r*cos_th;
 
     *x = ra*cos_ph;
     *y = ra*sin_ph;
@@ -206,7 +256,7 @@ static void cart2sph(
 {
     *r = norm3d(x, y, z);
     *th = asin(z/(*r));
-    *ph = (y >= 0 ? M_PI_2 : -M_PI_2) - atan(x/y);
+    *ph = atan2(y, x);
 }
 
 
@@ -226,28 +276,12 @@ static void geocentric_cart2geodetic(
     double x, double y, double z,
     double elp_a, double elp_e2)
 {
-    double p = norm2d(x, y);
-    /* Ferrari's solution */
-    double pa = p/elp_a;
-    double za = z/elp_a;
-    double pa2 = pa*pa;
-    double za2 = za*za;
-    double ee4 = elp_e2*elp_e2;
-    double rkp0 = (1.0 - elp_e2);
-    double zt = rkp0*za2;
-    double rh = (pa2 + zt - ee4)/6.0;
-    double ss = 0.25*zt*ee4*pa2;
-    double rh3 = rh*rh*rh;
-    double tmp = rh3 + ss + sqrt(ss*(ss+2.0*rh3));
-    double tt = copysign(pow(fabs(tmp), 1.0/3.0), tmp);
-    double uu = rh + tt + rh*rh/tt;
-    double vv = sqrt(uu*uu + ee4*zt);
-    double ww = 0.5*elp_e2*(uu + vv - zt)/vv;
-    double kp = 1.0 + elp_e2*(sqrt(uu + vv + ww*ww) + ww)/(uu + vv);
+    double lat_rad;
 
-    *lat = RAD2DG*atan(kp*z/p);
-    *lon = (y >= 0 ? +90.0 : -90.0) - RAD2DG*atan(x/y);
-    *elv = norm2d(p, z*kp)*(1.0/kp - rkp0)/elp_e2;
+    _geocentric2geodetic(&lat_rad, elv, norm2d(x, y), z, elp_a, elp_e2);
+
+    *lat = RAD2DG*lat_rad;
+    *lon = RAD2DG*atan2(y, x);
 }
 
 /**
@@ -267,29 +301,12 @@ static void geocentric_sph2geodetic(
     double r, double th, double ph,
     double elp_a, double elp_e2)
 {
-    double z = r*sin(th);
-    double p = r*cos(th);
-    /* Ferrari's solution */
-    double pa = p/elp_a;
-    double za = z/elp_a;
-    double pa2 = pa*pa;
-    double za2 = za*za;
-    double ee4 = elp_e2*elp_e2;
-    double rkp0 = (1.0 - elp_e2);
-    double zt = rkp0*za2;
-    double rh = (pa2 + zt - ee4)/6.0;
-    double ss = 0.25*zt*ee4*pa2;
-    double rh3 = rh*rh*rh;
-    double tmp = rh3 + ss + sqrt(ss*(ss+2.0*rh3));
-    double tt = copysign(pow(fabs(tmp), 1.0/3.0), tmp);
-    double uu = rh + tt + rh*rh/tt;
-    double vv = sqrt(uu*uu + ee4*zt);
-    double ww = 0.5*elp_e2*(uu + vv - zt)/vv;
-    double kp = 1.0 + elp_e2*(sqrt(uu + vv + ww*ww) + ww)/(uu + vv);
+    double lat_rad;
 
-    *lat = RAD2DG*atan(kp*z/p);
+    _geocentric2geodetic(&lat_rad, elv, r*cos(th), r*sin(th), elp_a, elp_e2);
+
+    *lat = RAD2DG*lat_rad;
     *lon = RAD2DG*ph;
-    *elv = norm2d(p, z*kp)*(1.0/kp - rkp0)/elp_e2;
 }
 
 #endif  /*GEO_CONV_H*/

@@ -79,9 +79,10 @@ static void _vrot_sph2cart(ARRAY_DATA ad_i, ARRAY_DATA ad_lat,
 #define DOC_VROT_SPH2CART "\n"\
 "   arr_out = vrot_sph2cart(arr_in, arr_lat, arr_lon)\n"\
 "\n"\
-"     Rotate vectors from the geocentric spherical to \n"\
-"     the geocentric Cartesian coordinates for given latitude\n"\
-"     and longitude in dg.\n"\
+"     Rotate vectors from the spherical (NEC) to \n"\
+"     the Cartesian (XYZ) coordinate frame for the given latitude\n"\
+"     and longitude in degrees.\n"\
+"\n"\
 "     The inputs are:\n"\
 "         arr_in - array of the input vectors\n"\
 "         arr_lat - array of latitudes.\n"\

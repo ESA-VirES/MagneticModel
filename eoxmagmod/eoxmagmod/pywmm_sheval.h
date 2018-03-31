@@ -82,6 +82,7 @@ static SHEVAL_MODE _check_sheval_mode(int mode, const char *label)
 
 /* magnetic model - auxiliary structure */
 typedef struct {
+    int is_internal;
     int degree;
     int nterm;
     int coord_in;
@@ -102,7 +103,7 @@ typedef struct {
     double *psqrt;
 } MODEL;
 
-/* model stucture destruction */
+/* model structure destruction */
 static void _sheval_model_destroy(MODEL *model)
 {
     if(NULL != model->lp)
@@ -121,14 +122,15 @@ static void _sheval_model_destroy(MODEL *model)
     memset(model, 0, sizeof(MODEL));
 }
 
-/* model stucture initiliazation */
-static int _sheval_model_init(MODEL *model, int degree,
+/* model structure initialization */
+static int _sheval_model_init(MODEL *model, int is_internal, int degree,
     int coord_in, int coord_out, const double *cg, const double *ch)
 {
     const int nterm = ((degree+1)*(degree+2))/2;
 
     memset(model, 0, sizeof(MODEL));
 
+    model->is_internal = is_internal;
     model->degree = degree;
     model->nterm = nterm;
     model->coord_in = coord_in;
@@ -176,6 +178,15 @@ static void _sheval_model_eval(MODEL *model, int mode, double *fpot,
     double flat, flon, frad;
     double tmp;
 
+    int glat_needed = (
+        (model->coord_out == CT_GEODETIC_ABOVE_WGS84) ||
+        (model->coord_out == CT_GEODETIC_ABOVE_EGM96)
+    );
+
+    void (*shc_relradpow)(double *rrp, int degree, double relrad) = (
+        model->is_internal ? shc_relradpow_internal : shc_relradpow_external
+    );
+
     // convert the input coordinates
     switch(model->coord_in)
     {
@@ -189,11 +200,15 @@ static void _sheval_model_eval(MODEL *model, int mode, double *fpot,
             break;
         case CT_GEOCENTRIC_SPHERICAL:
             clat = DG2RAD*x; clon = DG2RAD*y; crad = z;
-            geocentric_sph2geodetic(&glat, &glon, &ghgt, crad, clat, clon, model->elps_a, model->elps_eps2);
+            if (glat_needed) {
+                geocentric_sph2geodetic(&glat, &glon, &ghgt, crad, clat, clon, model->elps_a, model->elps_eps2);
+            }
             break;
         case CT_GEOCENTRIC_CARTESIAN:
             cart2sph(&crad, &clat, &clon, x, y, z);
-            geocentric_sph2geodetic(&glat, &glon, &ghgt, crad, clat, clon, model->elps_a, model->elps_eps2);
+            if (glat_needed) {
+                geocentric_sph2geodetic(&glat, &glon, &ghgt, crad, clat, clon, model->elps_a, model->elps_eps2);
+            }
             break;
         default:
             return;
@@ -217,9 +232,11 @@ static void _sheval_model_eval(MODEL *model, int mode, double *fpot,
     model->crad_last = crad;
 
     // evaluate the model
-    shc_eval(fpot, &flat, &flon, &frad, model->degree, mode,
-                clat, crad, model->cg, model->ch, model->lp, model->ldp,
-                model->rrp, model->lsin, model->lcos);
+    shc_eval(
+        fpot, &flat, &flon, &frad, model->degree, mode,
+        clat, crad, model->cg, model->ch, model->lp, model->ldp,
+        model->rrp, model->lsin, model->lcos, model->is_internal
+    );
 
     // project the produced vectors to the desired coordinate system
     if (mode&0x2)
@@ -305,27 +322,34 @@ static void _sheval3(ARRAY_DATA arrd_in, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_gr
 
 #define DOC_SHEVAL "\n"\
 "   arr_out = sheval(arr_in, degree, coef_g, coef_h, coord_type_in=GEODETIC_ABOVE_WGS84,\n"\
-"                          coord_type_out=GEODETIC_ABOVE_WGS84, mode=GRADIENT)\n"\
+"                    coord_type_out=GEODETIC_ABOVE_WGS84, mode=GRADIENT, is_internal=True)\n"\
+"\n"\
 "     Parameters:\n"\
 "       arr_in - array of 3D coordinates (up to 16 dimensions).\n"\
 "       degree - degree of the spherical harmonic model.\n"\
-"       coef_g - vector of spherical harmonic model coeficients.\n"\
-"       coef_h - vector of spherical harmonic model coeficients.\n"\
+"       coef_g - vector of spherical harmonic model coefficients.\n"\
+"       coef_h - vector of spherical harmonic model coefficients.\n"\
 "       coord_type_in - type of the input coordinates.\n"\
 "       mode - quantity to be evaluated:\n"\
 "                  POTENTIAL\n"\
 "                  GRADIENT (default)\n"\
 "                  POTENTIAL_AND_GRADIENT\n"\
-"       rad_ref - reference (Earth) radius\n"
+"       rad_ref - reference (Earth) radius\n"\
+"       is_internal - boolean flag set to True by default. When set to False \n"\
+"                     external field evaluation is used.\n"\
+"\n"
 
 
 static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
 {
-    static char *keywords[] = {"arr_in", "degree", "coef_g", "coef_h",
-                 "coord_type_in", "coord_type_out", "mode", NULL};
+    static char *keywords[] = {
+        "arr_in", "degree", "coef_g", "coef_h", "coord_type_in",
+        "coord_type_out", "mode", "is_internal", NULL
+    };
     int ct_in = CT_GEODETIC_ABOVE_WGS84;
     int ct_out = CT_GEODETIC_ABOVE_WGS84;
-    int nterm, degree = 0, mode = 0x2;
+    int nterm, degree = 0, mode = 0x2, is_internal;
+    PyObject *obj_is_internal = NULL; // boolean flag
     PyObject *obj_in = NULL; // input object
     PyObject *obj_cg = NULL; // coef_g object
     PyObject *obj_ch = NULL; // coef_h object
@@ -339,10 +363,13 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "OiOO|iii:sheval", keywords,
-        &obj_in, &degree, &obj_cg, &obj_ch, &ct_in, &ct_out, &mode
+        args, kwdict, "OiOO|iiiO:sheval", keywords,
+        &obj_in, &degree, &obj_cg, &obj_ch, &ct_in, &ct_out, &mode,
+        &obj_is_internal
     ))
         goto exit;
+
+    is_internal = (obj_is_internal == NULL) || PyObject_IsTrue(obj_is_internal);
 
     // check the type of the coordinate transformation
     if (CT_INVALID == _check_coord_type(ct_in, keywords[4]))
@@ -371,7 +398,7 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
     }
 
-    // check dimensions of the coeficient arrays
+    // check dimensions of the coefficient arrays
     nterm = ((degree+1)*(degree+2))/2;
 
     // check maximum allowed input array dimension
@@ -387,7 +414,7 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
     if (_check_array_dim_eq(arr_in, -1, 3, keywords[0]))
         goto exit;
 
-    // check the coeficients arrays' dimensions
+    // check the coefficients arrays' dimensions
     if (_check_array_dim_le(arr_cg, 0, nterm, keywords[2]))
         goto exit;
 
@@ -405,7 +432,10 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // evaluate the model
 
-    if(_sheval_model_init(&model, degree, ct_in, ct_out, PyArray_DATA(arr_cg), PyArray_DATA(arr_ch)))
+    if(_sheval_model_init(
+        &model, is_internal, degree, ct_in, ct_out, PyArray_DATA(arr_cg),
+        PyArray_DATA(arr_ch)
+    ))
         goto exit;
 
     switch(mode)

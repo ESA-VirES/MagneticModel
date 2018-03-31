@@ -1,8 +1,7 @@
 #-------------------------------------------------------------------------------
 #
-#  World Magnetic Model 2010 / Geomagnetism Library
+#  Spherical Harmonic Expansion - Geomagnetic Model
 #
-# Project: Earth magnetic field in Python.
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
@@ -16,8 +15,7 @@
 # furnished to do so, subject to the following conditions:
 #
 # The above copyright notice and this permission notice shall be included in
-# all
-# copies of this Software or works derived from this Software.
+# all copies of this Software or works derived from this Software.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,

@@ -73,12 +73,17 @@ static void _vrot_sph2geod(ARRAY_DATA ad_i, ARRAY_DATA ad_dlat,
 #define DOC_VROT_SPH2GEOD "\n"\
 "   arr_out = vrot_sph2geod(arr_in, arr_dlat)\n"\
 "\n"\
-"     Rotate vectors from the geocentric spherical to the geodetic\n"\
-"     coordinate system (or back) for a given difference of latitudes in dg.\n"\
+"     Rotate vectors from the geocentric spherical (NEC) to the geodetic\n"\
+"     (NEC) coordinate frame for a given difference of latitudes\n"\
+"     in degrees.\n"\
+"     This function can be also used for the inverse rotation from the geodetic\n"\
+"     (NEC) to the geocentric spherical (NEC) coordinate frame by setting\n"\
+"     the negative difference of latitudes.\n"\
+"\n"\
 "     The inputs are:\n"\
 "         arr_in - array of the input vectors\n"\
 "         arr_dlat - array of differences of the latitudes.\n"\
-"               A scalar value is also accepted for a single vector rotation.\n"
+"     A scalar value is also accepted for a single vector rotation.\n"
 
 static PyObject* vrot_sph2geod(PyObject *self, PyObject *args, PyObject *kwdict)
 {

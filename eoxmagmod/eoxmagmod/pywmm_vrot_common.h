@@ -35,26 +35,29 @@
 
 /* array check*/
 
-static int _vrot_arr_check(PyObject *arr0, PyObject *arr,
-        const char *label0, const char *label)
+static int _vrot_arr_check(
+    PyObject *arr_ref, PyObject *arr_checked,
+    const char *label_ref, const char *label_checked
+)
 {
-    if ((PyArray_NDIM(arr0) > 1)||(PyArray_NDIM(arr) > 0))
+    //if ((PyArray_NDIM(arr_ref) > 1)||(PyArray_NDIM(arr_checked) > 0))
+    if (PyArray_NDIM(arr_checked) > 0)
     {
         int d;
 
-        if (PyArray_NDIM(arr0) != PyArray_NDIM(arr)+1)
+        if (PyArray_NDIM(arr_ref) != PyArray_NDIM(arr_checked)+1)
         {
             PyErr_Format(PyExc_ValueError, "Shape mismatch between '%s' and "
-                "'%s'!", label0, label);
+                "'%s'!", label_ref, label_checked);
             return 1;
         }
 
-        for (d = 0; d < (PyArray_NDIM(arr0)-1); ++d)
+        for (d = 0; d < (PyArray_NDIM(arr_ref)-1); ++d)
         {
-            if (PyArray_DIM(arr0, d) != PyArray_DIM(arr, d))
+            if (PyArray_DIM(arr_ref, d) != PyArray_DIM(arr_checked, d))
             {
                 PyErr_Format(PyExc_ValueError, "Shape mismatch between '%s' "
-                    "and '%s'!", label0, label);
+                    "and '%s'!", label_ref, label_checked);
                 return 1;
             }
         }

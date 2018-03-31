@@ -45,43 +45,57 @@
 /* python function definition */
 
 #define DOC_RELRADPOW "\n"\
-"   rrp = relradpow(radius, degree, reference_radius="STR(RADIUS)")\n"\
+"   rrp = relradpow(radius, degree, reference_radius="STR(RADIUS)", is_internal=True)\n"\
 "\n"\
-"     For given 'radius' and 'reference_radius' evaluate relative radius power\n"\
+"     By default when the 'is_internal' flag is set to True, evaluate\n"\
+"     for the given 'radius' and 'reference_radius' relative radius power\n"\
 "     series:\n"\
 "       (reference_radius/radius)**(i+2) for i in range(0, degree+1) .\n"\
+"\n"\
+"     When the 'is_internal' flag is set to False, evaluate\n"\
+"     for the given 'radius' and 'reference_radius' relative radius power\n"\
+"     series:\n"\
+"       (radius/reference_radius)**(i+1) for i in range(0, degree+1) .\n"\
+"\n"
 
 
 static PyObject* relradpow(PyObject *self, PyObject *args, PyObject *kwdict)
 {
-    static char *keywords[] = {"latitude", "degree", "reference_radius", NULL};
+    static char *keywords[] = {
+        "radius", "degree", "reference_radius", "is_internal", NULL
+    };
 
     int degree;
+    int is_internal;
     double rad, rad0 = RADIUS; // radius and reference radius
+    PyObject *obj_is_internal = NULL; // boolean flag
     PyObject *arr_rrp = NULL; // P array
     PyObject *retval = NULL; // output tuple
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "di|d:relradpow", keywords, &rad, &degree, &rad0
+        args, kwdict, "di|dO:relradpow", keywords,
+        &rad, &degree, &rad0, &obj_is_internal
     ))
         goto exit;
 
-    if (degree < 1)
+    is_internal = (obj_is_internal == NULL) || PyObject_IsTrue(obj_is_internal);
+
+    if (degree < 0)
     {
-        PyErr_Format(PyExc_ValueError, "Invalid value %d of '%s'!", degree, keywords[1]);
+        PyErr_Format(PyExc_ValueError, "%s < 0", keywords[1]);
         goto exit;
     }
 
     if (rad < 0.0)
     {
-        PyErr_Format(PyExc_ValueError, "Invalid value %g of '%s'!", rad, keywords[0]);
+        PyErr_Format(PyExc_ValueError, "%s < 0", keywords[0]);
         goto exit;
     }
 
     if (rad0 <= 0.0)
     {
-        PyErr_Format(PyExc_ValueError, "Invalid value %g of '%s'!", rad0, keywords[2]);
+        PyErr_Format(PyExc_ValueError, "%s <= 0", keywords[2]);
         goto exit;
     }
 
@@ -89,8 +103,11 @@ static PyObject* relradpow(PyObject *self, PyObject *args, PyObject *kwdict)
     if (NULL == (arr_rrp = _get_new_double_array(1, NULL, degree+1)))
         goto exit;
 
-    // evaluate the relative radius power
-    shc_relradpow(PyArray_DATA(arr_rrp), degree, rad/rad0);
+    // evaluate the relative radius power series
+    if (is_internal)
+        shc_relradpow_internal(PyArray_DATA(arr_rrp), degree, rad/rad0);
+    else
+        shc_relradpow_external(PyArray_DATA(arr_rrp), degree, rad/rad0);
 
     retval = arr_rrp;
 
