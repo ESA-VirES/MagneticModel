@@ -49,30 +49,35 @@ def get_dipole_rotation_matrix(latitude, longitude):
     ])
 
 
-def convert_to_dipole(coords, lat_nmp, lon_nmp,
+def convert_to_dipole(coords, lat_ngp, lon_ngp,
                       coord_type_in=GEOCENTRIC_SPHERICAL):
     """ Convert coordinates (by default geocentric spherical)
     to dipole coordinates defined by the given latitude and longitude
     of the geomagnetic pole.
     The dipole coordinates are a simple rotated coordinate frame in which
     the North pole (dipole latitude == 0) is aligned with the geomagnetic pole
-    and the prime meridian (dipole longitude = 0 ) is the meridian
+    and the prime meridian (dipole longitude == 0) is the meridian
     passing trough the geomagnetic pole.
     """
-    rotation_matrix = get_dipole_rotation_matrix(lat_nmp, lon_nmp)
+    rotation_matrix = get_dipole_rotation_matrix(lat_ngp, lon_ngp)
     coords = convert(coords, coord_type_in, GEOCENTRIC_CARTESIAN)
     coords = dot(coords, rotation_matrix)
     coords = convert(coords, GEOCENTRIC_CARTESIAN, GEOCENTRIC_SPHERICAL)
     return coords
 
 
-def vrot_dipole2spherical(vectors, lat_dipole, lon_dipole,
-                          lat_spherical, lon_spherical, lat_nmp, lon_nmp):
+def vrot_from_dipole(vectors, lat_ngp, lon_ngp, lat_dipole, lon_dipole,
+                     lat_out=None, lon_out=None,
+                     coord_type_out=GEOCENTRIC_CARTESIAN):
     """ Rotate vectors from dipole (NEC) coordinate frame to the
-    geocentric spherical (NEC) coordinate frame.
+    Cartesian (XYZ) (default), geocentric spherical or geodetic (NEC)
+    coordinate frame.
     """
-    rotation_matrix = get_dipole_rotation_matrix(lat_nmp, lon_nmp).transpose()
+    rotation_matrix = get_dipole_rotation_matrix(lat_ngp, lon_ngp).transpose()
     vectors = vrot_sph2cart(vectors, lat_dipole, lon_dipole)
     vectors = dot(vectors, rotation_matrix)
-    vectors = vrot_cart2sph(vectors, lat_spherical, lon_spherical)
-    return vectors
+    if coord_type_out == GEOCENTRIC_CARTESIAN:
+        # coordinates are already in the Cartesian coordinates
+        return vectors
+    else:
+        return vrot_cart2sph(vectors, lat_out, lon_out)

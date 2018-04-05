@@ -25,7 +25,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
-# pylint: disable=missing-docstring, invalid-name
+# pylint: disable=missing-docstring,invalid-name,no-name-in-module
 
 from unittest import TestCase, main
 from itertools import product
@@ -36,11 +36,12 @@ from numpy.testing import assert_allclose
 from eoxmagmod._pywmm import (
     convert, vrot_sph2cart, vrot_cart2sph,
     GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
+    GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96,
 )
 from eoxmagmod.dipole_coords import (
     get_dipole_rotation_matrix,
     convert_to_dipole,
-    vrot_dipole2spherical,
+    vrot_from_dipole,
 )
 
 DEG2RAD = pi/180.0
@@ -152,7 +153,8 @@ class TestConvertToDipoleCoordinates(TestCase):
         )
 
 
-class TestVRotDipoleToSpherical(TestCase):
+class VRotFromDipoleMixIn(object):
+    target_coords_type = None
     shape = (37, 37)
 
     @property
@@ -166,34 +168,46 @@ class TestVRotDipoleToSpherical(TestCase):
             linspace(-180, 180, self.shape[1]),
             linspace(-90, 90, self.shape[0])
         )
-        coords[..., 2] = 1.0
+        coords[..., 2] = 6371.2
         return coords
 
-    @staticmethod
-    def reference_vrot_dipole2spherical(vectors, coords, latitude, longitude):
+    @classmethod
+    def reference_vrot_from_dipole(cls, vectors, coords, latitude, longitude):
         coords = asarray(coords)
         rotation_matrix = get_dipole_rotation_matrix(latitude, longitude)
         coords_dipole = convert_to_dipole(coords, latitude, longitude)
-        lat_spherical = coords[..., 0]
-        lon_spherical = coords[..., 1]
         lat_dipole = coords_dipole[..., 0]
         lon_dipole = coords_dipole[..., 1]
         vectors = vrot_sph2cart(vectors, lat_dipole, lon_dipole)
         vectors = dot(vectors, rotation_matrix.transpose())
-        vectors = vrot_cart2sph(vectors, lat_spherical, lon_spherical)
+        if cls.target_coords_type != GEOCENTRIC_CARTESIAN:
+            coords_out = convert(
+                coords, GEOCENTRIC_SPHERICAL, cls.target_coords_type
+            )
+            lat_out = coords_out[..., 0]
+            lon_out = coords_out[..., 1]
+            vectors = vrot_cart2sph(vectors, lat_out, lon_out)
         return vectors
 
-    @staticmethod
-    def eval_vrot_dipole2spherical(vectors, coords, latitude, longitude):
+    @classmethod
+    def eval_vrot_from_dipole(cls, vectors, coords, latitude, longitude):
         coords = asarray(coords)
         coords_dipole = convert_to_dipole(coords, latitude, longitude)
-        lat_spherical = coords[..., 0]
-        lon_spherical = coords[..., 1]
         lat_dipole = coords_dipole[..., 0]
         lon_dipole = coords_dipole[..., 1]
-        return vrot_dipole2spherical(
-            vectors, lat_dipole, lon_dipole, lat_spherical, lon_spherical,
-            latitude, longitude
+
+        if cls.target_coords_type != GEOCENTRIC_CARTESIAN:
+            coords_out = convert(
+                coords, GEOCENTRIC_SPHERICAL, cls.target_coords_type
+            )
+            lat_out = coords_out[..., 0]
+            lon_out = coords_out[..., 1]
+        else:
+            lat_out, lon_out = None, None
+
+        return vrot_from_dipole(
+            vectors, latitude, longitude, lat_dipole, lon_dipole,
+            lat_out, lon_out, cls.target_coords_type
         )
 
     def test_vrot_dipole2spherical(self):
@@ -205,12 +219,68 @@ class TestVRotDipoleToSpherical(TestCase):
             coords = self.coords
             vects = self.vectors
             assert_allclose(
-                self.eval_vrot_dipole2spherical(vects, coords, lat, lon),
-                self.reference_vrot_dipole2spherical(vects, coords, lat, lon),
+                self.eval_vrot_from_dipole(vects, coords, lat, lon),
+                self.reference_vrot_from_dipole(vects, coords, lat, lon),
                 atol=1e-12
             )
 
-    def test_vrot_dipole2spherical_sanity_check(self):
+
+class TestVRotDipoleToCartesian(TestCase, VRotFromDipoleMixIn):
+    target_coords_type = GEOCENTRIC_CARTESIAN
+
+    def test_vrot_dipole_to_cartesian_sanity_check(self):
+        lat_ngp, lon_ngp = 80, -170
+        vectors = array([
+            (1, 0, 0),
+            (0, 1, 0),
+            (0, 0, 1),
+        ])
+        sin10, cos10 = sin(DEG2RAD*10), cos(DEG2RAD*10)
+        input_output_pairs = [
+            ((-10, -170), (0, 0), [
+                (-sin10*cos10, -sin10**2, cos10),
+                (sin10, -cos10, 0),
+                (-cos10**2, -sin10*cos10, -sin10),
+            ]),
+            ((10, 10), (0, 180), [
+                (-sin10*cos10, -sin10**2, cos10),
+                (-sin10, cos10, 0),
+                (cos10**2, sin10*cos10, sin10),
+            ]),
+            ((0, -80), (0, 90), [
+                (-sin10*cos10, -sin10**2, cos10),
+                (cos10**2, sin10*cos10, sin10),
+                (sin10, -cos10, 0),
+            ]),
+            ((0, 100), (0, -90), [
+                (-sin10*cos10, -sin10**2, cos10),
+                (-cos10**2, -sin10*cos10, -sin10),
+                (-sin10, cos10, 0),
+            ]),
+            ((80, -170), (90, 0), [
+                (cos10**2, sin10*cos10, sin10),
+                (sin10, -cos10, 0),
+                (-sin10*cos10, -sin10**2, cos10),
+            ]),
+            ((-80, 10), (-90, 0), [
+                (-cos10**2, -sin10*cos10, -sin10),
+                (sin10, -cos10, 0),
+                (sin10*cos10, sin10**2, -cos10),
+            ]),
+        ]
+        for (lat_sph, lon_sph), (lat_dip, lon_dip), expected in input_output_pairs:
+            assert_allclose(
+                vrot_from_dipole(
+                    vectors, lat_ngp, lon_ngp, lat_dip, lon_dip,
+                    lat_sph, lon_sph, self.target_coords_type,
+                ), expected, atol=1e-12
+            )
+
+
+class VRotFromDipoleToSphericalMixIn(object):
+    target_coords_type = GEOCENTRIC_SPHERICAL
+
+    def test_vrot_dipole_to_spherical_sanity_check(self):
         lat_ngp, lon_ngp = 80, -170
         vectors = array([
             (1, 0, 0),
@@ -234,10 +304,23 @@ class TestVRotDipoleToSpherical(TestCase):
         ]
         for (lat_sph, lon_sph), (lat_dip, lon_dip), expected in input_output_pairs:
             assert_allclose(
-                vrot_dipole2spherical(
-                    vectors, lat_dip, lon_dip, lat_sph, lon_sph, lat_ngp, lon_ngp
+                vrot_from_dipole(
+                    vectors, lat_ngp, lon_ngp, lat_dip, lon_dip,
+                    lat_sph, lon_sph, self.target_coords_type,
                 ), expected, atol=1e-12
             )
+
+
+class TestVRotDipoleToSpherical(TestCase, VRotFromDipoleToSphericalMixIn):
+    target_coords_type = GEOCENTRIC_SPHERICAL
+
+
+class TestVRotDipoleToWGS84(TestCase, VRotFromDipoleToSphericalMixIn):
+    target_coords_type = GEODETIC_ABOVE_WGS84
+
+
+class TestVRotDipoleToEGM96(TestCase, VRotFromDipoleToSphericalMixIn):
+    target_coords_type = GEODETIC_ABOVE_EGM96
 
 
 if __name__ == "__main__":
