@@ -25,20 +25,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
-# pylint: disable=missing-docstring,unused-import,no-name-in-module,too-few-public-methods
+# pylint: disable=missing-docstring,no-name-in-module,too-few-public-methods,line-too-long
 
 from unittest import TestCase, main
-from itertools import chain, product
+from itertools import product
 from random import random
-from math import pi, cos, sin, sqrt
-from numpy import array, zeros, empty, nditer
+from numpy import array, empty, nditer
 from numpy.testing import assert_allclose
-from eoxmagmod.tests.pywmm_spharpot import SphericalHarmonicsCommonMixIn
 from eoxmagmod._pywmm import (
     POTENTIAL, GRADIENT, POTENTIAL_AND_GRADIENT,
     GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96,
     GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
-    convert, vrot_sph2geod, vrot_sph2cart, vrot_cart2sph,
+    convert, vrot_sph2geod, vrot_sph2cart,
     relradpow, lonsincos, legendre,
     spharpot, sphargrd, sheval,
 )
