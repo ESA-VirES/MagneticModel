@@ -36,9 +36,13 @@ setup(
     description="Earth magnetic field utilities.",
     author="Martin Paces",
     author_email="martin.paces@eox.at",
-    packages=['eoxmagmod'],
+    packages=[
+        'eoxmagmod',
+        'eoxmagmod.tests',
+        'eoxmagmod.tests.data',
+    ],
     license='EOX licence (MIT style)',
-    version='0.4.1',
+    version='0.5.0',
     package_data={'eoxmagmod': ['data/*']},
     ext_modules=[
         Extension(
