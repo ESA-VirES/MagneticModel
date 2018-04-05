@@ -62,6 +62,7 @@ from .base import (
     vrot_sph2geod,
     vrot_sph2cart,
     vrot_cart2sph,
+    sheval,
 )
 from .emm import read_model_emm2010
 from .wmm import read_model_wmm, read_model_wmm2010, read_model_wmm2015
@@ -73,6 +74,10 @@ from .qd import (
     eval_qdlatlon_with_base_vectors,
 )
 from .sunpos import sunpos, sunpos_original
+from .dipole_coords import (
+    get_dipole_rotation_matrix, convert_to_dipole, vrot_from_dipole,
+)
+from .sheval_dipole import sheval_dipole
 
 __all__ = [
     'MagneticModel',
@@ -94,6 +99,11 @@ __all__ = [
     'relradpow',
     'spharpot',
     'sphargrd',
+    'sheval',
+    'get_dipole_rotation_matrix',
+    'vrot_from_dipole',
+    'convert_to_dipole',
+    'sheval_dipole',
     'DATA_WMM_2010',
     'DATA_WMM_2015',
     'DATA_EMM_2010_STATIC',
