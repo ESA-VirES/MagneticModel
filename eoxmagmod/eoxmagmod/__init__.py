@@ -1,8 +1,7 @@
 #-------------------------------------------------------------------------------
 #
-#  World Magnetic Model 2010 / Geomagnetism Library
+#  EOX Magnetic Model Library
 #
-# Project: Earth magnetic field in Python.
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
@@ -28,21 +27,26 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+from .data import (
+    # Data items are renamed to provide backward compatibility.
+    WMM_2010 as DATA_WMM_2010,
+    WMM_2015 as DATA_WMM_2015,
+    EMM_2010_STATIC as DATA_EMM_2010_STATIC,
+    EMM_2010_SECVAR as DATA_EMM_2010_SECVAR,
+    CHAOS5_CORE as DATA_CHAOS5_CORE,
+    CHAOS5_CORE_V4 as DATA_CHAOS5_CORE_V4,
+    CHAOS5_STATIC as DATA_CHAOS5_STATIC,
+    CHAOS6_CORE as DATA_CHAOS6_CORE,
+    CHAOS6_CORE_X3 as DATA_CHAOS6_CORE_X3,
+    CHAOS6_STATIC as DATA_CHAOS6_STATIC,
+    IGRF11 as DATA_IGRF11,
+    IGRF12 as DATA_IGRF12,
+    SIFM as DATA_SIFM,
+    APEX_2015 as DATA_APEX_2015,
+    APEX_2020 as DATA_APEX_2020,
+)
 from .base import (
     MagneticModel,
-    DATA_WMM_2010,
-    DATA_WMM_2015,
-    DATA_EMM_2010_STATIC,
-    DATA_EMM_2010_SECVAR,
-    DATA_CHAOS5_CORE,
-    DATA_CHAOS5_CORE_V4,
-    DATA_CHAOS5_STATIC,
-    DATA_CHAOS6_CORE,
-    DATA_CHAOS6_CORE_X3,
-    DATA_CHAOS6_STATIC,
-    DATA_IGRF11,
-    DATA_IGRF12,
-    DATA_SIFM,
     GEODETIC_ABOVE_WGS84,
     GEODETIC_ABOVE_EGM96,
     GEOCENTRIC_SPHERICAL,
@@ -69,7 +73,6 @@ from .wmm import read_model_wmm, read_model_wmm2010, read_model_wmm2015
 from .shc import read_model_shc
 from .igrf import read_model_igrf11
 from .qd import (
-    DATA_APEX_2015, DATA_APEX_2020,
     eval_qdlatlon, eval_mlt, eval_subsol,
     eval_qdlatlon_with_base_vectors,
 )
@@ -121,7 +124,6 @@ __all__ = [
     'POTENTIAL',
     'GRADIENT',
     'POTENTIAL_AND_GRADIENT',
-    'eval_apex',
     'eval_qdlatlon',
     'eval_mlt',
     'eval_subsol',

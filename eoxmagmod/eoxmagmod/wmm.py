@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 #
-#  Spherical Harmonic Expansion - Geomagnetic Model
+#  World Magnetic Model
 #
 # Author: Martin Paces <martin.paces@eox.at>
 #
@@ -27,8 +27,10 @@
 #-------------------------------------------------------------------------------
 
 import re
-import numpy as np
-from base import MagneticModel, DATA_WMM_2010, DATA_WMM_2015
+from numpy import zeros, copy
+from .base import MagneticModel
+from .data import WMM_2010, WMM_2015
+
 
 class MagneticModelSimple(MagneticModel):
     """ Simple magnetic model class.
@@ -63,8 +65,8 @@ class MagneticModelSimple(MagneticModel):
         ddate = date - self.epoch
         nterm = min(prm['coef_static_g'].size, prm['coef_secvar_g'].size)
 
-        coef_static_g = np.copy(prm['coef_static_g'])
-        coef_static_h = np.copy(prm['coef_static_h'])
+        coef_static_g = copy(prm['coef_static_g'])
+        coef_static_h = copy(prm['coef_static_h'])
         coef_static_g[:nterm] += ddate * prm['coef_secvar_g'][:nterm]
         coef_static_h[:nterm] += ddate * prm['coef_secvar_h'][:nterm]
 
@@ -78,7 +80,7 @@ class MagneticModelSimple(MagneticModel):
         def _analyse_coeficiens(degree, coef_g, coef_h, prefix):
             nz_g = coef_g.nonzero()
             nz_h = coef_h.nonzero()
-            nz_max = max(np.max(nz_g[0]), np.max(nz_h[0]))
+            nz_max = max(nz_g[0].max(), nz_h[0].max())
             degree_real = 0
             for dg in xrange(degree, 0, -1):
                 if nz_max >= ((dg*(dg+1))/2):
@@ -114,13 +116,13 @@ class MagneticModelSimple(MagneticModel):
 
 
 def read_model_wmm2010():
-    """ Read WMM2015 model coefficients."""
-    return read_model_wmm(DATA_WMM_2010)
+    """ Read WMM2010 model coefficients."""
+    return read_model_wmm(WMM_2010)
 
 
 def read_model_wmm2015():
     """ Read WMM2015 model coefficients."""
-    return read_model_wmm(DATA_WMM_2010)
+    return read_model_wmm(WMM_2015)
 
 
 def read_model_wmm(fname):
@@ -154,10 +156,10 @@ def read_model_wmm(fname):
 
         # PASS2 - fill the coefficient arrays
         nterm = ((degree+2)*(degree+1))/2
-        coef_g = np.zeros(nterm)
-        coef_h = np.zeros(nterm)
-        coef_dg = np.zeros(nterm)
-        coef_dh = np.zeros(nterm)
+        coef_g = zeros(nterm)
+        coef_h = zeros(nterm)
+        coef_dg = zeros(nterm)
+        coef_dh = zeros(nterm)
 
         for n, m, g, h, dg, dh in lcoef:
             idx = m + ((n+1)*n)/2

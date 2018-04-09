@@ -38,6 +38,7 @@ setup(
     author_email="martin.paces@eox.at",
     packages=[
         'eoxmagmod',
+        'eoxmagmod.data',
         'eoxmagmod.tests',
         'eoxmagmod.tests.data',
     ],

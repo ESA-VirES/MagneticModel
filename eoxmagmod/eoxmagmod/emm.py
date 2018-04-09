@@ -2,7 +2,6 @@
 #
 #  Earth Magnetic Model 2010
 #
-# Project: Earth magnetic field in Python.
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
@@ -30,9 +29,10 @@
 
 import re
 from gzip import GzipFile as _GzipFile
-import numpy as np
-from wmm import MagneticModelSimple
-from base import DATA_EMM_2010_STATIC, DATA_EMM_2010_SECVAR
+from numpy import zeros
+from .wmm import MagneticModelSimple
+from .data import EMM_2010_STATIC, EMM_2010_SECVAR
+
 
 # NOTE: GzipFile with statement support added in Python 2.7.
 if hasattr(_GzipFile, '__exit__'):
@@ -79,8 +79,8 @@ def _read_prm_emm2010(fname):
 
         degree_check = 0
         nterm = ((degree+2)*(degree+1))/2
-        coef_g = np.zeros(nterm)
-        coef_h = np.zeros(nterm)
+        coef_g = zeros(nterm)
+        coef_h = zeros(nterm)
 
         loff = lidx
         for lidx, line in enumerate(fid):
@@ -126,8 +126,8 @@ def _read_prm_emm2010(fname):
             return _read(fid)
 
 
-def read_model_emm2010(fname_static=DATA_EMM_2010_STATIC,
-                       fname_secvar=DATA_EMM_2010_SECVAR):
+def read_model_emm2010(fname_static=EMM_2010_STATIC,
+                       fname_secvar=EMM_2010_SECVAR):
     """ Read model parameters from the coefficient files in the WMM2010 format.
     """
 
