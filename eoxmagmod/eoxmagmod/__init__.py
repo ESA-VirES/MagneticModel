@@ -76,7 +76,7 @@ from .quasi_dipole_coordinates import (
     eval_qdlatlon, eval_mlt, eval_subsol,
     eval_qdlatlon_with_base_vectors,
 )
-from .sunpos import sunpos, sunpos_original
+from .solar_position import sunpos, sunpos_original
 from .dipole_coords import (
     get_dipole_rotation_matrix, convert_to_dipole, vrot_from_dipole,
 )
