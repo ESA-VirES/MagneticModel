@@ -45,8 +45,13 @@ from .data import (
     APEX_2015 as DATA_APEX_2015,
     APEX_2020 as DATA_APEX_2020,
 )
-from .base import (
-    MagneticModel,
+from .base import MagneticModel
+from .util import (
+    vnorm,
+    vrotate,
+    vincdecnorm,
+)
+from ._pywmm import (
     GEODETIC_ABOVE_WGS84,
     GEODETIC_ABOVE_EGM96,
     GEOCENTRIC_SPHERICAL,
@@ -54,18 +59,15 @@ from .base import (
     POTENTIAL,
     GRADIENT,
     POTENTIAL_AND_GRADIENT,
-    vnorm,
-    vincdecnorm,
     convert,
+    vrot_sph2geod,
+    vrot_sph2cart,
+    vrot_cart2sph,
     legendre,
     lonsincos,
     relradpow,
     spharpot,
     sphargrd,
-    vrotate,
-    vrot_sph2geod,
-    vrot_sph2cart,
-    vrot_cart2sph,
     sheval,
 )
 from .emm import read_model_emm2010
