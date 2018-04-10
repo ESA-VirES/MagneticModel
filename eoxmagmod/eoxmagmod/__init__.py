@@ -72,7 +72,7 @@ from .emm import read_model_emm2010
 from .wmm import read_model_wmm, read_model_wmm2010, read_model_wmm2015
 from .shc import read_model_shc
 from .igrf import read_model_igrf11
-from .qd import (
+from .quasi_dipole_coordinates import (
     eval_qdlatlon, eval_mlt, eval_subsol,
     eval_qdlatlon_with_base_vectors,
 )

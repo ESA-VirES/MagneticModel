@@ -44,7 +44,7 @@ setup(
     ],
     license='EOX licence (MIT style)',
     version='0.5.0',
-    package_data={'eoxmagmod': ['data/*']},
+    package_data={'eoxmagmod': ['data/*', 'tests/data/*.tsv']},
     ext_modules=[
         Extension(
             'eoxmagmod._pywmm',
