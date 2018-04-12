@@ -41,10 +41,20 @@ setup(
         'eoxmagmod.data',
         'eoxmagmod.tests',
         'eoxmagmod.tests.data',
+        'eoxmagmod.magnetic_model',
+        'eoxmagmod.magnetic_model.tests',
+        'eoxmagmod.magnetic_model.tests.data',
     ],
     license='EOX licence (MIT style)',
     version='0.5.0',
-    package_data={'eoxmagmod': ['data/*', 'tests/data/*.tsv']},
+    package_data={
+        'eoxmagmod': [
+            'data/*',
+            'tests/data/*.tsv',
+            'magnetic_model/tests/data/*.txt',
+            'magnetic_model/tests/data/*.cdf',
+        ],
+    },
     ext_modules=[
         Extension(
             'eoxmagmod._pywmm',

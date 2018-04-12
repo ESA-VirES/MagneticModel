@@ -2,3 +2,5 @@ include MANIFEST.in
 recursive-exclude eoxmagmod *.pyc *.o
 recursive-include eoxmagmod *.c *.h
 graft eoxmagmod/data
+graft eoxmagmod/tests/data
+graft eoxmagmod/magnetic_model/tests/data
