@@ -51,6 +51,10 @@ from .util import (
     vrotate,
     vincdecnorm,
 )
+from ._pytimeconv import (
+    decimal_year_to_mjd2000,
+    mjd2000_to_decimal_year,
+)
 from ._pywmm import (
     GEODETIC_ABOVE_WGS84,
     GEODETIC_ABOVE_EGM96,
@@ -133,6 +137,8 @@ __all__ = [
     'DATA_APEX_2020',
     'sunpos',
     'sunpos_original',
+    'decimal_year_to_mjd2000',
+    'mjd2000_to_decimal_year',
 ]
 
 __version__ = '0.5.0'

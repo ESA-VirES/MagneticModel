@@ -92,5 +92,17 @@ setup(
                 './eoxmagmod/include',
             ],
         ),
+        Extension(
+            'eoxmagmod._pytimeconv',
+            sources=[
+                'eoxmagmod/pytimeconv.c',
+            ],
+            libraries=[],
+            library_dirs=[],
+            include_dirs=[
+                './eoxmagmod',
+                './eoxmagmod/include',
+            ],
+        ),
     ]
 )

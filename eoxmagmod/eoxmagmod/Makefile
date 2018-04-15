@@ -38,9 +38,13 @@ HDR_SP=pywmm_aux.h pysunpos.h pysunpos_original.h
 OBJ_SP=pysunpos.o
 DST_SP=_pysunpos.so
 
+HDR_TC=pywmm_aux.h pytimeconv_mjd2000_to_decimal_year.h pytimeconv_decimal_year_to_mjd2000.h
+OBJ_TC=pytimeconv.o
+DST_TC=_pytimeconv.so
+
 # --------------------------------------------
 
-all: pywmm pyqd pysunpos
+all: pywmm pyqd pysunpos pytimeconv
 
 %.o: %.c
 	$(CC) $< $(CCFLAGS) -o $@
@@ -57,6 +61,8 @@ pyqd: $(OBJ_QD)
 pysunpos: $(OBJ_SP)
 	$(LD) -shared -o $(DST_SP) $(OBJ_SP) $(LIBS_SP)
 
+pytimeconv: $(OBJ_TC)
+	$(LD) -shared -o $(DST_TC) $(OBJ_TC) $(LIBS_TC)
 
 clean:
 	$(RM) *.o
@@ -67,3 +73,4 @@ purge: clean
 pywmm.o: pywmm.c $(HDR_WMM)
 pyqd.o: pyqd.c $(HDR_QD)
 pysunpos.o: pysunpos.c $(HDR_SP)
+pytimeconv.o: pytimeconv.c $(HDR_TC)
