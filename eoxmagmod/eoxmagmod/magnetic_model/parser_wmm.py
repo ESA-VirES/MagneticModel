@@ -28,6 +28,7 @@
 
 import re
 from numpy import array
+from .._pytimeconv import decimal_year_to_mjd2000
 
 RE_TERMINATING_LINE = re.compile(r'^9+$')
 WMM_VALIDITY_PERIOD = 5.0 # years
@@ -66,7 +67,7 @@ def parse_wmm_coefficients(lines, data):
 
     # convert (t0, dt) to (t0, t1)
     epoch = data["epoch"]
-    times = array([epoch, epoch + WMM_VALIDITY_PERIOD])
+    times = decimal_year_to_mjd2000([epoch, epoch + WMM_VALIDITY_PERIOD])
     nm_index = array(nm_index)
     coeff = array(coeff)
     coeff[:, 1] = coeff[:, 0] + coeff[:, 1]*WMM_VALIDITY_PERIOD

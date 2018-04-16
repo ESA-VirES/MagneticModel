@@ -30,6 +30,7 @@
 from unittest import TestCase, main
 from numpy.testing import assert_allclose
 from numpy import abs as aabs
+from eoxmagmod import decimal_year_to_mjd2000
 from eoxmagmod.magnetic_model.parser_emm import (
     combine_emm_coefficients, parse_emm_file, EMM_VALIDITY_PERIOD,
 )
@@ -57,17 +58,17 @@ class TestEMMParser(TestCase):
 
     def _assert_valid_variable(self, data, expected_data):
         self._assert_valid(data, expected_data)
-        assert_allclose(
-            data["t"], [data["epoch"], data["epoch"] + EMM_VALIDITY_PERIOD]
-        )
+        assert_allclose(data["t"], decimal_year_to_mjd2000(
+            [data["epoch"], data["epoch"] + EMM_VALIDITY_PERIOD]
+        ))
 
     def _assert_valid_constant(self, data, expected_data):
         self._assert_valid(data, expected_data)
-        assert_allclose(data["t"], [data["epoch"]])
+        assert_allclose(data["t"], decimal_year_to_mjd2000([data["epoch"]]))
 
     def test_parse_emm_file_emm2010_static(self):
         data = self.parse(EMM_2010_STATIC)
-        self._assert_valid(data, {
+        self._assert_valid_constant(data, {
             "epoch": 2010.0,
             "degree_min": 1,
             "degree_max": 740,
@@ -75,7 +76,7 @@ class TestEMMParser(TestCase):
 
     def test_parse_emm_file_emm2010_secvar(self):
         data = self.parse(EMM_2010_SECVAR)
-        self._assert_valid(data, {
+        self._assert_valid_constant(data, {
             "epoch": 2010.0,
             "degree_min": 1,
             "degree_max": 16,

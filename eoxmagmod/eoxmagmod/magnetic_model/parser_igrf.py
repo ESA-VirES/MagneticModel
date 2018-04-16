@@ -28,6 +28,7 @@
 #-------------------------------------------------------------------------------
 
 from numpy import array
+from .._pytimeconv import decimal_year_to_mjd2000
 
 IGRF_EXTRAPOLATION_PERIOD = 5.0 # years
 
@@ -65,7 +66,7 @@ def parse_igrf_times(line):
     """ Parse SHC times. """
     times = [float(v) for v in line.split()[3:-1]]
     times.append(times[-1] + IGRF_EXTRAPOLATION_PERIOD)
-    return array(times)
+    return decimal_year_to_mjd2000(times)
 
 
 def parse_igrf_header(line):

@@ -27,6 +27,7 @@
 #-------------------------------------------------------------------------------
 
 from numpy import array
+from .._pytimeconv import decimal_year_to_mjd2000
 
 
 def parse_shc_file(file_in):
@@ -53,7 +54,7 @@ def parse_shc_coefficients(lines):
 
 def parse_shc_times(line):
     """ Parse SHC times. """
-    return array([float(v) for v in line.split()])
+    return decimal_year_to_mjd2000([float(v) for v in line.split()])
 
 
 def parse_shc_header(line):
@@ -67,8 +68,8 @@ def parse_shc_header(line):
         "nstep": int(fields[4]),
     }
     if fields[5:7]:
-        header["validity_start"] = float(fields[5])
-        header["validity_end"] = float(fields[6])
+        header["validity_start"] = decimal_year_to_mjd2000(float(fields[5]))
+        header["validity_end"] = decimal_year_to_mjd2000(float(fields[6]))
     return header
 
 
