@@ -61,7 +61,7 @@ class SphericalHarmonicsCommonMixIn(object):
         n_idx = array(list(chain.from_iterable(
             [n]*(n+1)  for n in range(degree + 1)
         )))
-        return -(radius * rad_series[n_idx] * p_series * (
+        return (radius * rad_series[n_idx] * p_series * (
             coef_g * cos_series[m_idx] + coef_h * sin_series[m_idx]
         )).sum()
 

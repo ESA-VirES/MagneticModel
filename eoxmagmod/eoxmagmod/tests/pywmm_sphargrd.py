@@ -53,13 +53,13 @@ class SphericalHarmonicsGradientTestMixIn(SphericalHarmonicsCommonMixIn):
             [n]*(n+1)  for n in range(degree + 1)
         )))
 
-        grad_lat = -(rad_series[n_idx] * dp_series * (
+        grad_lat = (rad_series[n_idx] * dp_series * (
             coef_g * cos_series[m_idx] + coef_h * sin_series[m_idx]
         )).sum()
 
         cos_lat = cos(latitude * pi / 180.0)
         if cos_lat > 1e-10:
-            grad_lon = (m_idx * rad_series[n_idx] * p_series * (
+            grad_lon = -(m_idx * rad_series[n_idx] * p_series * (
                 coef_g * sin_series[m_idx] - coef_h * cos_series[m_idx]
             )).sum() / cos_lat
         else:
@@ -81,12 +81,12 @@ class SphericalHarmonicsGradientTestMixIn(SphericalHarmonicsCommonMixIn):
             idx = array([
                 1 + (n*(n + 1))//2 for n in range(1, degree + 1)
             ], dtype="int")
-            grad_lon = (scale * rad_series[1:] * (
+            grad_lon = -(scale * rad_series[1:] * (
                 coef_g[idx]*sin_lon - coef_h[idx]*cos_lon
             )).sum()
 
         rad_scale = n_idx + 1 if cls.is_internal else -n_idx
-        grad_rad = (rad_scale * rad_series[n_idx] * p_series * (
+        grad_rad = -(rad_scale * rad_series[n_idx] * p_series * (
             coef_g * cos_series[m_idx] + coef_h * sin_series[m_idx]
         )).sum()
 

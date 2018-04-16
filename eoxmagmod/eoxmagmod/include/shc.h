@@ -423,10 +423,10 @@ static void shc_eval(
         const double tmp = cg[0]*rrp[0];
         const int i_dr = dr_scale*dr_offset;
 
-        _vpot = -tmp;
+        _vpot = tmp;
         _dvel = 0.0; // north-ward
         _dvaz = 0.0; // east-ward
-        _dvrd = tmp * i_dr ; // up-ward
+        _dvrd = -tmp * i_dr ; // up-ward
     }
 
     for (i = 1; i <= degree; ++i)
@@ -437,9 +437,9 @@ static void shc_eval(
         {
             const double tmp = cg[i_off]*rrp[i];
 
-            _vpot -= tmp * lp[i_off];
-            _dvel -= tmp * ldp[i_off]; // north-ward
-            _dvrd += tmp * lp[i_off] * i_dr ; // up-ward
+            _vpot += tmp * lp[i_off];
+            _dvel += tmp * ldp[i_off]; // north-ward
+            _dvrd -= tmp * lp[i_off] * i_dr ; // up-ward
         }
 
         for (j = 1; j <= i; ++j)
@@ -448,10 +448,10 @@ static void shc_eval(
             const double tmp0 = (cg[idx]*lcos[j] + ch[idx]*lsin[j])*rrp[i];
             const double tmp1 = (cg[idx]*lsin[j] - ch[idx]*lcos[j])*rrp[i];
 
-            _vpot -= tmp0 * lp[idx];
-            _dvel -= tmp0 * ldp[idx]; // north-ward
-            _dvaz += tmp1 * lp[idx] * j; // east-ward
-            _dvrd += tmp0 * lp[idx] * i_dr ; // up-ward
+            _vpot += tmp0 * lp[idx];
+            _dvel += tmp0 * ldp[idx]; // north-ward
+            _dvaz -= tmp1 * lp[idx] * j; // east-ward
+            _dvrd -= tmp0 * lp[idx] * i_dr ; // up-ward
         }
     }
 
@@ -474,7 +474,7 @@ static void shc_eval(
             double ps2, ps1 = 1.0, ps0 = 1.0,
 
             // i = 1
-            _dvaz = (cg[2]*lsin1 - ch[2]*lcos1) * rrp[1];
+            _dvaz = -(cg[2]*lsin1 - ch[2]*lcos1) * rrp[1];
 
             for (i = 2; i <= degree; ++i)
             {
@@ -490,7 +490,7 @@ static void shc_eval(
                 ps1 = ps0;
                 ps0 = sin_elv*ps1 - tmp*ps2;
 
-                _dvaz += (cg[idx]*lsin1 - ch[idx]*lcos1) * rrp[i] * ps0 * sqn3;
+                _dvaz -= (cg[idx]*lsin1 - ch[idx]*lcos1) * rrp[i] * ps0 * sqn3;
             }
 
             *dvaz = _dvaz;
