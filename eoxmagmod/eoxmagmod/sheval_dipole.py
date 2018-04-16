@@ -27,6 +27,7 @@
 #-------------------------------------------------------------------------------
 # pylint: disable=no-name-in-module
 
+from numpy import asarray, ones
 from ._pywmm import (
     GEODETIC_ABOVE_WGS84, GEOCENTRIC_CARTESIAN, GEOCENTRIC_SPHERICAL,
     POTENTIAL, GRADIENT, convert, sheval,
@@ -37,7 +38,8 @@ from .dipole_coords import convert_to_dipole, vrot_from_dipole
 def sheval_dipole(arr_in, degree, coef_g, coef_h, lat_ngp, lon_ngp,
                   coord_type_in=GEODETIC_ABOVE_WGS84,
                   coord_type_out=GEODETIC_ABOVE_WGS84,
-                  mode=GRADIENT, is_internal=True):
+                  mode=GRADIENT, is_internal=True,
+                  scale_potential=1.0, scale_gradient=1.0):
     """
     Evaluate spherical harmonic model in the dipole coordinate frame given
     by the provided North Geomagnetic Pole coordinates.
@@ -57,6 +59,9 @@ def sheval_dipole(arr_in, degree, coef_g, coef_h, lat_ngp, lon_ngp,
        rad_ref - reference (Earth) radius
        is_internal - boolean flag set to True by default. When set to False
                      external field evaluation is used.
+       scale_potential - scalar value multiplied with the result potentials.
+       scale_gradient - scalar or 3 element array multiplied with the result
+                        gradient components.
     """
     arr_in_dipole = convert_to_dipole(arr_in, lat_ngp, lon_ngp, coord_type_in)
     result = sheval(
@@ -64,21 +69,28 @@ def sheval_dipole(arr_in, degree, coef_g, coef_h, lat_ngp, lon_ngp,
         degree=degree, coef_g=coef_g, coef_h=coef_h,
         coord_type_in=GEOCENTRIC_SPHERICAL,
         coord_type_out=GEOCENTRIC_SPHERICAL,
+        scale_potential=scale_potential,
     )
 
     if mode == GRADIENT:
-        return _rotate_vectors_from_dipole(
+        return _scale_gradient(_rotate_vectors_from_dipole(
             result, lat_ngp, lon_ngp, arr_in_dipole, arr_in,
             coord_type_in, coord_type_out,
-        )
+        ), scale_gradient)
     elif mode == POTENTIAL:
         return result
     else: #mode == POTENTIAL_AND_GRADIENT
         potential, gradient = result
-        return potential, _rotate_vectors_from_dipole(
+        return potential, _scale_gradient(_rotate_vectors_from_dipole(
             gradient, lat_ngp, lon_ngp, arr_in_dipole, arr_in,
             coord_type_in, coord_type_out,
-        )
+        ), scale_gradient)
+
+
+def _scale_gradient(vectors, scale):
+    for idx, value in enumerate(asarray(scale) * ones(3)):
+        vectors[..., idx] *= value
+    return vectors
 
 
 def _rotate_vectors_from_dipole(vectors, lat_ngp, lon_ngp,

@@ -93,6 +93,10 @@ typedef struct {
     double clat_last;
     double clon_last;
     double crad_last;
+    double scale_potential;
+    double scale_gradient0;
+    double scale_gradient1;
+    double scale_gradient2;
     const double *cg;
     const double *ch;
     double *lp;
@@ -124,7 +128,9 @@ static void _sheval_model_destroy(MODEL *model)
 
 /* model structure initialization */
 static int _sheval_model_init(MODEL *model, int is_internal, int degree,
-    int coord_in, int coord_out, const double *cg, const double *ch)
+    int coord_in, int coord_out, const double *cg, const double *ch,
+    const double scale_potential, const double *scale_gradient
+    )
 {
     const int nterm = ((degree+1)*(degree+2))/2;
 
@@ -141,6 +147,10 @@ static int _sheval_model_init(MODEL *model, int is_internal, int degree,
     model->clat_last = NAN;
     model->clon_last = NAN;
     model->crad_last = NAN;
+    model->scale_potential = scale_potential;
+    model->scale_gradient0 = scale_gradient[0];
+    model->scale_gradient1 = scale_gradient[1];
+    model->scale_gradient2 = scale_gradient[2];
     model->cg = cg;
     model->ch = ch;
 
@@ -261,6 +271,17 @@ static void _sheval_model_eval(MODEL *model, int mode, double *fpot,
                 rot2d(fx, fy, tmp, flon, sin(clon), cos(clon));
                 break;
         }
+
+        // final scaling
+        *fx *= model->scale_gradient0;
+        *fy *= model->scale_gradient1;
+        *fz *= model->scale_gradient2;
+    }
+
+    if (mode&0x1)
+    {
+        // final scaling
+        *fpot *= model->scale_potential;
     }
 }
 
@@ -322,7 +343,8 @@ static void _sheval3(ARRAY_DATA arrd_in, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_gr
 
 #define DOC_SHEVAL "\n"\
 "   arr_out = sheval(arr_in, degree, coef_g, coef_h, coord_type_in=GEODETIC_ABOVE_WGS84,\n"\
-"                    coord_type_out=GEODETIC_ABOVE_WGS84, mode=GRADIENT, is_internal=True)\n"\
+"                    coord_type_out=GEODETIC_ABOVE_WGS84, mode=GRADIENT, is_internal=True,\n"\
+"                    scale_potential=1.0, scale_gradient=1.0)\n"\
 "\n"\
 "     Parameters:\n"\
 "       arr_in - array of 3D coordinates (up to 16 dimensions).\n"\
@@ -337,6 +359,9 @@ static void _sheval3(ARRAY_DATA arrd_in, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_gr
 "       rad_ref - reference (Earth) radius\n"\
 "       is_internal - boolean flag set to True by default. When set to False \n"\
 "                     external field evaluation is used.\n"\
+"       scale_potential - scalar value multiplied with the result potentials.\n"\
+"       scale_gradient - scalar or 3 element array multiplied with the result\n"\
+"                        gradient components.\n"\
 "\n"
 
 
@@ -344,28 +369,33 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
 {
     static char *keywords[] = {
         "arr_in", "degree", "coef_g", "coef_h", "coord_type_in",
-        "coord_type_out", "mode", "is_internal", NULL
+        "coord_type_out", "mode", "is_internal",
+        "scale_potential", "scale_gradient", NULL
     };
     int ct_in = CT_GEODETIC_ABOVE_WGS84;
     int ct_out = CT_GEODETIC_ABOVE_WGS84;
     int nterm, degree = 0, mode = 0x2, is_internal;
+    double scale_potential = 1.0;
+    double scale_gradient[3] = {1.0, 1.0, 1.0};
     PyObject *obj_is_internal = NULL; // boolean flag
     PyObject *obj_in = NULL; // input object
     PyObject *obj_cg = NULL; // coef_g object
     PyObject *obj_ch = NULL; // coef_h object
+    PyObject *obj_scale = NULL; // gradient scale object
     PyObject *arr_in = NULL; // input array
     PyObject *arr_cg = NULL; // coef_g array
     PyObject *arr_ch = NULL; // coef_h array
     PyObject *arr_pot = NULL; // output array
     PyObject *arr_grd = NULL; // output array
+    PyObject *arr_scale = NULL; // gradient scale array
     PyObject *retval = NULL;
     MODEL model;
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "OiOO|iiiO:sheval", keywords,
+        args, kwdict, "OiOO|iiiOdO:sheval", keywords,
         &obj_in, &degree, &obj_cg, &obj_ch, &ct_in, &ct_out, &mode,
-        &obj_is_internal
+        &obj_is_internal, &scale_potential, &obj_scale
     ))
         goto exit;
 
@@ -421,6 +451,16 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
     if (_check_array_dim_le(arr_ch, 0, nterm, keywords[3]))
         goto exit;
 
+    // handle the gradient scale factors
+    if (NULL != obj_scale)
+    {
+        if (NULL == (arr_scale=_get_as_double_array(obj_scale, 0, 1, NPY_IN_ARRAY, keywords[9])))
+            goto exit;
+
+        if (_extract_1d_double_array(scale_gradient, 3, arr_scale, keywords[9]))
+            goto exit;
+    }
+
     // create the output arrays
     if (mode & SM_POTENTIAL)
         if (NULL == (arr_pot = PyArray_EMPTY(PyArray_NDIM(arr_in)-1, PyArray_DIMS(arr_in), NPY_DOUBLE, 0)))
@@ -433,8 +473,9 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
     // evaluate the model
 
     if(_sheval_model_init(
-        &model, is_internal, degree, ct_in, ct_out, PyArray_DATA(arr_cg),
-        PyArray_DATA(arr_ch)
+        &model, is_internal, degree, ct_in, ct_out,
+        PyArray_DATA(arr_cg), PyArray_DATA(arr_ch),
+        scale_potential, scale_gradient
     ))
         goto exit;
 

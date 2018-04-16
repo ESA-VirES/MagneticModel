@@ -63,9 +63,9 @@ static PyObject* _get_as_double_array(PyObject *data, int dmin, int dmax,
 }
 
 /*
- * Get new allocated NumPy array. The first (N-1) dimenstions as read from
- * the array of dimenstions (allowing easily set the same shape as the input
- * matrix). The last Nth dimension is overriden by the 'dim_last' value.
+ * Get new allocated NumPy array. The first (N-1) dimensions as read from
+ * the array of dimensions (allowing easily set the same shape as the input
+ * matrix). The last Nth dimension is overridden by the 'dim_last' value.
  */
 static PyObject* _get_new_double_array(npy_intp ndim, const npy_intp *dims, npy_intp dim_last)
 {
@@ -81,7 +81,8 @@ static PyObject* _get_new_double_array(npy_intp ndim, const npy_intp *dims, npy_
 
     for (i = 0; i < (ndim-1); ++i)
         dims_new[i] = dims[i];
-    dims_new[ndim-1] = dim_last;
+    if (ndim >= 1)
+        dims_new[ndim-1] = dim_last;
 
     return PyArray_EMPTY(ndim, dims_new, NPY_DOUBLE, 0);
 }
@@ -101,6 +102,9 @@ static int _check_array_dim_eq(PyObject *arr, int dim, size_t size, const char *
     return rv;
 }
 
+/*
+ * Check that the dimension of the array is greater then or equal to the required value.
+ */
 static int _check_array_dim_le(PyObject *arr, int dim, size_t size, const char *label)
 {
     if (dim < 0)
@@ -175,6 +179,35 @@ static int _check_equal_shape(PyObject *arr0, PyObject *arr1, const char *label0
     return 0;
 }
 
+/*
+ *  Extract 1D Numpy array or broadcast scalar to a 1D C array.
+ */
+static int _extract_1d_double_array(double *out, size_t size, PyObject *arr_in, const char *label)
+{
+    npy_intp ndim = PyArray_NDIM(arr_in);
+    void *data = PyArray_DATA(arr_in);
+
+    if (ndim == 0)
+    {
+        size_t i;
+        for (i = 0 ; i < size; ++i)
+            out[i] = *((double*)data);
+    }
+    else if ((ndim == 1) && (PyArray_DIM(arr_in, 0) == size))
+    {
+        npy_intp stride = PyArray_STRIDE(arr_in, 0);
+        size_t i;
+        for (i = 0 ; i < size; ++i)
+            out[i] = *((double*)(data + i*stride));
+    }
+    else
+    {
+        PyErr_Format(PyExc_ValueError, "Invalid %s dimension!", label);
+        return 1;
+    }
+
+    return 0;
+}
 /*
  * Extraction of the lower dimensional parts of the arrays.
  */

@@ -45,6 +45,9 @@ from eoxmagmod.tests.data import mma_external
 
 
 class SphericalHarmonicsMixIn(object):
+    options = {}
+    scale_potential = 1.0
+    scale_gradient = [1.0, 1.0, 1.0]
     source_coordinate_system = None
     target_coordinate_system = None
     is_internal = True
@@ -121,6 +124,10 @@ class SphericalHarmonicsMixIn(object):
             )
 
         gradient = cls._rotate_gradient(gradient, coords_spherical)
+        potential *= cls.scale_potential
+        for idx, scale in enumerate(cls.scale_gradient):
+            gradient[..., idx] *= scale
+
         return potential, gradient
 
     @classmethod
@@ -130,6 +137,7 @@ class SphericalHarmonicsMixIn(object):
             degree=cls.degree, coef_g=cls.coef_g, coef_h=cls.coef_h,
             coord_type_in=cls.source_coordinate_system,
             coord_type_out=cls.target_coordinate_system,
+            **cls.options
         )
 
     def test_sheval_potential_and_gradient(self):
@@ -316,6 +324,17 @@ class TestSHEvalEGM962EGM96Internal(TestCase, SourceGeodetic, SHTypeInternal, Sp
 
 class TestSHEvalEGM962EGM96External(TestCase, SourceGeodetic, SHTypeExternal, SphericalHarmonicsMixIn):
     target_coordinate_system = GEODETIC_ABOVE_EGM96
+
+#-------------------------------------------------------------------------------
+
+class TestSHEvalCart2CartScaled(TestSHEvalCartesian2CartesianInternal):
+    options = {"scale_potential": 2.0, "scale_gradient": [0.5, 1.0, -1.0]}
+    scale_potential = 2.0
+    scale_gradient = [0.5, 1.0, -1.0]
+
+class TestSHEvalSph2SphScaled(TestSHEvalSpherical2SphericalInternal):
+    options = {"scale_gradient": -1.0}
+    scale_gradient = [-1.0, -1.0, -1.0]
 
 #-------------------------------------------------------------------------------
 
