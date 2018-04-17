@@ -54,7 +54,8 @@ def parse_swarm_mio_coefficients(lines, data):
 
     # shape of the 2D Fourier series coefficients arrays
     coeff_shape = (
-        len(coeff), data["smax"]-data["smin"]+1, data["pmax"]-data["pmin"]+1, 2
+        len(coeff), data["smax"] - data["smin"] + 1,
+        data["pmax"] - data["pmin"] + 1, 2
     )
     coeff = coeff.reshape(coeff_shape)
 

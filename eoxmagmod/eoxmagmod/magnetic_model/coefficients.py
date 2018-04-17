@@ -41,6 +41,7 @@ class SHCoefficients(object):
             kwargs.get("validity_start", -inf),
             kwargs.get("validity_end", +inf)
         )
+        self.scale = kwargs.get("scale", 1.0)
 
     @property
     def degree(self):
