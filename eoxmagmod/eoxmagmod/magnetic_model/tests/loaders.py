@@ -30,12 +30,16 @@
 from unittest import TestCase, main
 from numpy import inf
 from numpy.testing import assert_allclose
+from eoxmagmod._pytimeconv import (
+    decimal_year_to_mjd2000, mjd2000_to_decimal_year,
+)
 from eoxmagmod.data import (
     CHAOS5_CORE, CHAOS5_CORE_V4, CHAOS5_STATIC,
     CHAOS6_CORE, CHAOS6_CORE_X3, CHAOS6_STATIC,
     IGRF11, IGRF12, SIFM, WMM_2010, WMM_2015,
     EMM_2010_STATIC, EMM_2010_SECVAR,
 )
+from eoxmagmod.magnetic_model.tests.data import SWARM_MMA_SHA_2C_TEST_DATA
 from eoxmagmod.magnetic_model.coefficients import (
     SparseSHCoefficientsTimeDependent,
     SparseSHCoefficientsConstant,
@@ -45,8 +49,8 @@ from eoxmagmod.magnetic_model.loader_shc import load_shc, load_shc_combined
 from eoxmagmod.magnetic_model.loader_igrf import load_igrf
 from eoxmagmod.magnetic_model.loader_wmm import load_wmm
 from eoxmagmod.magnetic_model.loader_emm import load_emm
-from eoxmagmod._pytimeconv import (
-    decimal_year_to_mjd2000, mjd2000_to_decimal_year,
+from eoxmagmod.magnetic_model.loader_mma import (
+    load_swarm_mma_2c_internal, load_swarm_mma_2c_external
 )
 
 
@@ -211,6 +215,29 @@ class TestCoeffEMM2010(TestCase, CoefficietLoaderTestMixIn):
     @staticmethod
     def load():
         return load_emm(EMM_2010_STATIC, EMM_2010_SECVAR)
+
+#-------------------------------------------------------------------------------
+
+class TestCoeffMMA2CInternal(TestCase, CoefficietLoaderTestMixIn):
+    is_internal = True
+    class_ = CombinedSHCoefficients
+    degree = 3
+    validity = (6179.125, 6209.875)
+
+    @staticmethod
+    def load():
+        return load_swarm_mma_2c_internal(SWARM_MMA_SHA_2C_TEST_DATA)
+
+
+class TestCoeffMMA2CExternal(TestCase, CoefficietLoaderTestMixIn):
+    is_internal = False
+    class_ = CombinedSHCoefficients
+    degree = 2
+    validity = (6179.125, 6209.875)
+
+    @staticmethod
+    def load():
+        return load_swarm_mma_2c_external(SWARM_MMA_SHA_2C_TEST_DATA)
 
 #-------------------------------------------------------------------------------
 

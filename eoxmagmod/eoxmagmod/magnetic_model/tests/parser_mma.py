@@ -30,16 +30,12 @@
 from unittest import TestCase, main
 from numpy import abs as aabs
 from spacepy import pycdf
-from eoxmagmod.magnetic_model.parser_mma import read_swarm_mma_2c_file
 from eoxmagmod.magnetic_model.tests.data import SWARM_MMA_SHA_2C_TEST_DATA
+from eoxmagmod.magnetic_model.parser_mma import (
+    read_swarm_mma_2c_internal, read_swarm_mma_2c_external,
+)
 
-
-class TestSwarmMMAParser(TestCase):
-
-    @staticmethod
-    def parse(filename):
-        with pycdf.CDF(filename) as cdf:
-            return read_swarm_mma_2c_file(cdf)
+class SwarmMMAParserMixIn(object):
 
     def _assert_valid(self, coeff_field, data, expected_data):
         tested_data = {
@@ -53,21 +49,40 @@ class TestSwarmMMAParser(TestCase):
         self.assertEqual(data["nm"][..., 0].max(), data["degree_max"])
         self.assertTrue(aabs(data["nm"][..., 1]).max() <= data["degree_max"])
 
+
+class TestSwarmMMAInternalParser(TestCase, SwarmMMAParserMixIn):
+
+    @staticmethod
+    def parse(filename):
+        with pycdf.CDF(filename) as cdf:
+            return read_swarm_mma_2c_internal(cdf)
+
     def test_parse_swarm_mio_file(self):
         data = self.parse(SWARM_MMA_SHA_2C_TEST_DATA)
-        self._assert_valid("gh", data["gh"][0], {
+        self._assert_valid("gh", data[0], {
             "degree_min": 1,
             "degree_max": 1,
         })
-        self._assert_valid("gh", data["gh"][1], {
+        self._assert_valid("gh", data[1], {
             "degree_min": 1,
             "degree_max": 3,
         })
-        self._assert_valid("qs", data["qs"][0], {
+
+
+class TestSwarmMMAExternalParser(TestCase, SwarmMMAParserMixIn):
+
+    @staticmethod
+    def parse(filename):
+        with pycdf.CDF(filename) as cdf:
+            return read_swarm_mma_2c_external(cdf)
+
+    def test_parse_swarm_mio_file(self):
+        data = self.parse(SWARM_MMA_SHA_2C_TEST_DATA)
+        self._assert_valid("qs", data[0], {
             "degree_min": 1,
             "degree_max": 1,
         })
-        self._assert_valid("qs", data["qs"][1], {
+        self._assert_valid("qs", data[1], {
             "degree_min": 1,
             "degree_max": 2,
         })

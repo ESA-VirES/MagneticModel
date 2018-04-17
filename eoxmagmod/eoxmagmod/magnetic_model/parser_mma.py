@@ -26,33 +26,36 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+from spacepy import pycdf
 from numpy import array
 
-CDF_EPOCH_TYPE = 31 # spacepy.pycdf.const.CDF_EPOCH.value
+CDF_EPOCH_TYPE = pycdf.const.CDF_EPOCH.value
 CDF_EPOCH_2000 = 63113904000000.0
 CDF_EPOCH_TO_DAYS = 1.0/86400000.0
 
 
-def read_swarm_mma_2c_file(cdf):
-    """ Read Swarm MIO_SHA_2C product CDF file and returns a dictionary
-    containing the parsed model data.
-
-    The function expect a spacepy.pycdf.CDF object.
+def read_swarm_mma_2c_internal(cdf):
+    """ Read Swarm MMA_SHA_2C product CDF file and returns a tuple
+    containing the internal model coefficients.
     """
-    return {
-        "gh": (
-            read_swarm_mma_2c_coefficients(cdf, "gh_1", "gh"),
-            read_swarm_mma_2c_coefficients(cdf, "gh_2", "gh"),
-        ),
-        "qs": (
-            read_swarm_mma_2c_coefficients(cdf, "qs_1", "qs"),
-            read_swarm_mma_2c_coefficients(cdf, "qs_2", "qs"),
-        ),
-    }
+    return (
+        read_swarm_mma_2c_coefficients(cdf, "gh_1", "gh"),
+        read_swarm_mma_2c_coefficients(cdf, "gh_2", "gh"),
+    )
+
+
+def read_swarm_mma_2c_external(cdf):
+    """ Read Swarm MMA_SHA_2C product CDF file and returns a tuple
+    containing the internal model coefficients.
+    """
+    return (
+        read_swarm_mma_2c_coefficients(cdf, "qs_1", "qs"),
+        read_swarm_mma_2c_coefficients(cdf, "qs_2", "qs"),
+    )
 
 
 def read_swarm_mma_2c_coefficients(cdf, source_variable, target_variable):
-    """ Read a single set of Swarm MIO_SHA_2C coefficients.
+    """ Read a single set of Swarm MMA_SHA_2C coefficients.
 
     The function expect a spacepy.pycdf.CDF object.
     """
