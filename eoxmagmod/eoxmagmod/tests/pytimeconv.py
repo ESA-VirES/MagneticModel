@@ -34,7 +34,36 @@ from numpy.testing import assert_allclose
 from unittest import TestCase, main
 from eoxmagmod._pytimeconv import (
     decimal_year_to_mjd2000, mjd2000_to_decimal_year,
+    mjd2000_to_year_fraction,
 )
+
+
+class TestMjd2000ToYearFraction(TestCase):
+
+    @staticmethod
+    def reference(value):
+        return vectorize(_mjd2000_to_year_fraction)(value)
+
+    @staticmethod
+    def eval(value):
+        return mjd2000_to_year_fraction(value)
+
+    @staticmethod
+    def _assert(tested, expected):
+        assert_allclose(tested, expected, rtol=1e-14, atol=1e-11)
+
+    def test_mjd2000_to_year_fraction_far_range(self):
+        values = uniform(-730487., 730485., (100, 100))
+        self._assert(self.eval(values), self.reference(values))
+
+    def test_mjd2000_to_year_fraction_near_range(self):
+        values = uniform(-36524., 36525., (100, 100))
+        self._assert(self.eval(values), self.reference(values))
+
+    def test_mjd2000_to_year_fraction_sanity_check(self):
+        self._assert(self.eval(0.), 0.0)
+        self._assert(self.eval([-365.0, 366.0]), [0.0, 0.0])
+        self._assert(self.eval([6757.5, 7488.0]), [0.5, 0.5])
 
 
 class TestMjd2000ToDecimalYear(TestCase):
@@ -94,6 +123,12 @@ class TestDecimalYearToMjd2000(TestCase):
 
 #-------------------------------------------------------------------------------
 # reference implementation
+
+def _mjd2000_to_year_fraction(mjd2k):
+    """ Convert Modified Julian Date 2000 to year fraction.
+    """
+    year = day2k_to_year(int(floor(mjd2k)))
+    return (mjd2k - year_to_day2k(year)) / days_per_year(year)
 
 def _mjd2000_to_decimal_year(mjd2k):
     """ Convert Modified Julian Date 2000 to decimal year.

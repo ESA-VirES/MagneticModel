@@ -55,6 +55,7 @@
 /*---------------------------------------------------------------------------*/
 
 #include "pytimeconv_mjd2000_to_decimal_year.h"
+#include "pytimeconv_mjd2000_to_year_fraction.h"
 #include "pytimeconv_decimal_year_to_mjd2000.h"
 
 /*---------------------------------------------------------------------------*/
@@ -68,6 +69,7 @@
 static PyMethodDef pytimeconv_methods[] =
 {
     {"mjd2000_to_decimal_year", (PyCFunction)pytimeconv_mjd2000_to_decimal_year, METH_VARARGS|METH_KEYWORDS, DOC_MJD2000_TO_DECIMAL_YEAR},
+    {"mjd2000_to_year_fraction", (PyCFunction)pytimeconv_mjd2000_to_year_fraction, METH_VARARGS|METH_KEYWORDS, DOC_MJD2000_TO_YEAR_FRACTION},
     {"decimal_year_to_mjd2000", (PyCFunction)pytimeconv_decimal_year_to_mjd2000, METH_VARARGS|METH_KEYWORDS, DOC_DECIMAL_YEAR_TO_MJD2000},
     {NULL, NULL, 0, NULL} /* Sentinel - DO NOT REMOVE! */
 } ;

@@ -139,6 +139,19 @@ static double mjd2k_to_decimal_year(double mjd2k) {
 }
 
 /**
+ * @brief Convert MJD2000 to year fraction.
+ *
+ * Equivalent to:
+ *  decimal_year = mjd2k_to_decimal_year(mjd2k);
+ *  year_fraction = decimal_year - floor(decimal_year);
+ */
+
+static double mjd2k_to_year_fraction(double mjd2k) {
+    const int year = mjd2k_to_year(mjd2k);
+    return (mjd2k - mjd2k_year_start(year))*years_per_day(year);
+}
+
+/**
  * @brief Convert decimal year to MJD2000.
  *
  * Gregorian date formula applied since 1582-10-15
