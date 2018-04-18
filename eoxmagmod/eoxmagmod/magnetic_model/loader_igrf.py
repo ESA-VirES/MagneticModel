@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 #
-#  Coefficients - IGRF file format loader
+#  IGRF file format model loader
 #
 # Author: Martin Paces <martin.paces@eox.at>
 #
@@ -26,16 +26,22 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+from .model import SphericalHarmomicGeomagneticModel
 from .coefficients import SparseSHCoefficientsTimeDependent
 from .parser_igrf import parse_igrf_file
 
 
-def load_igrf(path):
-    """ Load coefficients from an IGRF file.
+def load_model_igrf(path):
+    """ Load model from an IGRF coefficient file.
 
     Note: IGRF file format was discontinued after IGRF11. Starting by IGRF12
     the IRFF models uses SHC format which is loaded by the SHC file loader.
     """
+    return SphericalHarmomicGeomagneticModel(load_coeff_igrf(path))
+
+
+def load_coeff_igrf(path):
+    """ Load coefficients from an IGRF file. """
     with open(path, "rb") as file_in:
         data = parse_igrf_file(file_in)
 

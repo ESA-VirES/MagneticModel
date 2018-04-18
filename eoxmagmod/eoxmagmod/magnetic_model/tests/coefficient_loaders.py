@@ -49,15 +49,17 @@ from eoxmagmod.magnetic_model.coefficients import (
 from eoxmagmod.magnetic_model.coefficients_mio import (
     SparseSHCoefficientsMIO,
 )
-from eoxmagmod.magnetic_model.loader_shc import load_shc, load_shc_combined
-from eoxmagmod.magnetic_model.loader_igrf import load_igrf
-from eoxmagmod.magnetic_model.loader_wmm import load_wmm
-from eoxmagmod.magnetic_model.loader_emm import load_emm
+from eoxmagmod.magnetic_model.loader_shc import (
+    load_coeff_shc, load_coeff_shc_combined,
+)
+from eoxmagmod.magnetic_model.loader_igrf import load_coeff_igrf
+from eoxmagmod.magnetic_model.loader_wmm import load_coeff_wmm
+from eoxmagmod.magnetic_model.loader_emm import load_coeff_emm
 from eoxmagmod.magnetic_model.loader_mma import (
-    load_swarm_mma_2c_internal, load_swarm_mma_2c_external
+    load_coeff_swarm_mma_2c_internal, load_coeff_swarm_mma_2c_external
 )
 from eoxmagmod.magnetic_model.loader_mio import (
-    load_swarm_mio_internal, load_swarm_mio_external
+    load_coeff_swarm_mio_internal, load_coeff_swarm_mio_external
 )
 
 
@@ -96,24 +98,38 @@ class MIOCoefficietLoaderTestMixIn(CoefficietLoaderTestMixIn):
     ps_extent = (0, 4, -2, 2)
     lat_ngp = 80.08
     lon_ngp = -72.22
-    mio_radius = 6481.2
+    height = 110.0
     wolf_ratio = 0.014850
+
+    @property
+    def params(self):
+        if not hasattr(self, "_params"):
+            self._params = self.load_params()
+        return self._params
+
+    @classmethod
+    def load(cls):
+        return cls._load()[0]
+
+    @classmethod
+    def load_params(cls):
+        return cls._load()[1]
 
     def test_ps_extent(self):
         self.assertEqual(self.coeff.ps_extent, self.ps_extent)
 
     def test_ngp_coords(self):
         assert_allclose(
-            (self.coeff.lat_ngp, self.coeff.lon_ngp),
+            (self.params["lat_NGP"], self.params["lon_NGP"]),
             (self.lat_ngp, self.lon_ngp),
             rtol=1e-8, atol=1e-8
         )
 
-    def test_mio_radius(self):
-        assert_allclose(self.coeff.mio_radius, self.mio_radius)
+    def test_height(self):
+        assert_allclose(self.params["height"], self.height)
 
     def test_wolf_ratio(self):
-        assert_allclose(self.coeff.wolf_ratio, self.wolf_ratio)
+        assert_allclose(self.params["wolf_ratio"], self.wolf_ratio)
 
 
 class ShcTestMixIn(CoefficietLoaderTestMixIn):
@@ -121,7 +137,7 @@ class ShcTestMixIn(CoefficietLoaderTestMixIn):
 
     @classmethod
     def load(cls):
-        return load_shc(cls.path)
+        return load_coeff_shc(cls.path)
 
 
 class CombinedShcTestMixIn(CoefficietLoaderTestMixIn):
@@ -131,7 +147,7 @@ class CombinedShcTestMixIn(CoefficietLoaderTestMixIn):
 
     @classmethod
     def load(cls):
-        return load_shc_combined(cls.path_core, cls.path_static)
+        return load_coeff_shc_combined(cls.path_core, cls.path_static)
 
 
 class WmmTestMixIn(CoefficietLoaderTestMixIn):
@@ -139,7 +155,7 @@ class WmmTestMixIn(CoefficietLoaderTestMixIn):
 
     @classmethod
     def load(cls):
-        return load_wmm(cls.path)
+        return load_coeff_wmm(cls.path)
 
 #-------------------------------------------------------------------------------
 
@@ -164,7 +180,7 @@ class TestCoeffIGRF11(TestCase, CoefficietLoaderTestMixIn):
 
     @staticmethod
     def load():
-        return load_igrf(IGRF11)
+        return load_coeff_igrf(IGRF11)
 
 #-------------------------------------------------------------------------------
 
@@ -247,7 +263,7 @@ class TestCoeffEMM2010(TestCase, CoefficietLoaderTestMixIn):
 
     @staticmethod
     def load():
-        return load_emm(EMM_2010_STATIC, EMM_2010_SECVAR)
+        return load_coeff_emm(EMM_2010_STATIC, EMM_2010_SECVAR)
 
 #-------------------------------------------------------------------------------
 
@@ -259,7 +275,7 @@ class TestCoeffMMA2CInternal(TestCase, CoefficietLoaderTestMixIn):
 
     @staticmethod
     def load():
-        return load_swarm_mma_2c_internal(SWARM_MMA_SHA_2C_TEST_DATA)
+        return load_coeff_swarm_mma_2c_internal(SWARM_MMA_SHA_2C_TEST_DATA)
 
 
 class TestCoeffMMA2CExternal(TestCase, CoefficietLoaderTestMixIn):
@@ -270,18 +286,9 @@ class TestCoeffMMA2CExternal(TestCase, CoefficietLoaderTestMixIn):
 
     @staticmethod
     def load():
-        return load_swarm_mma_2c_external(SWARM_MMA_SHA_2C_TEST_DATA)
+        return load_coeff_swarm_mma_2c_external(SWARM_MMA_SHA_2C_TEST_DATA)
 
 #-------------------------------------------------------------------------------
-
-class TestCoeffMIOInternal(TestCase, MIOCoefficietLoaderTestMixIn):
-    is_internal = True
-    degree = 2
-
-    @staticmethod
-    def load():
-        return load_swarm_mio_internal(SWARM_MIO_SHA_2_TEST_DATA)
-
 
 class TestCoeffMIOSecondary(TestCase, MIOCoefficietLoaderTestMixIn):
     is_internal = False
@@ -289,8 +296,10 @@ class TestCoeffMIOSecondary(TestCase, MIOCoefficietLoaderTestMixIn):
     options = {}
 
     @classmethod
-    def load(cls):
-        return load_swarm_mio_external(SWARM_MIO_SHA_2_TEST_DATA, **cls.options)
+    def _load(cls):
+        return load_coeff_swarm_mio_external(
+            SWARM_MIO_SHA_2_TEST_DATA, **cls.options
+        )
 
 
 class TestCoeffMIOPrimary(TestCase, MIOCoefficietLoaderTestMixIn):
@@ -299,8 +308,10 @@ class TestCoeffMIOPrimary(TestCase, MIOCoefficietLoaderTestMixIn):
     options = {}
 
     @classmethod
-    def load(cls):
-        return load_swarm_mio_external(SWARM_MIO_SHA_2_TEST_DATA, **cls.options)
+    def _load(cls):
+        return load_coeff_swarm_mio_external(
+            SWARM_MIO_SHA_2_TEST_DATA, **cls.options
+        )
 
 
 class TestCoeffMIOPrimaryBelowIoSph(TestCoeffMIOPrimary):

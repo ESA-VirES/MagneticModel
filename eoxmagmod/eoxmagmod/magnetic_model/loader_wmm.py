@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 #
-#  Coefficients - WMM file format loader
+#  WMM model loader
 #
 # Author: Martin Paces <martin.paces@eox.at>
 #
@@ -26,11 +26,17 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+from .model import SphericalHarmomicGeomagneticModel
 from .coefficients import SparseSHCoefficientsTimeDependent
 from .parser_wmm import parse_wmm_file
 
 
-def load_wmm(path):
+def load_model_wmm(path):
+    """ Load model from a WMM COF file. """
+    return SphericalHarmomicGeomagneticModel(load_coeff_wmm(path))
+
+
+def load_coeff_wmm(path):
     """ Load coefficients from a WMM COF file. """
 
     with open(path, "rb") as file_in:

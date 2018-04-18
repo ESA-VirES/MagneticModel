@@ -44,6 +44,9 @@ class SHCoefficinetTestMixIn(object):
     def test_validity(self):
         self.assertEqual(self.coefficients.validity, self.validity)
 
+    def test_is_internal(self):
+        self.assertEqual(self.coefficients.is_internal, self.is_internal)
+
 #-------------------------------------------------------------------------------
 
 class CombinedSHCoefficientsMixIn(object):
@@ -76,12 +79,11 @@ class CombinedSHCoefficientsMixIn(object):
 
 class TestCombinedSHCoefficientsDefault(TestCase, SHCoefficinetTestMixIn, CombinedSHCoefficientsMixIn):
     def test_callable(self):
-        coeff, degree, is_internal = self.coefficients(2013.0)
+        coeff, degree = self.coefficients(2013.0)
         assert_allclose(coeff, [
             [0., 0.], [1.5, 0], [7.5, 15.0], [1, 0], [5, 10.0], [8., 12.],
         ])
         self.assertEqual(degree, self.degree)
-        self.assertEqual(is_internal, self.is_internal)
 
 
 class TestCombinedSHCoefficientsInternal(TestCombinedSHCoefficientsDefault):
@@ -121,10 +123,10 @@ class TestSparseSHCoefficientsConstantDefault(TestCase, SHCoefficinetTestMixIn):
         )
 
     def test_callable(self):
-        coeff, degree, is_internal = self.coefficients(2013.0)
+        coeff, degree = self.coefficients(2013.0)
         assert_allclose(coeff, [[0., 0.], [1, 0], [5, 10.0]])
         self.assertEqual(degree, self.degree)
-        self.assertEqual(is_internal, self.is_internal)
+
 
 class TestSparseSHCoefficientsConstantInternal(TestSparseSHCoefficientsConstantDefault):
     is_internal = True
@@ -162,16 +164,14 @@ class TestSparseSHCoefficientsTimeDependentDefault(TestCase, SHCoefficinetTestMi
         )
 
     def test_callable(self):
-        coeff, degree, is_internal = self.coefficients(2013.0)
+        coeff, degree = self.coefficients(2013.0)
         assert_allclose(coeff, [[0., 0.], [1.5, 0], [7.5, 15.0]])
         self.assertEqual(degree, self.degree)
-        self.assertEqual(is_internal, self.is_internal)
 
     def test_callable_before_first_time(self):
-        coeff, degree, is_internal = self.coefficients(2011.0)
+        coeff, degree = self.coefficients(2011.0)
         assert_allclose(coeff, [[0., 0.], [0.5, 0], [2.5, 5.0]])
         self.assertEqual(degree, self.degree)
-        self.assertEqual(is_internal, self.is_internal)
 
 
 class TestSparseSHCoefficientsTimeDependentInternal(TestSparseSHCoefficientsTimeDependentDefault):

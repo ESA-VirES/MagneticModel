@@ -27,9 +27,7 @@
 #-------------------------------------------------------------------------------
 # pylint: disable=too-few-public-methods,abstract-method
 
-from numpy import (
-    inf, array, zeros, dot, digitize, argsort, abs as aabs,
-)
+from numpy import inf, array, zeros, dot, digitize, argsort, abs as aabs
 
 
 class SHCoefficients(object):
@@ -41,7 +39,6 @@ class SHCoefficients(object):
             kwargs.get("validity_start", -inf),
             kwargs.get("validity_end", +inf)
         )
-        self.scale = kwargs.get("scale", 1.0)
 
     @property
     def degree(self):
@@ -94,9 +91,9 @@ class CombinedSHCoefficients(SHCoefficients):
         degree = self.degree
         coeff_full = zeros((coeff_size(degree), 2))
         for item in self._items:
-            item_coeff, item_degree, _ = item(time, **parameters)
+            item_coeff, item_degree = item(time, **parameters)
             coeff_full[:coeff_size(item_degree), :] += item_coeff
-        return coeff_full, degree, self.is_internal
+        return coeff_full, degree
 
 
 
@@ -124,7 +121,7 @@ class SparseSHCoefficientsConstant(SparseSHCoefficients):
         degree = self.degree
         coeff_full = zeros((coeff_size(degree), 2))
         coeff_full[self._degree_index, self._coeff_index] = self._coeff
-        return coeff_full, degree, self.is_internal
+        return coeff_full, degree
 
 
 class SparseSHCoefficientsTimeDependent(SparseSHCoefficients):
@@ -147,7 +144,7 @@ class SparseSHCoefficientsTimeDependent(SparseSHCoefficients):
         coeff_full[self._degree_index, self._coeff_index] = (
             self._interpolate_coefficients(time, self._coeff)
         )
-        return coeff_full, degree, self.is_internal
+        return coeff_full, degree
 
     def _interpolate_coefficients(self, time, coeff):
         """ Return interpolated coefficients. """

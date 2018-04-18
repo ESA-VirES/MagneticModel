@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 #
-#  Coefficients - EMM file format loader
+#  EMM model loader
 #
 # Author: Martin Paces <martin.paces@eox.at>
 #
@@ -26,6 +26,7 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+from .model import SphericalHarmomicGeomagneticModel
 from .coefficients import (
     SparseSHCoefficientsTimeDependent,
     SparseSHCoefficientsConstant,
@@ -34,7 +35,14 @@ from .coefficients import (
 from .parser_emm import combine_emm_coefficients, parse_emm_file
 
 
-def load_emm(path_static, path_secvar):
+def load_model_emm(path_static, path_secvar):
+    """ Load model from a EMM coefficient files. """
+    return SphericalHarmomicGeomagneticModel(
+        load_coeff_emm(path_static, path_secvar)
+    )
+
+
+def load_coeff_emm(path_static, path_secvar):
     """ Load coefficients from a EMM coefficient files. """
 
     with open(path_static, "rb") as file_static:

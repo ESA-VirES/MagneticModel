@@ -43,40 +43,31 @@ class SparseSHCoefficientsMIO(SparseSHCoefficients):
             indices - array if the nm indices
             coefficients - gh or qs coefficients
             ps_extent - (pmin, pmax, smin, smax) tuple
-            lat_ngp - North Geomagnetic Pole latitude
-            lon_ngp - North Geomagnetic Pole longitude
-            mio_radius - radius of the external model threshold (a + h)
-            wolf_ratio - Wolf ration
             is_internal - set False for an external model
     """
 
-    def __init__(self, indices, coefficients, ps_extent, lat_ngp, lon_ngp,
-                 mio_radius, wolf_ratio, **kwargs):
+    def __init__(self, indices, coefficients, ps_extent, **kwargs):
         SparseSHCoefficients.__init__(self, indices, **kwargs)
         self._coeff = coefficients
         pmin, pmax, smin, smax = ps_extent
         if pmin > pmax or smin > smax:
             raise Exception("Invalid ps_extent %s!" % ps_extent)
         self.ps_extent = (pmin, pmax, smin, smax)
-        self.lat_ngp = lat_ngp
-        self.lon_ngp = lon_ngp
-        self.mio_radius = mio_radius
-        self.wolf_ratio = wolf_ratio
 
-    def __call__(self, time, **parameters):
+    def __call__(self, time, lat_ngp, lon_ngp, **parameters):
         degree = self.degree
-        coeff = self._eval_coeff_fourier2d(time)
+        coeff = self._eval_coeff_fourier2d(time, lat_ngp, lon_ngp)
         coeff_full = zeros((coeff_size(degree), 2))
         coeff_full[self._degree_index, self._coeff_index] = coeff
-        return coeff_full, degree, self.is_internal
+        return coeff_full, degree
 
-    def _eval_coeff_fourier2d(self, mjd2000):
+    def _eval_coeff_fourier2d(self, mjd2000, lat_ngp, lon_ngp):
         """ Evaluate model coefficients using the 2D Fourier series. """
         coeff = self._coeff
-        sin_f, cos_f = self._get_sincos_matrices(mjd2000)
+        sin_f, cos_f = self._get_sincos_matrices(mjd2000, lat_ngp, lon_ngp)
         return (coeff[..., 0]*cos_f + coeff[..., 1]*sin_f).sum(axis=(1, 2))
 
-    def _get_sincos_matrices(self, mjd2000):
+    def _get_sincos_matrices(self, mjd2000, lat_ngp, lon_ngp):
         """ Get sin/cos matrices used by the 2D Fourier transform. """
         pmin, pmax, smin, smax = self.ps_extent
         n_coeff = self._coeff.shape[0]
@@ -84,7 +75,7 @@ class SparseSHCoefficientsMIO(SparseSHCoefficients):
         n_row = smax - smin + 1
         f0_seasonal = F_SEASONAL * mjd2000_to_year_fraction(mjd2000)
         f0_diurnal = F_DIURNAL * mjd2000_to_magnetic_universal_time(
-            mjd2000, self.lat_ngp, self.lon_ngp
+            mjd2000, lat_ngp, lon_ngp
         )
         f_diurnal = f0_diurnal * arange(pmin, pmax + 1)
         f_seasonal = f0_seasonal * arange(smin, smax + 1)

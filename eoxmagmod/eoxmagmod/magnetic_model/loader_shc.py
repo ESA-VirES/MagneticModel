@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 #
-#  Coefficients - SHC file format loader
+#  SHC file format model loader
 #
 # Author: Martin Paces <martin.paces@eox.at>
 #
@@ -26,6 +26,7 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+from .model import SphericalHarmomicGeomagneticModel
 from .coefficients import (
     SparseSHCoefficientsTimeDependent,
     SparseSHCoefficientsConstant,
@@ -34,12 +35,22 @@ from .coefficients import (
 from .parser_shc import parse_shc_file
 
 
-def load_shc_combined(*paths):
-    """ Load combined coefficients from multiple SHC files. """
-    return CombinedSHCoefficients(*[load_shc(path) for path in paths])
+def load_model_shc_combined(*paths):
+    """ Load model with coefficients combined from multiple SHC files. """
+    return SphericalHarmomicGeomagneticModel(load_coeff_shc_combined(*paths))
 
 
-def load_shc(path):
+def load_model_shc(path):
+    """ Load model from an SHC file. """
+    return SphericalHarmomicGeomagneticModel(load_coeff_shc(path))
+
+
+def load_coeff_shc_combined(*paths):
+    """ Load coefficients combined from multiple SHC files. """
+    return CombinedSHCoefficients(*[load_coeff_shc(path) for path in paths])
+
+
+def load_coeff_shc(path):
     """ Load coefficients from an SHC file. """
 
     with open(path, "rb") as file_in:

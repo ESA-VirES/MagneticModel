@@ -28,6 +28,7 @@
 # pylint: disable=missing-docstring
 
 from unittest import TestCase, main
+from numpy import inf
 from numpy.testing import assert_allclose
 from eoxmagmod._pytimeconv import decimal_year_to_mjd2000
 from eoxmagmod.magnetic_model.coefficients_mio import SparseSHCoefficientsMIO
@@ -35,24 +36,43 @@ from eoxmagmod.magnetic_model.tests.data import SWARM_MIO_SHA_2_TEST_DATA
 from eoxmagmod.magnetic_model.parser_mio import parse_swarm_mio_file
 
 
-class TestSparseSHCoefficientsMIOInternal(TestCase):
-    @property
-    def coefficients(self):
+class MIOSHCoeffMixIn(object):
+    is_internal = None
+    degree = 2
+    validity = (-inf, inf)
+
+    def test_degree(self):
+        self.assertEqual(self.coefficients.degree, self.degree)
+
+    def test_validity(self):
+        assert_allclose(self.coefficients.validity, self.validity)
+
+    def test_is_internal(self):
+        self.assertEqual(self.coefficients.is_internal, self.is_internal)
+
+    def eval_coeff(self, time):
+        return self.coefficients(
+            time, lat_ngp=self.lat_ngp, lon_ngp=self.lon_ngp
+        )
+
+
+class TestSparseSHCoefficientsMIOInternal(TestCase, MIOSHCoeffMixIn):
+    is_internal = True
+
+    def setUp(self):
         with open(SWARM_MIO_SHA_2_TEST_DATA, "rb") as file_in:
             data = parse_swarm_mio_file(file_in)
 
-        return SparseSHCoefficientsMIO(
+        self.lat_ngp = data["lat_NGP"]
+        self.lon_ngp = data["lon_NGP"]
+        self.coefficients = SparseSHCoefficientsMIO(
             data["nm"], data["gh"],
             ps_extent=(data["pmin"], data["pmax"], data["smin"], data["smax"]),
-            lat_ngp=data["lat_NGP"],
-            lon_ngp=data["lon_NGP"],
             is_internal=True,
-            mio_radius=0, wolf_ratio=0,
         )
 
     def test_callable(self):
-        time = decimal_year_to_mjd2000(2018.5)
-        coeff, degree, is_internal = self.coefficients(time)
+        coeff, degree = self.eval_coeff(decimal_year_to_mjd2000(2018.5))
         assert_allclose(coeff, [
             (0, 0),
             (0.11415226, 0),
@@ -61,28 +81,26 @@ class TestSparseSHCoefficientsMIOInternal(TestCase):
             (-0.34379927, -0.81524805),
             (0.01412196, -0.18049787),
         ], atol=1e-8)
-        self.assertEqual(degree, 2)
-        self.assertEqual(is_internal, True)
+        self.assertEqual(degree, self.degree)
 
 
-class TestSparseSHCoefficientsMIOExternal(TestCase):
-    @property
-    def coefficients(self):
+class TestSparseSHCoefficientsMIOExternal(TestCase, MIOSHCoeffMixIn):
+    is_internal = False
+
+    def setUp(self):
         with open(SWARM_MIO_SHA_2_TEST_DATA, "rb") as file_in:
             data = parse_swarm_mio_file(file_in)
 
-        return SparseSHCoefficientsMIO(
+        self.lat_ngp = data["lat_NGP"]
+        self.lon_ngp = data["lon_NGP"]
+        self.coefficients = SparseSHCoefficientsMIO(
             data["nm"], data["qs"],
             ps_extent=(data["pmin"], data["pmax"], data["smin"], data["smax"]),
-            lat_ngp=data["lat_NGP"],
-            lon_ngp=data["lon_NGP"],
             is_internal=False,
-            mio_radius=0, wolf_ratio=0,
         )
 
     def test_callable(self):
-        time = decimal_year_to_mjd2000(2018.5)
-        coeff, degree, is_internal = self.coefficients(time)
+        coeff, degree = self.eval_coeff(decimal_year_to_mjd2000(2018.5))
         assert_allclose(coeff, [
             (0, 0),
             (-1.44080531, 0),
@@ -91,8 +109,7 @@ class TestSparseSHCoefficientsMIOExternal(TestCase):
             (-0.22583255, -2.02305245),
             (0.05941826, -0.24358544),
         ], atol=1e-8)
-        self.assertEqual(degree, 2)
-        self.assertEqual(is_internal, False)
+        self.assertEqual(degree, self.degree)
 
 
 if __name__ == "__main__":
