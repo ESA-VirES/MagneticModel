@@ -31,7 +31,7 @@ import sys
 from itertools import product, izip
 from numpy import array, vectorize
 from numpy.random import uniform
-from vires.time_util import mjd2000_to_decimal_year
+from eoxmagmod import mjd2000_to_decimal_year
 from eoxmagmod.quasi_dipole_coordinates import (
     eval_mlt, eval_subsol, eval_qdlatlon_with_base_vectors,
 )
