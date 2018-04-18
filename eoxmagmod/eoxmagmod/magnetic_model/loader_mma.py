@@ -45,7 +45,7 @@ def load_model_swarm_mma_2c_internal(path, lat_ngp=MMA2C_NGP_LATITUDE,
                                      lon_ngp=MMA2C_NGP_LONGITUDE):
     """ Load internal (secondary field) model from a Swarm MMA_SHA_2C product.
     """
-    DipoleSphericalHarmomicGeomagneticModel(
+    return DipoleSphericalHarmomicGeomagneticModel(
         load_coeff_swarm_mma_2c_internal(path),
         north_pole=(lat_ngp, lon_ngp),
     )
@@ -55,7 +55,7 @@ def load_model_swarm_mma_2c_external(path, lat_ngp=MMA2C_NGP_LATITUDE,
                                      lon_ngp=MMA2C_NGP_LONGITUDE):
     """ Load external (primary field) model from a Swarm MMA_SHA_2C product.
     """
-    DipoleSphericalHarmomicGeomagneticModel(
+    return DipoleSphericalHarmomicGeomagneticModel(
         load_coeff_swarm_mma_2c_external(path),
         north_pole=(lat_ngp, lon_ngp),
     )

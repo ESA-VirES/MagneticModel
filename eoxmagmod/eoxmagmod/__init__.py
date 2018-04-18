@@ -89,6 +89,18 @@ from .dipole_coords import (
 )
 from .sheval_dipole import sheval_dipole
 from .magnetic_time import mjd2000_to_magnetic_universal_time
+from .magnetic_model.loader_shc import load_model_shc, load_model_shc_combined
+from .magnetic_model.loader_igrf import load_model_igrf
+from .magnetic_model.loader_wmm import load_model_wmm
+from .magnetic_model.loader_emm import load_model_emm
+from .magnetic_model.loader_mma import (
+    load_model_swarm_mma_2c_internal,
+    load_model_swarm_mma_2c_external,
+)
+from .magnetic_model.loader_mio import (
+    load_model_swarm_mio_internal,
+    load_model_swarm_mio_external,
+)
 
 __all__ = [
     'MagneticModel',
@@ -143,6 +155,15 @@ __all__ = [
     'mjd2000_to_decimal_year',
     'mjd2000_to_year_fraction',
     'mjd2000_to_magnetic_universal_time',
+    'load_model_shc',
+    'load_model_shc_combined',
+    'load_model_igrf',
+    'load_model_wmm',
+    'load_model_emm',
+    'load_model_swarm_mma_2c_internal',
+    'load_model_swarm_mma_2c_external',
+    'load_model_swarm_mio_internal',
+    'load_model_swarm_mio_external',
 ]
 
 __version__ = '0.5.0'

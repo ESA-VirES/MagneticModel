@@ -112,11 +112,6 @@ class TestIGRF11(TestCase, MagneticModelMixIn):
     model = read_model_igrf11()
 
 
-class TestIGRF11(TestCase, MagneticModelMixIn):
-    validity = (1900.0, 2015.0)
-    model = read_model_igrf11()
-
-
 class TestIGRF12(TestCase, MagneticModelMixIn):
     validity = (1900.0, 2020.0)
     model = read_model_shc(IGRF12)

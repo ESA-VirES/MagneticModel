@@ -126,7 +126,7 @@ class DipoleSphericalHarmomicGeomagneticModel(SphericalHarmomicGeomagneticModel)
     """
 
     def __init__(self, coefficients, north_pole):
-        SphericalHarmomicGeomagneticModel.__init__(coefficients)
+        SphericalHarmomicGeomagneticModel.__init__(self, coefficients)
         if callable(north_pole):
             # time dependent north pole
             self.north_pole = north_pole

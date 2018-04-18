@@ -74,6 +74,6 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
             1.0 + self.wolf_ratio * self.f107(time)
         ) * options.get("scale", 1.0)
         return DipoleSphericalHarmomicGeomagneticModel._eval_single_time(
-            time, coords, input_coordinate_system, output_coordinate_system,
-            **options
+            self, time, coords, input_coordinate_system,
+            output_coordinate_system, **options
         )
