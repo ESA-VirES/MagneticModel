@@ -54,6 +54,7 @@ from .util import (
 from ._pytimeconv import (
     decimal_year_to_mjd2000,
     mjd2000_to_decimal_year,
+    mjd2000_to_year_fraction,
 )
 from ._pywmm import (
     GEODETIC_ABOVE_WGS84,
@@ -87,6 +88,7 @@ from .dipole_coords import (
     get_dipole_rotation_matrix, convert_to_dipole, vrot_from_dipole,
 )
 from .sheval_dipole import sheval_dipole
+from .magnetic_time import mjd2000_to_magnetic_universal_time
 
 __all__ = [
     'MagneticModel',
@@ -139,6 +141,8 @@ __all__ = [
     'sunpos_original',
     'decimal_year_to_mjd2000',
     'mjd2000_to_decimal_year',
+    'mjd2000_to_year_fraction',
+    'mjd2000_to_magnetic_universal_time',
 ]
 
 __version__ = '0.5.0'
