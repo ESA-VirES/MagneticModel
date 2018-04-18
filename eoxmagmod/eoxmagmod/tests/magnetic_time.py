@@ -34,7 +34,7 @@ from numpy.testing import assert_allclose
 from eoxmagmod._pytimeconv import decimal_year_to_mjd2000
 from eoxmagmod.solar_position import sunpos
 from eoxmagmod.dipole_coords import convert_to_dipole
-from eoxmagmod.magnetic_time import mjd2000_to_mag_uni_time
+from eoxmagmod.magnetic_time import mjd2000_to_magnetic_universal_time
 
 
 class TestMjd200ToMagneticUniversalTime(TestCase):
@@ -54,7 +54,7 @@ class TestMjd200ToMagneticUniversalTime(TestCase):
 
     @staticmethod
     def eval(times, lats_ngp, lons_ngp):
-        return mjd2000_to_mag_uni_time(times, lats_ngp, lons_ngp)
+        return mjd2000_to_magnetic_universal_time(times, lats_ngp, lons_ngp)
 
     @classmethod
     def reference(cls, times, lats_ngp, lons_ngp):
@@ -69,18 +69,20 @@ class TestMjd200ToMagneticUniversalTime(TestCase):
             ],
         )
         for time, lat_ngp, lon_ngp, result in iterator:
-            result[...] = cls.ref_mjd2000_to_mag_uni_time(time, lat_ngp, lon_ngp)
+            result[...] = cls.ref_mjd2000_to_magnetic_universal_time(
+                time, lat_ngp, lon_ngp
+            )
         return results
 
     @staticmethod
-    def ref_mjd2000_to_mag_uni_time(time, lat_ngp, lon_ngp):
+    def ref_mjd2000_to_magnetic_universal_time(time, lat_ngp, lon_ngp):
         declination, _, hour_angle, _, _ = sunpos(time, 0, 0, rad=0)
         _, subsol_dip_lon, _ = convert_to_dipole(
             [declination, -hour_angle, 1.0], lat_ngp, lon_ngp
         )
         return (180.0 - subsol_dip_lon) / 15.0
 
-    def test_mjd2000_to_mag_uni_time(self):
+    def test_mjd2000_to_magnetic_universal_time(self):
         times = self.times
         lats_ngp, lons_ngp = self.ngp_coords
         assert_allclose(
@@ -88,7 +90,7 @@ class TestMjd200ToMagneticUniversalTime(TestCase):
             self.reference(times, lats_ngp, lons_ngp),
         )
 
-    def test_mjd2000_to_mag_uni_time_fixed_pole(self):
+    def test_mjd2000_to_magnetic_universal_time_fixed_pole(self):
         times = self.times
         lats_ngp, lons_ngp = 80.08, -72.22
         assert_allclose(

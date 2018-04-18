@@ -27,7 +27,6 @@
 #-------------------------------------------------------------------------------
 
 from numpy import arange
-from eoxmagmod.magnetic_model.parser_mio import parse_swarm_mio_file
 from .coefficients_mio import SparseSHCoefficientsMIO
 from .parser_mio import parse_swarm_mio_file
 

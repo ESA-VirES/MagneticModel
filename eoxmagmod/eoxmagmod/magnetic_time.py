@@ -33,7 +33,7 @@ from .solar_position import sunpos
 DEG2RAD = pi/180.0
 RAD2HOUR = 12.0/pi
 
-def mjd2000_to_mag_uni_time(mjd2000, lat_ngp, lon_ngp):
+def mjd2000_to_magnetic_universal_time(mjd2000, lat_ngp, lon_ngp):
     """ Evaluate magnetic universal time for the given MJD2000 and
     coordinates of the North Geomagnetic Pole.
 

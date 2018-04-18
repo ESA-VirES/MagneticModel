@@ -30,7 +30,7 @@
 from math import pi
 from numpy import zeros, arange, broadcast_to, sin, cos
 from .coefficients import SparseSHCoefficients, coeff_size
-from ..magnetic_time import mjd2000_to_mag_uni_time
+from ..magnetic_time import mjd2000_to_magnetic_universal_time
 from .._pytimeconv import mjd2000_to_year_fraction
 
 F_SEASONAL = 2*pi
@@ -83,7 +83,7 @@ class SparseSHCoefficientsMIO(SparseSHCoefficients):
         n_col = pmax - pmin + 1
         n_row = smax - smin + 1
         f0_seasonal = F_SEASONAL * mjd2000_to_year_fraction(mjd2000)
-        f0_diurnal = F_DIURNAL * mjd2000_to_mag_uni_time(
+        f0_diurnal = F_DIURNAL * mjd2000_to_magnetic_universal_time(
             mjd2000, self.lat_ngp, self.lon_ngp
         )
         f_diurnal = f0_diurnal * arange(pmin, pmax + 1)
