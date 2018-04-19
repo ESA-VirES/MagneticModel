@@ -101,6 +101,7 @@ from .magnetic_model.loader_mio import (
     load_model_swarm_mio_internal,
     load_model_swarm_mio_external,
 )
+from .magnetic_model.field_lines import trace_field_line
 
 __all__ = [
     'MagneticModel',
@@ -164,6 +165,7 @@ __all__ = [
     'load_model_swarm_mma_2c_external',
     'load_model_swarm_mio_internal',
     'load_model_swarm_mio_external',
+    'trace_field_line',
 ]
 
 __version__ = '0.5.0'
