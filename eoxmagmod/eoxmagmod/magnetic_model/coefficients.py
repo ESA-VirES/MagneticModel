@@ -27,7 +27,7 @@
 #-------------------------------------------------------------------------------
 # pylint: disable=too-few-public-methods,abstract-method
 
-from numpy import inf, array, zeros, dot, digitize, argsort, abs as aabs
+from numpy import inf, array, zeros, dot, digitize, argsort, abs as aabs, stack
 
 
 class SHCoefficients(object):
@@ -88,7 +88,8 @@ class CombinedSHCoefficients(SHCoefficients):
         return self._degree
 
     def __call__(self, time, **parameters):
-        degree = self.degree
+        max_degree = parameters.get("max_degree", -1)
+        degree = self.degree if max_degree < 0 else min(self.degree, max_degree)
         coeff_full = zeros((coeff_size(degree), 2))
         for item in self._items:
             item_coeff, item_degree = item(time, **parameters)
@@ -99,28 +100,59 @@ class CombinedSHCoefficients(SHCoefficients):
 
 class SparseSHCoefficients(SHCoefficients):
     """ Base class for sparse spherical harmonic coefficients. """
-    def __init__(self, indices, **kwargs):
+    def __init__(self, indices, coefficients, **kwargs):
         SHCoefficients.__init__(self, **kwargs)
         n_idx, m_idx = indices[..., 0], indices[..., 1]
-        self._degree_index = aabs(m_idx) + (n_idx*(n_idx + 1))//2
-        self._coeff_index = (m_idx < 0).astype('int')
         self._degree = n_idx.max()
+        self._index = stack((
+            aabs(m_idx) + (n_idx*(n_idx + 1))//2,
+            (m_idx < 0).astype('int'),
+            n_idx,
+        ), 1)
+        self._coeff = coefficients
 
     @property
     def degree(self):
         return self._degree
 
+    def _subset(self, min_degree, max_degree):
+        """ Get subset of the coefficients for the give min and max degrees. """
+        degree = self._degree
+        index = self._index
+        coeff = self._coeff
+
+        if max_degree >= 0 and max_degree < degree:
+            idx, = (index[:, 2] <= max_degree).nonzero()
+            coeff = coeff[idx]
+            index = index[idx]
+            degree = None
+
+        if min_degree > 0:
+            idx, = (index[:, 2] >= min_degree).nonzero()
+            coeff = coeff[idx]
+            index = index[idx]
+            degree = None
+
+        if degree is None:
+            if index.shape[0] > 0:
+                degree = index[:, 2].max()
+            else:
+                degree = 0
+
+        return degree, coeff, index[:, 0], index[:, 1]
+
 
 class SparseSHCoefficientsConstant(SparseSHCoefficients):
     """ Time invariant sparse spherical harmonic coefficients. """
     def __init__(self, indices, coefficients, **kwargs):
-        SparseSHCoefficients.__init__(self, indices, **kwargs)
-        self._coeff = coefficients
+        SparseSHCoefficients.__init__(self, indices, coefficients, **kwargs)
 
     def __call__(self, time, **parameters):
-        degree = self.degree
+        degree, coeff, index, kind = self._subset(
+            parameters.get("min_degree", -1), parameters.get("max_degree", -1)
+        )
         coeff_full = zeros((coeff_size(degree), 2))
-        coeff_full[self._degree_index, self._coeff_index] = self._coeff
+        coeff_full[index, kind] = coeff
         return coeff_full, degree
 
 
@@ -128,7 +160,6 @@ class SparseSHCoefficientsTimeDependent(SparseSHCoefficients):
     """ Time dependent sparse spherical harmonic coefficients. """
     def __init__(self, indices, coefficients, times, **kwargs):
         order = argsort(times)
-        self._coeff = coefficients[:, order]
         self._times = times[order]
 
         if kwargs.get("validity_start") is None:
@@ -136,14 +167,16 @@ class SparseSHCoefficientsTimeDependent(SparseSHCoefficients):
         if kwargs.get("validity_end") is None:
             kwargs["validity_end"] = self._times[-1]
 
-        SparseSHCoefficients.__init__(self, indices, **kwargs)
+        SparseSHCoefficients.__init__(
+            self, indices, coefficients[:, order], **kwargs
+        )
 
     def __call__(self, time, **parameters):
-        degree = self.degree
-        coeff_full = zeros((coeff_size(degree), 2))
-        coeff_full[self._degree_index, self._coeff_index] = (
-            self._interpolate_coefficients(time, self._coeff)
+        degree, coeff, index, kind = self._subset(
+            parameters.get("min_degree", -1), parameters.get("max_degree", -1)
         )
+        coeff_full = zeros((coeff_size(degree), 2))
+        coeff_full[index, kind] = self._interpolate_coefficients(time, coeff)
         return coeff_full, degree
 
     def _interpolate_coefficients(self, time, coeff):

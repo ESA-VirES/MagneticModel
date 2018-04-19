@@ -36,6 +36,7 @@ from eoxmagmod.magnetic_model.coefficients import (
     CombinedSHCoefficients,
 )
 
+
 class SHCoefficinetTestMixIn(object):
 
     def test_degree(self):
@@ -84,6 +85,29 @@ class TestCombinedSHCoefficientsDefault(TestCase, SHCoefficinetTestMixIn, Combin
             [0., 0.], [1.5, 0], [7.5, 15.0], [1, 0], [5, 10.0], [8., 12.],
         ])
         self.assertEqual(degree, self.degree)
+
+
+class TestCombinedSHCoefficientsMinDegree(TestCase, SHCoefficinetTestMixIn, CombinedSHCoefficientsMixIn):
+    def test_callable(self):
+        coeff, degree = self.coefficients(2013.0, min_degree=2)
+        assert_allclose(coeff, [
+            [0., 0.], [0., 0.], [0., 0.], [1., 0.], [5, 10.0], [8., 12.],
+        ])
+        self.assertEqual(degree, self.degree)
+
+
+class TestCombinedSHCoefficientsMaxDegree(TestCase, SHCoefficinetTestMixIn, CombinedSHCoefficientsMixIn):
+    def test_callable(self):
+        coeff, degree = self.coefficients(2013.0, max_degree=1)
+        assert_allclose(coeff, [[0., 0.], [1.5, 0], [7.5, 15.0]])
+        self.assertEqual(degree, 1)
+
+
+class TestCombinedSHCoefficientsMinMaxDegree(TestCase, SHCoefficinetTestMixIn, CombinedSHCoefficientsMixIn):
+    def test_callable(self):
+        coeff, degree = self.coefficients(2013.0, min_degree=1, max_degree=1)
+        assert_allclose(coeff, [[0., 0.], [1.5, 0], [7.5, 15.0]])
+        self.assertEqual(degree, 1)
 
 
 class TestCombinedSHCoefficientsInternal(TestCombinedSHCoefficientsDefault):
@@ -187,6 +211,132 @@ class TestSparseSHCoefficientsTimeDependentExternal(TestSparseSHCoefficientsTime
 class TestSparseSHCoefficientsTimeDependentExtendedValidity(TestSparseSHCoefficientsTimeDependentDefault):
     validity = (2010.0, 2018.0)
     options = {"validity_start": 2010.0, "validity_end": 2018.0}
+
+#-------------------------------------------------------------------------------
+
+class TestSparseSHCoefficientsConstantSubset(TestCase, SHCoefficinetTestMixIn):
+    indices = array([(1, 0), (2, 1), (3, -2)])
+    coeff = array([1, 5, 10])
+    degree = 3
+    is_internal = True
+    validity = (-inf, inf)
+    options = {}
+
+    @property
+    def coefficients(self):
+        return SparseSHCoefficientsConstant(
+            self.indices, self.coeff, **self.options
+        )
+
+    def test_callable(self):
+        coeff, degree = self.coefficients(2013.0)
+        assert_allclose(coeff, [
+            [0, 0],
+            [1, 0], [0, 0],
+            [0, 0], [5, 0], [0, 0],
+            [0, 0], [0, 0], [0, 10], [0, 0],
+        ])
+        self.assertEqual(degree, 3)
+
+    def test_callable_min_degree(self):
+        coeff, degree = self.coefficients(2013.0, min_degree=2)
+        assert_allclose(coeff, [
+            [0, 0],
+            [0, 0], [0, 0],
+            [0, 0], [5, 0], [0, 0],
+            [0, 0], [0, 0], [0, 10], [0, 0],
+        ])
+        self.assertEqual(degree, 3)
+
+    def test_callable_max_degree(self):
+        coeff, degree = self.coefficients(2013.0, max_degree=2)
+        assert_allclose(coeff, [
+            [0, 0],
+            [1, 0], [0, 0],
+            [0, 0], [5, 0], [0, 0],
+        ])
+        self.assertEqual(degree, 2)
+
+    def test_callable_min_max_degree(self):
+        coeff, degree = self.coefficients(2013.0, min_degree=2, max_degree=2)
+        assert_allclose(coeff, [
+            [0, 0],
+            [0, 0], [0, 0],
+            [0, 0], [5, 0], [0, 0],
+        ])
+        self.assertEqual(degree, 2)
+
+    def test_callable_all_zero(self):
+        coeff, degree = self.coefficients(2013.0, min_degree=4)
+        assert_allclose(coeff, [
+            [0, 0],
+        ])
+        self.assertEqual(degree, 0)
+
+
+class TestSparseSHCoefficientsTimeDependentSubset(TestCase, SHCoefficinetTestMixIn):
+    times = array([2012.0, 2014.0])
+    indices = array([(1, 0), (2, 1), (3, -2)])
+    coeff = array([
+        [1, 2],
+        [5, 10],
+        [10, 20],
+    ])
+    degree = 3
+    is_internal = True
+    validity = (2012.0, 2014.0)
+    options = {}
+
+    @property
+    def coefficients(self):
+        return SparseSHCoefficientsTimeDependent(
+            self.indices, self.coeff, self.times, **self.options
+        )
+
+    def test_callable(self):
+        coeff, degree = self.coefficients(2013.0)
+        assert_allclose(coeff, [
+            [0, 0],
+            [1.5, 0], [0, 0],
+            [0, 0], [7.5, 0], [0, 0],
+            [0, 0], [0, 0], [0, 15], [0, 0],
+        ])
+        self.assertEqual(degree, 3)
+
+    def test_callable_min_degree(self):
+        coeff, degree = self.coefficients(2013.0, min_degree=2)
+        assert_allclose(coeff, [
+            [0, 0],
+            [0, 0], [0, 0],
+            [0, 0], [7.5, 0], [0, 0],
+            [0, 0], [0, 0], [0, 15], [0, 0],
+        ])
+        self.assertEqual(degree, 3)
+
+    def test_callable_max_degree(self):
+        coeff, degree = self.coefficients(2013.0, max_degree=2)
+        assert_allclose(coeff, [
+            [0, 0],
+            [1.5, 0], [0, 0],
+            [0, 0], [7.5, 0], [0, 0],
+        ])
+        self.assertEqual(degree, 2)
+
+    def test_callable_min_max_degree(self):
+        coeff, degree = self.coefficients(2013.0, min_degree=2, max_degree=2)
+        assert_allclose(coeff, [
+            [0, 0],
+            [0, 0], [0, 0],
+            [0, 0], [7.5, 0], [0, 0],
+        ])
+        self.assertEqual(degree, 2)
+
+    def test_callable_all_zero(self):
+        coeff, degree = self.coefficients(2013.0, min_degree=4)
+        assert_allclose(coeff, [
+            [0, 0],
+        ])
+        self.assertEqual(degree, 0)
 
 #-------------------------------------------------------------------------------
 

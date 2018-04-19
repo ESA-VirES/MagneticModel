@@ -50,9 +50,9 @@ class MIOSHCoeffMixIn(object):
     def test_is_internal(self):
         self.assertEqual(self.coefficients.is_internal, self.is_internal)
 
-    def eval_coeff(self, time):
+    def eval_coeff(self, time, **options):
         return self.coefficients(
-            time, lat_ngp=self.lat_ngp, lon_ngp=self.lon_ngp
+            time, lat_ngp=self.lat_ngp, lon_ngp=self.lon_ngp, **options
         )
 
 
@@ -75,13 +75,50 @@ class TestSparseSHCoefficientsMIOInternal(TestCase, MIOSHCoeffMixIn):
         coeff, degree = self.eval_coeff(decimal_year_to_mjd2000(2018.5))
         assert_allclose(coeff, [
             (0, 0),
-            (0.11415226, 0),
-            (-0.22361224, -0.02624283),
-            (-0.23244221, 0),
-            (-0.34379927, -0.81524805),
-            (0.01412196, -0.18049787),
+            (0.11415226, 0), (-0.22361224, -0.02624283),
+            (-0.23244221, 0), (-0.34379927, -0.81524805), (0.01412196, -0.18049787),
         ], atol=1e-8)
         self.assertEqual(degree, self.degree)
+
+    def test_callable_max_degree(self):
+        coeff, degree = self.eval_coeff(
+            decimal_year_to_mjd2000(2018.5), max_degree=1
+        )
+        assert_allclose(coeff, [
+            (0, 0),
+            (0.11415226, 0), (-0.22361224, -0.02624283),
+        ], atol=1e-8)
+        self.assertEqual(degree, 1)
+
+    def test_callable_min_degree(self):
+        coeff, degree = self.eval_coeff(
+            decimal_year_to_mjd2000(2018.5), min_degree=2
+        )
+        assert_allclose(coeff, [
+            (0, 0),
+            (0, 0), (0, 0),
+            (-0.23244221, 0), (-0.34379927, -0.81524805), (0.01412196, -0.18049787),
+        ], atol=1e-8)
+        self.assertEqual(degree, self.degree)
+
+    def test_callable_min_max_degree(self):
+        coeff, degree = self.eval_coeff(
+            decimal_year_to_mjd2000(2018.5), max_degree=1, min_degree=1
+        )
+        assert_allclose(coeff, [
+            (0, 0),
+            (0.11415226, 0), (-0.22361224, -0.02624283),
+        ], atol=1e-8)
+        self.assertEqual(degree, 1)
+
+    def test_callable_all_zero(self):
+        coeff, degree = self.eval_coeff(
+            decimal_year_to_mjd2000(2018.5), min_degree=3
+        )
+        assert_allclose(coeff, [
+            [0, 0],
+        ])
+        self.assertEqual(degree, 0)
 
 
 class TestSparseSHCoefficientsMIOExternal(TestCase, MIOSHCoeffMixIn):
@@ -103,11 +140,8 @@ class TestSparseSHCoefficientsMIOExternal(TestCase, MIOSHCoeffMixIn):
         coeff, degree = self.eval_coeff(decimal_year_to_mjd2000(2018.5))
         assert_allclose(coeff, [
             (0, 0),
-            (-1.44080531, 0),
-            (-0.27711333, -0.25918073),
-            (-0.63645813, 0),
-            (-0.22583255, -2.02305245),
-            (0.05941826, -0.24358544),
+            (-1.44080531, 0), (-0.27711333, -0.25918073),
+            (-0.63645813, 0), (-0.22583255, -2.02305245), (0.05941826, -0.24358544),
         ], atol=1e-8)
         self.assertEqual(degree, self.degree)
 

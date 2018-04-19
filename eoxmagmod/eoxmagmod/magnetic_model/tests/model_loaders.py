@@ -71,6 +71,7 @@ class SHModelTestMixIn(object):
     range_lon = range(-180, 181, 10)
     validity = None
     model_class = SphericalHarmomicGeomagneticModel
+    options = {}
 
     @property
     def model(self):
@@ -104,7 +105,7 @@ class SHModelTestMixIn(object):
         )
 
     def eval_model(self, times, coords):
-        return self.model.eval(times, coords)
+        return self.model.eval(times, coords, **self.options)
 
     def eval_reference(self, times, coords):
         result = empty(coords.shape)
@@ -126,7 +127,7 @@ class SHModelTestMixIn(object):
 
     def _eval_reference(self, time, coords):
         is_internal = self.model.coefficients.is_internal
-        coeff, degree = self.model.coefficients(time)
+        coeff, degree = self.model.coefficients(time, **self.options)
         return sheval(
             coords, degree, coeff[..., 0], coeff[..., 0],
             is_internal=is_internal, mode=GRADIENT,
@@ -211,6 +212,7 @@ class TestEMM2010(TestCase, SHModelTestMixIn):
     range_lat = range(-90, 91, 30)
     range_lon = range(-180, 181, 60)
     validity = decimal_year_to_mjd2000((2010.0, 2015.0))
+    options = {"max_degree": 300}
     def load(self):
         return load_model_emm(EMM_2010_STATIC, EMM_2010_SECVAR)
 
