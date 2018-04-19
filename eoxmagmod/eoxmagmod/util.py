@@ -35,6 +35,10 @@ from ._pywmm import (
     convert, vrot_sph2geod, vrot_sph2cart, vrot_cart2sph,
 )
 
+GEODETIC_COORD_TYPES = (GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96)
+SPHERICAL_COORD_TYPES = (
+    GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96, GEOCENTRIC_SPHERICAL
+)
 
 def vrotate(arr, coord_in, coord_out, coord_type_in, coord_type_out):
     """ Rotate vectors from one coordinate system to another.
@@ -51,13 +55,11 @@ def vrotate(arr, coord_in, coord_out, coord_type_in, coord_type_out):
     if coord_type_in == coord_type_out:
         return arr
 
-    geodetic_coord_types = (GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96)
-
     coord_out = None if coord_out is None else asarray(coord_out)
     coord_in = None if coord_in is None else asarray(coord_in)
 
-    if coord_type_in in geodetic_coord_types:
-        if coord_type_out in geodetic_coord_types:
+    if coord_type_in in GEODETIC_COORD_TYPES:
+        if coord_type_out in GEODETIC_COORD_TYPES:
             return arr
         elif coord_type_out == GEOCENTRIC_SPHERICAL:
             return vrot_sph2geod(arr, coord_out[..., 0] - coord_in[..., 0])
@@ -65,15 +67,13 @@ def vrotate(arr, coord_in, coord_out, coord_type_in, coord_type_out):
             return vrot_sph2cart(arr, coord_in[..., 0], coord_in[..., 1])
 
     elif coord_type_in == GEOCENTRIC_SPHERICAL:
-        if coord_type_out in geodetic_coord_types:
+        if coord_type_out in GEODETIC_COORD_TYPES:
             return vrot_sph2geod(arr, coord_out[..., 0] - coord_in[..., 0])
         elif coord_type_out == GEOCENTRIC_CARTESIAN:
             return vrot_sph2cart(arr, coord_in[..., 0], coord_in[..., 1])
 
     elif coord_type_in == GEOCENTRIC_CARTESIAN:
-        if coord_type_out in geodetic_coord_types:
-            return vrot_cart2sph(arr, coord_out[..., 0], coord_out[..., 1])
-        elif coord_type_out == GEOCENTRIC_SPHERICAL:
+        if coord_type_out in SPHERICAL_COORD_TYPES:
             return vrot_cart2sph(arr, coord_out[..., 0], coord_out[..., 1])
 
     raise ValueError("Unsupported coordinate system type!")
