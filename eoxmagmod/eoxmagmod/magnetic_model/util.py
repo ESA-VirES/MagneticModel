@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 #
-#  SHC file format model loader
+#  shared utilities
 #
 # Author: Martin Paces <martin.paces@eox.at>
 #
@@ -26,46 +26,9 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-from .util import parse_file
-from .model import SphericalHarmomicGeomagneticModel
-from .coefficients import (
-    SparseSHCoefficientsTimeDependent,
-    SparseSHCoefficientsConstant,
-    CombinedSHCoefficients,
-)
-from .parser_shc import parse_shc_file
-
-
-def load_model_shc_combined(*paths):
-    """ Load model with coefficients combined from multiple SHC files. """
-    return SphericalHarmomicGeomagneticModel(load_coeff_shc_combined(*paths))
-
-
-def load_model_shc(path):
-    """ Load model from an SHC file. """
-    return SphericalHarmomicGeomagneticModel(load_coeff_shc(path))
-
-
-def load_coeff_shc_combined(*paths):
-    """ Load coefficients combined from multiple SHC files. """
-    return CombinedSHCoefficients(*[load_coeff_shc(path) for path in paths])
-
-
-def load_coeff_shc(path):
-    """ Load coefficients from an SHC file. """
-    data = parse_file(parse_shc_file, file_in)
-
-    options = {
-        key: data[key]
-        for key in ("validity_start", "validity_end") if key in data
-    }
-
-    times = data["t"]
-    if len(times) == 1:
-        return SparseSHCoefficientsConstant(
-            data["nm"], data["gh"][:, 0], **options
-        )
+def parse_file(parser, file_, *args, **kwargs):
+    if isinstance(file_, basestring):
+        with file(file_, "rb") as file_in:
+            return parser(file_in, *args, **kwargs)
     else:
-        return SparseSHCoefficientsTimeDependent(
-            data["nm"], data["gh"], times, **options
-        )
+        return parser(file_, *args, **kwargs)

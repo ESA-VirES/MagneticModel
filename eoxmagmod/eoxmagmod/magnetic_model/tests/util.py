@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 #
-#  SHC file format model loader
+#  shared utilities test
 #
 # Author: Martin Paces <martin.paces@eox.at>
 #
@@ -26,46 +26,27 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-from .util import parse_file
-from .model import SphericalHarmomicGeomagneticModel
-from .coefficients import (
-    SparseSHCoefficientsTimeDependent,
-    SparseSHCoefficientsConstant,
-    CombinedSHCoefficients,
-)
-from .parser_shc import parse_shc_file
+from unittest import TestCase, main
+from hashlib import md5
+from eoxmagmod.magnetic_model.util import parse_file
+from eoxmagmod.magnetic_model.tests.data import SWARM_MIO_SHA_2_TEST_DATA
 
 
-def load_model_shc_combined(*paths):
-    """ Load model with coefficients combined from multiple SHC files. """
-    return SphericalHarmomicGeomagneticModel(load_coeff_shc_combined(*paths))
+class TestUtil(TestCase):
+
+    @staticmethod
+    def _check_sum(file_in):
+        md5sum = md5()
+        md5sum.update(file_in.read())
+        return md5sum.hexdigest()
+
+    def test_parse_file(self):
+        filename = SWARM_MIO_SHA_2_TEST_DATA
+        data_file_name = parse_file(self._check_sum, filename)
+        with file(filename, "rb") as file_in:
+            data_file_object = parse_file(self._check_sum, file_in)
+        self.assertEqual(data_file_name, data_file_object)
 
 
-def load_model_shc(path):
-    """ Load model from an SHC file. """
-    return SphericalHarmomicGeomagneticModel(load_coeff_shc(path))
-
-
-def load_coeff_shc_combined(*paths):
-    """ Load coefficients combined from multiple SHC files. """
-    return CombinedSHCoefficients(*[load_coeff_shc(path) for path in paths])
-
-
-def load_coeff_shc(path):
-    """ Load coefficients from an SHC file. """
-    data = parse_file(parse_shc_file, file_in)
-
-    options = {
-        key: data[key]
-        for key in ("validity_start", "validity_end") if key in data
-    }
-
-    times = data["t"]
-    if len(times) == 1:
-        return SparseSHCoefficientsConstant(
-            data["nm"], data["gh"][:, 0], **options
-        )
-    else:
-        return SparseSHCoefficientsTimeDependent(
-            data["nm"], data["gh"], times, **options
-        )
+if __name__ == "__main__":
+    main()
