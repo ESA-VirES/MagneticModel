@@ -29,7 +29,7 @@
 
 from unittest import TestCase, main
 from itertools import product
-from numpy import inf, array, empty, nditer
+from numpy import inf, array, empty, nditer, asarray
 from numpy.random import uniform
 from numpy.testing import assert_allclose
 from eoxmagmod import decimal_year_to_mjd2000
@@ -67,6 +67,7 @@ from eoxmagmod.sheval_dipole import sheval_dipole
 
 
 class SHModelTestMixIn(object):
+    scale = 1.0
     range_lat = range(-90, 91, 5)
     range_lon = range(-180, 181, 10)
     validity = None
@@ -133,7 +134,7 @@ class SHModelTestMixIn(object):
             is_internal=is_internal, mode=GRADIENT,
             coord_type_in=GEOCENTRIC_SPHERICAL,
             coord_type_out=GEOCENTRIC_SPHERICAL,
-            scale_gradient=-1.0
+            scale_gradient=-asarray(self.scale),
         )
 
     def test_class(self):
@@ -173,7 +174,7 @@ class DipoleSHModelTestMixIn(SHModelTestMixIn):
             is_internal=is_internal, mode=GRADIENT,
             coord_type_in=GEOCENTRIC_SPHERICAL,
             coord_type_out=GEOCENTRIC_SPHERICAL,
-            scale_gradient=-1.0
+            scale_gradient=-asarray(self.scale),
         )
 
 class DipoleMIOSHModelTestMixIn(SHModelTestMixIn):
@@ -182,7 +183,9 @@ class DipoleMIOSHModelTestMixIn(SHModelTestMixIn):
 
     def _eval_reference(self, time, coords):
         is_internal = self.model.coefficients.is_internal
-        scale = -(1.0 + self.model.f107(time) * self.model.wolf_ratio)
+        scale = -(
+            1.0 + self.model.f107(time) * self.model.wolf_ratio
+        ) * asarray(self.scale)
         lat_ngp, lon_ngp = self.model.north_pole(time)
         coeff, degree = self.model.coefficients(time, lat_ngp, lon_ngp)
         return sheval_dipole(
@@ -197,6 +200,8 @@ class DipoleMIOSHModelTestMixIn(SHModelTestMixIn):
 
 class TestWMM2010(TestCase, SHModelTestMixIn):
     validity = decimal_year_to_mjd2000((2010.0, 2015.0))
+    options = {"scale": [1, 1, -1]}
+    scale = [1, 1, -1]
     def load(self):
         return load_model_wmm(WMM_2010)
 
@@ -286,6 +291,8 @@ class TestCHAOS6Combined(TestCase, SHModelTestMixIn):
 
 class TestMMA2CInternal(TestCase, DipoleSHModelTestMixIn):
     validity = (6179.125, 6209.875)
+    options = {"scale": [1, 1, -1]}
+    scale = [1, 1, -1]
     def load(self):
         return load_model_swarm_mma_2c_internal(SWARM_MMA_SHA_2C_TEST_DATA)
 
@@ -298,6 +305,8 @@ class TestMMA2CExternal(TestCase, DipoleSHModelTestMixIn):
 
 class TestMIOSecondary(TestCase, DipoleMIOSHModelTestMixIn):
     validity = (-inf, inf)
+    options = {"scale": [1, 1, -1]}
+    scale = [1, 1, -1]
     def load(self):
         return load_model_swarm_mio_internal(
             SWARM_MIO_SHA_2_TEST_DATA, self.f107

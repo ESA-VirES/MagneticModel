@@ -146,6 +146,7 @@ __all__ = [
     'GRADIENT',
     'POTENTIAL_AND_GRADIENT',
     'eval_qdlatlon',
+    'eval_qdlatlon_with_base_vectors',
     'eval_mlt',
     'eval_subsol',
     'DATA_APEX_2015',

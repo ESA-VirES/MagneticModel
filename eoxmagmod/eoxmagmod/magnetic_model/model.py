@@ -106,7 +106,6 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
                           output_coordinate_system=GEOCENTRIC_SPHERICAL,
                           **options):
         """ Evaluate spherical harmonic for a single time."""
-        scale = -options.get("scale", 1.0)
         is_internal = self.coefficients.is_internal
         coeff, degree = self.coefficients(time, **options)
         return sheval(
@@ -114,7 +113,7 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
             is_internal=is_internal, mode=GRADIENT,
             coord_type_in=input_coordinate_system,
             coord_type_out=output_coordinate_system,
-            scale_gradient=scale
+            scale_gradient=-asarray(options.get("scale", 1.0))
         )
 
 
@@ -140,7 +139,6 @@ class DipoleSphericalHarmomicGeomagneticModel(SphericalHarmomicGeomagneticModel)
                           output_coordinate_system=GEOCENTRIC_SPHERICAL,
                           **options):
         lat_ngp, lon_ngp = self.north_pole(time)
-        scale = -options.get("scale", 1.0)
         is_internal = self.coefficients.is_internal
         coeff, degree = self.coefficients(
             time, lat_ngp=lat_ngp, lon_ngp=lon_ngp, **options
@@ -150,5 +148,5 @@ class DipoleSphericalHarmomicGeomagneticModel(SphericalHarmomicGeomagneticModel)
             is_internal=is_internal, mode=GRADIENT,
             coord_type_in=input_coordinate_system,
             coord_type_out=output_coordinate_system,
-            scale_gradient=scale
+            scale_gradient=-asarray(options.get("scale", 1.0))
         )

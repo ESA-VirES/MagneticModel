@@ -26,6 +26,7 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+from numpy import asarray
 from .model import DipoleSphericalHarmomicGeomagneticModel, GEOCENTRIC_SPHERICAL
 
 MIO_HEIGHT = 110.0 # km
@@ -72,7 +73,7 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
                           **options):
         options["scale"] = (
             1.0 + self.wolf_ratio * self.f107(time)
-        ) * options.get("scale", 1.0)
+        ) * asarray(options.get("scale", 1.0))
         return DipoleSphericalHarmomicGeomagneticModel._eval_single_time(
             self, time, coords, input_coordinate_system,
             output_coordinate_system, **options

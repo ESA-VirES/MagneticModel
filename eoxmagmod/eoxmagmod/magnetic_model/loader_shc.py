@@ -53,7 +53,7 @@ def load_coeff_shc_combined(*paths):
 
 def load_coeff_shc(path):
     """ Load coefficients from an SHC file. """
-    data = parse_file(parse_shc_file, file_in)
+    data = parse_file(parse_shc_file, path)
 
     options = {
         key: data[key]
