@@ -70,6 +70,7 @@ class MagneticModelMixIn(object):
             degree=degree, coef_g=coef_g, coef_h=coef_h,
             coord_type_in=GEOCENTRIC_SPHERICAL,
             coord_type_out=GEOCENTRIC_SPHERICAL,
+            scale_gradient=-1.0,
         )
 
     def eval_model(self, date, coords):

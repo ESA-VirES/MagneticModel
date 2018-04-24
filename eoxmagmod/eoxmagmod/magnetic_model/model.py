@@ -109,7 +109,7 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
         is_internal = self.coefficients.is_internal
         coeff, degree = self.coefficients(time, **options)
         return sheval(
-            coords, degree, coeff[..., 0], coeff[..., 0],
+            coords, degree, coeff[..., 0], coeff[..., 1],
             is_internal=is_internal, mode=GRADIENT,
             coord_type_in=input_coordinate_system,
             coord_type_out=output_coordinate_system,
@@ -144,7 +144,7 @@ class DipoleSphericalHarmomicGeomagneticModel(SphericalHarmomicGeomagneticModel)
             time, lat_ngp=lat_ngp, lon_ngp=lon_ngp, **options
         )
         return sheval_dipole(
-            coords, degree, coeff[..., 0], coeff[..., 0], lat_ngp, lon_ngp,
+            coords, degree, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
             is_internal=is_internal, mode=GRADIENT,
             coord_type_in=input_coordinate_system,
             coord_type_out=output_coordinate_system,

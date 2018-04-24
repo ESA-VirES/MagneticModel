@@ -182,7 +182,8 @@ class MagneticModelBase(object):
             degree = 0
 
         return sheval(
-            arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out, mode
+            arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out, mode,
+            scale_gradient=-1.0
         )
 
 

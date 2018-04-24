@@ -130,7 +130,7 @@ class SHModelTestMixIn(object):
         is_internal = self.model.coefficients.is_internal
         coeff, degree = self.model.coefficients(time, **self.options)
         return sheval(
-            coords, degree, coeff[..., 0], coeff[..., 0],
+            coords, degree, coeff[..., 0], coeff[..., 1],
             is_internal=is_internal, mode=GRADIENT,
             coord_type_in=GEOCENTRIC_SPHERICAL,
             coord_type_out=GEOCENTRIC_SPHERICAL,
@@ -170,7 +170,7 @@ class DipoleSHModelTestMixIn(SHModelTestMixIn):
         lat_ngp, lon_ngp = self.model.north_pole(time)
         coeff, degree = self.model.coefficients(time)
         return sheval_dipole(
-            coords, degree, coeff[..., 0], coeff[..., 0], lat_ngp, lon_ngp,
+            coords, degree, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
             is_internal=is_internal, mode=GRADIENT,
             coord_type_in=GEOCENTRIC_SPHERICAL,
             coord_type_out=GEOCENTRIC_SPHERICAL,
@@ -189,7 +189,7 @@ class DipoleMIOSHModelTestMixIn(SHModelTestMixIn):
         lat_ngp, lon_ngp = self.model.north_pole(time)
         coeff, degree = self.model.coefficients(time, lat_ngp, lon_ngp)
         return sheval_dipole(
-            coords, degree, coeff[..., 0], coeff[..., 0], lat_ngp, lon_ngp,
+            coords, degree, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
             is_internal=is_internal, mode=GRADIENT,
             coord_type_in=GEOCENTRIC_SPHERICAL,
             coord_type_out=GEOCENTRIC_SPHERICAL,
