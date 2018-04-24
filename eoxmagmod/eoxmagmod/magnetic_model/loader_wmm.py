@@ -27,7 +27,7 @@
 #-------------------------------------------------------------------------------
 
 from .model import SphericalHarmomicGeomagneticModel
-from .coefficients import SparseSHCoefficientsTimeDependent
+from .coefficients import SparseSHCoefficientsTimeDependentDecimalYear
 from .parser_wmm import parse_wmm_file
 
 
@@ -42,4 +42,6 @@ def load_coeff_wmm(path):
     with open(path, "rb") as file_in:
         data = parse_wmm_file(file_in)
 
-    return SparseSHCoefficientsTimeDependent(data["nm"], data["gh"], data["t"])
+    return SparseSHCoefficientsTimeDependentDecimalYear(
+        data["nm"], data["gh"], data["t"]
+    )

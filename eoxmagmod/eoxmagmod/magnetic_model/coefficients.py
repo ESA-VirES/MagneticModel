@@ -28,6 +28,7 @@
 # pylint: disable=too-few-public-methods,abstract-method
 
 from numpy import inf, array, zeros, dot, digitize, argsort, abs as aabs, stack
+from .._pytimeconv import decimal_year_to_mjd2000, mjd2000_to_decimal_year
 
 
 class SHCoefficients(object):
@@ -157,7 +158,9 @@ class SparseSHCoefficientsConstant(SparseSHCoefficients):
 
 
 class SparseSHCoefficientsTimeDependent(SparseSHCoefficients):
-    """ Time dependent sparse spherical harmonic coefficients. """
+    """ Time dependent sparse spherical harmonic coefficients
+    evaluated interpolation.
+    """
     def __init__(self, indices, coefficients, times, **kwargs):
         order = argsort(times)
         self._times = times[order]
@@ -192,6 +195,24 @@ class SparseSHCoefficientsTimeDependent(SparseSHCoefficients):
         idx0 = idx1 - 1
         alpha = (time -times[idx0])/(times[idx1] - times[idx0])
         return [idx0, idx1], array([1.0 - alpha, alpha]).reshape((2, 1))
+
+
+class SparseSHCoefficientsTimeDependentDecimalYear(SparseSHCoefficientsTimeDependent):
+    """ Time dependent sparse spherical harmonic coefficients
+    evaluated interpolation in the decimal-year time domain.
+    """
+
+    def __init__(self, indices, coefficients, times, **kwargs):
+        SparseSHCoefficientsTimeDependent.__init__(
+            self, indices, coefficients, times, **kwargs
+        )
+        # Fix the validity range to be in the expected MJD2000.
+        self.validity = tuple(decimal_year_to_mjd2000(self.validity))
+
+    def __call__(self, time, **parameters):
+        return SparseSHCoefficientsTimeDependent.__call__(
+            self, mjd2000_to_decimal_year(time), **parameters
+        )
 
 
 def coeff_size(degree):

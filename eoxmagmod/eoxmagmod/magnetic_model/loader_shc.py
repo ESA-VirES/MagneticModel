@@ -29,7 +29,7 @@
 from .util import parse_file
 from .model import SphericalHarmomicGeomagneticModel
 from .coefficients import (
-    SparseSHCoefficientsTimeDependent,
+    SparseSHCoefficientsTimeDependentDecimalYear,
     SparseSHCoefficientsConstant,
     CombinedSHCoefficients,
 )
@@ -66,6 +66,6 @@ def load_coeff_shc(path):
             data["nm"], data["gh"][:, 0], **options
         )
     else:
-        return SparseSHCoefficientsTimeDependent(
+        return SparseSHCoefficientsTimeDependentDecimalYear(
             data["nm"], data["gh"], times, **options
         )

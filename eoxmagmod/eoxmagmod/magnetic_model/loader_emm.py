@@ -28,7 +28,7 @@
 
 from .model import SphericalHarmomicGeomagneticModel
 from .coefficients import (
-    SparseSHCoefficientsTimeDependent,
+    SparseSHCoefficientsTimeDependentDecimalYear,
     SparseSHCoefficientsConstant,
     CombinedSHCoefficients,
 )
@@ -53,7 +53,7 @@ def load_coeff_emm(path_static, path_secvar):
             )
 
     return CombinedSHCoefficients(
-        SparseSHCoefficientsTimeDependent(
+        SparseSHCoefficientsTimeDependentDecimalYear(
             data_variable["nm"], data_variable["gh"], data_variable["t"],
         ),
         SparseSHCoefficientsConstant(

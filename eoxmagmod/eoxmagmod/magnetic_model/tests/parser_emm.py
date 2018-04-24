@@ -58,13 +58,13 @@ class TestEMMParser(TestCase):
 
     def _assert_valid_variable(self, data, expected_data):
         self._assert_valid(data, expected_data)
-        assert_allclose(data["t"], decimal_year_to_mjd2000(
-            [data["epoch"], data["epoch"] + EMM_VALIDITY_PERIOD]
-        ))
+        assert_allclose(
+            data["t"], [data["epoch"], data["epoch"] + EMM_VALIDITY_PERIOD]
+        )
 
     def _assert_valid_constant(self, data, expected_data):
         self._assert_valid(data, expected_data)
-        assert_allclose(data["t"], decimal_year_to_mjd2000([data["epoch"]]))
+        assert_allclose(data["t"], [data["epoch"]])
 
     def test_parse_emm_file_emm2010_static(self):
         data = self.parse(EMM_2010_STATIC)

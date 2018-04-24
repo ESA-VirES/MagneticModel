@@ -28,7 +28,6 @@
 
 import re
 from numpy import array, stack
-from .._pytimeconv import decimal_year_to_mjd2000
 
 
 RE_HEADER_LINE = re.compile(r'^-+$')
@@ -58,9 +57,7 @@ def combine_emm_variable(data_static, data_secvar):
         "epoch": epoch_secvar,
         "degree_min": data_secvar["degree_min"],
         "degree_max": data_secvar["degree_max"],
-        "t": decimal_year_to_mjd2000(
-            [epoch_secvar, epoch_secvar + EMM_VALIDITY_PERIOD]
-        ),
+        "t": array([epoch_secvar, epoch_secvar + EMM_VALIDITY_PERIOD]),
         "nm": nm_secvar,
         "gh": stack((
             gh_static[:size, 0],
@@ -81,7 +78,7 @@ def extract_emm_constant(data_static, data_secvar):
         "epoch": epoch,
         "degree_min": nm_static[:, 0].min(),
         "degree_max": nm_static[:, 0].max(),
-        "t": decimal_year_to_mjd2000([epoch]),
+        "t": array([epoch]),
         "nm": nm_static,
         "gh": gh_static,
     }
@@ -127,4 +124,4 @@ def parse_emm_coefficients(lines, data):
             nm_index.append((n_idx, -m_idx))
             coeff.append(coef_h)
     coeff = array(coeff).reshape((len(coeff), 1))
-    return array(nm_index), coeff, decimal_year_to_mjd2000([data["epoch"]])
+    return array(nm_index), coeff, array([data["epoch"]])

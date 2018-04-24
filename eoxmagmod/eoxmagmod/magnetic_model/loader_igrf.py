@@ -27,7 +27,7 @@
 #-------------------------------------------------------------------------------
 
 from .model import SphericalHarmomicGeomagneticModel
-from .coefficients import SparseSHCoefficientsTimeDependent
+from .coefficients import SparseSHCoefficientsTimeDependentDecimalYear
 from .parser_igrf import parse_igrf_file
 
 
@@ -45,4 +45,6 @@ def load_coeff_igrf(path):
     with open(path, "rb") as file_in:
         data = parse_igrf_file(file_in)
 
-    return SparseSHCoefficientsTimeDependent(data["nm"], data["gh"], data["t"])
+    return SparseSHCoefficientsTimeDependentDecimalYear(
+        data["nm"], data["gh"], data["t"]
+    )

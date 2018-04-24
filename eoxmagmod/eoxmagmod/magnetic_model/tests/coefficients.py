@@ -29,9 +29,11 @@
 from unittest import TestCase, main
 from numpy import inf, array
 from numpy.testing import assert_allclose
+from eoxmagmod import decimal_year_to_mjd2000
 from eoxmagmod.magnetic_model.coefficients import (
     SparseSHCoefficients,
     SparseSHCoefficientsTimeDependent,
+    SparseSHCoefficientsTimeDependentDecimalYear,
     SparseSHCoefficientsConstant,
     CombinedSHCoefficients,
 )
@@ -210,6 +212,52 @@ class TestSparseSHCoefficientsTimeDependentExternal(TestSparseSHCoefficientsTime
 
 class TestSparseSHCoefficientsTimeDependentExtendedValidity(TestSparseSHCoefficientsTimeDependentDefault):
     validity = (2010.0, 2018.0)
+    options = {"validity_start": 2010.0, "validity_end": 2018.0}
+
+#-------------------------------------------------------------------------------
+
+class TestSparseSHCoefficientsTimeDependentDecimalYearDefault(TestCase, SHCoefficinetTestMixIn):
+    times = array([2012.0, 2016.0, 2014.0])
+    indices = array([(1, 0), (1, 1), (1, -1)])
+    coeff = array([
+        [1, 3, 2],
+        [5, 15, 10],
+        [10, 30, 20],
+    ])
+    degree = 1
+    is_internal = True
+    validity = tuple(decimal_year_to_mjd2000((2012.0, 2016.0)))
+    options = {}
+
+    @property
+    def coefficients(self):
+        return SparseSHCoefficientsTimeDependentDecimalYear(
+            self.indices, self.coeff, self.times, **self.options
+        )
+
+    def test_callable(self):
+        coeff, degree = self.coefficients(decimal_year_to_mjd2000(2013.0))
+        assert_allclose(coeff, [[0., 0.], [1.5, 0], [7.5, 15.0]])
+        self.assertEqual(degree, self.degree)
+
+    def test_callable_before_first_time(self):
+        coeff, degree = self.coefficients(decimal_year_to_mjd2000(2011.0))
+        assert_allclose(coeff, [[0., 0.], [0.5, 0], [2.5, 5.0]])
+        self.assertEqual(degree, self.degree)
+
+
+class TestSparseSHCoefficientsTimeDependentDecimalYearInternal(TestSparseSHCoefficientsTimeDependentDecimalYearDefault):
+    is_internal = True
+    options = {"is_internal": True}
+
+
+class TestSparseSHCoefficientsTimeDependentDecimalYearExternal(TestSparseSHCoefficientsTimeDependentDecimalYearDefault):
+    is_internal = False
+    options = {"is_internal": False}
+
+
+class TestSparseSHCoefficientsTimeDependentDecimalYearExtendedValidity(TestSparseSHCoefficientsTimeDependentDecimalYearDefault):
+    validity = tuple(decimal_year_to_mjd2000((2010.0, 2018.0)))
     options = {"validity_start": 2010.0, "validity_end": 2018.0}
 
 #-------------------------------------------------------------------------------

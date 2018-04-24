@@ -42,7 +42,7 @@ from eoxmagmod.magnetic_model.tests.data import (
     SWARM_MIO_SHA_2_TEST_DATA,
 )
 from eoxmagmod.magnetic_model.coefficients import (
-    SparseSHCoefficientsTimeDependent,
+    SparseSHCoefficientsTimeDependentDecimalYear,
     SparseSHCoefficientsConstant,
     CombinedSHCoefficients,
 )
@@ -160,21 +160,21 @@ class WmmTestMixIn(CoefficietLoaderTestMixIn):
 #-------------------------------------------------------------------------------
 
 class TestCoeffSIFM(TestCase, ShcTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependent
+    class_ = SparseSHCoefficientsTimeDependentDecimalYear
     path = SIFM
     degree = 70
     validity = decimal_year_to_mjd2000((2013.4976, 2015.4962))
 
 
 class TestCoeffIGRF12(TestCase, ShcTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependent
+    class_ = SparseSHCoefficientsTimeDependentDecimalYear
     path = IGRF12
     degree = 13
     validity = decimal_year_to_mjd2000((1900.0, 2020.0))
 
 
 class TestCoeffIGRF11(TestCase, CoefficietLoaderTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependent
+    class_ = SparseSHCoefficientsTimeDependentDecimalYear
     degree = 13
     validity = decimal_year_to_mjd2000((1900.0, 2015.0))
 
@@ -185,14 +185,14 @@ class TestCoeffIGRF11(TestCase, CoefficietLoaderTestMixIn):
 #-------------------------------------------------------------------------------
 
 class TestCoeffCHAOS5Core(TestCase, ShcTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependent
+    class_ = SparseSHCoefficientsTimeDependentDecimalYear
     path = CHAOS5_CORE
     degree = 20
     validity = decimal_year_to_mjd2000((1997.0021, 2015.0007))
 
 
 class TestCoeffCHAOS5CoreV4(TestCase, ShcTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependent
+    class_ = SparseSHCoefficientsTimeDependentDecimalYear
     path = CHAOS5_CORE_V4
     degree = 20
     validity = decimal_year_to_mjd2000((1997.1020, 2016.1027))
@@ -214,14 +214,14 @@ class TestCoeffCHAOS5Combined(TestCase, CombinedShcTestMixIn):
 #-------------------------------------------------------------------------------
 
 class TestCoeffCHAOS6Core(TestCase, ShcTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependent
+    class_ = SparseSHCoefficientsTimeDependentDecimalYear
     path = CHAOS6_CORE
     degree = 20
     validity = decimal_year_to_mjd2000((1997.102, 2016.6023))
 
 
 class TestCoeffCHAOS6CoreX3(TestCase, ShcTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependent
+    class_ = SparseSHCoefficientsTimeDependentDecimalYear
     path = CHAOS6_CORE_X3
     degree = 20
     validity = decimal_year_to_mjd2000((1997.102, 2017.6016))
@@ -243,14 +243,14 @@ class TestCoeffCHAOS6Combined(TestCase, CombinedShcTestMixIn):
 #-------------------------------------------------------------------------------
 
 class TestCoeffWMM2010(TestCase, WmmTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependent
+    class_ = SparseSHCoefficientsTimeDependentDecimalYear
     path = WMM_2010
     degree = 12
     validity = decimal_year_to_mjd2000((2010., 2015.))
 
 
 class TestCoeffWMM2015(TestCase, WmmTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependent
+    class_ = SparseSHCoefficientsTimeDependentDecimalYear
     path = WMM_2015
     degree = 12
     validity = decimal_year_to_mjd2000((2015., 2020.))
@@ -291,13 +291,13 @@ class TestCoeffMMA2CExternal(TestCase, CoefficietLoaderTestMixIn):
 #-------------------------------------------------------------------------------
 
 class TestCoeffMIOSecondary(TestCase, MIOCoefficietLoaderTestMixIn):
-    is_internal = False
+    is_internal = True
     degree = 2
     options = {}
 
     @classmethod
     def _load(cls):
-        return load_coeff_swarm_mio_external(
+        return load_coeff_swarm_mio_internal(
             SWARM_MIO_SHA_2_TEST_DATA, **cls.options
         )
 

@@ -31,7 +31,6 @@ from unittest import TestCase, main
 from StringIO import StringIO
 from numpy.testing import assert_allclose
 from numpy import abs as aabs
-from eoxmagmod import decimal_year_to_mjd2000
 from eoxmagmod.magnetic_model.parser_wmm import (
     parse_wmm_file, WMM_VALIDITY_PERIOD,
 )
@@ -49,9 +48,9 @@ class TestWMMParser(TestCase):
         tested_data = {
             key: data[key] for key in expected_data
         }
-        assert_allclose(data["t"], decimal_year_to_mjd2000(
-                [data["epoch"], data["epoch"] + WMM_VALIDITY_PERIOD]
-        ))
+        assert_allclose(
+            data["t"], [data["epoch"], data["epoch"] + WMM_VALIDITY_PERIOD]
+        )
         self.assertEqual(tested_data, expected_data)
         self.assertEqual(data["t"].size, data["gh"].shape[1])
         self.assertEqual(data["nm"].shape[0], data["gh"].shape[0])
