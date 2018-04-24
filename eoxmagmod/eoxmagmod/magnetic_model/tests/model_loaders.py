@@ -29,7 +29,7 @@
 
 from unittest import TestCase, main
 from itertools import product
-from numpy import inf, array, empty, nditer, asarray
+from numpy import inf, array, empty, nditer, asarray, floor
 from numpy.random import uniform
 from numpy.testing import assert_allclose
 from eoxmagmod import decimal_year_to_mjd2000
@@ -146,7 +146,6 @@ class SHModelTestMixIn(object):
     def test_eval_single_time(self):
         time = self.time
         coords = self.coordinates
-        #self.eval_model(time, coords)
         assert_allclose(
             self.eval_model(time, coords),
             self.eval_reference(time, coords),
@@ -155,11 +154,14 @@ class SHModelTestMixIn(object):
     def test_eval_multi_time(self):
         times = self.times
         coords = self.coordinates
-        #self.eval_model(times, coords)
         assert_allclose(
             self.eval_model(times, coords),
             self.eval_reference(times, coords),
         )
+
+    def test_eval_reference_values(self):
+        times, coords, results = self.reference_values
+        assert_allclose(self.model.eval(times, coords), results)
 
 
 class DipoleSHModelTestMixIn(SHModelTestMixIn):
@@ -199,6 +201,10 @@ class DipoleMIOSHModelTestMixIn(SHModelTestMixIn):
 #-------------------------------------------------------------------------------
 
 class TestWMM2010(TestCase, SHModelTestMixIn):
+    reference_values = (
+        4566.0, (30.0, 40.0, 8000.0),
+        (15123.605974201277, 431.1067254253052, -14617.02644010297)
+    )
     validity = decimal_year_to_mjd2000((2010.0, 2015.0))
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
@@ -207,12 +213,20 @@ class TestWMM2010(TestCase, SHModelTestMixIn):
 
 
 class TestWMM2015(TestCase, SHModelTestMixIn):
+    reference_values = (
+        6392.0, (30.0, 40.0, 8000.0),
+        (15124.716592471135, 533.1027023540182, -14728.4938691708)
+    )
     validity = decimal_year_to_mjd2000((2015.0, 2020.0))
     def load(self):
         return load_model_wmm(WMM_2015)
 
 
 class TestEMM2010(TestCase, SHModelTestMixIn):
+    reference_values = (
+        4566.0, (30.0, 40.0, 8000.0),
+        (15124.606019372684, 442.2376840179962, -14612.282120230499)
+    )
     # The EMM models is huge and the test ranges have to be reduced.
     range_lat = range(-90, 91, 30)
     range_lon = range(-180, 181, 60)
@@ -223,66 +237,110 @@ class TestEMM2010(TestCase, SHModelTestMixIn):
 
 
 class TestIGRF11(TestCase, SHModelTestMixIn):
+    reference_values = (
+        -14609.5, (30.0, 40.0, 8000.0),
+        (15265.918081037888, -142.6442876878355, -14044.282413158882)
+    )
     validity = decimal_year_to_mjd2000((1900.0, 2015.0))
     def load(self):
         return load_model_igrf(IGRF11)
 
 
 class TestIGRF12(TestCase, SHModelTestMixIn):
+    reference_values = (
+        -15522.5, (30.0, 40.0, 8000.0),
+        (15259.57386772841, -159.00767967612023, -14015.952721753336)
+    )
     validity = decimal_year_to_mjd2000((1900.0, 2020.0))
     def load(self):
         return load_model_shc(IGRF12)
 
 
 class TestSIFM(TestCase, SHModelTestMixIn):
+    reference_values = (
+        5295.36, (30.0, 40.0, 8000.0),
+        (15122.448070753977, 474.14615304317635, -14669.16289251053)
+    )
     validity = decimal_year_to_mjd2000((2013.4976, 2015.4962))
     def load(self):
         return load_model_shc(SIFM)
 
 
 class TestCHAOS5Static(TestCase, SHModelTestMixIn):
+    reference_values = (
+        0.0, (30.0, 40.0, 8000.0),
+        (-0.019165363389425448, 0.017766807977599153, 0.007245125734944849)
+    )
     validity = (-inf, inf)
     def load(self):
         return load_model_shc(CHAOS5_STATIC)
 
 
 class TestCHAOS5Core(TestCase, SHModelTestMixIn):
+    reference_values = (
+        2192.51, (30.0, 40.0, 8000.0),
+        (15126.610410635147, 302.75469100239826, -14477.55985460029)
+    )
     validity = decimal_year_to_mjd2000((1997.0021, 2015.0007))
     def load(self):
         return load_model_shc(CHAOS5_CORE)
 
 
 class TestCHAOS5CoreV4(TestCase, SHModelTestMixIn):
+    reference_values = (
+        2411.9, (30.0, 40.0, 8000.0),
+        (15127.03768745214, 313.61814829613326, -14489.207459734534)
+    )
     validity = decimal_year_to_mjd2000((1997.1020, 2016.1027))
     def load(self):
         return load_model_shc(CHAOS5_CORE_V4)
 
 
 class TestCHAOS5Combined(TestCase, SHModelTestMixIn):
+    reference_values = (
+        2411.9, (30.0, 40.0, 8000.0),
+        (15127.018522088763, 313.6359151041108, -14489.200214608843)
+    )
     validity = decimal_year_to_mjd2000((1997.1020, 2016.1027))
     def load(self):
         return load_model_shc_combined(CHAOS5_STATIC, CHAOS5_CORE_V4)
 
 
 class TestCHAOS6Static(TestCase, SHModelTestMixIn):
+    reference_values = (
+        0.0, (30.0, 40.0, 8000.0),
+        (-0.006745769467490476, 0.00860457221837856, -0.010495388357779979)
+    )
     validity = (-inf, inf)
     def load(self):
         return load_model_shc(CHAOS6_STATIC)
 
 
 class TestCHAOS6Core(TestCase, SHModelTestMixIn):
+    reference_values = (
+        2503.33, (30.0, 40.0, 8000.0),
+        (15127.146281343608, 318.51792709726175, -14493.952978715943)
+    )
     validity = decimal_year_to_mjd2000((1997.102, 2016.6023))
     def load(self):
         return load_model_shc(CHAOS6_CORE)
 
 
 class TestCHAOS6CoreX3(TestCase, SHModelTestMixIn):
+    reference_values = (
+        2685.9, (30.0, 40.0, 8000.0),
+        (15127.196090133599, 328.5862052582883, -14503.664172833218)
+    )
     validity = decimal_year_to_mjd2000((1997.102, 2017.6016))
     def load(self):
         return load_model_shc(CHAOS6_CORE_X3)
 
 
 class TestCHAOS6Combined(TestCase, SHModelTestMixIn):
+    reference_values = (
+        2685.9, (30.0, 40.0, 8000.0),
+        (15127.189344364127, 328.594809830505, -14503.674668221536)
+    )
     validity = decimal_year_to_mjd2000((1997.102, 2017.6016))
     def load(self):
         return load_model_shc_combined(CHAOS6_CORE_X3, CHAOS6_STATIC)
@@ -290,6 +348,10 @@ class TestCHAOS6Combined(TestCase, SHModelTestMixIn):
 #-------------------------------------------------------------------------------
 
 class TestMMA2CInternal(TestCase, DipoleSHModelTestMixIn):
+    reference_values = (
+        6194.5, (30.0, 40.0, 8000.0),
+        (1.7252467863888683, 0.27791273383414994, 0.12422361564742368)
+    )
     validity = (6179.125, 6209.875)
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
@@ -298,12 +360,20 @@ class TestMMA2CInternal(TestCase, DipoleSHModelTestMixIn):
 
 
 class TestMMA2CExternal(TestCase, DipoleSHModelTestMixIn):
+    reference_values = (
+        6194.5, (30.0, 40.0, 8000.0),
+        (-7.474051407972587, 3.531499380152684, -4.628812102394507)
+    )
     validity = (6179.125, 6209.875)
     def load(self):
         return load_model_swarm_mma_2c_external(SWARM_MMA_SHA_2C_TEST_DATA)
 
 
 class TestMIOSecondary(TestCase, DipoleMIOSHModelTestMixIn):
+    reference_values = (
+        5661.87, (30.0, 40.0, 8000.0),
+        (-0.5388282699123806, -0.17622120922727555, 1.6137152691151841)
+    )
     validity = (-inf, inf)
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
@@ -314,6 +384,11 @@ class TestMIOSecondary(TestCase, DipoleMIOSHModelTestMixIn):
 
 
 class TestMIOPrimaryAboveIoSph(TestCase, DipoleMIOSHModelTestMixIn):
+    reference_values = (
+        5661.87,
+        (30.0, 40.0, 8000.0),
+        (-1.3523599056396773, -0.8935582291305793, -6.221436829664026)
+    )
     validity = (-inf, inf)
     def load(self):
         return load_model_swarm_mio_external(
@@ -322,6 +397,10 @@ class TestMIOPrimaryAboveIoSph(TestCase, DipoleMIOSHModelTestMixIn):
 
 
 class TestMIOPrimaryBelowIoSph(TestCase, DipoleMIOSHModelTestMixIn):
+    reference_values = (
+        5661.87, (30.0, 40.0, 6400.0),
+        (0.8841866754110816, 0.5334193969424075, -5.074057668255071)
+    )
     validity = (-inf, inf)
     def load(self):
         return load_model_swarm_mio_external(
