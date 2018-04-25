@@ -80,6 +80,20 @@ class TestSparseSHCoefficientsMIOInternal(TestCase, MIOSHCoeffMixIn):
         ], atol=1e-8)
         self.assertEqual(degree, self.degree)
 
+    def test_extra_sub_solar_point(self):
+        coeff, degree = self.eval_coeff(
+            decimal_year_to_mjd2000(2018.5), lat_sol=0.0, lon_sol=0.0,
+        )
+        assert_allclose(coeff, [
+            (0.0, 0.0),
+            (0.12120376078924046, 0.0),
+            (-0.22660807757361834, 0.008720797143766132),
+            (-0.2485487953382298, 0.0),
+            (-0.40755502000159416, -0.7608326017305439),
+            (-0.04181600178841578, -0.16655581670562275),
+        ], atol=1e-8)
+        self.assertEqual(degree, self.degree)
+
     def test_callable_max_degree(self):
         coeff, degree = self.eval_coeff(
             decimal_year_to_mjd2000(2018.5), max_degree=1

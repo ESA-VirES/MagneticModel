@@ -67,6 +67,7 @@ from eoxmagmod.sheval_dipole import sheval_dipole
 
 
 class SHModelTestMixIn(object):
+    parameters = ("time", "location")
     scale = 1.0
     range_lat = range(-90, 91, 5)
     range_lon = range(-180, 181, 10)
@@ -143,6 +144,9 @@ class SHModelTestMixIn(object):
     def test_validity(self):
         assert_allclose(self.model.validity, self.validity)
 
+    def test_parameters(self):
+        self.assertEqual(self.model.parameters, self.parameters)
+
     def test_eval_single_time(self):
         time = self.time
         coords = self.coordinates
@@ -161,7 +165,7 @@ class SHModelTestMixIn(object):
 
     def test_eval_reference_values(self):
         times, coords, results = self.reference_values
-        assert_allclose(self.model.eval(times, coords), results)
+        assert_allclose(self.eval_model(times, coords), results)
 
 
 class DipoleSHModelTestMixIn(SHModelTestMixIn):
@@ -180,13 +184,17 @@ class DipoleSHModelTestMixIn(SHModelTestMixIn):
         )
 
 class DipoleMIOSHModelTestMixIn(SHModelTestMixIn):
+    parameters = ("time", "location", "f107", "subsolar_point")
     f107 = 70.0
     model_class = DipoleMIOGeomagneticModel
+
+    def eval_model(self, times, coords):
+        return self.model.eval(times, coords, f107=self.f107, **self.options)
 
     def _eval_reference(self, time, coords):
         is_internal = self.model.coefficients.is_internal
         scale = -(
-            1.0 + self.model.f107(time) * self.model.wolf_ratio
+            1.0 + self.f107 * self.model.wolf_ratio
         ) * asarray(self.scale)
         lat_ngp, lon_ngp = self.model.north_pole(time)
         coeff, degree = self.model.coefficients(time, lat_ngp, lon_ngp)
@@ -203,7 +211,7 @@ class DipoleMIOSHModelTestMixIn(SHModelTestMixIn):
 class TestWMM2010(TestCase, SHModelTestMixIn):
     reference_values = (
         4566.0, (30.0, 40.0, 8000.0),
-        (15123.605974201277, 431.1067254253052, -14617.02644010297)
+        (15123.605974201277, 431.1067254253052, 14617.02644010297)
     )
     validity = decimal_year_to_mjd2000((2010.0, 2015.0))
     options = {"scale": [1, 1, -1]}
@@ -350,7 +358,7 @@ class TestCHAOS6Combined(TestCase, SHModelTestMixIn):
 class TestMMA2CSecondary(TestCase, DipoleSHModelTestMixIn):
     reference_values = (
         6194.5, (30.0, 40.0, 8000.0),
-        (1.7252467863888683, 0.27791273383414994, 0.12422361564742368)
+        (1.7252467863888683, 0.27791273383414994, -0.12422361564742368)
     )
     validity = (6179.125, 6209.875)
     options = {"scale": [1, 1, -1]}
@@ -372,15 +380,13 @@ class TestMMA2CPrimary(TestCase, DipoleSHModelTestMixIn):
 class TestMIOSecondary(TestCase, DipoleMIOSHModelTestMixIn):
     reference_values = (
         5661.87, (30.0, 40.0, 8000.0),
-        (-0.5388282699123806, -0.17622120922727555, 1.6137152691151841)
+        (-0.5388282699123806, -0.17622120922727555, -1.6137152691151841)
     )
     validity = (-inf, inf)
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
     def load(self):
-        return load_model_swarm_mio_internal(
-            SWARM_MIO_SHA_2_TEST_DATA, self.f107
-        )
+        return load_model_swarm_mio_internal(SWARM_MIO_SHA_2_TEST_DATA)
 
 
 class TestMIOPrimaryAboveIonosphere(TestCase, DipoleMIOSHModelTestMixIn):
@@ -392,7 +398,7 @@ class TestMIOPrimaryAboveIonosphere(TestCase, DipoleMIOSHModelTestMixIn):
     validity = (-inf, inf)
     def load(self):
         return load_model_swarm_mio_external(
-            SWARM_MIO_SHA_2_TEST_DATA, self.f107, above_ionosphere=True
+            SWARM_MIO_SHA_2_TEST_DATA, above_ionosphere=True
         )
 
 
@@ -404,7 +410,7 @@ class TestMIOPrimaryBelowIonosphere(TestCase, DipoleMIOSHModelTestMixIn):
     validity = (-inf, inf)
     def load(self):
         return load_model_swarm_mio_external(
-            SWARM_MIO_SHA_2_TEST_DATA, self.f107, above_ionosphere=False
+            SWARM_MIO_SHA_2_TEST_DATA, above_ionosphere=False
         )
 
 #-------------------------------------------------------------------------------

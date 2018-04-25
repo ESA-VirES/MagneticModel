@@ -33,8 +33,10 @@ from ..sheval_dipole import sheval_dipole
 
 class GeomagneticModel(object):
     """ Abstract base class of the Earth magnetic field model. """
+    # list of the required model parameters
+    parameters = ("time", "location")
 
-    def eval(self, time, coords,
+    def eval(self, time, location,
              input_coordinate_system=GEOCENTRIC_SPHERICAL,
              output_coordinate_system=GEOCENTRIC_SPHERICAL,
              **options):
@@ -63,7 +65,7 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
     def validity(self):
         return self.coefficients.validity
 
-    def eval(self, time, coords,
+    def eval(self, time, location,
              input_coordinate_system=GEOCENTRIC_SPHERICAL,
              output_coordinate_system=GEOCENTRIC_SPHERICAL,
              **options):
@@ -74,14 +76,12 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
             _eval = self._eval_multi_time
 
         return _eval(
-            time, coords, input_coordinate_system, output_coordinate_system,
+            time, location, input_coordinate_system, output_coordinate_system,
             **options
         )
 
-    def _eval_multi_time(self, time, coords,
-                         input_coordinate_system=GEOCENTRIC_SPHERICAL,
-                         output_coordinate_system=GEOCENTRIC_SPHERICAL,
-                         **options):
+    def _eval_multi_time(self, time, coords, input_coordinate_system,
+                         output_coordinate_system, **options):
         """ Evaluate spherical harmonic for multiple times. """
         result = empty(coords.shape)
         iterator = nditer(
@@ -101,10 +101,8 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
             )
         return result
 
-    def _eval_single_time(self, time, coords,
-                          input_coordinate_system=GEOCENTRIC_SPHERICAL,
-                          output_coordinate_system=GEOCENTRIC_SPHERICAL,
-                          **options):
+    def _eval_single_time(self, time, coords, input_coordinate_system,
+                          output_coordinate_system, **options):
         """ Evaluate spherical harmonic for a single time."""
         is_internal = self.coefficients.is_internal
         coeff, degree = self.coefficients(time, **options)
@@ -134,10 +132,8 @@ class DipoleSphericalHarmomicGeomagneticModel(SphericalHarmomicGeomagneticModel)
             self.north_pole = lambda _: north_pole
 
 
-    def _eval_single_time(self, time, coords,
-                          input_coordinate_system=GEOCENTRIC_SPHERICAL,
-                          output_coordinate_system=GEOCENTRIC_SPHERICAL,
-                          **options):
+    def _eval_single_time(self, time, coords, input_coordinate_system,
+                          output_coordinate_system, **options):
         lat_ngp, lon_ngp = self.north_pole(time)
         is_internal = self.coefficients.is_internal
         coeff, degree = self.coefficients(
