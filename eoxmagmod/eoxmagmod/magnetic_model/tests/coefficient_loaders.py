@@ -303,7 +303,7 @@ class TestCoeffMIOSecondary(TestCase, MIOCoefficietLoaderTestMixIn):
 
 
 class TestCoeffMIOPrimary(TestCase, MIOCoefficietLoaderTestMixIn):
-    is_internal = False
+    is_internal = True # default model above the ionosphere
     degree = 2
     options = {}
 
@@ -315,12 +315,12 @@ class TestCoeffMIOPrimary(TestCase, MIOCoefficietLoaderTestMixIn):
 
 
 class TestCoeffMIOPrimaryBelowIoSph(TestCoeffMIOPrimary):
-    is_internal = True
+    is_internal = False
     options = {"above_ionosphere": False}
 
 
 class TestCoeffMIOPrimaryAboveIoSph(TestCoeffMIOPrimary):
-    is_internal = False
+    is_internal = True
     options = {"above_ionosphere": True}
 
 #-------------------------------------------------------------------------------

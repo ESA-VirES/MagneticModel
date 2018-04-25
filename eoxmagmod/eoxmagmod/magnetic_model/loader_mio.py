@@ -83,12 +83,12 @@ def load_coeff_swarm_mio_external(path, above_ionosphere=True):
     indices = data["nm"]
     coefficients = data["qs"]
     if above_ionosphere:
-        is_internal = False
-    else:
         is_internal = True
         coefficients = convert_external_mio_coeff(
             data["degree_max"], indices, coefficients, data["height"]
         )
+    else:
+        is_internal = False
 
     return SparseSHCoefficientsMIO(
         indices, coefficients,

@@ -347,7 +347,7 @@ class TestCHAOS6Combined(TestCase, SHModelTestMixIn):
 
 #-------------------------------------------------------------------------------
 
-class TestMMA2CInternal(TestCase, DipoleSHModelTestMixIn):
+class TestMMA2CSecondary(TestCase, DipoleSHModelTestMixIn):
     reference_values = (
         6194.5, (30.0, 40.0, 8000.0),
         (1.7252467863888683, 0.27791273383414994, 0.12422361564742368)
@@ -359,7 +359,7 @@ class TestMMA2CInternal(TestCase, DipoleSHModelTestMixIn):
         return load_model_swarm_mma_2c_internal(SWARM_MMA_SHA_2C_TEST_DATA)
 
 
-class TestMMA2CExternal(TestCase, DipoleSHModelTestMixIn):
+class TestMMA2CPrimary(TestCase, DipoleSHModelTestMixIn):
     reference_values = (
         6194.5, (30.0, 40.0, 8000.0),
         (-7.474051407972587, 3.531499380152684, -4.628812102394507)
@@ -383,11 +383,11 @@ class TestMIOSecondary(TestCase, DipoleMIOSHModelTestMixIn):
         )
 
 
-class TestMIOPrimaryAboveIoSph(TestCase, DipoleMIOSHModelTestMixIn):
+class TestMIOPrimaryAboveIonosphere(TestCase, DipoleMIOSHModelTestMixIn):
     reference_values = (
         5661.87,
         (30.0, 40.0, 8000.0),
-        (-1.3523599056396773, -0.8935582291305793, -6.221436829664026)
+        (0.2356719922628632, 0.19030444647263053, -1.9489199024730584)
     )
     validity = (-inf, inf)
     def load(self):
@@ -396,10 +396,10 @@ class TestMIOPrimaryAboveIoSph(TestCase, DipoleMIOSHModelTestMixIn):
         )
 
 
-class TestMIOPrimaryBelowIoSph(TestCase, DipoleMIOSHModelTestMixIn):
+class TestMIOPrimaryBelowIonosphere(TestCase, DipoleMIOSHModelTestMixIn):
     reference_values = (
         5661.87, (30.0, 40.0, 6400.0),
-        (0.8841866754110816, 0.5334193969424075, -5.074057668255071)
+        (-0.6061225119866813, -0.6088386296175435, -4.733769204526618)
     )
     validity = (-inf, inf)
     def load(self):
