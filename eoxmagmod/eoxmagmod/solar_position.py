@@ -2,6 +2,8 @@
 #
 #  Solar position calculation
 #
+#  Deprecated old interface.
+#
 # Project: VirES
 # Author: Martin Paces <martin.paces@eox.at>
 #
@@ -35,25 +37,22 @@ def sunpos(time_mjd2k, lat, lon, rad=6371.2, dtt=0):
     """ Calculate solar equatorial and horizontal coordinates
     for given MJD2000 times and geocentric coordinates (lat, lon, rad).
 
-    arr_out = sunpos(time_mjd2k, lat, lon, rad, dtt)
-
-      Output:
-        arr_out - array of the Sun equatorial and horizontal coordinates:
-                  - declination
-                  - right ascension
-                  - hour angle
-                  - azimuth
-                  - zenith
-                  All angles are in deg.
+    Outputs: arrays of the Sun equatorial and horizontal coordinates:
+      declination
+      right ascension
+      local hour angle (global hour angle for 0, 0 latitude and longitude)
+      local azimuth
+      local zenith
 
       Parameters:
         time_mjd2k - array of MJD2000 times (up to 15 dimensions).
         lat - array of latitudes [deg]
         lon - array of longitudes [deg]
-        rad - array of radii [km] (parallax correction)
+        rad - array of radii [km] (set to 0 to disable the parallax correction)
         dtt - array of offsets to TT [sec]
     """
-    return _pysunpos.sunpos(time_mjd2k, lat, lon, rad, dtt)
+    result = _pysunpos.sunpos(time_mjd2k, lat, lon, rad, dtt)
+    return tuple(result[..., idx] for idx in range(result.shape[-1]))
 
 
 def sunpos_original(time_mjd2k, lat, lon, rad=6371.2, dtt=0, pres=1.0, temp=20.0):
@@ -61,26 +60,23 @@ def sunpos_original(time_mjd2k, lat, lon, rad=6371.2, dtt=0, pres=1.0, temp=20.0
     for given MJD2000 times and geocentric coordinates (lat, lon, rad).
     This is the original implementation.
 
-    arr_out = sunpos_original(time_mjd2k, lat, lon, rad, dtt, pres, temp)
-
-      Output:
-        arr_out - array of the Sun equatorial and horizontal coordinates:
-                  - declination
-                  - right ascension
-                  - hour angle
-                  - azimuth
-                  - zenith
-                  All angles are in deg.
+    Outputs: arrays of the Sun equatorial and horizontal coordinates:
+      declination
+      right ascension
+      local hour angle (global hour angle for 0, 0 latitude and longitude)
+      local azimuth
+      local zenith
 
       Parameters:
         time_mjd2k - array of MJD2000 times (up to 15 dimensions).
         lat - array of latitudes [deg]
         lon - array of longitudes [deg]
-        rad - array of radii [km] (parallax correction)
+        rad - array of radii [km] (set to 0 to disable the parallax correction)
         dtt - array of offsets to TT [sec]
         pres - array of offsets of pressures [atm] (refraction correction)
         temp - array of offsets to temperatures [dgC] (refraction coorection)
     """
-    return _pysunpos.sunpos_original(
+    result = _pysunpos.sunpos_original(
         time_mjd2k, lat, lon, rad, dtt, pres, temp
     )
+    return tuple(result[..., idx] for idx in range(result.shape[-1]))

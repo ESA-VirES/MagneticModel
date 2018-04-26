@@ -1,9 +1,8 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings - spherical-harmonics
+ * Geomagnetic Model - C python bindings - spherical-harmonics
  * - evaluation of the potential gradient in the spherical coordinate system
  *
- * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
@@ -51,8 +50,8 @@
 "       coef_h - vector of spherical harmonic model coefficients.\n"\
 "       leg_p - vector the Legendre polynomials.\n"\
 "       rrp - vector the relative radius powers.\n"\
-"       lonsin - vector the the longitude cosines.\n"\
-"       lonsin - vector the the longitude sines.\n"
+"       lonsin - vector of the longitude cosines.\n"\
+"       lonsin - vector of the longitude sines.\n"
 
 static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
 {
@@ -78,13 +77,15 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *arr_lcos = NULL; // loncos array
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "diOOOOOO|:spharpot", keywords,
-            &rad, &degree, &obj_cg, &obj_ch, &obj_lp, &obj_rrp,
-            &obj_lsin, &obj_lcos));
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "diOOOOOO|:spharpot", keywords,
+        &rad, &degree, &obj_cg, &obj_ch, &obj_lp, &obj_rrp, &obj_lsin, &obj_lcos
+    ))
+        goto exit;
 
-    if (degree < 1)
+    if (degree < 0)
     {
-        PyErr_Format(PyExc_ValueError, "Invalid value %d of '%s'!", degree, keywords[1]);
+        PyErr_Format(PyExc_ValueError, "%s < 0", keywords[1]);
         goto exit;
     }
 
@@ -135,11 +136,14 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     // the evaluation
     {
         double *out = (double*)PyArray_DATA(arr_out);
-        shc_eval(out, NULL, NULL, NULL, degree, 0x1,
-                0.0, rad, PyArray_DATA(arr_cg),
-                PyArray_DATA(arr_ch), PyArray_DATA(arr_lp),
-                PyArray_DATA(arr_lp), PyArray_DATA(arr_rrp),
-                PyArray_DATA(arr_lsin), PyArray_DATA(arr_lcos));
+        shc_eval(
+            out, NULL, NULL, NULL, degree, 0x1,
+            0.0, rad, PyArray_DATA(arr_cg),
+            PyArray_DATA(arr_ch), PyArray_DATA(arr_lp),
+            PyArray_DATA(arr_lp), PyArray_DATA(arr_rrp),
+            PyArray_DATA(arr_lsin), PyArray_DATA(arr_lcos),
+            0 // this flag has no impact on the evaluated potential
+        );
     }
 
   exit:

@@ -1,9 +1,8 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings - vector rotation - sph2cart
+ * Geomagnetic Model - C python bindings - vector rotation - sph2cart
  *  (i.e., vector coordinate system transformation)
  *
- * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
@@ -80,9 +79,10 @@ static void _vrot_sph2cart(ARRAY_DATA ad_i, ARRAY_DATA ad_lat,
 #define DOC_VROT_SPH2CART "\n"\
 "   arr_out = vrot_sph2cart(arr_in, arr_lat, arr_lon)\n"\
 "\n"\
-"     Rotate vectors from the geocentric spherical to \n"\
-"     the geocentric Cartesian coordinates for given latitude\n"\
-"     and longitude in dg.\n"\
+"     Rotate vectors from the spherical (NEC) to \n"\
+"     the Cartesian (XYZ) coordinate frame for the given latitude\n"\
+"     and longitude in degrees.\n"\
+"\n"\
 "     The inputs are:\n"\
 "         arr_in - array of the input vectors\n"\
 "         arr_lat - array of latitudes.\n"\
@@ -102,8 +102,11 @@ static PyObject* vrot_sph2cart(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *retval = NULL;
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "OOO|:vrot_sph2cart", keywords, &obj_in, &obj_lat, &obj_lon));
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "OOO|:vrot_sph2cart", keywords,
+        &obj_in, &obj_lat, &obj_lon
+    ))
+        goto exit;
 
     // cast the objects to arrays
     if (NULL == (arr_in=_get_as_double_array(obj_in, 1, 0, NPY_ALIGNED, keywords[0])))

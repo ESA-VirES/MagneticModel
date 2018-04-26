@@ -3,7 +3,6 @@
  * Magnetic Quasi Dipole Coordinates - C python bindings
  * -  QD coordinates' evaluation
  *
- * Project: EOX Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
@@ -85,9 +84,10 @@ static PyObject* eval_qdlatlon(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *retval = NULL;
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "OOOOs|O:eval_qdlatlon", keywords, &obj_gclat, &obj_gclon,
-            &obj_gcrad, &obj_time, &model_fname, &obj_flag))
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "OOOOs|O:eval_qdlatlon", keywords,
+        &obj_gclat, &obj_gclon, &obj_gcrad, &obj_time, &model_fname, &obj_flag
+    ))
         goto exit;
 
     eval_base = obj_flag ? (1 == PyObject_IsTrue(obj_flag)) : 0;

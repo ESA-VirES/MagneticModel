@@ -1,9 +1,8 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings
+ * Geomagnetic Model - C python bindings
  * - longitude sin/cos spherical terms' evaluation
  *
- * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
@@ -61,12 +60,14 @@ static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *retval = NULL; // output tuple
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "di|i:lonsincos", keywords, &lon_dg, &degree, &fast_alg));
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "di|i:lonsincos", keywords, &lon_dg, &degree, &fast_alg
+    ))
+        goto exit;
 
-    if (degree < 1)
+    if (degree < 0)
     {
-        PyErr_Format(PyExc_ValueError, "Invalid value %d of '%s'!", degree, keywords[1]);
+        PyErr_Format(PyExc_ValueError, "%s < 0", keywords[1]);
         goto exit;
     }
 

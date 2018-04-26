@@ -1,9 +1,7 @@
 #-------------------------------------------------------------------------------
 #
-#  World Magnetic Model 2010 / Geomagnetism Library
-#  - IGRF format reader
+#  IGRF format reader (used until IGRF11 then changed to the SHC format)
 #
-# Project: Earth magnetic field in Python.
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
@@ -29,17 +27,16 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-import numpy as np
-from shc import MagneticModelSHCPP
-from base import DATA_IGRF11
+from numpy import array, zeros
+from .shc import MagneticModelSHCPP
+from .data import IGRF11
 
-def read_model_igrf11(fname=DATA_IGRF11):
+
+def read_model_igrf11(fname=IGRF11):
     """ Read model parameters from a coefficient file in the IGRF11 format."""
-
     prm = {'sources': [fname], 'headers': []}
 
     with file(fname, 'r') as fid:
-
         # parse text headers (comments)
         lidx = 0
         for line in fid:
@@ -61,7 +58,7 @@ def read_model_igrf11(fname=DATA_IGRF11):
         item = line.split()
         time = [float(v) for v in item[3:-1]]
         time.append(float(item[-1][:2]+item[-1][-2:]))
-        time = np.array(time)
+        time = array(time)
 
         # parse coefficients
         degree = 0
@@ -69,8 +66,10 @@ def read_model_igrf11(fname=DATA_IGRF11):
         for line in fid:
             lidx += 1
             item = line.split()
-            item = (item[0], int(item[1]), int(item[2]),
-                        np.array([float(v) for v in item[3:]]))
+            item = (
+                item[0], int(item[1]), int(item[2]),
+                array([float(v) for v in item[3:]])
+            )
             lcoef.append(item)
             degree = max(item[1], degree)
             if item[0] not in ('g', 'h'):
@@ -81,20 +80,20 @@ def read_model_igrf11(fname=DATA_IGRF11):
         # fill the coefficient arrays
         ntime = time.size
         nterm = ((degree+1)*(degree+2))/2
-        coef_g = np.zeros((nterm, ntime))
-        coef_h = np.zeros((nterm, ntime))
+        coef_g = zeros((nterm, ntime))
+        coef_h = zeros((nterm, ntime))
 
         for label, i, j, coef in lcoef:
             idx = j + (i*(i+1))/2
             if label == 'g':
-                coef_g[idx,:] = coef
+                coef_g[idx, :] = coef
             elif label == 'h':
-                coef_h[idx,:] = coef
+                coef_h[idx, :] = coef
 
         # fix the last column
         dt = time[-1] - time[-2]
-        coef_g[:,-1] = coef_g[:,-2] + dt*coef_g[:,-1]
-        coef_h[:,-1] = coef_h[:,-2] + dt*coef_h[:,-1]
+        coef_g[:, -1] = coef_g[:, -2] + dt*coef_g[:, -1]
+        coef_h[:, -1] = coef_h[:, -2] + dt*coef_h[:, -1]
 
         prm.update({
             'degree_min': 0,
