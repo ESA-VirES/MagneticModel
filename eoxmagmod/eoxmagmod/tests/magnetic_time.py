@@ -53,8 +53,10 @@ class TestMjd200ToMagneticUniversalTime(TestCase):
         return uniform(-90, 90, self.shape), uniform(-90, 90, self.shape)
 
     @staticmethod
-    def eval(times, lats_ngp, lons_ngp):
-        return mjd2000_to_magnetic_universal_time(times, lats_ngp, lons_ngp)
+    def eval(times, lats_ngp, lons_ngp, *args, **kwargs):
+        return mjd2000_to_magnetic_universal_time(
+            times, lats_ngp, lons_ngp, *args, **kwargs
+        )
 
     @classmethod
     def reference(cls, times, lats_ngp, lons_ngp):
@@ -75,10 +77,15 @@ class TestMjd200ToMagneticUniversalTime(TestCase):
         return results
 
     @staticmethod
-    def ref_mjd2000_to_magnetic_universal_time(time, lat_ngp, lon_ngp):
+    def sunpos(time):
         declination, _, hour_angle, _, _ = sunpos(time, 0, 0, rad=0)
+        return declination, -hour_angle
+
+    @classmethod
+    def ref_mjd2000_to_magnetic_universal_time(cls, time, lat_ngp, lon_ngp):
+        lat_sol, lon_sol = cls.sunpos(time)
         _, subsol_dip_lon, _ = convert_to_dipole(
-            [declination, -hour_angle, 1.0], lat_ngp, lon_ngp
+            [lat_sol, lon_sol, 1.0], lat_ngp, lon_ngp
         )
         return (180.0 - subsol_dip_lon) / 15.0
 
@@ -97,6 +104,16 @@ class TestMjd200ToMagneticUniversalTime(TestCase):
             self.eval(times, lats_ngp, lons_ngp),
             self.reference(times, lats_ngp, lons_ngp),
         )
+
+    def test_mjd2000_to_magnetic_universal_time_with_extra_subsol_coords(self):
+        times = self.times
+        lats_ngp, lons_ngp = self.ngp_coords
+        lat_sol, lon_sol = self.sunpos(times)
+        assert_allclose(
+            self.eval(times, lats_ngp, lons_ngp, lat_sol=lat_sol, lon_sol=lon_sol),
+            self.reference(times, lats_ngp, lons_ngp),
+        )
+
 
 if __name__ == "__main__":
     main()

@@ -32,30 +32,24 @@ from .coefficients_mio import SparseSHCoefficientsMIO
 from .parser_mio import parse_swarm_mio_file
 
 
-def load_model_swarm_mio_internal(path, f107=0.0):
+def load_model_swarm_mio_internal(path):
     """ Load internal (secondary field) model from a Swarm MIO_SHA_2* product.
-
-    The loader requires F10.7 index source (see `DipoleMIOGeomagneticModel`
-    for details).
     """
     coefficients, params = load_coeff_swarm_mio_internal(path)
-    return _create_mio_model(coefficients, params, f107)
+    return _create_mio_model(coefficients, params)
 
 
-def load_model_swarm_mio_external(path, f107=0.0, above_ionosphere=True):
+def load_model_swarm_mio_external(path, above_ionosphere=True):
     """ Load external (primary field) model from a Swarm MIO_SHA_2* product.
-
-    The loader requires F10.7 index source (see `DipoleMIOGeomagneticModel`
-    for details).
     """
     coefficients, params = load_coeff_swarm_mio_external(path, above_ionosphere)
-    return _create_mio_model(coefficients, params, f107)
+    return _create_mio_model(coefficients, params)
 
 
-def _create_mio_model(coefficients, params, f107):
+def _create_mio_model(coefficients, params):
     return DipoleMIOGeomagneticModel(
         coefficients, north_pole=(params["lat_NGP"], params["lon_NGP"]),
-        f107=f107, wolf_ratio=params["wolf_ratio"], height=params["height"],
+        wolf_ratio=params["wolf_ratio"], height=params["height"],
     )
 
 

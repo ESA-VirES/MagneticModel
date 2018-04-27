@@ -33,18 +33,34 @@ from .solar_position import sunpos
 DEG2RAD = pi/180.0
 RAD2HOUR = 12.0/pi
 
-def mjd2000_to_magnetic_universal_time(mjd2000, lat_ngp, lon_ngp):
+def mjd2000_to_magnetic_universal_time(mjd2000, lat_ngp, lon_ngp,
+                                       lat_sol=None, lon_sol=None):
     """ Evaluate magnetic universal time for the given MJD2000 and
     coordinates of the North Geomagnetic Pole.
 
     The magnetic universal time is geometrically equivalent
     to the magnetic dipole longitude of the sub-solar point.
-    """
-    declination, _, hour_angle, _, _ = sunpos(mjd2000, 0, 0, rad=0)
 
-    latr_sol = DEG2RAD * declination
+    Function allows specification of user defined sub-solar
+    latitude and longitude lat_sol and lon_sol in degrees
+    overriding the default Sun model.
+    """
+    if lat_sol is None or lon_sol is None:
+        declination, _, hour_angle, _, _ = sunpos(mjd2000, 0, 0, rad=0)
+        return _mjd2000_to_magnetic_universal_time(
+            mjd2000, lat_ngp, lon_ngp, declination, -hour_angle
+        )
+    else:
+        return _mjd2000_to_magnetic_universal_time(
+            mjd2000, lat_ngp, lon_ngp, lat_sol, lon_sol
+        )
+
+
+def _mjd2000_to_magnetic_universal_time(mjd2000, lat_ngp, lon_ngp,
+                                        lat_sol, lon_sol):
+    latr_sol = DEG2RAD * lat_sol
     latr_ngp = DEG2RAD * lat_ngp
-    dif_lonr = -DEG2RAD * (hour_angle + lon_ngp)
+    dif_lonr = DEG2RAD * (lon_sol - lon_ngp)
 
     tmp_y = cos(latr_sol)
     tmp_x = sin(latr_ngp)*tmp_y*cos(dif_lonr) - cos(latr_ngp)*sin(latr_sol)
