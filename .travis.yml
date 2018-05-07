@@ -16,4 +16,4 @@ install:
   - pip install ./eoxmagmod/
 script:
   - pip show -f eoxmagmod
-  - python -m unittest discover -p '[a-z]*.py' -v eoxmagmod
+  - ( mkdir -p ./test && cd ./test && python -m unittest discover -p '[a-z]*.py' -v eoxmagmod )
