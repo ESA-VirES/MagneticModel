@@ -1,0 +1,17 @@
+language: python
+python: 2.7
+sudo: enabled
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc
+      - gfortran
+install:
+  - ( cd wmm && ./configure && make build && sudo make install )
+  - pwd
+  - ( cd qdipole && ./configure && make build && sudo make install )
+  - sudo pip install ./eoxmagmod/
+script:
+  - python -m unittest discover -p '[a-z]*.py' -v eoxmagmod
