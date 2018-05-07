@@ -12,10 +12,11 @@ install:
 - ( cd libcdf && make build && sudo make install )
 - ( cd wmm && ./configure && make build && sudo make install )
 - ( cd qdipole && ./configure && make build && sudo make install )
-- pip install -I numpy
+- pip install numpy
 - pip install SpacePy
 - pip install ./eoxmagmod/
 script:
+- pip list
 - mkdir -p ./test && cd ./test
 - pip show -f eoxmagmod
 - python -c 'import eoxmagmod' && python -m unittest discover -p '[a-z]*.py' -v eoxmagmod
