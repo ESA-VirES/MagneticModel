@@ -4,18 +4,21 @@ sudo: enabled
 addons:
   apt:
     sources:
-      - ubuntu-toolchain-r-test
+    - ubuntu-toolchain-r-test
     packages:
-      - gcc
-      - gfortran
+    - gcc
+    - gfortran
 install:
-  - ( cd libcdf && make build && sudo make install )
-  - ( cd wmm && ./configure && make build && sudo make install )
-  - ( cd qdipole && ./configure && make build && sudo make install )
-  - pip install -I numpy
-  - pip install SpacePy
-  - pip install ./eoxmagmod/
+- ( cd libcdf && make build && sudo make install )
+- ( cd wmm && ./configure && make build && sudo make install )
+- ( cd qdipole && ./configure && make build && sudo make install )
+- pip install -I numpy
+- pip install SpacePy
+- pip install ./eoxmagmod/
 script:
-  - mkdir -p ./test && cd ./test
-  - pip show -f eoxmagmod
-  - python -c 'import eoxmagmod' && python -m unittest discover -p '[a-z]*.py' -v eoxmagmod
+- mkdir -p ./test && cd ./test
+- pip show -f eoxmagmod
+- python -c 'import eoxmagmod' && python -m unittest discover -p '[a-z]*.py' -v eoxmagmod
+notifications:
+  slack:
+    secure: cbb7/6s0sglh2q7Lqnlq1I3tF8v2PS3KC+8ppjFFsKGzXWVImTSVU8md06Kkw1Hrf+mXm39x78NQx0o66EzMjZ2GS7SKD3eT3GDRqaF9COrc5zfeshZGF7swu/wtZMMMj0UrTxQnhJx09nwsTWGpCnCyEWOs0tHg+gUzoHqmM+E=
