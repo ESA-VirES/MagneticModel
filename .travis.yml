@@ -12,7 +12,7 @@ install:
   - ( cd wmm && ./configure && make build && sudo make install )
   - pwd
   - ( cd qdipole && ./configure && make build && sudo make install )
-  - pip install numpy
+  - pip install -I numpy
   - pip install ./eoxmagmod/
 script:
   - python -m unittest discover -p '[a-z]*.py' -v eoxmagmod
