@@ -15,5 +15,6 @@ install:
   - pip install -I numpy
   - pip install ./eoxmagmod/
 script:
+  - mkdir -p ./test && cd ./test
   - pip show -f eoxmagmod
-  - ( mkdir -p ./test && cd ./test && python -m unittest discover -p '[a-z]*.py' -v eoxmagmod )
+  - python -m unittest discover -p '[a-z]*.py' -v eoxmagmod
