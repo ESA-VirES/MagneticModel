@@ -1,3 +1,6 @@
+![Travis-CI staus](https://api.travis-ci.org/ESA-VirES/MagneticModel.svg?branch=staging)
+
+
 ## Magnetic Model
 
 This repository contains various utilities related to Earth magnetic field
