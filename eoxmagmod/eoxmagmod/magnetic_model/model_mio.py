@@ -27,12 +27,73 @@
 #-------------------------------------------------------------------------------
 # pylint: disable=too-many-arguments,too-many-locals
 
-from numpy import asarray, empty, nditer
-from .model import DipoleSphericalHarmomicGeomagneticModel
+from numpy import asarray, empty, nditer, logical_not, isscalar
+from .._pywmm import GEOCENTRIC_SPHERICAL, convert
+from .model import GeomagneticModel, DipoleSphericalHarmomicGeomagneticModel
 
 MIO_HEIGHT = 110.0 # km
 MIO_EARTH_RADIUS = 6371.2 # km
 MIO_WOLF_RATIO = 0.014850
+
+
+class DipoleMIOPrimaryGeomagneticModel(GeomagneticModel):
+    """ Composed model switching between MIO primary fields evaluation
+    above and below the Ionosphere.
+    """
+    parameters = ("time", "location", "f107", "subsolar_point")
+
+    def __init__(self, model_below_ionosphere, model_above_ionosphere,
+                 height=MIO_HEIGHT, earth_radius=MIO_EARTH_RADIUS):
+        self.model_below_ionosphere = model_below_ionosphere
+        self.model_above_ionosphere = model_above_ionosphere
+        self.height = height
+        self.earth_radius = earth_radius
+
+    def eval(self, time, location,
+             input_coordinate_system=GEOCENTRIC_SPHERICAL,
+             output_coordinate_system=GEOCENTRIC_SPHERICAL,
+             **options):
+        location = convert(
+            location, input_coordinate_system, GEOCENTRIC_SPHERICAL
+        )
+
+        radius_ionosphere = self.height + self.earth_radius
+        radius = location[..., 2]
+        mask_below_ionosphere = radius <= radius_ionosphere
+
+        def _eval_masked_location(model, time, location, mask):
+            result[mask] = model.eval(
+                time, location[mask], GEOCENTRIC_SPHERICAL,
+                output_coordinate_system, **options
+            )
+
+        def _eval_masked_time_and_location(model, time, location, mask):
+            return _eval_masked_location(model, time[mask], location, mask)
+
+        if isscalar(time):
+            _eval_masked = _eval_masked_location
+        else:
+            _eval_masked = _eval_masked_time_and_location
+
+        result = empty(location.shape)
+
+        _eval_masked(
+            self.model_below_ionosphere, time, location,
+            mask_below_ionosphere
+        )
+
+        _eval_masked(
+            self.model_above_ionosphere, time, location,
+            logical_not(mask_below_ionosphere)
+        )
+
+        return result
+
+    @property
+    def validity(self):
+        start_above, stop_above = self.model_above_ionosphere.validity
+        start_below, stop_below = self.model_below_ionosphere.validity
+        return (max(start_above, start_below), min(stop_above, stop_below))
 
 
 class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):

@@ -61,7 +61,10 @@ from eoxmagmod.magnetic_model.model import (
     SphericalHarmomicGeomagneticModel,
     DipoleSphericalHarmomicGeomagneticModel,
 )
-from eoxmagmod.magnetic_model.model_mio import DipoleMIOGeomagneticModel
+from eoxmagmod.magnetic_model.model_mio import (
+    DipoleMIOPrimaryGeomagneticModel,
+    DipoleMIOGeomagneticModel,
+)
 from eoxmagmod._pywmm import GEOCENTRIC_SPHERICAL, sheval, GRADIENT
 from eoxmagmod.sheval_dipole import sheval_dipole
 
@@ -183,6 +186,7 @@ class DipoleSHModelTestMixIn(SHModelTestMixIn):
             scale_gradient=-asarray(self.scale),
         )
 
+
 class DipoleMIOSHModelTestMixIn(SHModelTestMixIn):
     parameters = ("time", "location", "f107", "subsolar_point")
     f107 = 70.0
@@ -192,12 +196,15 @@ class DipoleMIOSHModelTestMixIn(SHModelTestMixIn):
         return self.model.eval(times, coords, f107=self.f107, **self.options)
 
     def _eval_reference(self, time, coords):
-        is_internal = self.model.coefficients.is_internal
+        return self._eval_reference_mio(self.model, time, coords)
+
+    def _eval_reference_mio(self, model, time, coords):
+        is_internal = model.coefficients.is_internal
         scale = -(
-            1.0 + self.f107 * self.model.wolf_ratio
+            1.0 + self.f107 * model.wolf_ratio
         ) * asarray(self.scale)
-        lat_ngp, lon_ngp = self.model.north_pole(time)
-        coeff, degree = self.model.coefficients(time, lat_ngp, lon_ngp)
+        lat_ngp, lon_ngp = model.north_pole(time)
+        coeff, degree = model.coefficients(time, lat_ngp, lon_ngp)
         return sheval_dipole(
             coords, degree, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
             is_internal=is_internal, mode=GRADIENT,
@@ -387,6 +394,42 @@ class TestMIOSecondary(TestCase, DipoleMIOSHModelTestMixIn):
     scale = [1, 1, -1]
     def load(self):
         return load_model_swarm_mio_internal(SWARM_MIO_SHA_2_TEST_DATA)
+
+
+class TestMIOPrimary(TestCase, DipoleMIOSHModelTestMixIn):
+    model_class = DipoleMIOPrimaryGeomagneticModel
+    reference_values = (
+        5661.87,
+        [
+            (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
+            (30.0, 40.0, 8000.0), # above ionosphere r > (a + h)
+        ],
+        [
+            (-0.6061225119866813, -0.6088386296175435, -4.733769204526618),
+            (0.2356719922628632, 0.19030444647263053, -1.9489199024730584),
+        ]
+    )
+    validity = (-inf, inf)
+    def load(self):
+        return load_model_swarm_mio_external(SWARM_MIO_SHA_2_TEST_DATA)
+
+    def _eval_reference(self, time, coords):
+        height_radius = self.model.earth_radius + self.model.height
+
+        if coords[2] <= height_radius:
+            model = self.model.model_below_ionosphere
+        else:
+            model = self.model.model_above_ionosphere
+
+        return self._eval_reference_mio(model, time, coords)
+
+    def test_eval_single_reference_value_below_ionosphere(self):
+        times, coords, results = self.reference_values
+        assert_allclose(self.eval_model(times, coords[0]), results[0])
+
+    def test_eval_single_reference_value_above_ionosphere(self):
+        times, coords, results = self.reference_values
+        assert_allclose(self.eval_model(times, coords[1]), results[1])
 
 
 class TestMIOPrimaryAboveIonosphere(TestCase, DipoleMIOSHModelTestMixIn):
