@@ -30,6 +30,15 @@
 
 from distutils.core import setup
 from distutils.extension import Extension
+import numpy
+
+
+COMMON_INCLUDE_DIRS = [
+    numpy.get_include(),
+    './eoxmagmod',
+    './eoxmagmod/include',
+]
+
 
 setup(
     name="eoxmagmod",
@@ -63,10 +72,7 @@ setup(
             ],
             libraries=['geomag'],
             library_dirs=[],
-            include_dirs=[
-                './eoxmagmod',
-                './eoxmagmod/include',
-            ],
+            include_dirs=COMMON_INCLUDE_DIRS,
         ),
         Extension(
             'eoxmagmod._pyqd',
@@ -75,10 +81,7 @@ setup(
             ],
             libraries=['qdipole'],
             library_dirs=[],
-            include_dirs=[
-                './eoxmagmod',
-                './eoxmagmod/include',
-            ],
+            include_dirs=COMMON_INCLUDE_DIRS,
         ),
         Extension(
             'eoxmagmod._pysunpos',
@@ -87,10 +90,7 @@ setup(
             ],
             libraries=[],
             library_dirs=[],
-            include_dirs=[
-                './eoxmagmod',
-                './eoxmagmod/include',
-            ],
+            include_dirs=COMMON_INCLUDE_DIRS,
         ),
         Extension(
             'eoxmagmod._pytimeconv',
@@ -99,10 +99,7 @@ setup(
             ],
             libraries=[],
             library_dirs=[],
-            include_dirs=[
-                './eoxmagmod',
-                './eoxmagmod/include',
-            ],
+            include_dirs=COMMON_INCLUDE_DIRS,
         ),
     ]
 )
