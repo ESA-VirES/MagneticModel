@@ -96,6 +96,10 @@ from .magnetic_model.loader_emm import load_model_emm
 from .magnetic_model.loader_mma import (
     load_model_swarm_mma_2c_internal,
     load_model_swarm_mma_2c_external,
+    load_model_swarm_mma_2f_geo_internal,
+    load_model_swarm_mma_2f_geo_external,
+    load_model_swarm_mma_2f_sm_internal,
+    load_model_swarm_mma_2f_sm_external,
 )
 from .magnetic_model.loader_mio import (
     load_model_swarm_mio_internal,
@@ -164,6 +168,10 @@ __all__ = [
     'load_model_emm',
     'load_model_swarm_mma_2c_internal',
     'load_model_swarm_mma_2c_external',
+    'load_model_swarm_mma_2f_geo_internal',
+    'load_model_swarm_mma_2f_geo_external',
+    'load_model_swarm_mma_2f_sm_internal',
+    'load_model_swarm_mma_2f_sm_external',
     'load_model_swarm_mio_internal',
     'load_model_swarm_mio_external',
     'trace_field_line',

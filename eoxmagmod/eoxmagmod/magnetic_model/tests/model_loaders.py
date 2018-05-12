@@ -29,7 +29,7 @@
 
 from unittest import TestCase, main
 from itertools import product
-from numpy import inf, array, empty, nditer, asarray, floor
+from numpy import inf, array, empty, nditer, asarray
 from numpy.random import uniform
 from numpy.testing import assert_allclose
 from eoxmagmod import decimal_year_to_mjd2000
@@ -42,6 +42,10 @@ from eoxmagmod.magnetic_model.loader_emm import load_model_emm
 from eoxmagmod.magnetic_model.loader_mma import (
     load_model_swarm_mma_2c_internal,
     load_model_swarm_mma_2c_external,
+    load_model_swarm_mma_2f_geo_internal,
+    load_model_swarm_mma_2f_geo_external,
+    load_model_swarm_mma_2f_sm_internal,
+    load_model_swarm_mma_2f_sm_external,
 )
 from eoxmagmod.magnetic_model.loader_mio import (
     load_model_swarm_mio_internal,
@@ -55,6 +59,7 @@ from eoxmagmod.data import (
 )
 from eoxmagmod.magnetic_model.tests.data import (
     SWARM_MMA_SHA_2C_TEST_DATA,
+    SWARM_MMA_SHA_2F_TEST_DATA,
     SWARM_MIO_SHA_2_TEST_DATA,
 )
 from eoxmagmod.magnetic_model.model import (
@@ -223,6 +228,7 @@ class TestWMM2010(TestCase, SHModelTestMixIn):
     validity = decimal_year_to_mjd2000((2010.0, 2015.0))
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
+
     def load(self):
         return load_model_wmm(WMM_2010)
 
@@ -233,6 +239,7 @@ class TestWMM2015(TestCase, SHModelTestMixIn):
         (15124.716592471135, 533.1027023540182, -14728.4938691708)
     )
     validity = decimal_year_to_mjd2000((2015.0, 2020.0))
+
     def load(self):
         return load_model_wmm(WMM_2015)
 
@@ -247,6 +254,7 @@ class TestEMM2010(TestCase, SHModelTestMixIn):
     range_lon = range(-180, 181, 60)
     validity = decimal_year_to_mjd2000((2010.0, 2015.0))
     options = {"max_degree": 300}
+
     def load(self):
         return load_model_emm(EMM_2010_STATIC, EMM_2010_SECVAR)
 
@@ -257,6 +265,7 @@ class TestIGRF11(TestCase, SHModelTestMixIn):
         (15265.918081037888, -142.6442876878355, -14044.282413158882)
     )
     validity = decimal_year_to_mjd2000((1900.0, 2015.0))
+
     def load(self):
         return load_model_igrf(IGRF11)
 
@@ -267,6 +276,7 @@ class TestIGRF12(TestCase, SHModelTestMixIn):
         (15259.57386772841, -159.00767967612023, -14015.952721753336)
     )
     validity = decimal_year_to_mjd2000((1900.0, 2020.0))
+
     def load(self):
         return load_model_shc(IGRF12)
 
@@ -277,6 +287,7 @@ class TestSIFM(TestCase, SHModelTestMixIn):
         (15122.448070753977, 474.14615304317635, -14669.16289251053)
     )
     validity = decimal_year_to_mjd2000((2013.4976, 2015.4962))
+
     def load(self):
         return load_model_shc(SIFM)
 
@@ -287,6 +298,7 @@ class TestCHAOS5Static(TestCase, SHModelTestMixIn):
         (-0.019165363389425448, 0.017766807977599153, 0.007245125734944849)
     )
     validity = (-inf, inf)
+
     def load(self):
         return load_model_shc(CHAOS5_STATIC)
 
@@ -297,6 +309,7 @@ class TestCHAOS5Core(TestCase, SHModelTestMixIn):
         (15126.610410635147, 302.75469100239826, -14477.55985460029)
     )
     validity = decimal_year_to_mjd2000((1997.0021, 2015.0007))
+
     def load(self):
         return load_model_shc(CHAOS5_CORE)
 
@@ -307,6 +320,7 @@ class TestCHAOS5CoreV4(TestCase, SHModelTestMixIn):
         (15127.03768745214, 313.61814829613326, -14489.207459734534)
     )
     validity = decimal_year_to_mjd2000((1997.1020, 2016.1027))
+
     def load(self):
         return load_model_shc(CHAOS5_CORE_V4)
 
@@ -317,6 +331,7 @@ class TestCHAOS5Combined(TestCase, SHModelTestMixIn):
         (15127.018522088763, 313.6359151041108, -14489.200214608843)
     )
     validity = decimal_year_to_mjd2000((1997.1020, 2016.1027))
+
     def load(self):
         return load_model_shc_combined(CHAOS5_STATIC, CHAOS5_CORE_V4)
 
@@ -327,6 +342,7 @@ class TestCHAOS6Static(TestCase, SHModelTestMixIn):
         (-0.006745769467490476, 0.00860457221837856, -0.010495388357779979)
     )
     validity = (-inf, inf)
+
     def load(self):
         return load_model_shc(CHAOS6_STATIC)
 
@@ -337,6 +353,7 @@ class TestCHAOS6Core(TestCase, SHModelTestMixIn):
         (15127.146281343608, 318.51792709726175, -14493.952978715943)
     )
     validity = decimal_year_to_mjd2000((1997.102, 2016.6023))
+
     def load(self):
         return load_model_shc(CHAOS6_CORE)
 
@@ -347,6 +364,7 @@ class TestCHAOS6CoreX3(TestCase, SHModelTestMixIn):
         (15127.196090133599, 328.5862052582883, -14503.664172833218)
     )
     validity = decimal_year_to_mjd2000((1997.102, 2017.6016))
+
     def load(self):
         return load_model_shc(CHAOS6_CORE_X3)
 
@@ -357,6 +375,7 @@ class TestCHAOS6Combined(TestCase, SHModelTestMixIn):
         (15127.189344364127, 328.594809830505, -14503.674668221536)
     )
     validity = decimal_year_to_mjd2000((1997.102, 2017.6016))
+
     def load(self):
         return load_model_shc_combined(CHAOS6_CORE_X3, CHAOS6_STATIC)
 
@@ -370,6 +389,7 @@ class TestMMA2CSecondary(TestCase, DipoleSHModelTestMixIn):
     validity = (6179.125, 6209.875)
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
+
     def load(self):
         return load_model_swarm_mma_2c_internal(SWARM_MMA_SHA_2C_TEST_DATA)
 
@@ -380,9 +400,63 @@ class TestMMA2CPrimary(TestCase, DipoleSHModelTestMixIn):
         (-7.474051407972587, 3.531499380152684, -4.628812102394507)
     )
     validity = (6179.125, 6209.875)
+
     def load(self):
         return load_model_swarm_mma_2c_external(SWARM_MMA_SHA_2C_TEST_DATA)
 
+
+class TestMMA2FGeoSecondary(TestCase, SHModelTestMixIn):
+    reference_values = (
+        6194.5, (30.0, 40.0, 8000.0),
+        (3.499868484719017, 1.2407204785498254, -2.720615562984746)
+    )
+    validity = (6179.03125, 6209.96875)
+    options = {"scale": [1, 1, -1]}
+    scale = [1, 1, -1]
+
+    def load(self):
+        return load_model_swarm_mma_2f_geo_internal(SWARM_MMA_SHA_2F_TEST_DATA)
+
+
+class TestMMA2FGeoPrimary(TestCase, SHModelTestMixIn):
+    reference_values = (
+        6194.5, (30.0, 40.0, 8000.0),
+        (-9.114015792291584, 6.856282080637684, 3.208391426427198)
+    )
+    validity = (6179.03125, 6209.96875)
+    options = {"scale": [1, 1, -1]}
+    scale = [1, 1, -1]
+
+    def load(self):
+        return load_model_swarm_mma_2f_geo_external(SWARM_MMA_SHA_2F_TEST_DATA)
+
+
+class TestMMA2FSMSecondary(TestCase, SHModelTestMixIn):
+    reference_values = (
+        6194.5, (30.0, 40.0, 8000.0),
+        (3.2044931491163933, 2.0358247920140644, -2.650774870536232)
+    )
+    validity = (6179.03125, 6209.96875)
+    options = {"scale": [1, 1, -1]}
+    scale = [1, 1, -1]
+
+    def load(self):
+        return load_model_swarm_mma_2f_sm_internal(SWARM_MMA_SHA_2F_TEST_DATA)
+
+
+class TestMMA2FSMPrimary(TestCase, SHModelTestMixIn):
+    reference_values = (
+        6194.5, (30.0, 40.0, 8000.0),
+        (-9.42096313502333, 5.586931375284516, 4.7449677343745975)
+    )
+    validity = (6179.03125, 6209.96875)
+    options = {"scale": [1, 1, -1]}
+    scale = [1, 1, -1]
+
+    def load(self):
+        return load_model_swarm_mma_2f_sm_external(SWARM_MMA_SHA_2F_TEST_DATA)
+
+#-------------------------------------------------------------------------------
 
 class TestMIOSecondary(TestCase, DipoleMIOSHModelTestMixIn):
     reference_values = (
@@ -392,6 +466,7 @@ class TestMIOSecondary(TestCase, DipoleMIOSHModelTestMixIn):
     validity = (-inf, inf)
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
+
     def load(self):
         return load_model_swarm_mio_internal(SWARM_MIO_SHA_2_TEST_DATA)
 
@@ -410,6 +485,7 @@ class TestMIOPrimary(TestCase, DipoleMIOSHModelTestMixIn):
         ]
     )
     validity = (-inf, inf)
+
     def load(self):
         return load_model_swarm_mio_external(SWARM_MIO_SHA_2_TEST_DATA)
 
@@ -439,6 +515,7 @@ class TestMIOPrimaryAboveIonosphere(TestCase, DipoleMIOSHModelTestMixIn):
         (0.2356719922628632, 0.19030444647263053, -1.9489199024730584)
     )
     validity = (-inf, inf)
+
     def load(self):
         return load_model_swarm_mio_external(
             SWARM_MIO_SHA_2_TEST_DATA, above_ionosphere=True
@@ -451,6 +528,7 @@ class TestMIOPrimaryBelowIonosphere(TestCase, DipoleMIOSHModelTestMixIn):
         (-0.6061225119866813, -0.6088386296175435, -4.733769204526618)
     )
     validity = (-inf, inf)
+
     def load(self):
         return load_model_swarm_mio_external(
             SWARM_MIO_SHA_2_TEST_DATA, above_ionosphere=False
