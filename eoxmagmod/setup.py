@@ -55,7 +55,7 @@ setup(
         'eoxmagmod.magnetic_model.tests.data',
     ],
     license='EOX licence (MIT style)',
-    version='0.5.0',
+    version='0.5.1',
     package_data={
         'eoxmagmod': [
             'data/*',
