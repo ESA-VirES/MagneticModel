@@ -34,13 +34,41 @@ CDF_EPOCH_2000 = 63113904000000.0
 CDF_EPOCH_TO_DAYS = 1.0/86400000.0
 
 
+def read_swarm_mma_2f_geo_internal(cdf):
+    """ Read Swarm MMA_SHA_2F product CDF file and returns a tuple
+    containing the internal geographic frame model coefficients.
+    """
+    return read_swarm_mma_2f_coefficients(cdf, "gh", "geo")
+
+
+def read_swarm_mma_2f_geo_external(cdf):
+    """ Read Swarm MMA_SHA_2F product CDF file and returns a tuple
+    containing the external geographic frame model coefficients.
+    """
+    return read_swarm_mma_2f_coefficients(cdf, "qs", "geo")
+
+
+def read_swarm_mma_2f_sm_internal(cdf):
+    """ Read Swarm MMA_SHA_2F product CDF file and returns a tuple
+    containing the internal solar-magnetic frame model coefficients.
+    """
+    return read_swarm_mma_2f_coefficients(cdf, "gh", "sm")
+
+
+def read_swarm_mma_2f_sm_external(cdf):
+    """ Read Swarm MMA_SHA_2F product CDF file and returns a tuple
+    containing the external solar-magnetic frame model coefficients.
+    """
+    return read_swarm_mma_2f_coefficients(cdf, "qs", "sm")
+
+
 def read_swarm_mma_2c_internal(cdf):
     """ Read Swarm MMA_SHA_2C product CDF file and returns a tuple
     containing the internal model coefficients.
     """
     return (
-        read_swarm_mma_2c_coefficients(cdf, "gh_1", "gh"),
-        read_swarm_mma_2c_coefficients(cdf, "gh_2", "gh"),
+        read_swarm_mma_2c_coefficients(cdf, "gh", "1"),
+        read_swarm_mma_2c_coefficients(cdf, "gh", "2"),
     )
 
 
@@ -49,24 +77,50 @@ def read_swarm_mma_2c_external(cdf):
     containing the internal model coefficients.
     """
     return (
-        read_swarm_mma_2c_coefficients(cdf, "qs_1", "qs"),
-        read_swarm_mma_2c_coefficients(cdf, "qs_2", "qs"),
+        read_swarm_mma_2c_coefficients(cdf, "qs", "1"),
+        read_swarm_mma_2c_coefficients(cdf, "qs", "2"),
     )
 
 
-def read_swarm_mma_2c_coefficients(cdf, source_variable, target_variable):
+def read_swarm_mma_2f_coefficients(cdf, variable, frame):
+    """ Read a single set of Swarm MMA_SHA_2F coefficients.
+
+    The function expect a spacepy.pycdf.CDF object.
+    """
+    return read_swarm_mma_coefficients(
+        cdf, "t_" + variable, "nm_" + variable, "%s_%s" % (variable, frame),
+        variable
+    )
+
+
+def read_swarm_mma_2c_coefficients(cdf, variable, subset):
     """ Read a single set of Swarm MMA_SHA_2C coefficients.
 
     The function expect a spacepy.pycdf.CDF object.
     """
-    time = cdf.raw_var("t_" + source_variable)
-    n_idx = cdf["nm_" + source_variable][0, :, 0]
+    source_variable = "%s_%s" % (variable, subset)
+    return read_swarm_mma_coefficients(
+        cdf, "t_" + source_variable, "nm_" + source_variable, source_variable,
+        variable
+    )
+
+
+def read_swarm_mma_coefficients(cdf, time_variable, nm_variable, coeff_variable,
+                                target_variable):
+    """ Read a single set of Swarm MMA_SHA_2* coefficients.
+
+    The function expect a spacepy.pycdf.CDF object.
+    """
+    time = cdf.raw_var(time_variable)
+    nm_idx = array(cdf[nm_variable][...])
+    if nm_idx.ndim == 3  and nm_idx.shape[0] == 1:
+        nm_idx = nm_idx[0]
     return {
-        "degree_min": n_idx.min(),
-        "degree_max": n_idx.max(),
+        "degree_min": nm_idx[:, 0].min(),
+        "degree_max": nm_idx[:, 0].max(),
         "t": _cdf_rawtime_to_mjd2000(time[0], time.type()),
-        "nm": array(cdf["nm_" + source_variable][0]),
-        target_variable: array(cdf[source_variable][0].transpose()),
+        "nm": nm_idx,
+        target_variable: array(cdf[coeff_variable][0].transpose()),
     }
 
 

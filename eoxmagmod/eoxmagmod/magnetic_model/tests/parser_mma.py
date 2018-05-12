@@ -30,12 +30,22 @@
 from unittest import TestCase, main
 from numpy import abs as aabs
 from spacepy import pycdf
-from eoxmagmod.magnetic_model.tests.data import SWARM_MMA_SHA_2C_TEST_DATA
+from eoxmagmod.magnetic_model.tests.data import (
+    SWARM_MMA_SHA_2C_TEST_DATA, SWARM_MMA_SHA_2F_TEST_DATA,
+)
 from eoxmagmod.magnetic_model.parser_mma import (
     read_swarm_mma_2c_internal, read_swarm_mma_2c_external,
+    read_swarm_mma_2f_geo_internal, read_swarm_mma_2f_geo_external,
+    read_swarm_mma_2f_sm_internal, read_swarm_mma_2f_sm_external,
 )
 
+
 class SwarmMMAParserMixIn(object):
+
+    @property
+    def data(self):
+        with pycdf.CDF(self.filename) as cdf:
+            return self.parse(cdf)
 
     def _assert_valid(self, coeff_field, data, expected_data):
         tested_data = {
@@ -50,15 +60,15 @@ class SwarmMMAParserMixIn(object):
         self.assertTrue(aabs(data["nm"][..., 1]).max() <= data["degree_max"])
 
 
-class TestSwarmMMAInternalParser(TestCase, SwarmMMAParserMixIn):
+class TestSwarmMMA2CInternalParser(TestCase, SwarmMMAParserMixIn):
+    filename = SWARM_MMA_SHA_2C_TEST_DATA
 
     @staticmethod
-    def parse(filename):
-        with pycdf.CDF(filename) as cdf:
-            return read_swarm_mma_2c_internal(cdf)
+    def parse(cdf):
+        return read_swarm_mma_2c_internal(cdf)
 
-    def test_parse_swarm_mio_file(self):
-        data = self.parse(SWARM_MMA_SHA_2C_TEST_DATA)
+    def test_read_swarm_mma_2c_internal(self):
+        data = self.data
         self._assert_valid("gh", data[0], {
             "degree_min": 1,
             "degree_max": 1,
@@ -69,15 +79,15 @@ class TestSwarmMMAInternalParser(TestCase, SwarmMMAParserMixIn):
         })
 
 
-class TestSwarmMMAExternalParser(TestCase, SwarmMMAParserMixIn):
+class TestSwarmMMA2CExternalParser(TestCase, SwarmMMAParserMixIn):
+    filename = SWARM_MMA_SHA_2C_TEST_DATA
 
     @staticmethod
-    def parse(filename):
-        with pycdf.CDF(filename) as cdf:
-            return read_swarm_mma_2c_external(cdf)
+    def parse(cdf):
+        return read_swarm_mma_2c_external(cdf)
 
-    def test_parse_swarm_mio_file(self):
-        data = self.parse(SWARM_MMA_SHA_2C_TEST_DATA)
+    def test_read_swarm_mma_2c_external(self):
+        data = self.data
         self._assert_valid("qs", data[0], {
             "degree_min": 1,
             "degree_max": 1,
@@ -85,6 +95,64 @@ class TestSwarmMMAExternalParser(TestCase, SwarmMMAParserMixIn):
         self._assert_valid("qs", data[1], {
             "degree_min": 1,
             "degree_max": 2,
+        })
+
+
+class TestSwarmMMA2FGeoInternalParser(TestCase, SwarmMMAParserMixIn):
+    filename = SWARM_MMA_SHA_2F_TEST_DATA
+
+    @staticmethod
+    def parse(cdf):
+        return read_swarm_mma_2f_geo_internal(cdf)
+
+    def test_read_swarm_mma_2f_geo_internal(self):
+        data = self.data
+        self._assert_valid("gh", self.data, {
+            "degree_min": 1,
+            "degree_max": 1,
+        })
+
+
+class TestSwarmMMA2FGeoExternalParser(TestCase, SwarmMMAParserMixIn):
+    filename = SWARM_MMA_SHA_2F_TEST_DATA
+
+    @staticmethod
+    def parse(cdf):
+        return read_swarm_mma_2f_geo_external(cdf)
+
+    def test_read_swarm_mma_2f_geo_external(self):
+        data = self.data
+        self._assert_valid("qs", self.data, {
+            "degree_min": 1,
+            "degree_max": 1,
+        })
+
+
+class TestSwarmMMA2FSMInternalParser(TestCase, SwarmMMAParserMixIn):
+    filename = SWARM_MMA_SHA_2F_TEST_DATA
+
+    @staticmethod
+    def parse(cdf):
+        return read_swarm_mma_2f_sm_internal(cdf)
+
+    def test_read_swarm_mma_2f_sm_internal(self):
+        self._assert_valid("gh", self.data, {
+            "degree_min": 1,
+            "degree_max": 1,
+        })
+
+
+class TestSwarmMMA2FSMExternalParser(TestCase, SwarmMMAParserMixIn):
+    filename = SWARM_MMA_SHA_2F_TEST_DATA
+
+    @staticmethod
+    def parse(cdf):
+        return read_swarm_mma_2f_sm_external(cdf)
+
+    def test_read_swarm_mma_2f_sm_external(self):
+        self._assert_valid("qs", self.data, {
+            "degree_min": 1,
+            "degree_max": 1,
         })
 
 
