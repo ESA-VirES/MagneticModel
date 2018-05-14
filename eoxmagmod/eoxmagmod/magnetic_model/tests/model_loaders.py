@@ -175,6 +175,18 @@ class SHModelTestMixIn(object):
         times, coords, results = self.reference_values
         assert_allclose(self.eval_model(times, coords), results)
 
+    def test_eval_empty_coords(self):
+        assert_allclose(
+            self.eval_model(self.time, empty((0, 3))),
+            empty((0, 3))
+        )
+
+    def test_eval_empty_time_and_coords(self):
+        assert_allclose(
+            self.eval_model(empty(0), empty((0, 3))),
+            empty((0, 3))
+        )
+
 
 class DipoleSHModelTestMixIn(SHModelTestMixIn):
     model_class = DipoleSphericalHarmomicGeomagneticModel

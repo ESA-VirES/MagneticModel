@@ -141,55 +141,57 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
     def _eval_multi_time_short(self, time, coords, input_coordinate_system,
                                output_coordinate_system, f107, **options):
         result = empty(coords.shape)
-        iterator = nditer(
-            [
-                result[..., 0], result[..., 1], result[..., 2],
-                time, coords[..., 0], coords[..., 1], coords[..., 2],
-                asarray(f107),
-            ],
-            op_flags=[
-                ['writeonly'], ['writeonly'], ['writeonly'],
-                ['readonly'], ['readonly'], ['readonly'], ['readonly'],
-                ['readonly'],
-            ],
-        )
-        for item in iterator:
-            (
-                vect0, vect1, vect2,
-                time_, coord0, coord1, coord2, f107_,
-            ) = item
-            vect0[...], vect1[...], vect2[...] = self._eval_single_time(
-                time_, [coord0, coord1, coord2], input_coordinate_system,
-                output_coordinate_system, f107=f107_, **options
+        if result.size > 0:
+            iterator = nditer(
+                [
+                    result[..., 0], result[..., 1], result[..., 2],
+                    time, coords[..., 0], coords[..., 1], coords[..., 2],
+                    asarray(f107),
+                ],
+                op_flags=[
+                    ['writeonly'], ['writeonly'], ['writeonly'],
+                    ['readonly'], ['readonly'], ['readonly'], ['readonly'],
+                    ['readonly'],
+                ],
             )
+            for item in iterator:
+                (
+                    vect0, vect1, vect2,
+                    time_, coord0, coord1, coord2, f107_,
+                ) = item
+                vect0[...], vect1[...], vect2[...] = self._eval_single_time(
+                    time_, [coord0, coord1, coord2], input_coordinate_system,
+                    output_coordinate_system, f107=f107_, **options
+                )
         return result
 
     def _eval_multi_time_long(self, time, coords, input_coordinate_system,
                               output_coordinate_system, f107,
                               lat_sol, lon_sol, **options):
         result = empty(coords.shape)
-        iterator = nditer(
-            [
-                result[..., 0], result[..., 1], result[..., 2],
-                time, coords[..., 0], coords[..., 1], coords[..., 2],
-                asarray(f107), asarray(lat_sol), asarray(lon_sol),
-            ],
-            op_flags=[
-                ['writeonly'], ['writeonly'], ['writeonly'],
-                ['readonly'], ['readonly'], ['readonly'], ['readonly'],
-                ['readonly'], ['readonly'], ['readonly'],
-            ],
-        )
-        for item in iterator:
-            (
-                vect0, vect1, vect2,
-                time_, coord0, coord1, coord2, f107_, sslat, sslon,
-            ) = item
-            vect0[...], vect1[...], vect2[...] = self._eval_single_time(
-                time_, [coord0, coord1, coord2], input_coordinate_system,
-                output_coordinate_system, f107=f107_,
-                lat_sol=sslat, lon_sol=sslon, **options
+        if result.size > 0:
+            iterator = nditer(
+                [
+                    result[..., 0], result[..., 1], result[..., 2],
+                    time, coords[..., 0], coords[..., 1], coords[..., 2],
+                    asarray(f107), asarray(lat_sol), asarray(lon_sol),
+                ],
+                op_flags=[
+                    ['writeonly'], ['writeonly'], ['writeonly'],
+                    ['readonly'], ['readonly'], ['readonly'], ['readonly'],
+                    ['readonly'], ['readonly'], ['readonly'],
+                ],
             )
+            for item in iterator:
+                (
+                    vect0, vect1, vect2,
+                    time_, coord0, coord1, coord2, f107_, sslat, sslon,
+                ) = item
+                vect0[...], vect1[...], vect2[...] = self._eval_single_time(
+                    time_, [coord0, coord1, coord2], input_coordinate_system,
+                    output_coordinate_system, f107=f107_,
+                    lat_sol=sslat, lon_sol=sslon, **options
+                )
         return result
 
     def _eval_single_time(self, time, coords, input_coordinate_system,
