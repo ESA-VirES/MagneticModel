@@ -84,21 +84,22 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
                          output_coordinate_system, **options):
         """ Evaluate spherical harmonic for multiple times. """
         result = empty(coords.shape)
-        iterator = nditer(
-            [
-                time, coords[..., 0], coords[..., 1], coords[..., 2],
-                result[..., 0], result[..., 1], result[..., 2],
-            ],
-            op_flags=[
-                ['readonly'], ['readonly'], ['readonly'], ['readonly'],
-                ['writeonly'], ['writeonly'], ['writeonly'],
-            ],
-        )
-        for time_, coord0, coord1, coord2, vect0, vect1, vect2 in iterator:
-            vect0[...], vect1[...], vect2[...] = self._eval_single_time(
-                time_, [coord0, coord1, coord2], input_coordinate_system,
-                output_coordinate_system, **options
+        if result.size > 0:
+            iterator = nditer(
+                [
+                    time, coords[..., 0], coords[..., 1], coords[..., 2],
+                    result[..., 0], result[..., 1], result[..., 2],
+                ],
+                op_flags=[
+                    ['readonly'], ['readonly'], ['readonly'], ['readonly'],
+                    ['writeonly'], ['writeonly'], ['writeonly'],
+                ],
             )
+            for time_, coord0, coord1, coord2, vect0, vect1, vect2 in iterator:
+                vect0[...], vect1[...], vect2[...] = self._eval_single_time(
+                    time_, [coord0, coord1, coord2], input_coordinate_system,
+                    output_coordinate_system, **options
+                )
         return result
 
     def _eval_single_time(self, time, coords, input_coordinate_system,

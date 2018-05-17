@@ -30,3 +30,4 @@ from os.path import dirname, join
 
 SWARM_MIO_SHA_2_TEST_DATA = join(dirname(__file__), "TEST_MIO_SHA.txt")
 SWARM_MMA_SHA_2C_TEST_DATA = join(dirname(__file__), "TEST_MMA_SHA_2C.cdf")
+SWARM_MMA_SHA_2F_TEST_DATA = join(dirname(__file__), "TEST_MMA_SHA_2F.cdf")

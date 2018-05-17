@@ -27,7 +27,10 @@
 #-------------------------------------------------------------------------------
 
 from numpy import arange
-from .model_mio import DipoleMIOGeomagneticModel, MIO_EARTH_RADIUS
+from .model_mio import (
+    DipoleMIOPrimaryGeomagneticModel, DipoleMIOGeomagneticModel,
+    MIO_EARTH_RADIUS,
+)
 from .coefficients_mio import SparseSHCoefficientsMIO
 from .parser_mio import parse_swarm_mio_file
 
@@ -39,11 +42,31 @@ def load_model_swarm_mio_internal(path):
     return _create_mio_model(coefficients, params)
 
 
-def load_model_swarm_mio_external(path, above_ionosphere=True):
+def load_model_swarm_mio_external(path, above_ionosphere=None):
     """ Load external (primary field) model from a Swarm MIO_SHA_2* product.
     """
-    coefficients, params = load_coeff_swarm_mio_external(path, above_ionosphere)
-    return _create_mio_model(coefficients, params)
+    with open(path, "rb") as file_in:
+        params = parse_swarm_mio_file(file_in)
+
+    if above_ionosphere is None:
+        return _create_composed_mio_model(
+            _get_coeff_swarm_mio_external(params, False),
+            _get_coeff_swarm_mio_external(params, True),
+            params
+        )
+    else:
+        return _create_mio_model(
+            _get_coeff_swarm_mio_external(params, above_ionosphere), params
+        )
+
+
+def _create_composed_mio_model(coefficients_below_ionosphere,
+                               coefficients_above_ionosphere, params):
+    return DipoleMIOPrimaryGeomagneticModel(
+        _create_mio_model(coefficients_below_ionosphere, params),
+        _create_mio_model(coefficients_above_ionosphere, params),
+        height=params["height"],
+    )
 
 
 def _create_mio_model(coefficients, params):
@@ -74,6 +97,11 @@ def load_coeff_swarm_mio_external(path, above_ionosphere=True):
     with open(path, "rb") as file_in:
         data = parse_swarm_mio_file(file_in)
 
+    return _get_coeff_swarm_mio_external(data, above_ionosphere), data
+
+
+def _get_coeff_swarm_mio_external(data, above_ionosphere):
+    """ Create coefficient object for the given source data. """
     indices = data["nm"]
     coefficients = data["qs"]
     if above_ionosphere:
@@ -88,7 +116,7 @@ def load_coeff_swarm_mio_external(path, above_ionosphere=True):
         indices, coefficients,
         ps_extent=(data["pmin"], data["pmax"], data["smin"], data["smax"]),
         is_internal=is_internal,
-    ), data
+    )
 
 
 def convert_external_mio_coeff(degree, indices, coefficients, height):
