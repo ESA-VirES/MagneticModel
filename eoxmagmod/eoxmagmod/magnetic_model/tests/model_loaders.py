@@ -420,7 +420,7 @@ class TestMMA2CPrimary(TestCase, DipoleSHModelTestMixIn):
 class TestMMA2FGeoSecondary(TestCase, SHModelTestMixIn):
     reference_values = (
         6194.5, (30.0, 40.0, 8000.0),
-        (3.499868484719017, 1.2407204785498254, -2.720615562984746)
+        (1.7678502698292433, 0.6267115585524842, 2.7484695371405405)
     )
     validity = (6179.03125, 6209.96875)
     options = {"scale": [1, 1, -1]}
@@ -446,7 +446,7 @@ class TestMMA2FGeoPrimary(TestCase, SHModelTestMixIn):
 class TestMMA2FSMSecondary(TestCase, SHModelTestMixIn):
     reference_values = (
         6194.5, (30.0, 40.0, 8000.0),
-        (3.2044931491163933, 2.0358247920140644, -2.650774870536232)
+        (1.6186505587469782, 1.0283338998596887, 2.6779138076728497)
     )
     validity = (6179.03125, 6209.96875)
     options = {"scale": [1, 1, -1]}

@@ -39,9 +39,11 @@ from eoxmagmod.data import (
 )
 from eoxmagmod.magnetic_model.tests.data import (
     SWARM_MMA_SHA_2C_TEST_DATA,
+    SWARM_MMA_SHA_2F_TEST_DATA,
     SWARM_MIO_SHA_2_TEST_DATA,
 )
 from eoxmagmod.magnetic_model.coefficients import (
+    SparseSHCoefficientsTimeDependent,
     SparseSHCoefficientsTimeDependentDecimalYear,
     SparseSHCoefficientsConstant,
     CombinedSHCoefficients,
@@ -56,7 +58,9 @@ from eoxmagmod.magnetic_model.loader_igrf import load_coeff_igrf
 from eoxmagmod.magnetic_model.loader_wmm import load_coeff_wmm
 from eoxmagmod.magnetic_model.loader_emm import load_coeff_emm
 from eoxmagmod.magnetic_model.loader_mma import (
-    load_coeff_swarm_mma_2c_internal, load_coeff_swarm_mma_2c_external
+    load_coeff_swarm_mma_2c_internal, load_coeff_swarm_mma_2c_external,
+    load_coeff_swarm_mma_2f_geo_internal, load_coeff_swarm_mma_2f_geo_external,
+    load_coeff_swarm_mma_2f_sm_internal, load_coeff_swarm_mma_2f_sm_external,
 )
 from eoxmagmod.magnetic_model.loader_mio import (
     load_coeff_swarm_mio_internal, load_coeff_swarm_mio_external
@@ -287,6 +291,50 @@ class TestCoeffMMA2CExternal(TestCase, CoefficietLoaderTestMixIn):
     @staticmethod
     def load():
         return load_coeff_swarm_mma_2c_external(SWARM_MMA_SHA_2C_TEST_DATA)
+
+
+class TestCoeffMMA2FGeoInternal(TestCase, CoefficietLoaderTestMixIn):
+    is_internal = True
+    class_ = SparseSHCoefficientsTimeDependent
+    degree = 1
+    validity = (6179.03125, 6209.96875)
+
+    @staticmethod
+    def load():
+        return load_coeff_swarm_mma_2f_geo_internal(SWARM_MMA_SHA_2F_TEST_DATA)
+
+
+class TestCoeffMMA2FGeoExternal(TestCase, CoefficietLoaderTestMixIn):
+    is_internal = False
+    class_ = SparseSHCoefficientsTimeDependent
+    degree = 1
+    validity = (6179.03125, 6209.96875)
+
+    @staticmethod
+    def load():
+        return load_coeff_swarm_mma_2f_geo_external(SWARM_MMA_SHA_2F_TEST_DATA)
+
+
+class TestCoeffMMA2FSMInternal(TestCase, CoefficietLoaderTestMixIn):
+    is_internal = True
+    class_ = SparseSHCoefficientsTimeDependent
+    degree = 1
+    validity = (6179.03125, 6209.96875)
+
+    @staticmethod
+    def load():
+        return load_coeff_swarm_mma_2f_sm_internal(SWARM_MMA_SHA_2F_TEST_DATA)
+
+
+class TestCoeffMMA2FSMExternal(TestCase, CoefficietLoaderTestMixIn):
+    is_internal = False
+    class_ = SparseSHCoefficientsTimeDependent
+    degree = 1
+    validity = (6179.03125, 6209.96875)
+
+    @staticmethod
+    def load():
+        return load_coeff_swarm_mma_2f_sm_external(SWARM_MMA_SHA_2F_TEST_DATA)
 
 #-------------------------------------------------------------------------------
 

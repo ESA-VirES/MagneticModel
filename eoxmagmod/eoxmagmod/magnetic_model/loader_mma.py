@@ -125,7 +125,7 @@ def load_coeff_swarm_mma_2f_geo_internal(path):
     MMA_SHA_2F product file.
     """
     return _load_coeff_swarm_mma_2f(
-        path, read_swarm_mma_2f_geo_internal, "gh", is_internal=False
+        path, read_swarm_mma_2f_geo_internal, "gh", is_internal=True
     )
 
 
@@ -143,7 +143,7 @@ def load_coeff_swarm_mma_2f_sm_internal(path):
     MMA_SHA_2F product file.
     """
     return _load_coeff_swarm_mma_2f(
-        path, read_swarm_mma_2f_sm_internal, "gh", is_internal=False
+        path, read_swarm_mma_2f_sm_internal, "gh", is_internal=True
     )
 
 
