@@ -3,7 +3,6 @@
  * Magnetic Quasi Dipole Coordinates - C python bindings
  * -  Magnetic Local Time evaluation
  *
- * Project: EOX Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
@@ -61,9 +60,10 @@ static PyObject* eval_mlt(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-            args, kwdict, "OOs:eval_mlt", keywords,
-            &obj_qdlon, &obj_time, &model_fname
-    )) goto exit;
+        args, kwdict, "OOs:eval_mlt", keywords,
+        &obj_qdlon, &obj_time, &model_fname
+    ))
+        goto exit;
 
     #define NPY_REQ (NPY_ALIGNED|NPY_CONTIGUOUS)
 

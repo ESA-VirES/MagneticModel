@@ -3,7 +3,6 @@
  * Magnetic Quasi Dipole Coordinates - C python bindings
  * -  sub-solar point evaluation
  *
- * Project: EOX Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
@@ -59,7 +58,8 @@ static PyObject* eval_subsol(PyObject *self, PyObject *args, PyObject *kwdict)
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
         args, kwdict, "O:eval_subsol", keywords, &obj_time
-    )) goto exit;
+    ))
+        goto exit;
 
     #define NPY_REQ (NPY_ALIGNED|NPY_CONTIGUOUS)
 

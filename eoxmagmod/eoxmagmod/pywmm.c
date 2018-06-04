@@ -1,8 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings
+ * Geomagnetic Model - C python bindings
  *
- * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
@@ -84,7 +83,7 @@
 /* module's doc string */
 
 #define DOC_PYWMM \
-"This module provides bindings to the World Magnetic Model library."
+"This module provides bindings to the Geomagnetic Model library."
 
 /*---------------------------------------------------------------------------*/
 /*define module's methods */

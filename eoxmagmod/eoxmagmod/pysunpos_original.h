@@ -2,7 +2,6 @@
  *
  * Solar position - original algorithms
  *
- * Project: VirES
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
@@ -150,7 +149,8 @@ static PyObject* pysunpos_sunpos_original(PyObject *self, PyObject *args, PyObje
     if (!PyArg_ParseTupleAndKeywords(
         args, kwdict, "OOOOOOO:sunpos", keywords,
         &obj_mjd, &obj_lat, &obj_lon, &obj_rad, &obj_dtt, &obj_pres, &obj_temp
-    )) goto exit;
+    ))
+        goto exit;
 
     // cast the objects to arrays
     if (NULL == (arr_mjd = _get_as_double_array(obj_mjd, 0, 0, NPY_ALIGNED, keywords[0])))

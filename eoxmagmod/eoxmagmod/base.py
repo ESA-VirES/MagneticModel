@@ -2,7 +2,6 @@
 #
 #  Magnetic Model
 #
-# Project: Earth magnetic field in Python.
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
@@ -15,8 +14,7 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in
-# all
+# The above copyright notice and this permission notice shall be included in all
 # copies of this Software or works derived from this Software.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -27,37 +25,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
+# pylint: disable=no-name-in-module,invalid-name,too-many-locals,too-many-arguments
+# pylint: disable=abstract-method,missing-docstring
 
-import os.path
 import datetime
-import time
 import numpy as np
-
-# location of the data files
-dirname = os.path.dirname(__file__)
-dirname = os.path.join(dirname, 'data')
-DATA_WMM_2010 = os.path.join(dirname, 'WMM2010.COF')
-DATA_WMM_2015 = os.path.join(dirname, 'WMM2015.COF')
-DATA_EMM_2010_STATIC = os.path.join(dirname, 'EMM-720_V3p0_static.cof')
-DATA_EMM_2010_SECVAR = os.path.join(dirname, 'EMM-720_V3p0_secvar.cof')
-DATA_CHAOS5_CORE = os.path.join(dirname, 'CHAOS-5_core.shc')
-DATA_CHAOS5_CORE_V4 = os.path.join(dirname, 'CHAOS-5x_v4_core.shc')
-DATA_CHAOS5_STATIC = os.path.join(dirname, 'CHAOS-5_static.shc')
-DATA_CHAOS6_CORE = os.path.join(dirname, 'CHAOS-6_static.shc')
-DATA_CHAOS6_CORE_X3 = os.path.join(dirname, 'CHAOS-6-x3_core.shc')
-DATA_CHAOS6_STATIC = os.path.join(dirname, 'CHAOS-6_static.shc')
-DATA_IGRF11 = os.path.join(dirname, 'igrf11coeffs.txt')
-DATA_IGRF12 = os.path.join(dirname, 'IGRF12.shc')
-DATA_SIFM = os.path.join(dirname, 'SIFM.shc')
-
-# coordinate systems and their transformation
-from _pywmm import (
+from .util import vnorm, vrotate, datetime_to_decimal_year
+from ._pywmm import (
     GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96,
     GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
     POTENTIAL, GRADIENT, POTENTIAL_AND_GRADIENT,
-    convert, legendre, lonsincos, relradpow, spharpot, sphargrd,
-    vrot_sph2geod, vrot_sph2cart, vrot_cart2sph, sheval,
+    convert, sheval,
 )
+
 
 COORD_TYPES = (
     (GEODETIC_ABOVE_WGS84, "GEODETIC_ABOVE_WGS84"),
@@ -73,75 +53,6 @@ EVAL_MODES = (
     (GRADIENT, "GRADIENT"),
     (POTENTIAL_AND_GRADIENT, "POTENTIAL_AND_GRADIENT"),
 )
-
-def vrotate(arr, coord_in, coord_out, coord_type_in, coord_type_out):
-    """ Rotate vectors from one coordinate system to another.
-        Input:
-            arr - array of the source vectors
-            coord_in - source coordinates
-            coord_out - destination coordinates
-            coord_type_in - source coordinate system type
-            coord_type_out - destination coordinate system type
-        Output:
-            arr_out - array of the rotated vectors
-    """
-    if coord_type_in == coord_type_out:
-        return arr
-
-    if coord_type_in in _GEODETIC_COORD_TYPES:
-        if coord_type_out in _GEODETIC_COORD_TYPES:
-            return arr
-        elif coord_type_out == GEOCENTRIC_SPHERICAL:
-            return vrot_sph2geod(arr, coord_out[..., 0] - coord_in[..., 0])
-        elif coord_type_out == GEOCENTRIC_CARTESIAN:
-            return vrot_sph2cart(arr, coord_in[..., 0], coord_in[..., 1])
-
-    elif coord_type_in == GEOCENTRIC_SPHERICAL:
-        if coord_type_out in _GEODETIC_COORD_TYPES:
-            return vrot_sph2geod(arr, coord_out[..., 0] - coord_in[..., 0])
-        elif coord_type_out == GEOCENTRIC_CARTESIAN:
-            return vrot_sph2cart(arr, coord_in[..., 0], coord_in[..., 1])
-
-    elif coord_type_in == GEOCENTRIC_CARTESIAN:
-        if coord_type_out in _GEODETIC_COORD_TYPES:
-            return vrot_cart2sph(arr, coord_out[..., 0], coord_out[..., 1])
-        elif coord_type_out == GEOCENTRIC_SPHERICAL:
-            return vrot_cart2sph(arr, coord_out[..., 0], coord_out[..., 1])
-
-    raise ValueError("Unsupported coordinate type!")
-
-
-def vnorm(arr):
-    """Calculate norms for each vector form an input array of vectors."""
-    return np.sqrt((arr*arr).sum(axis=arr.ndim-1))
-
-def vincdecnorm(arr):
-    """ Calculate vector inclinations (-90:90), declinations
-    (-180,180), and the vector norms.
-    """
-    # equivalent to conversion of Cartesian to spherical coordinates
-    tmp = convert(arr, GEOCENTRIC_CARTESIAN, GEOCENTRIC_SPHERICAL)
-    return -tmp[...,0], tmp[...,1], tmp[...,2]
-
-
-def to_year_fraction(date):
-    """ Converts a Python `datetime.date` or `datetime.datetime` to a decimal
-    year value.
-    """
-
-    def since_epoch(date):  # returns seconds since epoch
-        return time.mktime(date.timetuple())
-
-    year = date.year
-    start_this_year = datetime.datetime(year=year, month=1, day=1)
-    start_next_year = datetime.datetime(year=year+1, month=1, day=1)
-
-    year_elapsed = since_epoch(date) - since_epoch(start_this_year)
-    year_duration = since_epoch(start_next_year) - since_epoch(start_this_year)
-    fraction = year_elapsed / year_duration
-
-    return date.year + fraction
-
 
 class MagneticModelBase(object):
     """ Base Magnetic model class """
@@ -181,8 +92,8 @@ class MagneticModelBase(object):
         print self
 
     def eval(self, arr_in, date, coord_type_in=GEODETIC_ABOVE_WGS84,
-                coord_type_out=None, secvar=False, mode=GRADIENT, maxdegree=-1,
-                mindegree=-1, check_validity=True):
+             coord_type_out=None, secvar=False, mode=GRADIENT, maxdegree=-1,
+             mindegree=-1, check_validity=True):
         """Evaluate spherical harmonic model for a given set of spatio-temporal
         coordinates.
 
@@ -233,7 +144,7 @@ class MagneticModelBase(object):
         """
 
         if isinstance(date, (datetime.date, datetime.datetime)):
-            date = to_year_fraction(date)
+            date = datetime_to_decimal_year(date)
 
         if mode not in dict(EVAL_MODES):
             raise ValueError("Invalid mode value!")
@@ -271,13 +182,14 @@ class MagneticModelBase(object):
             degree = 0
 
         return sheval(
-            arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out, mode
+            arr_in, degree, coef_g, coef_h, coord_type_in, coord_type_out, mode,
+            scale_gradient=-1.0
         )
 
 
     def field_line(self, point, date, coord_type_in=GEODETIC_ABOVE_WGS84,
-                coord_type_out=None, maxdegree=-1, check_validity=True,
-                step=1e2, nstep=500):
+                   coord_type_out=None, maxdegree=-1, check_validity=True,
+                   step=1e2, nstep=500):
         """Trace a field line passing trough given point in space.
         (Equivalent to ODE solution by means of the Euler method.)
 

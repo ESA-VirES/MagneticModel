@@ -2,7 +2,6 @@
 #
 #  Quasi-Dipole Apex Coordinates / Geomagnetism Library
 #
-# Project: Earth magnetic field in Python.
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
@@ -27,21 +26,15 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-from os.path import join, dirname, isfile
-from warnings import warn
-import _pyqd
-
-# location of the data files
-_DIRNAME = join(dirname(__file__), 'data')
-DATA_APEX_2015 = join(_DIRNAME, 'apexsh_1995-2015.txt')
-DATA_APEX_2020 = join(_DIRNAME, 'apexsh_1980-2020.txt')
-DATA_APEX = DATA_APEX_2020
+from os.path import isfile
+from . import _pyqd
+from .data import APEX
 
 
-def eval_qdlatlon(gclat, gclon, gcrad, time, fname=DATA_APEX):
+def eval_qdlatlon(gclat, gclon, gcrad, time, fname=APEX):
     """
           Evaluate magnetic quasi-dipole coordinates a single or multiple input
-          coordinates.
+          points.
 
           Inputs:
             gclat - geocentric latitude(s).
@@ -59,7 +52,7 @@ def eval_qdlatlon(gclat, gclon, gcrad, time, fname=DATA_APEX):
     return _pyqd.eval_qdlatlon(gclat, gclon, gcrad, time, fname)
 
 
-def eval_qdlatlon_with_base_vectors(gclat, gclon, gcrad, time, fname=DATA_APEX):
+def eval_qdlatlon_with_base_vectors(gclat, gclon, gcrad, time, fname=APEX):
     """
           Evaluate magnetic quasi-dipole coordinates a single or multiple input
           coordinates.
@@ -74,7 +67,6 @@ def eval_qdlatlon_with_base_vectors(gclat, gclon, gcrad, time, fname=DATA_APEX):
           Outputs:
             qdlat - quasi-dipole latitude(s).
             qdlon - quasi-dipole longitude(s).
-            qdlon - quasi-dipole longitude(s).
             f11 - base vector F1 component 1
             f12 - base vector F1 component 2
             f21 - base vector F2 component 1
@@ -86,7 +78,7 @@ def eval_qdlatlon_with_base_vectors(gclat, gclon, gcrad, time, fname=DATA_APEX):
     return _pyqd.eval_qdlatlon(gclat, gclon, gcrad, time, fname, True)
 
 
-def eval_mlt(qdlon, time, fname=DATA_APEX):
+def eval_mlt(qdlon, time, fname=APEX):
     """
           Evaluate magnetic local time for given quasi dipole longitudes.
 

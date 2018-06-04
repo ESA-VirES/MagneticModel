@@ -1,9 +1,7 @@
 #-------------------------------------------------------------------------------
 #
-#  World Magnetic Model 2010 / Geomagnetism Library
-#  - SHC format reader
+#  SHC format reader
 #
-# Project: Earth magnetic field in Python.
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
@@ -29,18 +27,9 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-import numpy as np
-from base import (
-    MagneticModel,
-    DATA_CHAOS5_CORE,
-    DATA_CHAOS5_CORE_V4,
-    DATA_CHAOS5_STATIC,
-    DATA_CHAOS6_CORE,
-    DATA_CHAOS6_CORE_X3,
-    DATA_CHAOS6_STATIC,
-    DATA_IGRF12,
-    DATA_SIFM,
-)
+from numpy import array, zeros, digitize
+from .base import MagneticModel
+
 
 class MagneticModelSHCPP(MagneticModel):
     """ SHC piecewise polynomial magnetic model class.
@@ -52,8 +41,8 @@ class MagneticModelSHCPP(MagneticModel):
         if model_prm.get('validity'):
             self._validity_start, self._validity_stop = model_prm['validity']
         else:
-            self._validity_start = np.amin(self.prm['time'])
-            self._validity_stop = np.amax(self.prm['time'])
+            self._validity_start = self.prm['time'].min()
+            self._validity_stop = self.prm['time'].max()
 
     @property
     def validity(self):
@@ -78,17 +67,17 @@ class MagneticModelSHCPP(MagneticModel):
         idxoff = (degree_min*(degree_min+1))/2
         # TODO: proper spline interpolation
 
-        coef_g = np.zeros(nterms)
-        coef_h = np.zeros(nterms)
+        coef_g = zeros(nterms)
+        coef_h = zeros(nterms)
 
         if dates.size > 1:
             # lookup the interval
-            idx = np.digitize([date], dates)[0] - 1
+            idx = digitize([date], dates)[0] - 1
             idx = min(dates.size - 2, max(0, idx))
 
             a = 1.0/(dates[idx+1]-dates[idx])
-            coef_g[idxoff:] = a*(src_coef_g[:,idx+1] - src_coef_g[:,idx])
-            coef_h[idxoff:] = a*(src_coef_h[:,idx+1] - src_coef_h[:,idx])
+            coef_g[idxoff:] = a*(src_coef_g[:, idx+1] - src_coef_g[:, idx])
+            coef_h[idxoff:] = a*(src_coef_h[:, idx+1] - src_coef_h[:, idx])
 
         return coef_g, coef_h
 
@@ -105,23 +94,23 @@ class MagneticModelSHCPP(MagneticModel):
         idxoff = (degree_min*(degree_min+1))/2
         # TODO: proper spline interpolation
 
-        coef_g = np.zeros(nterms)
-        coef_h = np.zeros(nterms)
+        coef_g = zeros(nterms)
+        coef_h = zeros(nterms)
 
         if dates.size == 1:
-            coef_g[idxoff:] = src_coef_g[:,0]
-            coef_h[idxoff:] = src_coef_h[:,0]
+            coef_g[idxoff:] = src_coef_g[:, 0]
+            coef_h[idxoff:] = src_coef_h[:, 0]
 
         elif dates.size > 1:
             # lookup the interval
-            idx = np.digitize([date], dates)[0] - 1
+            idx = digitize([date], dates)[0] - 1
             idx = min(dates.size - 2, max(0, idx))
 
             a1 = (date-dates[idx])/(dates[idx+1]-dates[idx])
             a0 = 1.0 - a1
 
-            coef_g[idxoff:] = a0*src_coef_g[:,idx] + a1*src_coef_g[:,idx+1]
-            coef_h[idxoff:] = a0*src_coef_h[:,idx] + a1*src_coef_h[:,idx+1]
+            coef_g[idxoff:] = a0*src_coef_g[:, idx] + a1*src_coef_g[:, idx+1]
+            coef_h[idxoff:] = a0*src_coef_h[:, idx] + a1*src_coef_h[:, idx+1]
 
         return coef_g, coef_h
 
@@ -178,25 +167,25 @@ def _read_model_shc(fid, fname):
     # parse time header
     line = next(fid)
     lidx += 1
-    time = np.array([float(v) for v in line.split()])
+    time = array([float(v) for v in line.split()])
     if time.size != ntime:
         ValueError("The list of times does not match the file header!")
 
     nterm = ((degree+1)*(degree+2)-(degree_min)*(degree_min+1))/2
 
-    coef_g = np.zeros((nterm, ntime))
-    coef_h = np.zeros((nterm, ntime))
+    coef_g = zeros((nterm, ntime))
+    coef_h = zeros((nterm, ntime))
 
     for line in fid:
         lidx += 1
         line = line.split()
         i, j = [int(v) for v in line[:2]]
         idx = abs(j)+((i)*(i+1)-(degree_min)*(degree_min+1))/2
-        coef = np.array([float(v) for v in line[2:]])
+        coef = array([float(v) for v in line[2:]])
         if j < 0:
-            coef_h[idx,:] = coef
+            coef_h[idx, :] = coef
         else:
-            coef_g[idx,:] = coef
+            coef_g[idx, :] = coef
 
     prm.update({
         'degree_min': degree_min,

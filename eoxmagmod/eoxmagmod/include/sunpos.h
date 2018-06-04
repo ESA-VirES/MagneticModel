@@ -39,6 +39,7 @@
 #ifndef SUNPOS_H
 #define SUNPOS_H
 
+#include "time_conversion.h"
 #include <math.h>
 
 #ifndef SEC2DAYS
@@ -55,36 +56,6 @@
 #ifndef FMOD_FLOOR
 #define FMOD_FLOOR(a,b) ((a)-(b)*floor((a)/(b)))
 #endif
-
-// external - to be removed
-void sunpos5(
-    double *decl, double *rasc, double *hang, double *azimuth, double *zenith,
-    int year, int month, int day, double ut, double lat, double lon, double dtt
-);
-
-/**
- * @brief Convert MJD2000 to year, month, day and day fraction
- *
- * Convert MJD2000 to year, month, day and number of decimal hours
- *
- * ref: https://en.wikipedia.org/wiki/Julian_day#Julian_or_Gregorian_calendar_from_Julian_day_number
- * Gregorian date formula applied since 1582-10-15
- * Julian date formula applied until 1582-10-04
- */
-
-void mjd2k_to_date(int *year, int *month, int *day, double *hours, double mjd2k) {
-    const int day2k = (int)floor(mjd2k);
-    const int d__ = day2k + 2451545;
-    const int f0_ = d__ + 1401 ;
-    const int f__ = f0_ + (d__ > 2299160 ? (((4*d__ + 274277)/146097)*3)/4 - 38: 0);
-    const int e__ = 4*f__ + 3;
-    const int h__ = 5*((e__ % 1461)/4) + 2;
-    *day = (h__%153)/5 + 1;
-    *month = (h__/153 + 2)%12 + 1;
-    *year = e__/1461 - 4716 + (14 - *month)/12;
-    *hours = 24.0 * (mjd2k - day2k);
-}
-
 
 /**
  * @brief Convert year, month, day and number of decimal hours to MJD2000
@@ -239,8 +210,7 @@ void sunpos5original(
 void sunpos5equat(
     double *decl, double *rasc, double *hang,
     double mjd2k, double dtt ,double lon
-)
-{
+) {
     // t is decimal number of days since 1940-01-01
     const double t = mjd2k + 43.0 - 21958.0;
     const double te = SEC2DAYS*dtt + t; // Terestrial Time correction
@@ -315,8 +285,7 @@ void sunpos5equat(
 void sunpos5eq2hor(
     double *azimuth, double *zenith,
     double decl, double hang, double lat, double rad, double press, double temp
-)
-{
+) {
     // horizontal coordinates
     // move conversion equatorial to horizontal coords to a separate function
     const double sp = sin(lat);

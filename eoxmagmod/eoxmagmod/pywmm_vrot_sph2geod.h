@@ -1,9 +1,8 @@
 /*-----------------------------------------------------------------------------
  *
- * World Magnetic Model - C python bindings - vector rotation - sph2geod
+ * Geomagnetic Model - C python bindings - vector rotation - sph2geod
  *  (i.e., vector coordinate system transformation)
  *
- * Project: World Magnetic Model - python interface
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
@@ -74,12 +73,17 @@ static void _vrot_sph2geod(ARRAY_DATA ad_i, ARRAY_DATA ad_dlat,
 #define DOC_VROT_SPH2GEOD "\n"\
 "   arr_out = vrot_sph2geod(arr_in, arr_dlat)\n"\
 "\n"\
-"     Rotate vectors from the geocentric spherical to the geodetic\n"\
-"     coordinate system (or back) for a given difference of latitudes in dg.\n"\
+"     Rotate vectors from the geocentric spherical (NEC) to the geodetic\n"\
+"     (NEC) coordinate frame for a given difference of latitudes\n"\
+"     in degrees.\n"\
+"     This function can be also used for the inverse rotation from the geodetic\n"\
+"     (NEC) to the geocentric spherical (NEC) coordinate frame by setting\n"\
+"     the negative difference of latitudes.\n"\
+"\n"\
 "     The inputs are:\n"\
 "         arr_in - array of the input vectors\n"\
 "         arr_dlat - array of differences of the latitudes.\n"\
-"               A scalar value is also accepted for a single vector rotation.\n"
+"     A scalar value is also accepted for a single vector rotation.\n"
 
 static PyObject* vrot_sph2geod(PyObject *self, PyObject *args, PyObject *kwdict)
 {
@@ -92,8 +96,10 @@ static PyObject* vrot_sph2geod(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *retval = NULL;
 
     // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict,
-            "OO|:vrot_sph2geod", keywords, &obj_in, &obj_dlat));
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "OO|:vrot_sph2geod", keywords, &obj_in, &obj_dlat
+    ))
+        goto exit;
 
     // cast the objects to arrays
     if (NULL == (arr_in=_get_as_double_array(obj_in, 1, 0, NPY_ALIGNED, keywords[0])))
