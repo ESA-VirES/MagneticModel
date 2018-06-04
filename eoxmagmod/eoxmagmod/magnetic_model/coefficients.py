@@ -41,6 +41,11 @@ class SHCoefficients(object):
             kwargs.get("validity_end", +inf)
         )
 
+    def is_valid(self, time):
+        """ Check if the time is within the coefficients validity range. """
+        validity_start, validity_end = self.validity
+        return validity_start <= time <= validity_end
+
     @property
     def degree(self):
         """ Get model degree. """

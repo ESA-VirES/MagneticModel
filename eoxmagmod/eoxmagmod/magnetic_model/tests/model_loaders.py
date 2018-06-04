@@ -29,7 +29,7 @@
 
 from unittest import TestCase, main
 from itertools import product
-from numpy import inf, array, empty, nditer, asarray
+from numpy import nan, inf, isinf, array, empty, full, nditer, asarray
 from numpy.random import uniform
 from numpy.testing import assert_allclose
 from eoxmagmod import decimal_year_to_mjd2000
@@ -104,6 +104,14 @@ class SHModelTestMixIn(object):
         )
 
     @property
+    def time_before(self):
+        return self.validity[0] - 1.0
+
+    @property
+    def time_after(self):
+        return self.validity[1] + 1.0
+
+    @property
     def time(self):
         return uniform(*self._constrain_validity(*self.validity))
 
@@ -130,10 +138,17 @@ class SHModelTestMixIn(object):
             ],
         )
         for time, coord0, coord1, coord2, vect0, vect1, vect2 in iterator:
-            vect0[...], vect1[...], vect2[...] = self._eval_reference(
-                time, [coord0, coord1, coord2]
-            )
+            if self._is_valid_time(time):
+                vect0[...], vect1[...], vect2[...] = self._eval_reference(
+                    time, [coord0, coord1, coord2]
+                )
+            else:
+                vect0[...], vect1[...], vect2[...] = nan, nan, nan
         return result
+
+    def _is_valid_time(self, time):
+        validity_start, validity_end = self.model.validity
+        return validity_start <= time <= validity_end
 
     def _eval_reference(self, time, coords):
         is_internal = self.model.coefficients.is_internal
@@ -163,9 +178,40 @@ class SHModelTestMixIn(object):
             self.eval_reference(time, coords),
         )
 
+    def _test_eval_single_time_invalid(self, time):
+        coords = self.coordinates
+        assert_allclose(
+            self.eval_model(time, coords),
+            full(coords.shape, nan)
+        )
+
+    def test_eval_single_time_nan(self):
+        self._test_eval_single_time_invalid(nan)
+
+    def test_eval_single_time_before(self):
+        time = self.time_before
+        if not isinf(time):
+            self._test_eval_single_time_invalid(time)
+
+    def test_eval_single_time_after(self):
+        time = self.time_after
+        if not isinf(time):
+            self._test_eval_single_time_invalid(time)
+
     def test_eval_multi_time(self):
         times = self.times
         coords = self.coordinates
+        assert_allclose(
+            self.eval_model(times, coords),
+            self.eval_reference(times, coords),
+        )
+
+    def test_eval_multi_time_invalid(self):
+        times = array([
+            time for time in [nan, self.time_before, self.time, self.time_after]
+            if not isinf(time)
+        ])
+        coords = array([(0, 0, 6371.2) for _ in times])
         assert_allclose(
             self.eval_model(times, coords),
             self.eval_reference(times, coords),

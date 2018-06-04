@@ -28,7 +28,7 @@
 # pylint: disable=missing-docstring
 
 from unittest import TestCase, main
-from numpy import inf
+from numpy import inf, nan
 from numpy.testing import assert_allclose
 from eoxmagmod._pytimeconv import decimal_year_to_mjd2000
 from eoxmagmod.magnetic_model.coefficients_mio import SparseSHCoefficientsMIO
@@ -44,11 +44,17 @@ class MIOSHCoeffMixIn(object):
     def test_degree(self):
         self.assertEqual(self.coefficients.degree, self.degree)
 
+    def test_is_internal(self):
+        self.assertEqual(self.coefficients.is_internal, self.is_internal)
+
     def test_validity(self):
         assert_allclose(self.coefficients.validity, self.validity)
 
-    def test_is_internal(self):
-        self.assertEqual(self.coefficients.is_internal, self.is_internal)
+    def test_is_valid_success(self):
+        self.assertTrue(self.coefficients.is_valid(0.0))
+
+    def test_is_valid_fail_nan(self):
+        self.assertFalse(self.coefficients.is_valid(nan))
 
     def eval_coeff(self, time, **options):
         return self.coefficients(
