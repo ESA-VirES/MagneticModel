@@ -31,7 +31,8 @@ from numpy import abs as aabs
 from eoxmagmod.magnetic_model.parser_shc import parse_shc_file
 from eoxmagmod.data import (
     CHAOS5_CORE, CHAOS5_CORE_V4, CHAOS5_STATIC,
-    CHAOS6_CORE, CHAOS6_CORE_X3, CHAOS6_STATIC,
+    CHAOS6_CORE, CHAOS6_CORE_X3, CHAOS6_CORE_X4, CHAOS6_CORE_X5,
+    CHAOS6_STATIC,
     IGRF12, SIFM,
 )
 
@@ -91,6 +92,26 @@ class TestSHCParser(TestCase):
             "degree_max": 20,
             "spline_order": 6,
             "ntime": 206,
+            "nstep": 5,
+        })
+
+    def test_parse_shc_file_chaos6core_x4(self):
+        data = self.parse(CHAOS6_CORE_X4)
+        self._assert_valid(data, {
+            "degree_min": 1,
+            "degree_max": 20,
+            "spline_order": 6,
+            "ntime": 211,
+            "nstep": 5,
+        })
+
+    def test_parse_shc_file_chaos6core_x5(self):
+        data = self.parse(CHAOS6_CORE_X5)
+        self._assert_valid(data, {
+            "degree_min": 1,
+            "degree_max": 20,
+            "spline_order": 6,
+            "ntime": 211,
             "nstep": 5,
         })
 

@@ -33,7 +33,7 @@ from numpy.testing import assert_allclose
 from eoxmagmod._pytimeconv import decimal_year_to_mjd2000
 from eoxmagmod.data import (
     CHAOS5_CORE, CHAOS5_CORE_V4, CHAOS5_STATIC,
-    CHAOS6_CORE, CHAOS6_CORE_X3, CHAOS6_STATIC,
+    CHAOS6_CORE_LATEST, CHAOS6_STATIC,
     IGRF11, IGRF12, SIFM, WMM_2010, WMM_2015,
     EMM_2010_STATIC, EMM_2010_SECVAR,
 )
@@ -219,16 +219,9 @@ class TestCoeffCHAOS5Combined(TestCase, CombinedShcTestMixIn):
 
 class TestCoeffCHAOS6Core(TestCase, ShcTestMixIn):
     class_ = SparseSHCoefficientsTimeDependentDecimalYear
-    path = CHAOS6_CORE
+    path = CHAOS6_CORE_LATEST
     degree = 20
-    validity = decimal_year_to_mjd2000((1997.102, 2016.6023))
-
-
-class TestCoeffCHAOS6CoreX3(TestCase, ShcTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependentDecimalYear
-    path = CHAOS6_CORE_X3
-    degree = 20
-    validity = decimal_year_to_mjd2000((1997.102, 2017.6016))
+    validity = decimal_year_to_mjd2000((1997.102, 2018.1013))
 
 
 class TestCoeffCHAOS6Static(TestCase, ShcTestMixIn):
@@ -239,10 +232,10 @@ class TestCoeffCHAOS6Static(TestCase, ShcTestMixIn):
 
 
 class TestCoeffCHAOS6Combined(TestCase, CombinedShcTestMixIn):
-    path_core = CHAOS6_CORE_X3
+    path_core = CHAOS6_CORE_LATEST
     path_static = CHAOS6_STATIC
     degree = 110
-    validity = decimal_year_to_mjd2000((1997.1020, 2017.6016))
+    validity = decimal_year_to_mjd2000((1997.1020, 2018.1013))
 
 #-------------------------------------------------------------------------------
 

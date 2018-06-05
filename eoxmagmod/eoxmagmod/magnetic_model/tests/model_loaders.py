@@ -54,7 +54,7 @@ from eoxmagmod.magnetic_model.loader_mio import (
 from eoxmagmod.data import (
     EMM_2010_STATIC, EMM_2010_SECVAR, WMM_2010, WMM_2015,
     CHAOS5_CORE, CHAOS5_CORE_V4, CHAOS5_STATIC,
-    CHAOS6_CORE, CHAOS6_CORE_X3, CHAOS6_STATIC,
+    CHAOS6_CORE_LATEST, CHAOS6_STATIC,
     IGRF11, IGRF12, SIFM,
 )
 from eoxmagmod.magnetic_model.tests.data import (
@@ -219,6 +219,10 @@ class SHModelTestMixIn(object):
 
     def test_eval_reference_values(self):
         times, coords, results = self.reference_values
+        try:
+            assert_allclose(self.eval_model(times, coords), results)
+        except:
+            print tuple(float(f) for f in self.eval_model(times, coords))
         assert_allclose(self.eval_model(times, coords), results)
 
     def test_eval_empty_coords(self):
@@ -408,34 +412,23 @@ class TestCHAOS6Static(TestCase, SHModelTestMixIn):
 class TestCHAOS6Core(TestCase, SHModelTestMixIn):
     reference_values = (
         2503.33, (30.0, 40.0, 8000.0),
-        (15127.146281343608, 318.51792709726175, -14493.952978715943)
+        (15127.120635596926, 318.5338195336121, -14493.87226290503)
     )
-    validity = decimal_year_to_mjd2000((1997.102, 2016.6023))
+    validity = decimal_year_to_mjd2000((1997.102, 2018.1013))
 
     def load(self):
-        return load_model_shc(CHAOS6_CORE)
-
-
-class TestCHAOS6CoreX3(TestCase, SHModelTestMixIn):
-    reference_values = (
-        2685.9, (30.0, 40.0, 8000.0),
-        (15127.196090133599, 328.5862052582883, -14503.664172833218)
-    )
-    validity = decimal_year_to_mjd2000((1997.102, 2017.6016))
-
-    def load(self):
-        return load_model_shc(CHAOS6_CORE_X3)
+        return load_model_shc(CHAOS6_CORE_LATEST)
 
 
 class TestCHAOS6Combined(TestCase, SHModelTestMixIn):
     reference_values = (
         2685.9, (30.0, 40.0, 8000.0),
-        (15127.189344364127, 328.594809830505, -14503.674668221536)
+        (15127.166976516573, 328.59358581354275, -14503.61324922254)
     )
-    validity = decimal_year_to_mjd2000((1997.102, 2017.6016))
+    validity = decimal_year_to_mjd2000((1997.102, 2018.1013))
 
     def load(self):
-        return load_model_shc_combined(CHAOS6_CORE_X3, CHAOS6_STATIC)
+        return load_model_shc_combined(CHAOS6_CORE_LATEST, CHAOS6_STATIC)
 
 #-------------------------------------------------------------------------------
 
