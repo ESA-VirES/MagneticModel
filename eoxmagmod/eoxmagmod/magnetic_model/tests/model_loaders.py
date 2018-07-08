@@ -412,9 +412,9 @@ class TestCHAOS6Static(TestCase, SHModelTestMixIn):
 class TestCHAOS6Core(TestCase, SHModelTestMixIn):
     reference_values = (
         2503.33, (30.0, 40.0, 8000.0),
-        (15127.120635596926, 318.5338195336121, -14493.87226290503)
+        (15127.057940347644, 318.5271561480321, -14493.838709087788)
     )
-    validity = decimal_year_to_mjd2000((1997.102, 2018.1013))
+    validity = decimal_year_to_mjd2000((1997.102, 2018.6010))
 
     def load(self):
         return load_model_shc(CHAOS6_CORE_LATEST)
@@ -423,9 +423,9 @@ class TestCHAOS6Core(TestCase, SHModelTestMixIn):
 class TestCHAOS6Combined(TestCase, SHModelTestMixIn):
     reference_values = (
         2685.9, (30.0, 40.0, 8000.0),
-        (15127.166976516573, 328.59358581354275, -14503.61324922254)
+        (15127.114434785679, 328.58224854712097, -14503.596562773837)
     )
-    validity = decimal_year_to_mjd2000((1997.102, 2018.1013))
+    validity = decimal_year_to_mjd2000((1997.102, 2018.6010))
 
     def load(self):
         return load_model_shc_combined(CHAOS6_CORE_LATEST, CHAOS6_STATIC)
