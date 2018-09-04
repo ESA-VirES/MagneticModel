@@ -26,7 +26,7 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-from numpy import asarray, empty, nditer
+from numpy import asarray, empty, full, nan, nditer
 from .._pywmm import GRADIENT, GEOCENTRIC_SPHERICAL, sheval
 from ..sheval_dipole import sheval_dipole
 
@@ -105,16 +105,18 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
     def _eval_single_time(self, time, coords, input_coordinate_system,
                           output_coordinate_system, **options):
         """ Evaluate spherical harmonic for a single time."""
-        is_internal = self.coefficients.is_internal
-        coeff, degree = self.coefficients(time, **options)
-        return sheval(
-            coords, degree, coeff[..., 0], coeff[..., 1],
-            is_internal=is_internal, mode=GRADIENT,
-            coord_type_in=input_coordinate_system,
-            coord_type_out=output_coordinate_system,
-            scale_gradient=-asarray(options.get("scale", 1.0))
-        )
-
+        coefficients = self.coefficients
+        if coefficients.is_valid(time):
+            coeff, degree = coefficients(time, **options)
+            return sheval(
+                coords, degree, coeff[..., 0], coeff[..., 1],
+                is_internal=coefficients.is_internal, mode=GRADIENT,
+                coord_type_in=input_coordinate_system,
+                coord_type_out=output_coordinate_system,
+                scale_gradient=-asarray(options.get("scale", 1.0))
+            )
+        else:
+            return full(asarray(coords).shape, nan)
 
 class DipoleSphericalHarmomicGeomagneticModel(SphericalHarmomicGeomagneticModel):
     """ Earth magnetic field model calculated by the Spherical Harmonic
@@ -135,15 +137,18 @@ class DipoleSphericalHarmomicGeomagneticModel(SphericalHarmomicGeomagneticModel)
 
     def _eval_single_time(self, time, coords, input_coordinate_system,
                           output_coordinate_system, **options):
-        lat_ngp, lon_ngp = self.north_pole(time)
-        is_internal = self.coefficients.is_internal
-        coeff, degree = self.coefficients(
-            time, lat_ngp=lat_ngp, lon_ngp=lon_ngp, **options
-        )
-        return sheval_dipole(
-            coords, degree, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
-            is_internal=is_internal, mode=GRADIENT,
-            coord_type_in=input_coordinate_system,
-            coord_type_out=output_coordinate_system,
-            scale_gradient=-asarray(options.get("scale", 1.0))
-        )
+        coefficients = self.coefficients
+        if coefficients.is_valid(time):
+            lat_ngp, lon_ngp = self.north_pole(time)
+            coeff, degree = coefficients(
+                time, lat_ngp=lat_ngp, lon_ngp=lon_ngp, **options
+            )
+            return sheval_dipole(
+                coords, degree, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
+                is_internal=coefficients.is_internal, mode=GRADIENT,
+                coord_type_in=input_coordinate_system,
+                coord_type_out=output_coordinate_system,
+                scale_gradient=-asarray(options.get("scale", 1.0))
+            )
+        else:
+            return full(asarray(coords).shape, nan)

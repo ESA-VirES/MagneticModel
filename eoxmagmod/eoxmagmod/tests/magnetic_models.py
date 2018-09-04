@@ -38,7 +38,7 @@ from eoxmagmod.igrf import read_model_igrf11
 from eoxmagmod.shc import read_model_shc
 from eoxmagmod.data import (
     CHAOS5_CORE, CHAOS5_CORE_V4, CHAOS5_STATIC,
-    CHAOS6_CORE, CHAOS6_CORE_X3, CHAOS6_STATIC,
+    CHAOS6_CORE_LATEST, CHAOS6_STATIC,
     IGRF12, SIFM,
 )
 from eoxmagmod._pywmm import (
@@ -144,13 +144,8 @@ class TestCHAOS6Static(TestCase, MagneticModelMixIn):
 
 
 class TestCHAOS6Core(TestCase, MagneticModelMixIn):
-    validity = (1997.102, 2016.6023)
-    model = read_model_shc(CHAOS6_CORE)
-
-
-class TestCHAOS6CoreX3(TestCase, MagneticModelMixIn):
-    validity = (1997.102, 2017.6016)
-    model = read_model_shc(CHAOS6_CORE_X3)
+    validity = (1997.102, 2018.601)
+    model = read_model_shc(CHAOS6_CORE_LATEST)
 
 #-------------------------------------------------------------------------------
 

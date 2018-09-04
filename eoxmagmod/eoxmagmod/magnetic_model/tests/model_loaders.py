@@ -29,7 +29,7 @@
 
 from unittest import TestCase, main
 from itertools import product
-from numpy import inf, array, empty, nditer, asarray
+from numpy import nan, inf, isinf, array, empty, full, nditer, asarray
 from numpy.random import uniform
 from numpy.testing import assert_allclose
 from eoxmagmod import decimal_year_to_mjd2000
@@ -54,7 +54,7 @@ from eoxmagmod.magnetic_model.loader_mio import (
 from eoxmagmod.data import (
     EMM_2010_STATIC, EMM_2010_SECVAR, WMM_2010, WMM_2015,
     CHAOS5_CORE, CHAOS5_CORE_V4, CHAOS5_STATIC,
-    CHAOS6_CORE, CHAOS6_CORE_X3, CHAOS6_STATIC,
+    CHAOS6_CORE_LATEST, CHAOS6_STATIC,
     IGRF11, IGRF12, SIFM,
 )
 from eoxmagmod.magnetic_model.tests.data import (
@@ -104,6 +104,14 @@ class SHModelTestMixIn(object):
         )
 
     @property
+    def time_before(self):
+        return self.validity[0] - 1.0
+
+    @property
+    def time_after(self):
+        return self.validity[1] + 1.0
+
+    @property
     def time(self):
         return uniform(*self._constrain_validity(*self.validity))
 
@@ -130,10 +138,17 @@ class SHModelTestMixIn(object):
             ],
         )
         for time, coord0, coord1, coord2, vect0, vect1, vect2 in iterator:
-            vect0[...], vect1[...], vect2[...] = self._eval_reference(
-                time, [coord0, coord1, coord2]
-            )
+            if self._is_valid_time(time):
+                vect0[...], vect1[...], vect2[...] = self._eval_reference(
+                    time, [coord0, coord1, coord2]
+                )
+            else:
+                vect0[...], vect1[...], vect2[...] = nan, nan, nan
         return result
+
+    def _is_valid_time(self, time):
+        validity_start, validity_end = self.model.validity
+        return validity_start <= time <= validity_end
 
     def _eval_reference(self, time, coords):
         is_internal = self.model.coefficients.is_internal
@@ -163,6 +178,26 @@ class SHModelTestMixIn(object):
             self.eval_reference(time, coords),
         )
 
+    def _test_eval_single_time_invalid(self, time):
+        coords = self.coordinates
+        assert_allclose(
+            self.eval_model(time, coords),
+            full(coords.shape, nan)
+        )
+
+    def test_eval_single_time_nan(self):
+        self._test_eval_single_time_invalid(nan)
+
+    def test_eval_single_time_before(self):
+        time = self.time_before
+        if not isinf(time):
+            self._test_eval_single_time_invalid(time)
+
+    def test_eval_single_time_after(self):
+        time = self.time_after
+        if not isinf(time):
+            self._test_eval_single_time_invalid(time)
+
     def test_eval_multi_time(self):
         times = self.times
         coords = self.coordinates
@@ -171,8 +206,23 @@ class SHModelTestMixIn(object):
             self.eval_reference(times, coords),
         )
 
+    def test_eval_multi_time_invalid(self):
+        times = array([
+            time for time in [nan, self.time_before, self.time, self.time_after]
+            if not isinf(time)
+        ])
+        coords = array([(0, 0, 6371.2) for _ in times])
+        assert_allclose(
+            self.eval_model(times, coords),
+            self.eval_reference(times, coords),
+        )
+
     def test_eval_reference_values(self):
         times, coords, results = self.reference_values
+        try:
+            assert_allclose(self.eval_model(times, coords), results)
+        except:
+            print tuple(float(f) for f in self.eval_model(times, coords))
         assert_allclose(self.eval_model(times, coords), results)
 
     def test_eval_empty_coords(self):
@@ -362,34 +412,23 @@ class TestCHAOS6Static(TestCase, SHModelTestMixIn):
 class TestCHAOS6Core(TestCase, SHModelTestMixIn):
     reference_values = (
         2503.33, (30.0, 40.0, 8000.0),
-        (15127.146281343608, 318.51792709726175, -14493.952978715943)
+        (15127.057940347644, 318.5271561480321, -14493.838709087788)
     )
-    validity = decimal_year_to_mjd2000((1997.102, 2016.6023))
+    validity = decimal_year_to_mjd2000((1997.102, 2018.6010))
 
     def load(self):
-        return load_model_shc(CHAOS6_CORE)
-
-
-class TestCHAOS6CoreX3(TestCase, SHModelTestMixIn):
-    reference_values = (
-        2685.9, (30.0, 40.0, 8000.0),
-        (15127.196090133599, 328.5862052582883, -14503.664172833218)
-    )
-    validity = decimal_year_to_mjd2000((1997.102, 2017.6016))
-
-    def load(self):
-        return load_model_shc(CHAOS6_CORE_X3)
+        return load_model_shc(CHAOS6_CORE_LATEST)
 
 
 class TestCHAOS6Combined(TestCase, SHModelTestMixIn):
     reference_values = (
         2685.9, (30.0, 40.0, 8000.0),
-        (15127.189344364127, 328.594809830505, -14503.674668221536)
+        (15127.114434785679, 328.58224854712097, -14503.596562773837)
     )
-    validity = decimal_year_to_mjd2000((1997.102, 2017.6016))
+    validity = decimal_year_to_mjd2000((1997.102, 2018.6010))
 
     def load(self):
-        return load_model_shc_combined(CHAOS6_CORE_X3, CHAOS6_STATIC)
+        return load_model_shc_combined(CHAOS6_CORE_LATEST, CHAOS6_STATIC)
 
 #-------------------------------------------------------------------------------
 

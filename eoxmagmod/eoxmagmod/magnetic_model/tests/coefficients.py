@@ -25,30 +25,56 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
+# pylint: disable=missing-docstring, line-too-long
 
 from unittest import TestCase, main
-from numpy import inf, array
+from numpy import nan, inf, isinf, array
 from numpy.testing import assert_allclose
 from eoxmagmod import decimal_year_to_mjd2000
 from eoxmagmod.magnetic_model.coefficients import (
-    SparseSHCoefficients,
     SparseSHCoefficientsTimeDependent,
     SparseSHCoefficientsTimeDependentDecimalYear,
     SparseSHCoefficientsConstant,
     CombinedSHCoefficients,
 )
 
-
 class SHCoefficinetTestMixIn(object):
 
     def test_degree(self):
         self.assertEqual(self.coefficients.degree, self.degree)
 
+    def test_is_internal(self):
+        self.assertEqual(self.coefficients.is_internal, self.is_internal)
+
     def test_validity(self):
         self.assertEqual(self.coefficients.validity, self.validity)
 
-    def test_is_internal(self):
-        self.assertEqual(self.coefficients.is_internal, self.is_internal)
+    def test_is_valid_success(self):
+        validity_start, validity_end = self.coefficients.validity
+        if isinf(validity_start):
+            if isinf(validity_end):
+                time = 0.0
+            else:
+                time = validity_end - 1.0
+        else:
+            if isinf(validity_end):
+                time = validity_start + 1.0
+            else:
+                time = 0.5*(validity_start + validity_end)
+        self.assertTrue(self.coefficients.is_valid(time))
+
+    def test_is_valid_fail_before(self):
+        validity_start, _ = self.coefficients.validity
+        if not isinf(validity_start):
+            self.assertFalse(self.coefficients.is_valid(validity_start - 1.0))
+
+    def test_is_valid_fail_after(self):
+        _, validity_end = self.coefficients.validity
+        if not isinf(validity_end):
+            self.assertFalse(self.coefficients.is_valid(validity_end + 1.0))
+
+    def test_is_valid_fail_nan(self):
+        self.assertFalse(self.coefficients.is_valid(nan))
 
 #-------------------------------------------------------------------------------
 
@@ -130,7 +156,7 @@ class TestCombinedSHCoefficientsMixed(TestCase, CombinedSHCoefficientsMixIn):
 
     def test_mixed_type_failure(self):
         with self.assertRaises(ValueError):
-            self.coefficients
+            self.coefficients # pylint: disable=pointless-statement
 
 #-------------------------------------------------------------------------------
 
