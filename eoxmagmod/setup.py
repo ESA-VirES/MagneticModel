@@ -45,6 +45,10 @@ setup(
     description="Earth magnetic field utilities.",
     author="Martin Paces",
     author_email="martin.paces@eox.at",
+    install_requires=[
+        'numpy',
+        'spacepy',
+    ],
     packages=[
         'eoxmagmod',
         'eoxmagmod.data',
@@ -55,7 +59,7 @@ setup(
         'eoxmagmod.magnetic_model.tests.data',
     ],
     license='EOX licence (MIT style)',
-    version='0.6.0',
+    version='0.6.1',
     package_data={
         'eoxmagmod': [
             'data/*',
