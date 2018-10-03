@@ -107,7 +107,7 @@ def load_model_swarm_mma_2f_sm_external(path):
 def load_coeff_swarm_mma_2c_internal(path):
     """ Load internal model coefficients from a Swarm MMA_SHA_2C product file.
     """
-    return _load_coeff_swarm_mma_2c(
+    return _load_coeff_mma_multi_set(
         path, read_swarm_mma_2c_internal, "gh", is_internal=True
     )
 
@@ -115,7 +115,7 @@ def load_coeff_swarm_mma_2c_internal(path):
 def load_coeff_swarm_mma_2c_external(path):
     """ Load external model coefficients from a Swarm MMA_SHA_2C product file.
     """
-    return _load_coeff_swarm_mma_2c(
+    return _load_coeff_mma_multi_set(
         path, read_swarm_mma_2c_external, "qs", is_internal=False
     )
 
@@ -124,7 +124,7 @@ def load_coeff_swarm_mma_2f_geo_internal(path):
     """ Load internal geographic frame model coefficients from a Swarm
     MMA_SHA_2F product file.
     """
-    return _load_coeff_swarm_mma_2f(
+    return _load_coeff_mma_single_set(
         path, read_swarm_mma_2f_geo_internal, "gh", is_internal=True
     )
 
@@ -133,7 +133,7 @@ def load_coeff_swarm_mma_2f_geo_external(path):
     """ Load external geographic frame model coefficients from a Swarm
     MMA_SHA_2F product file.
     """
-    return _load_coeff_swarm_mma_2f(
+    return _load_coeff_mma_single_set(
         path, read_swarm_mma_2f_geo_external, "qs", is_internal=False
     )
 
@@ -142,7 +142,7 @@ def load_coeff_swarm_mma_2f_sm_internal(path):
     """ Load internal solar magnetic frame model coefficients from a Swarm
     MMA_SHA_2F product file.
     """
-    return _load_coeff_swarm_mma_2f(
+    return _load_coeff_mma_single_set(
         path, read_swarm_mma_2f_sm_internal, "gh", is_internal=True
     )
 
@@ -151,14 +151,12 @@ def load_coeff_swarm_mma_2f_sm_external(path):
     """ Load external solar magnetic frame model coefficients from a Swarm
     MMA_SHA_2F product file.
     """
-    return _load_coeff_swarm_mma_2f(
+    return _load_coeff_mma_single_set(
         path, read_swarm_mma_2f_sm_external, "qs", is_internal=False
     )
 
 
-def _load_coeff_swarm_mma_2c(path, cdf_reader, variable, is_internal):
-    """ Load external model coefficients from a Swarm MMA_SHA_2C product file.
-    """
+def _load_coeff_mma_multi_set(path, cdf_reader, variable, is_internal):
     with pycdf.CDF(path) as cdf:
         data = cdf_reader(cdf)
 
@@ -169,9 +167,7 @@ def _load_coeff_swarm_mma_2c(path, cdf_reader, variable, is_internal):
     ])
 
 
-def _load_coeff_swarm_mma_2f(path, cdf_reader, variable, is_internal):
-    """ Load external model coefficients from a Swarm MMA_SHA_2F product file.
-    """
+def _load_coeff_mma_single_set(path, cdf_reader, variable, is_internal):
     with pycdf.CDF(path) as cdf:
         data = cdf_reader(cdf)
 

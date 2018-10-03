@@ -41,6 +41,7 @@ from eoxmagmod.magnetic_model.tests.data import (
     SWARM_MMA_SHA_2C_TEST_DATA,
     SWARM_MMA_SHA_2F_TEST_DATA,
     SWARM_MIO_SHA_2_TEST_DATA,
+    CHAOS_MMA_TEST_DATA,
 )
 from eoxmagmod.magnetic_model.coefficients import (
     SparseSHCoefficientsTimeDependent,
@@ -284,6 +285,28 @@ class TestCoeffMMA2CExternal(TestCase, CoefficietLoaderTestMixIn):
     @staticmethod
     def load():
         return load_coeff_swarm_mma_2c_external(SWARM_MMA_SHA_2C_TEST_DATA)
+
+
+class TestCoeffChaosMMAInternal(TestCase, CoefficietLoaderTestMixIn):
+    is_internal = True
+    class_ = CombinedSHCoefficients
+    degree = 2
+    validity = (6179.00000, 6209.979167)
+
+    @staticmethod
+    def load():
+        return load_coeff_swarm_mma_2c_internal(CHAOS_MMA_TEST_DATA)
+
+
+class TestCoeffChaosMMAExternal(TestCase, CoefficietLoaderTestMixIn):
+    is_internal = False
+    class_ = CombinedSHCoefficients
+    degree = 2
+    validity = (6179.00000, 6209.979167)
+
+    @staticmethod
+    def load():
+        return load_coeff_swarm_mma_2c_external(CHAOS_MMA_TEST_DATA)
 
 
 class TestCoeffMMA2FGeoInternal(TestCase, CoefficietLoaderTestMixIn):

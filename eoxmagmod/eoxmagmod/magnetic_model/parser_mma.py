@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 #
-#  Swarm MMA_SHA_2C product file format parser
+#  Swarm MMA_SHA_2* product file format parser
 #
 # Author: Martin Paces <martin.paces@eox.at>
 #
@@ -26,8 +26,8 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-from spacepy import pycdf
 from numpy import array
+from spacepy import pycdf
 
 CDF_EPOCH_TYPE = pycdf.const.CDF_EPOCH.value
 CDF_EPOCH_2000 = 63113904000000.0
@@ -35,29 +35,29 @@ CDF_EPOCH_TO_DAYS = 1.0/86400000.0
 
 
 def read_swarm_mma_2f_geo_internal(cdf):
-    """ Read Swarm MMA_SHA_2F product CDF file and returns a tuple
-    containing the internal geographic frame model coefficients.
+    """ Read Swarm MMA_SHA_2F product CDF file and returns the internal
+    geographic frame model coefficients.
     """
     return read_swarm_mma_2f_coefficients(cdf, "gh", "geo")
 
 
 def read_swarm_mma_2f_geo_external(cdf):
-    """ Read Swarm MMA_SHA_2F product CDF file and returns a tuple
-    containing the external geographic frame model coefficients.
+    """ Read Swarm MMA_SHA_2F product CDF file and returns the external
+    geographic frame model coefficients.
     """
     return read_swarm_mma_2f_coefficients(cdf, "qs", "geo")
 
 
 def read_swarm_mma_2f_sm_internal(cdf):
-    """ Read Swarm MMA_SHA_2F product CDF file and returns a tuple
-    containing the internal solar-magnetic frame model coefficients.
+    """ Read Swarm MMA_SHA_2F product CDF file and returns the internal
+    solar-magnetic frame model coefficients.
     """
     return read_swarm_mma_2f_coefficients(cdf, "gh", "sm")
 
 
 def read_swarm_mma_2f_sm_external(cdf):
-    """ Read Swarm MMA_SHA_2F product CDF file and returns a tuple
-    containing the external solar-magnetic frame model coefficients.
+    """ Read Swarm MMA_SHA_2F product CDF file and returns the external
+    solar-magnetic frame model coefficients.
     """
     return read_swarm_mma_2f_coefficients(cdf, "qs", "sm")
 
@@ -83,7 +83,7 @@ def read_swarm_mma_2c_external(cdf):
 
 
 def read_swarm_mma_2f_coefficients(cdf, variable, frame):
-    """ Read a single set of Swarm MMA_SHA_2F coefficients.
+    """ Read a set of Swarm MMA_SHA_2F coefficients.
 
     The function expect a spacepy.pycdf.CDF object.
     """

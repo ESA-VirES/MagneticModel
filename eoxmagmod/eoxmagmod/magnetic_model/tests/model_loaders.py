@@ -61,6 +61,7 @@ from eoxmagmod.magnetic_model.tests.data import (
     SWARM_MMA_SHA_2C_TEST_DATA,
     SWARM_MMA_SHA_2F_TEST_DATA,
     SWARM_MIO_SHA_2_TEST_DATA,
+    CHAOS_MMA_TEST_DATA,
 )
 from eoxmagmod.magnetic_model.model import (
     SphericalHarmomicGeomagneticModel,
@@ -454,6 +455,32 @@ class TestMMA2CPrimary(TestCase, DipoleSHModelTestMixIn):
 
     def load(self):
         return load_model_swarm_mma_2c_external(SWARM_MMA_SHA_2C_TEST_DATA)
+
+
+class TestChaosMMASecondary(TestCase, DipoleSHModelTestMixIn):
+    reference_values = (
+        6194.5, (30.0, 40.0, 8000.0),
+        (1.8492638163980442, 0.5125018012040559, 1.0821299594918217)
+    )
+    validity = (6179.00000, 6209.979167)
+    options = {"scale": [1, 1, -1]}
+    scale = [1, 1, -1]
+
+    def load(self):
+        return load_model_swarm_mma_2c_internal(CHAOS_MMA_TEST_DATA)
+
+
+class TestChaosMMAPrimary(TestCase, DipoleSHModelTestMixIn):
+    reference_values = (
+        6194.5, (30.0, 40.0, 8000.0),
+        (-8.667405753073385, 4.538967766836233, 6.576263454698334)
+    )
+    validity = (6179.00000, 6209.979167)
+    options = {"scale": [1, 1, -1]}
+    scale = [1, 1, -1]
+
+    def load(self):
+        return load_model_swarm_mma_2c_external(CHAOS_MMA_TEST_DATA)
 
 
 class TestMMA2FGeoSecondary(TestCase, SHModelTestMixIn):
