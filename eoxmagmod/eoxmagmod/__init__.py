@@ -27,25 +27,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-from .data import (
-    # Data items are renamed to provide backward compatibility.
-    WMM_2010 as DATA_WMM_2010,
-    WMM_2015 as DATA_WMM_2015,
-    EMM_2010_STATIC as DATA_EMM_2010_STATIC,
-    EMM_2010_SECVAR as DATA_EMM_2010_SECVAR,
-    CHAOS5_CORE as DATA_CHAOS5_CORE,
-    CHAOS5_CORE_V4 as DATA_CHAOS5_CORE_V4,
-    CHAOS5_STATIC as DATA_CHAOS5_STATIC,
-    CHAOS6_CORE as DATA_CHAOS6_CORE,
-    CHAOS6_CORE_X3 as DATA_CHAOS6_CORE_X3,
-    CHAOS6_STATIC as DATA_CHAOS6_STATIC,
-    IGRF11 as DATA_IGRF11,
-    IGRF12 as DATA_IGRF12,
-    SIFM as DATA_SIFM,
-    APEX_2015 as DATA_APEX_2015,
-    APEX_2020 as DATA_APEX_2020,
-)
-from .base import MagneticModel
 from .util import (
     vnorm,
     vrotate,
@@ -75,10 +56,6 @@ from ._pywmm import (
     sphargrd,
     sheval,
 )
-from .emm import read_model_emm2010
-from .wmm import read_model_wmm, read_model_wmm2010, read_model_wmm2015
-from .shc import read_model_shc
-from .igrf import read_model_igrf11
 from .quasi_dipole_coordinates import (
     eval_qdlatlon, eval_mlt, eval_subsol,
     eval_qdlatlon_with_base_vectors,
@@ -108,13 +85,6 @@ from .magnetic_model.loader_mio import (
 from .magnetic_model.field_lines import trace_field_line
 
 __all__ = [
-    'MagneticModel',
-    'read_model_wmm',
-    'read_model_wmm2010',
-    'read_model_wmm2015',
-    'read_model_emm2010',
-    'read_model_shc',
-    'read_model_igrf11',
     'vnorm',
     'vincdecnorm',
     'vrotate',
@@ -132,16 +102,6 @@ __all__ = [
     'vrot_from_dipole',
     'convert_to_dipole',
     'sheval_dipole',
-    'DATA_WMM_2010',
-    'DATA_WMM_2015',
-    'DATA_EMM_2010_STATIC',
-    'DATA_EMM_2010_SECVAR',
-    'DATA_CHAOS5_CORE',
-    'DATA_CHAOS5_CORE_V4',
-    'DATA_CHAOS5_STATIC',
-    'DATA_IGRF11',
-    'DATA_IGRF12',
-    'DATA_SIFM',
     'GEODETIC_ABOVE_WGS84',
     'GEODETIC_ABOVE_EGM96',
     'GEOCENTRIC_SPHERICAL',
@@ -153,8 +113,6 @@ __all__ = [
     'eval_qdlatlon_with_base_vectors',
     'eval_mlt',
     'eval_subsol',
-    'DATA_APEX_2015',
-    'DATA_APEX_2020',
     'sunpos',
     'sunpos_original',
     'decimal_year_to_mjd2000',
@@ -177,7 +135,7 @@ __all__ = [
     'trace_field_line',
 ]
 
-__version__ = '0.5.3'
+__version__ = '0.6.0'
 __author__ = 'Martin Paces (martin.paces@eox.at)'
 __copyright__ = 'Copyright (C) 2014 EOX IT Services GmbH'
 __licence__ = 'EOX licence (MIT style)'
