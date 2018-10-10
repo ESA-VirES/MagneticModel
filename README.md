@@ -29,7 +29,7 @@ $ sudo make install
 
 ```
 $ cd wmm/
-$ ./configure --prefix=/usr/ --libdir='${exec_prefix}/lib64'
+$ ./configure
 $ make build
 $ sudo make install
 ```
@@ -38,7 +38,7 @@ $ sudo make install
 
 ```
 $ cd qdipole/
-$ ./configure --prefix=/usr/ --libdir='${exec_prefix}/lib64'
+$ ./configure
 $ make build
 $ sudo make install
 ```
