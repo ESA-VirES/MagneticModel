@@ -221,7 +221,7 @@ class TestCoeffCHAOS6Core(TestCase, ShcTestMixIn):
     class_ = SparseSHCoefficientsTimeDependentDecimalYear
     path = CHAOS6_CORE_LATEST
     degree = 20
-    validity = decimal_year_to_mjd2000((1997.102, 2018.6010))
+    validity = decimal_year_to_mjd2000((1997.102, 2019.1006))
 
 
 class TestCoeffCHAOS6Static(TestCase, ShcTestMixIn):
@@ -235,7 +235,7 @@ class TestCoeffCHAOS6Combined(TestCase, CombinedShcTestMixIn):
     path_core = CHAOS6_CORE_LATEST
     path_static = CHAOS6_STATIC
     degree = 110
-    validity = decimal_year_to_mjd2000((1997.1020, 2018.6010))
+    validity = decimal_year_to_mjd2000((1997.1020, 2019.1006))
 
 #-------------------------------------------------------------------------------
 
