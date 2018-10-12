@@ -30,7 +30,7 @@
 #ifndef PYTIMECONV_DECIMAL_YEAR_TO_MJD2000_H
 #define PYTIMECONV_DECIMAL_YEAR_TO_MJD2000_H
 
-#include "pywmm_aux.h"
+#include "pymm_aux.h"
 #include "time_conversion.h"
 #include <math.h>
 

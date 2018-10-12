@@ -33,8 +33,8 @@ from random import random
 from math import pi, cos, sin, sqrt
 from numpy import array, zeros
 from numpy.testing import assert_allclose
-from eoxmagmod._pywmm import sphargrd
-from eoxmagmod.tests.pywmm_spharpot import SphericalHarmonicsCommonMixIn
+from eoxmagmod._pymm import sphargrd
+from eoxmagmod.tests.pymm_spharpot import SphericalHarmonicsCommonMixIn
 from eoxmagmod.tests.data import sifm
 from eoxmagmod.tests.data import mma_external
 

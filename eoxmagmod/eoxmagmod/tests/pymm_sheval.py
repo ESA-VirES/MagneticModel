@@ -32,7 +32,7 @@ from itertools import product
 from random import random
 from numpy import array, empty, nditer
 from numpy.testing import assert_allclose
-from eoxmagmod._pywmm import (
+from eoxmagmod._pymm import (
     POTENTIAL, GRADIENT, POTENTIAL_AND_GRADIENT,
     GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96,
     GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,

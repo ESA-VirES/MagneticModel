@@ -27,7 +27,7 @@
 #-------------------------------------------------------------------------------
 
 from numpy import asarray, copy
-from .._pywmm import GEOCENTRIC_CARTESIAN, GEOCENTRIC_SPHERICAL, convert
+from .._pymm import GEOCENTRIC_CARTESIAN, GEOCENTRIC_SPHERICAL, convert
 from ..util import vnorm, vrotate
 
 EARTH_RADIUS = 6371.2

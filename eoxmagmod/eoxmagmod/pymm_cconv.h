@@ -27,14 +27,14 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_CCONV_H
-#define PYWMM_CCONV_H
+#ifndef PYMM_CCONV_H
+#define PYMM_CCONV_H
 
 #include "wmm/GeomagnetismHeader.h"
 #include "wmm/EGM9615.h"
 #include "geo_conv.h"
-#include "pywmm_aux.h"
-#include "pywmm_coord.h"
+#include "pymm_aux.h"
+#include "pymm_coord.h"
 
 #ifndef NAN
 #define NAN (0.0/0.0)
@@ -259,4 +259,4 @@ static PyObject* convert(PyObject *self, PyObject *args, PyObject *kwdict)
     return retval;
 }
 
-#endif  /* PYWMM_CCONV_H */
+#endif  /* PYMM_CCONV_H */

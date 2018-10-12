@@ -28,10 +28,10 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_VROT_COMMON_H
-#define PYWMM_VROT_COMMON_H
+#ifndef PYMM_VROT_COMMON_H
+#define PYMM_VROT_COMMON_H
 
-#include "pywmm_aux.h"
+#include "pymm_aux.h"
 
 /* array check*/
 
@@ -66,4 +66,4 @@ static int _vrot_arr_check(
     return 0;
 }
 
-#endif  /* PYWMM_VROT_COMMON_H */
+#endif  /* PYMM_VROT_COMMON_H */

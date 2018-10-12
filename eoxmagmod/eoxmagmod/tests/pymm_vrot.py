@@ -32,7 +32,7 @@ from math import pi
 from numpy import array, zeros, empty, meshgrid, linspace, sin, cos
 from numpy.random import random
 from numpy.testing import assert_allclose
-from eoxmagmod._pywmm import (
+from eoxmagmod._pymm import (
     vrot_sph2geod, vrot_sph2cart, vrot_cart2sph,
     convert, GEODETIC_ABOVE_WGS84, GEOCENTRIC_SPHERICAL,
 )

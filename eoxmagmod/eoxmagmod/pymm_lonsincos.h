@@ -28,12 +28,12 @@
  *-----------------------------------------------------------------------------
  */
 
-#ifndef PYWMM_LONSINCOS_H
-#define PYWMM_LONSINCOS_H
+#ifndef PYMM_LONSINCOS_H
+#define PYMM_LONSINCOS_H
 
 #include <math.h>
 #include "shc.h"
-#include "pywmm_aux.h"
+#include "pymm_aux.h"
 
 /* python function definition */
 
@@ -96,4 +96,4 @@ static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
     return retval;
 }
 
-#endif  /* PYWMM_LONSINCOS_H */
+#endif  /* PYMM_LONSINCOS_H */

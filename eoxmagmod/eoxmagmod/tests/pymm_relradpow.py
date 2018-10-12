@@ -30,7 +30,7 @@
 from unittest import TestCase, main
 from numpy import array
 from numpy.testing import assert_allclose
-from eoxmagmod._pywmm import relradpow
+from eoxmagmod._pymm import relradpow
 
 
 class TestRadialPowerSeries(TestCase):

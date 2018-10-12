@@ -33,7 +33,7 @@ from random import random
 from math import pi #, sin, cos, sqrt, floor
 from numpy import array, empty, sin, cos, sqrt, arctan2, hypot, fabs, copysign
 from numpy.testing import assert_allclose
-from eoxmagmod._pywmm import (
+from eoxmagmod._pymm import (
     GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96,
     GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
     convert,

@@ -37,7 +37,7 @@ from ._pytimeconv import (
     mjd2000_to_decimal_year,
     mjd2000_to_year_fraction,
 )
-from ._pywmm import (
+from ._pymm import (
     GEODETIC_ABOVE_WGS84,
     GEODETIC_ABOVE_EGM96,
     GEOCENTRIC_SPHERICAL,
@@ -135,7 +135,7 @@ __all__ = [
     'trace_field_line',
 ]
 
-__version__ = '0.6.1'
+__version__ = '0.7.0'
 __author__ = 'Martin Paces (martin.paces@eox.at)'
 __copyright__ = 'Copyright (C) 2014 EOX IT Services GmbH'
 __licence__ = 'EOX licence (MIT style)'

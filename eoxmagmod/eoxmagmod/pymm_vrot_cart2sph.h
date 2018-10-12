@@ -1,6 +1,6 @@
 /*-----------------------------------------------------------------------------
  *
- * Geomagnetic Model - C python bindings - vector rotation - sph2geod
+ * Geomagnetic Model - C python bindings - vector rotation - cart2sph
  *  (i.e., vector coordinate system transformation)
  *
  * Author: Martin Paces <martin.paces@eox.at>
@@ -28,26 +28,28 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_VROT_SPH2GEOD_H
-#define PYWMM_VROT_SPH2GEOD_H
+#ifndef PYMM_VROT_CART2SPH_H
+#define PYMM_VROT_CART2SPH_H
 
+#include <math.h>
 #include "math_aux.h"
 #include "geo_conv.h"
-#include "pywmm_aux.h"
-#include "pywmm_vrot_common.h"
+#include "pymm_aux.h"
+#include "pymm_vrot_common.h"
 
 /* recursive vector rotation */
 
-static void _vrot_sph2geod(ARRAY_DATA ad_i, ARRAY_DATA ad_dlat,
-                           ARRAY_DATA ad_o)
+static void _vrot_cart2sph(ARRAY_DATA ad_i, ARRAY_DATA ad_lat,
+                           ARRAY_DATA ad_lon, ARRAY_DATA ad_o)
 {
     if (ad_i.ndim > 1)
     {
         npy_intp i;
         for(i = 0; i < ad_i.dim[0]; ++i)
-            _vrot_sph2geod(
+            _vrot_cart2sph(
                 _get_arrd_item(&ad_i, i),
-                _get_arrd_item(&ad_dlat, i),
+                _get_arrd_item(&ad_lat, i),
+                _get_arrd_item(&ad_lon, i),
                 _get_arrd_item(&ad_o, i)
             );
     }
@@ -57,11 +59,15 @@ static void _vrot_sph2geod(ARRAY_DATA ad_i, ARRAY_DATA ad_dlat,
         #define P(a,i) ((double*)((a).data+(i)*(a).stride[0]))
         #define V(a,i) (*P(a,i))
 
-        const double dlat = -DG2RAD*SV(ad_dlat);
+        const double lat = -DG2RAD*SV(ad_lat);
+        const double lon = -DG2RAD*SV(ad_lon);
+        double tmp;
+
+        // rotate around the azimuth axis
+        rot2d(&tmp, P(ad_o,1), V(ad_i,0), V(ad_i,1), sin(lon), cos(lon));
 
         // rotate around the elevation axis
-        rot2d(P(ad_o,2), P(ad_o,0), V(ad_i,2), V(ad_i,0), sin(dlat), cos(dlat));
-        V(ad_o,1) = V(ad_i,1);
+        rot2d(P(ad_o,2), P(ad_o,0), tmp, V(ad_i,2), sin(lat), cos(lat));
 
         #undef V
         #undef P
@@ -70,34 +76,35 @@ static void _vrot_sph2geod(ARRAY_DATA ad_i, ARRAY_DATA ad_dlat,
 
 /* python function definition */
 
-#define DOC_VROT_SPH2GEOD "\n"\
-"   arr_out = vrot_sph2geod(arr_in, arr_dlat)\n"\
+#define DOC_VROT_CART2SPH "\n"\
+"   arr_out = vrot_cart2sph(arr_in, arr_lat, arr_lon)\n"\
 "\n"\
-"     Rotate vectors from the geocentric spherical (NEC) to the geodetic\n"\
-"     (NEC) coordinate frame for a given difference of latitudes\n"\
-"     in degrees.\n"\
-"     This function can be also used for the inverse rotation from the geodetic\n"\
-"     (NEC) to the geocentric spherical (NEC) coordinate frame by setting\n"\
-"     the negative difference of latitudes.\n"\
+"     Rotate vectors from the Cartesian (XYZ) to \n"\
+"     the spherical (NEC) coordinate frame for the given latitude\n"\
+"     and longitude in degrees.\n"\
 "\n"\
 "     The inputs are:\n"\
 "         arr_in - array of the input vectors\n"\
-"         arr_dlat - array of differences of the latitudes.\n"\
-"     A scalar value is also accepted for a single vector rotation.\n"
+"         arr_lat - array of latitudes.\n"\
+"         arr_lon - array of longitudes.\n"\
+"     Scalar lat/lon values are also accepted for a single vector rotation.\n"
 
-static PyObject* vrot_sph2geod(PyObject *self, PyObject *args, PyObject *kwdict)
+static PyObject* vrot_cart2sph(PyObject *self, PyObject *args, PyObject *kwdict)
 {
-    static char *keywords[] = {"arr_in", "arr_dlat", NULL};
+    static char *keywords[] = {"arr_in", "arr_lat", "arr_lon", NULL};
     PyObject *obj_in = NULL; // input object
-    PyObject *obj_dlat = NULL; // input object
+    PyObject *obj_lat = NULL; // input object
+    PyObject *obj_lon = NULL; // input object
     PyObject *arr_in = NULL; // input array
-    PyObject *arr_dlat = NULL; // input array
+    PyObject *arr_lat = NULL; // input array
+    PyObject *arr_lon = NULL; // input array
     PyObject *arr_out = NULL; // output array
     PyObject *retval = NULL;
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "OO|:vrot_sph2geod", keywords, &obj_in, &obj_dlat
+        args, kwdict, "OOO|:vrot_cart2sph", keywords,
+        &obj_in, &obj_lat, &obj_lon
     ))
         goto exit;
 
@@ -105,7 +112,10 @@ static PyObject* vrot_sph2geod(PyObject *self, PyObject *args, PyObject *kwdict)
     if (NULL == (arr_in=_get_as_double_array(obj_in, 1, 0, NPY_ALIGNED, keywords[0])))
         goto exit;
 
-    if (NULL == (arr_dlat=_get_as_double_array(obj_dlat, 0, 0, NPY_ALIGNED, keywords[1])))
+    if (NULL == (arr_lat=_get_as_double_array(obj_lat, 0, 0, NPY_ALIGNED, keywords[1])))
+        goto exit;
+
+    if (NULL == (arr_lon=_get_as_double_array(obj_lon, 0, 0, NPY_ALIGNED, keywords[2])))
         goto exit;
 
     // check maximum allowed input array dimension
@@ -121,7 +131,10 @@ static PyObject* vrot_sph2geod(PyObject *self, PyObject *args, PyObject *kwdict)
     if (_check_array_dim_eq(arr_in, -1, 3, keywords[0]))
         goto exit;
 
-    if (_vrot_arr_check(arr_in, arr_dlat, keywords[0], keywords[1]))
+    if (_vrot_arr_check(arr_in, arr_lat, keywords[0], keywords[1]))
+        goto exit;
+
+    if (_vrot_arr_check(arr_in, arr_lon, keywords[0], keywords[2]))
         goto exit;
 
     // create the output array
@@ -129,18 +142,20 @@ static PyObject* vrot_sph2geod(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     // rotate the vector(s)
-    _vrot_sph2geod(_array_to_arrd(arr_in), _array_to_arrd(arr_dlat), _array_to_arrd(arr_out));
+    _vrot_cart2sph(_array_to_arrd(arr_in), _array_to_arrd(arr_lat),
+                   _array_to_arrd(arr_lon), _array_to_arrd(arr_out));
 
     retval = arr_out;
 
   exit:
 
-    // decrease reference counters to the arrays
+    // decrease reference counters of the arrays
     if (arr_in){Py_DECREF(arr_in);}
-    if (arr_dlat){Py_DECREF(arr_dlat);}
+    if (arr_lat){Py_DECREF(arr_lat);}
+    if (arr_lon){Py_DECREF(arr_lon);}
     if (!retval && arr_out){Py_DECREF(arr_out);}
 
     return retval;
 }
 
-#endif  /* PYWMM_VROT_SPH2GEOD_H */
+#endif  /* PYMM_VROT_CART2SPH_H */

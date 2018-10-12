@@ -27,8 +27,8 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_SHEVAL_H
-#define PYWMM_SHEVAL_H
+#ifndef PYMM_SHEVAL_H
+#define PYMM_SHEVAL_H
 
 #include <math.h>
 #include <string.h>
@@ -37,9 +37,9 @@
 #include "math_aux.h"
 #include "geo_conv.h"
 #include "shc.h"
-#include "pywmm_aux.h"
-#include "pywmm_coord.h"
-#include "pywmm_cconv.h"
+#include "pymm_aux.h"
+#include "pymm_coord.h"
+#include "pymm_cconv.h"
 
 #ifndef NAN
 #define NAN (0.0/0.0)
@@ -512,4 +512,4 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
     return retval;
 }
 
-#endif  /* PYWMM_SHEVAL_H */
+#endif  /* PYMM_SHEVAL_H */

@@ -59,7 +59,7 @@ setup(
         'eoxmagmod.magnetic_model.tests.data',
     ],
     license='EOX licence (MIT style)',
-    version='0.6.1',
+    version='0.7.0',
     package_data={
         'eoxmagmod': [
             'data/*',
@@ -70,9 +70,9 @@ setup(
     },
     ext_modules=[
         Extension(
-            'eoxmagmod._pywmm',
+            'eoxmagmod._pymm',
             sources=[
-                'eoxmagmod/pywmm.c',
+                'eoxmagmod/pymm.c',
             ],
             libraries=['geomag'],
             library_dirs=[],

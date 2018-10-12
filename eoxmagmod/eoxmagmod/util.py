@@ -29,7 +29,7 @@
 
 from datetime import datetime
 from numpy import sqrt, asarray
-from ._pywmm import (
+from ._pymm import (
     GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96,
     GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
     convert, vrot_sph2geod, vrot_sph2cart, vrot_cart2sph,

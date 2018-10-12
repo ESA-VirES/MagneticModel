@@ -28,7 +28,7 @@
 # pylint: disable=no-name-in-module
 
 from numpy import asarray, ones
-from ._pywmm import (
+from ._pymm import (
     GEODETIC_ABOVE_WGS84, GEOCENTRIC_CARTESIAN, GEOCENTRIC_SPHERICAL,
     POTENTIAL, GRADIENT, convert, sheval,
 )
