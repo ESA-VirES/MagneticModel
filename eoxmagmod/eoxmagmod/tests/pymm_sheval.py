@@ -34,8 +34,7 @@ from numpy import array, empty, nditer
 from numpy.testing import assert_allclose
 from eoxmagmod._pymm import (
     POTENTIAL, GRADIENT, POTENTIAL_AND_GRADIENT,
-    GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96,
-    GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
+    GEODETIC_ABOVE_WGS84, GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
     convert, vrot_sph2geod, vrot_sph2cart,
     relradpow, lonsincos, legendre,
     spharpot, sphargrd, sheval,
@@ -88,7 +87,7 @@ class SphericalHarmonicsMixIn(object):
             latd = coords[..., 0]
             lond = coords[..., 1]
             return vrot_sph2cart(vectors, latd, lond)
-        elif cls.target_coordinate_system in (GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96):
+        elif cls.target_coordinate_system == GEODETIC_ABOVE_WGS84:
             dlatd = convert(
                 coords, GEOCENTRIC_SPHERICAL, cls.target_coordinate_system
             )[..., 0] - coords[..., 0]
@@ -231,13 +230,6 @@ class TestSHEvalCartesian2WGS84Internal(TestCase, SourceCartesian, SHTypeInterna
 class TestSHEvalCartesian2WGS84External(TestCase, SourceCartesian, SHTypeExternal, SphericalHarmonicsMixIn):
     target_coordinate_system = GEODETIC_ABOVE_WGS84
 
-
-class TestSHEvalCartesian2EGM96Internal(TestCase, SourceCartesian, SHTypeInternal, SphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-class TestSHEvalCartesian2EGM96External(TestCase, SourceCartesian, SHTypeExternal, SphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
 #-------------------------------------------------------------------------------
 
 class TestSHEvalSpherical2CartesianInternal(TestCase, SourceSpherical, SHTypeInternal, SphericalHarmonicsMixIn):
@@ -260,13 +252,6 @@ class TestSHEvalSpherical2WGS84Internal(TestCase, SourceSpherical, SHTypeInterna
 class TestSHEvalSpherical2WGS84External(TestCase, SourceSpherical, SHTypeExternal, SphericalHarmonicsMixIn):
     target_coordinate_system = GEODETIC_ABOVE_WGS84
 
-
-class TestSHEvalSpherical2EGM96Internal(TestCase, SourceSpherical, SHTypeInternal, SphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-class TestSHEvalSpherical2EGM96External(TestCase, SourceSpherical, SHTypeExternal, SphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
 #-------------------------------------------------------------------------------
 
 class TestSHEvalWGS842CartesianInternal(TestCase, SourceGeodetic, SHTypeInternal, SphericalHarmonicsMixIn):
@@ -288,42 +273,6 @@ class TestSHEvalWGS842WGS84Internal(TestCase, SourceGeodetic, SHTypeInternal, Sp
 
 class TestSHEvalWGS842WGS84External(TestCase, SourceGeodetic, SHTypeExternal, SphericalHarmonicsMixIn):
     target_coordinate_system = GEODETIC_ABOVE_WGS84
-
-
-class TestSHEvalWGS842EGM96Internal(TestCase, SourceGeodetic, SHTypeInternal, SphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-class TestSHEvalWGS842EGM96External(TestCase, SourceGeodetic, SHTypeExternal, SphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-#-------------------------------------------------------------------------------
-
-class TestSHEvalEGM962CartesianInternal(TestCase, SourceGeodetic, SHTypeInternal, SphericalHarmonicsMixIn):
-    target_coordinate_system = GEOCENTRIC_CARTESIAN
-
-class TestSHEvalEGM962CartesianExternal(TestCase, SourceGeodetic, SHTypeExternal, SphericalHarmonicsMixIn):
-    target_coordinate_system = GEOCENTRIC_CARTESIAN
-
-
-class TestSHEvalEGM962SphericalInternal(TestCase, SourceGeodetic, SHTypeInternal, SphericalHarmonicsMixIn):
-    target_coordinate_system = GEOCENTRIC_SPHERICAL
-
-class TestSHEvalEGM962SphericalExternal(TestCase, SourceGeodetic, SHTypeExternal, SphericalHarmonicsMixIn):
-    target_coordinate_system = GEOCENTRIC_SPHERICAL
-
-
-class TestSHEvalEGM962WGS84Internal(TestCase, SourceGeodetic, SHTypeInternal, SphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_WGS84
-
-class TestSHEvalEGM962WGS84External(TestCase, SourceGeodetic, SHTypeExternal, SphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_WGS84
-
-
-class TestSHEvalEGM962EGM96Internal(TestCase, SourceGeodetic, SHTypeInternal, SphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-class TestSHEvalEGM962EGM96External(TestCase, SourceGeodetic, SHTypeExternal, SphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
 
 #-------------------------------------------------------------------------------
 

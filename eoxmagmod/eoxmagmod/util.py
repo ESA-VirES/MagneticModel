@@ -30,15 +30,11 @@
 from datetime import datetime
 from numpy import sqrt, asarray
 from ._pymm import (
-    GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96,
-    GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
+    GEODETIC_ABOVE_WGS84, GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
     convert, vrot_sph2geod, vrot_sph2cart, vrot_cart2sph,
 )
 
-GEODETIC_COORD_TYPES = (GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96)
-SPHERICAL_COORD_TYPES = (
-    GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96, GEOCENTRIC_SPHERICAL
-)
+SPHERICAL_COORD_TYPES = (GEODETIC_ABOVE_WGS84, GEOCENTRIC_SPHERICAL)
 
 def vrotate(arr, coord_in, coord_out, coord_type_in, coord_type_out):
     """ Rotate vectors from one coordinate system to another.
@@ -58,8 +54,8 @@ def vrotate(arr, coord_in, coord_out, coord_type_in, coord_type_out):
     coord_out = None if coord_out is None else asarray(coord_out)
     coord_in = None if coord_in is None else asarray(coord_in)
 
-    if coord_type_in in GEODETIC_COORD_TYPES:
-        if coord_type_out in GEODETIC_COORD_TYPES:
+    if coord_type_in == GEODETIC_ABOVE_WGS84:
+        if coord_type_out == GEODETIC_ABOVE_WGS84:
             return arr
         elif coord_type_out == GEOCENTRIC_SPHERICAL:
             return vrot_sph2geod(arr, coord_out[..., 0] - coord_in[..., 0])
@@ -67,7 +63,7 @@ def vrotate(arr, coord_in, coord_out, coord_type_in, coord_type_out):
             return vrot_sph2cart(arr, coord_in[..., 0], coord_in[..., 1])
 
     elif coord_type_in == GEOCENTRIC_SPHERICAL:
-        if coord_type_out in GEODETIC_COORD_TYPES:
+        if coord_type_out == GEODETIC_ABOVE_WGS84:
             return vrot_sph2geod(arr, coord_out[..., 0] - coord_in[..., 0])
         elif coord_type_out == GEOCENTRIC_CARTESIAN:
             return vrot_sph2cart(arr, coord_in[..., 0], coord_in[..., 1])

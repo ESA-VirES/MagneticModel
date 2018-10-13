@@ -39,7 +39,6 @@ from ._pytimeconv import (
 )
 from ._pymm import (
     GEODETIC_ABOVE_WGS84,
-    GEODETIC_ABOVE_EGM96,
     GEOCENTRIC_SPHERICAL,
     GEOCENTRIC_CARTESIAN,
     POTENTIAL,
@@ -103,7 +102,6 @@ __all__ = [
     'convert_to_dipole',
     'sheval_dipole',
     'GEODETIC_ABOVE_WGS84',
-    'GEODETIC_ABOVE_EGM96',
     'GEOCENTRIC_SPHERICAL',
     'GEOCENTRIC_CARTESIAN',
     'POTENTIAL',

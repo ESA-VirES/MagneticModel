@@ -33,9 +33,8 @@
 typedef enum {
     CT_INVALID = -1,
     CT_GEODETIC_ABOVE_WGS84 = 0,
-    CT_GEODETIC_ABOVE_EGM96 = 1,
-    CT_GEOCENTRIC_SPHERICAL = 2,
-    CT_GEOCENTRIC_CARTESIAN = 3
+    CT_GEOCENTRIC_SPHERICAL = 1,
+    CT_GEOCENTRIC_CARTESIAN = 2
 } COORD_TYPE;
 
 /*
@@ -47,8 +46,6 @@ static COORD_TYPE _check_coord_type(int ct, const char *label)
     {
         case CT_GEODETIC_ABOVE_WGS84:
             return CT_GEODETIC_ABOVE_WGS84;
-        case CT_GEODETIC_ABOVE_EGM96:
-            return CT_GEODETIC_ABOVE_EGM96;
         case CT_GEOCENTRIC_SPHERICAL:
             return CT_GEOCENTRIC_SPHERICAL;
         case CT_GEOCENTRIC_CARTESIAN:
@@ -60,4 +57,3 @@ static COORD_TYPE _check_coord_type(int ct, const char *label)
 }
 
 #endif  /* PYMM_COORD_H */
-
