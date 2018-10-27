@@ -10,7 +10,6 @@ addons:
     - gfortran
 install:
 - ( cd libcdf && make build && sudo make install )
-- ( cd wmm && ./configure && make build && sudo make install )
 - ( cd qdipole && ./configure && make build && sudo make install )
 - pip install numpy
 - pip install SpacePy
