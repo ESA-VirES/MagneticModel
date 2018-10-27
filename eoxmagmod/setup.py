@@ -74,7 +74,7 @@ setup(
             sources=[
                 'eoxmagmod/pymm.c',
             ],
-            libraries=['geomag'],
+            libraries=[],
             library_dirs=[],
             include_dirs=COMMON_INCLUDE_DIRS,
         ),
