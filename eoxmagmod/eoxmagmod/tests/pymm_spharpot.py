@@ -32,7 +32,7 @@ from itertools import chain, product
 from random import random
 from numpy import array, zeros
 from numpy.testing import assert_allclose
-from eoxmagmod._pywmm import legendre, lonsincos, relradpow, spharpot
+from eoxmagmod._pymm import legendre, lonsincos, relradpow, spharpot
 from eoxmagmod.tests.data import sifm
 from eoxmagmod.tests.data import mma_external
 

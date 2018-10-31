@@ -31,7 +31,7 @@
 #ifndef PYQD_EVAL_QDLATLON_H
 #define PYQD_EVAL_QDLATLON_H
 
-#include "pywmm_aux.h"
+#include "pymm_aux.h"
 #include "qdipole/cqdipole.h"
 
 /* python function definition */

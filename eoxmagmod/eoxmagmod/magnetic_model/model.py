@@ -27,7 +27,7 @@
 #-------------------------------------------------------------------------------
 
 from numpy import asarray, empty, full, nan, nditer
-from .._pywmm import GRADIENT, GEOCENTRIC_SPHERICAL, sheval
+from .._pymm import GRADIENT, GEOCENTRIC_SPHERICAL, sheval
 from ..sheval_dipole import sheval_dipole
 
 

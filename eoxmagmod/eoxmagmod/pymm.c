@@ -27,7 +27,7 @@
  *-----------------------------------------------------------------------------
 */
 
-#define VERSION "0.2.0"
+#define VERSION "0.7.0"
 
 // needed to prevent dual definition
 #ifdef _POSIX_C_SOURCE
@@ -51,43 +51,43 @@
 /*---------------------------------------------------------------------------*/
 
 /* Module specific exceptions. */
-#include "pywmm_exc.h"
+#include "pymm_exc.h"
 
 /* Coordinate conversions. */
-#include "pywmm_cconv.h"
+#include "pymm_cconv.h"
 
 /* spherical harmonic model evaluation */
-#include "pywmm_sheval.h"
+#include "pymm_sheval.h"
 
 /* evaluation of the associative Legendre functions */
-#include "pywmm_legendre.h"
+#include "pymm_legendre.h"
 
 /* evaluation of the relative radius powers */
-#include "pywmm_relradpow.h"
+#include "pymm_relradpow.h"
 
 /* evaluation of the series of longitude sine and cosine values */
-#include "pywmm_lonsincos.h"
+#include "pymm_lonsincos.h"
 
 /* final spherical-harmonic gradient evaluation */
-#include "pywmm_sphargrd.h"
+#include "pymm_sphargrd.h"
 
 /* final spherical-harmonic gradient potential */
-#include "pywmm_spharpot.h"
+#include "pymm_spharpot.h"
 
 /* vector rotations */
-#include "pywmm_vrot_sph2geod.h"
-#include "pywmm_vrot_sph2cart.h"
-#include "pywmm_vrot_cart2sph.h"
+#include "pymm_vrot_sph2geod.h"
+#include "pymm_vrot_sph2cart.h"
+#include "pymm_vrot_cart2sph.h"
 
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
 
-#define DOC_PYWMM \
+#define DOC_PYMM \
 "This module provides bindings to the Geomagnetic Model library."
 
 /*---------------------------------------------------------------------------*/
 /*define module's methods */
-static PyMethodDef pywmm_methods[] =
+static PyMethodDef pymm_methods[] =
 {
     {"vrot_sph2cart", (PyCFunction)vrot_sph2cart, METH_VARARGS|METH_KEYWORDS, DOC_VROT_SPH2CART},
     {"vrot_cart2sph", (PyCFunction)vrot_cart2sph, METH_VARARGS|METH_KEYWORDS, DOC_VROT_CART2SPH},
@@ -105,12 +105,12 @@ static PyMethodDef pywmm_methods[] =
 /*---------------------------------------------------------------------------*/
 
 /* module initialization  */
-PyMODINIT_FUNC init_pywmm(void)
+PyMODINIT_FUNC init_pymm(void)
 {
     PyObject *dict, *module;
 
     /* define module */
-    module = Py_InitModule3("_pywmm", pywmm_methods, DOC_PYWMM);
+    module = Py_InitModule3("_pymm", pymm_methods, DOC_PYMM);
     if (NULL == module) return ;
 
     /* initialize numpy arrays */
@@ -120,15 +120,14 @@ PyMODINIT_FUNC init_pywmm(void)
     if (NULL == dict) return;
 
     /* add RT2Error */
-    PyExc_WMMError = PyErr_NewException("_pywmm.WMMError", NULL, NULL);
+    PyExc_MMError = PyErr_NewException("_pymm.MMError", NULL, NULL);
 
-    PyDict_SetItemString(dict, "WMMError", PyExc_WMMError);
+    PyDict_SetItemString(dict, "MMError", PyExc_MMError);
 
     /* constants */
     #define SET_INT_ITEM(d, s, i) \
     {PyObject *tmp = PyInt_FromLong(i);  PyDict_SetItemString(d,s,tmp); Py_DECREF(tmp);}
     SET_INT_ITEM(dict, "GEODETIC_ABOVE_WGS84", CT_GEODETIC_ABOVE_WGS84);
-    SET_INT_ITEM(dict, "GEODETIC_ABOVE_EGM96", CT_GEODETIC_ABOVE_EGM96);
     SET_INT_ITEM(dict, "GEOCENTRIC_SPHERICAL", CT_GEOCENTRIC_SPHERICAL);
     SET_INT_ITEM(dict, "GEOCENTRIC_CARTESIAN", CT_GEOCENTRIC_CARTESIAN);
     SET_INT_ITEM(dict, "POTENTIAL", SM_POTENTIAL);

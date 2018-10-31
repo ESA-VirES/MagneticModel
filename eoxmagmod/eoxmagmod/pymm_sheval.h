@@ -27,8 +27,8 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_SHEVAL_H
-#define PYWMM_SHEVAL_H
+#ifndef PYMM_SHEVAL_H
+#define PYMM_SHEVAL_H
 
 #include <math.h>
 #include <string.h>
@@ -37,9 +37,9 @@
 #include "math_aux.h"
 #include "geo_conv.h"
 #include "shc.h"
-#include "pywmm_aux.h"
-#include "pywmm_coord.h"
-#include "pywmm_cconv.h"
+#include "pymm_aux.h"
+#include "pymm_coord.h"
+#include "pymm_cconv.h"
 
 #ifndef NAN
 #define NAN (0.0/0.0)
@@ -188,10 +188,7 @@ static void _sheval_model_eval(MODEL *model, int mode, double *fpot,
     double flat, flon, frad;
     double tmp;
 
-    int glat_needed = (
-        (model->coord_out == CT_GEODETIC_ABOVE_WGS84) ||
-        (model->coord_out == CT_GEODETIC_ABOVE_EGM96)
-    );
+    int glat_needed = (model->coord_out == CT_GEODETIC_ABOVE_WGS84);
 
     void (*shc_relradpow)(double *rrp, int degree, double relrad) = (
         model->is_internal ? shc_relradpow_internal : shc_relradpow_external
@@ -202,10 +199,6 @@ static void _sheval_model_eval(MODEL *model, int mode, double *fpot,
     {
         case CT_GEODETIC_ABOVE_WGS84:
             glat = x; glon = y; ghgt = z;
-            geodetic2geocentric_sph(&crad, &clat, &clon, glat, glon, ghgt, model->elps_a, model->elps_eps2);
-            break;
-        case CT_GEODETIC_ABOVE_EGM96:
-            glat = x; glon = y; ghgt = z + delta_EGM96_to_WGS84(glat, glon);
             geodetic2geocentric_sph(&crad, &clat, &clon, glat, glon, ghgt, model->elps_a, model->elps_eps2);
             break;
         case CT_GEOCENTRIC_SPHERICAL:
@@ -260,7 +253,6 @@ static void _sheval_model_eval(MODEL *model, int mode, double *fpot,
                 break;
 
             case CT_GEODETIC_ABOVE_WGS84:
-            case CT_GEODETIC_ABOVE_EGM96:
                 tmp = clat - DG2RAD*glat;
                 rot2d(fz, fx, frad, flat, sin(tmp), cos(tmp));
                 *fy = flon;
@@ -512,4 +504,4 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
     return retval;
 }
 
-#endif  /* PYWMM_SHEVAL_H */
+#endif  /* PYMM_SHEVAL_H */

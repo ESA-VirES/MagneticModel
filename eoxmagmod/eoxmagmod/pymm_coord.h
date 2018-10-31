@@ -1,7 +1,6 @@
 /*-----------------------------------------------------------------------------
  *
- * Geomagnetic Model - C python bindings - vector rotation - common
- *  (i.e., vector coordinate system transformation)
+ * Geomagnetic Model - C python bindings - coordinate systems definitions
  *
  * Author: Martin Paces <martin.paces@eox.at>
  *
@@ -28,42 +27,33 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_VROT_COMMON_H
-#define PYWMM_VROT_COMMON_H
+#ifndef PYMM_COORD_H
+#define PYMM_COORD_H
 
-#include "pywmm_aux.h"
+typedef enum {
+    CT_INVALID = -1,
+    CT_GEODETIC_ABOVE_WGS84 = 0,
+    CT_GEOCENTRIC_SPHERICAL = 1,
+    CT_GEOCENTRIC_CARTESIAN = 2
+} COORD_TYPE;
 
-/* array check*/
-
-static int _vrot_arr_check(
-    PyObject *arr_ref, PyObject *arr_checked,
-    const char *label_ref, const char *label_checked
-)
+/*
+ * Check the coordinate type.
+ */
+static COORD_TYPE _check_coord_type(int ct, const char *label)
 {
-    //if ((PyArray_NDIM(arr_ref) > 1)||(PyArray_NDIM(arr_checked) > 0))
-    if (PyArray_NDIM(arr_checked) > 0)
+    switch (ct)
     {
-        int d;
-
-        if (PyArray_NDIM(arr_ref) != PyArray_NDIM(arr_checked)+1)
-        {
-            PyErr_Format(PyExc_ValueError, "Shape mismatch between '%s' and "
-                "'%s'!", label_ref, label_checked);
-            return 1;
-        }
-
-        for (d = 0; d < (PyArray_NDIM(arr_ref)-1); ++d)
-        {
-            if (PyArray_DIM(arr_ref, d) != PyArray_DIM(arr_checked, d))
-            {
-                PyErr_Format(PyExc_ValueError, "Shape mismatch between '%s' "
-                    "and '%s'!", label_ref, label_checked);
-                return 1;
-            }
-        }
+        case CT_GEODETIC_ABOVE_WGS84:
+            return CT_GEODETIC_ABOVE_WGS84;
+        case CT_GEOCENTRIC_SPHERICAL:
+            return CT_GEOCENTRIC_SPHERICAL;
+        case CT_GEOCENTRIC_CARTESIAN:
+            return CT_GEOCENTRIC_CARTESIAN;
+        default:
+            PyErr_Format(PyExc_ValueError, "Invalid coordinate type '%s'!", label);
+            return CT_INVALID;
     }
-
-    return 0;
 }
 
-#endif  /* PYWMM_VROT_COMMON_H */
+#endif  /* PYMM_COORD_H */

@@ -1,11 +1,11 @@
 /*-----------------------------------------------------------------------------
  *
- * Geomagnetic Model - C python bindings - coordinate systems definitions
+ *  common shared Python definitions Python 2/3 compatibility
  *
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2014 EOX IT Services GmbH
+ * Copyright (C) 2018 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,37 +27,56 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_COORD_H
-#define PYWMM_COORD_H
+#ifndef PY_COMMON
+#define PY_COMMON
 
-typedef enum {
-    CT_INVALID = -1,
-    CT_GEODETIC_ABOVE_WGS84 = 0,
-    CT_GEODETIC_ABOVE_EGM96 = 1,
-    CT_GEOCENTRIC_SPHERICAL = 2,
-    CT_GEOCENTRIC_CARTESIAN = 3
-} COORD_TYPE;
+#include <Python.h>
 
-/*
- * Check the coordinate type.
- */
-static COORD_TYPE _check_coord_type(int ct, const char *label)
+/* checking the Python version */
+
+#if PY_MAJOR_VERSION == 2
+#define IS_PYTHON_2
+#if PY_MINOR_VERSION < 6
+#error "Non-supported Python minor version!"
+#endif
+#elif PY_MAJOR_VERSION == 3
+#define IS_PYTHON_3
+#if PY_MINOR_VERSION < 4
+#error "Non-supported Python minor version!"
+#endif
+#else
+#error "Non-supported Python major version!"
+#endif
+
+/* Python 2/3 compatibility */
+
+#ifdef IS_PYTHON_3
+#define PyString_FromString PyUnicode_FromString
+#endif
+
+/* Python module initialization */
+#ifdef IS_PYTHON_3
+static struct PyModuleDef module_definition = {
+    PyModuleDef_HEAD_INIT, NULL, NULL, -1, NULL, NULL, NULL, NULL, NULL
+};
+#endif
+
+PyObject* init_python_module(
+    const char *name,
+    const char *doc,
+    PyMethodDef *methods
+)
 {
-    switch (ct)
-    {
-        case CT_GEODETIC_ABOVE_WGS84:
-            return CT_GEODETIC_ABOVE_WGS84;
-        case CT_GEODETIC_ABOVE_EGM96:
-            return CT_GEODETIC_ABOVE_EGM96;
-        case CT_GEOCENTRIC_SPHERICAL:
-            return CT_GEOCENTRIC_SPHERICAL;
-        case CT_GEOCENTRIC_CARTESIAN:
-            return CT_GEOCENTRIC_CARTESIAN;
-        default:
-            PyErr_Format(PyExc_ValueError, "Invalid coordinate type '%s'!", label);
-            return CT_INVALID;
-    }
+    PyObject *module = NULL;
+#ifdef IS_PYTHON_3
+    module_definition.m_name = name;
+    module_definition.m_doc = doc;
+    module_definition.m_methods = methods;
+    module = PyModule_Create(&module_definition);
+#else /* IS_PYTHON2 */
+    module = Py_InitModule3(name, methods, doc);
+#endif
+    return module;
 }
 
-#endif  /* PYWMM_COORD_H */
-
+#endif /* PY_COMMON */

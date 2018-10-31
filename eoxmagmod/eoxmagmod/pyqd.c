@@ -99,7 +99,7 @@ PyMODINIT_FUNC init_pyqd(void)
         return;
 
     /* add RT2Error */
-    PyExc_QDError = PyErr_NewException("_pywmm.QDError", NULL, NULL);
+    PyExc_QDError = PyErr_NewException("_pyqd.QDError", NULL, NULL);
 
     PyDict_SetItemString(dict, "QDError", PyExc_QDError);
 

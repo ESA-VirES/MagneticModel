@@ -1,11 +1,11 @@
 /*-----------------------------------------------------------------------------
  *
- * Geomagnetic Model - C python bindings - module specific exceptions
+ *  common shared definitions
  *
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2014 EOX IT Services GmbH
+ * Copyright (C) 2018 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +27,20 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_EXC_H
-#define PYWMM_EXC_H
+#ifndef COMMON
+#define COMMON
 
-/* PyWMM module exception */
-static PyObject *PyExc_WMMError;
+#include "version.h"
 
-#endif  /* PYWMM_EXC_H */
+// needed to prevent dual definition
+#ifdef _POSIX_C_SOURCE
+#undef _POSIX_C_SOURCE
+#endif
 
+//#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#define PY_SSIZE_T_CLEAN 1
+
+/* maximum allowed output array dimension */
+#define MAX_OUT_ARRAY_NDIM 16
+
+#endif /* COMMON */

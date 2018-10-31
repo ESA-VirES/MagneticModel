@@ -28,7 +28,7 @@
 
 from math import pi, sin, cos
 from numpy import array, dot
-from eoxmagmod._pywmm import (
+from eoxmagmod._pymm import (
     convert, vrot_sph2cart, vrot_cart2sph,
     GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
 )

@@ -71,7 +71,7 @@ from eoxmagmod.magnetic_model.model_mio import (
     DipoleMIOPrimaryGeomagneticModel,
     DipoleMIOGeomagneticModel,
 )
-from eoxmagmod._pywmm import GEOCENTRIC_SPHERICAL, sheval, GRADIENT
+from eoxmagmod._pymm import GEOCENTRIC_SPHERICAL, sheval, GRADIENT
 from eoxmagmod.sheval_dipole import sheval_dipole
 
 

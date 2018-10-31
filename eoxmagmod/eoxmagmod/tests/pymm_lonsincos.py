@@ -31,7 +31,7 @@ from unittest import TestCase, main
 from math import pi, sin, cos
 from numpy import array
 from numpy.testing import assert_allclose
-from eoxmagmod._pywmm import lonsincos
+from eoxmagmod._pymm import lonsincos
 
 
 class TestLongitudialSinCosSeries(TestCase):

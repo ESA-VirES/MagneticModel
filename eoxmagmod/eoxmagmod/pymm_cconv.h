@@ -27,39 +27,16 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_CCONV_H
-#define PYWMM_CCONV_H
+#ifndef PYMM_CCONV_H
+#define PYMM_CCONV_H
 
-#include "wmm/GeomagnetismHeader.h"
-#include "wmm/EGM9615.h"
 #include "geo_conv.h"
-#include "pywmm_aux.h"
-#include "pywmm_coord.h"
+#include "pymm_aux.h"
+#include "pymm_coord.h"
 
 #ifndef NAN
 #define NAN (0.0/0.0)
 #endif
-
-/* NOTE: Geomagnetism library is used to get the geoid height */
-static double delta_EGM96_to_WGS84(double lat, double lon)
-{
-    double delta_h = NAN;
-    MAGtype_Geoid Geoid;
-
-    /* Sets EGM-96 model file parameters (see also  EGM9615.h)*/
-    Geoid.GeoidHeightBuffer = GeoidHeightBuffer; /* see EGM9615.h */
-    Geoid.NumbGeoidCols = 1441; /* 360 degrees of longitude at 15 minute spacing */
-    Geoid.NumbGeoidRows = 721; /* 180 degrees of latitude  at 15 minute spacing */
-    Geoid.NumbHeaderItems = 6; /* min, max lat, min, max long, lat, long spacing*/
-    Geoid.ScaleFactor = 4; /* 4 grid cells per degree at 15 minute spacing  */
-    Geoid.NumbGeoidElevs = Geoid.NumbGeoidCols * Geoid.NumbGeoidRows;
-    Geoid.Geoid_Initialized = 1;
-    Geoid.UseGeoid = 1;
-
-    MAG_GetGeoidHeight(lat, lon, &delta_h, &Geoid);
-
-    return delta_h * 1e-3; /* scale to km */
-}
 
 /* low-level conversion handlers */
 
@@ -69,18 +46,6 @@ static void conv_identity(double *x1, double *y1, double *z1,
                         double x0, double y0, double z0)
 {
     *x1 = x0; *y1 = y0; *z1 = z0;
-}
-
-static void conv_EGM96_to_WGS84(double *lat1, double *lon1, double *h1,
-                        double lat0, double lon0, double h0)
-{
-    *lat1 = lat0; *lon1 = lon0; *h1 = h0 + delta_EGM96_to_WGS84(lat0, lon0);
-}
-
-static void conv_WGS84_to_EGM96(double *lat1, double *lon1, double *h1,
-                        double lat0, double lon0, double h0)
-{
-    *lat1 = lat0; *lon1 = lon0; *h1 = h0 - delta_EGM96_to_WGS84(lat0, lon0);
 }
 
 static void conv_WGS84_to_cartECEF(double *x, double *y, double *z,
@@ -95,22 +60,6 @@ static void conv_WGS84_to_sphECEF(double *lat1, double *lon1, double *r1,
     geodetic2geocentric_sph(r1, lat1, lon1, lat0, lon0, h0, WGS84_A, WGS84_EPS2);
     *lat1 *= RAD2DG;
     *lon1 *= RAD2DG;
-}
-
-static void conv_EGM96_to_cartECEF(double *x, double *y, double *z,
-                        double lat, double lon, double h)
-{
-    double tmp_lat, tmp_lon, tmp_h;
-    conv_EGM96_to_WGS84(&tmp_lat, &tmp_lon, &tmp_h, lat, lon, h);
-    conv_WGS84_to_cartECEF(x, y, z, lat, lon, tmp_h);
-}
-
-static void conv_EGM96_to_sphECEF(double *lat1, double *lon1, double *r1,
-                        double lat0, double lon0, double h0)
-{
-    double tmp_lat, tmp_lon, tmp_h;
-    conv_EGM96_to_WGS84(&tmp_lat, &tmp_lon, &tmp_h, lat0, lon0, h0);
-    conv_WGS84_to_sphECEF(lat1, lon1, r1, lat0, lon0, tmp_h);
 }
 
 static void conv_cartECEF_to_sphECEF(double *lat, double *lon, double *r,
@@ -128,15 +77,6 @@ static void conv_cartECEF_to_WGS84(double *lat, double *lon, double *h,
 }
 
 
-static void conv_cartECEF_to_EGM96(double *lat, double *lon, double *h,
-                         double x, double y, double z)
-{
-    double tmp_lat, tmp_lon, tmp_h;
-    conv_cartECEF_to_WGS84(&tmp_lat, &tmp_lon, &tmp_h, x, y, z);
-    conv_WGS84_to_EGM96(lat, lon, h, tmp_lat, tmp_lon, tmp_h);
-
-}
-
 static void conv_sphECEF_to_cartECEF(double *x, double *y, double *z,
                          double lat, double lon, double r)
 {
@@ -149,21 +89,12 @@ static void conv_sphECEF_to_WGS84(double *lat1, double *lon1, double *h1,
     geocentric_sph2geodetic(lat1, lon1, h1, r0, DG2RAD*lat0, DG2RAD*lon0, WGS84_A, WGS84_EPS2);
 }
 
-static void conv_sphECEF_to_EGM96(double *lat1, double *lon1, double *h1,
-                           double lat0, double lon0, double r0)
-{
-    double tmp_lat, tmp_lon, tmp_h;
-    conv_sphECEF_to_WGS84(&tmp_lat, &tmp_lon, &tmp_h, lat0, lon0, r0);
-    conv_WGS84_to_EGM96(lat1, lon1, h1, tmp_lat, tmp_lon, tmp_h);
-}
-
 static f_conv _get_fconv(int ct_in, int ct_out)
 {
-    f_conv mtx[4][4] = {
-        {conv_identity, conv_WGS84_to_EGM96, conv_WGS84_to_sphECEF, conv_WGS84_to_cartECEF},
-        {conv_EGM96_to_WGS84, conv_identity, conv_EGM96_to_sphECEF, conv_EGM96_to_cartECEF},
-        {conv_sphECEF_to_WGS84, conv_sphECEF_to_EGM96, conv_identity, conv_sphECEF_to_cartECEF},
-        {conv_cartECEF_to_WGS84, conv_cartECEF_to_EGM96, conv_cartECEF_to_sphECEF, conv_identity}
+    f_conv mtx[3][3] = {
+        {conv_identity, conv_WGS84_to_sphECEF, conv_WGS84_to_cartECEF},
+        {conv_sphECEF_to_WGS84, conv_identity, conv_sphECEF_to_cartECEF},
+        {conv_cartECEF_to_WGS84, conv_cartECEF_to_sphECEF, conv_identity}
     };
 
     return mtx[ct_in][ct_out];
@@ -259,4 +190,4 @@ static PyObject* convert(PyObject *self, PyObject *args, PyObject *kwdict)
     return retval;
 }
 
-#endif  /* PYWMM_CCONV_H */
+#endif  /* PYMM_CCONV_H */

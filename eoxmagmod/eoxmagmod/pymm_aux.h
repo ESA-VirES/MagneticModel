@@ -27,8 +27,8 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_AUX_H
-#define PYWMM_AUX_H
+#ifndef PYMM_AUX_H
+#define PYMM_AUX_H
 
 /*
  * Check the input python object and convert it to a double precision NumPy
@@ -248,4 +248,4 @@ static ARRAY_DATA _get_arrd_item(const ARRAY_DATA *arrd, npy_intp idx)
     }
 }
 
-#endif  /* PYWMM_AUX_H */
+#endif  /* PYMM_AUX_H */

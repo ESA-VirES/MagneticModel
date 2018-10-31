@@ -28,42 +28,50 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_SPHARPOT_H
-#define PYWMM_SPHARPOT_H
+#ifndef PYMM_SPHARGRD_H
+#define PYMM_SPHARGRD_H
 
 #include "shc.h"
-#include "pywmm_aux.h"
-#include "pywmm_cconv.h"
+#include "pymm_aux.h"
+#include "pymm_cconv.h"
 
 /* python function definition */
-#define DOC_SPHARPOT "\n"\
-"  v_grad = spharpot(radius, degree, coef_g, coef_h, leg_p, rrp, lonsin, loncos)\n"\
+#define DOC_SPHARGRD "\n"\
+"  v_grad = sphargrd(latitude, degree, coef_g, coef_h, leg_p, leg_dp, rrp, lonsin, loncos, is_internal=True)\n"\
 "\n"\
-"     Spherical harmonic evaluation of the value of the potential\n"\
-"     (scalar) field in the (geocentric) spherical coordinates (latitude,\n"\
+"     Spherical harmonic evaluation of the gradient of the potential\n"\
+"     (scalar) field in the geocentric spherical coordinates (latitude,\n"\
 "     longitude, radius).\n"\
 "     The input parameters are:\n"\
-"       radius - radius, i.e., distance from the earth centre, at the\n"\
-"                evaluated location.\n"\
+"       latitude - spherical (or geodetic) latitude in degrees at the evaluated\n"\
+"                  location.\n"\
 "       degree - degree of the spherical harmonic model.\n"\
 "       coef_g - vector of spherical harmonic model coefficients.\n"\
 "       coef_h - vector of spherical harmonic model coefficients.\n"\
 "       leg_p - vector the Legendre polynomials.\n"\
+"       leg_dp - vector the Legendre polynomials' derivations.\n"\
 "       rrp - vector the relative radius powers.\n"\
 "       lonsin - vector of the longitude cosines.\n"\
-"       lonsin - vector of the longitude sines.\n"
+"       lonsin - vector of the longitude sines.\n"\
+"       is_internal - boolean flag set to True by default. When set to False\n"\
+"                     external field evaluation is used.\n"\
+"\n"\
 
-static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
+static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
 {
-    static char *keywords[] = {"radius", "degree", "coef_g", "coef_h",
-                                "leg_p", "rpp", "lonsin", "loncos", NULL};
+    static char *keywords[] = {
+        "latitude", "degree", "coef_g", "coef_h", "leg_p", "leg_dp",
+        "rpp", "lonsin", "loncos", "is_internal", NULL
+    };
 
-    int degree, nterm;
-    double rad;
+    int degree, nterm, is_internal;
+    double lat_sph;
 
+    PyObject *obj_is_internal = NULL; // boolean flag
     PyObject *obj_cg = NULL; // coef_g object
     PyObject *obj_ch = NULL; // coef_h object
     PyObject *obj_lp = NULL; // P object
+    PyObject *obj_ldp = NULL; // dP object
     PyObject *obj_rrp = NULL; // rel.rad.pow. object
     PyObject *obj_lsin = NULL; // lonsin object
     PyObject *obj_lcos = NULL; // loncos object
@@ -72,16 +80,20 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *arr_cg = NULL; // coef_g array
     PyObject *arr_ch = NULL; // coef_h array
     PyObject *arr_lp = NULL; // P array
+    PyObject *arr_ldp = NULL; // dP array
     PyObject *arr_rrp = NULL; // rel.rad.pow. array
     PyObject *arr_lsin = NULL; // lonsin array
     PyObject *arr_lcos = NULL; // loncos array
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "diOOOOOO|:spharpot", keywords,
-        &rad, &degree, &obj_cg, &obj_ch, &obj_lp, &obj_rrp, &obj_lsin, &obj_lcos
+        args, kwdict, "diOOOOOOO|O:sphargrd", keywords,
+        &lat_sph, &degree, &obj_cg, &obj_ch, &obj_lp, &obj_ldp, &obj_rrp,
+        &obj_lsin, &obj_lcos, &obj_is_internal
     ))
         goto exit;
+
+    is_internal = (obj_is_internal == NULL) || PyObject_IsTrue(obj_is_internal);
 
     if (degree < 0)
     {
@@ -101,13 +113,16 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     if (NULL == (arr_lp=_get_as_double_array(obj_lp, 1, 1, NPY_IN_ARRAY, keywords[4])))
         goto exit;
 
-    if (NULL == (arr_rrp=_get_as_double_array(obj_rrp, 1, 1, NPY_IN_ARRAY, keywords[5])))
+    if (NULL == (arr_ldp=_get_as_double_array(obj_ldp, 1, 1, NPY_IN_ARRAY, keywords[5])))
         goto exit;
 
-    if (NULL == (arr_lsin=_get_as_double_array(obj_lsin, 1, 1, NPY_IN_ARRAY, keywords[6])))
+    if (NULL == (arr_rrp=_get_as_double_array(obj_rrp, 1, 1, NPY_IN_ARRAY, keywords[6])))
         goto exit;
 
-    if (NULL == (arr_lcos=_get_as_double_array(obj_lcos, 1, 1, NPY_IN_ARRAY, keywords[7])))
+    if (NULL == (arr_lsin=_get_as_double_array(obj_lsin, 1, 1, NPY_IN_ARRAY, keywords[7])))
+        goto exit;
+
+    if (NULL == (arr_lcos=_get_as_double_array(obj_lcos, 1, 1, NPY_IN_ARRAY, keywords[8])))
         goto exit;
 
     // check the arrays' dimensions
@@ -120,29 +135,32 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     if (_check_array_dim_le(arr_lp, 0, nterm, keywords[4]))
         goto exit;
 
-    if (_check_array_dim_le(arr_rrp, 0, degree+1, keywords[5]))
+    if (_check_array_dim_le(arr_ldp, 0, nterm, keywords[5]))
         goto exit;
 
-    if (_check_array_dim_le(arr_lsin, 0, degree+1, keywords[6]))
+    if (_check_array_dim_le(arr_rrp, 0, degree+1, keywords[6]))
         goto exit;
 
-    if (_check_array_dim_le(arr_lcos, 0, degree+1, keywords[7]))
+    if (_check_array_dim_le(arr_lsin, 0, degree+1, keywords[7]))
         goto exit;
 
-    // allocate the output numpy scalar (zero-dimensional array)
-    if (NULL == (arr_out = PyArray_EMPTY(0, NULL, NPY_DOUBLE, 0)))
+    if (_check_array_dim_le(arr_lcos, 0, degree+1, keywords[8]))
+        goto exit;
+
+    // allocate the output array
+    if (NULL == (arr_out = _get_new_double_array(1, NULL, 3)))
         goto exit;
 
     // the evaluation
     {
         double *out = (double*)PyArray_DATA(arr_out);
         shc_eval(
-            out, NULL, NULL, NULL, degree, 0x1,
-            0.0, rad, PyArray_DATA(arr_cg),
+            NULL, out+0, out+1, out+2, degree, 0x2,
+            DG2RAD*lat_sph, 0.0, PyArray_DATA(arr_cg),
             PyArray_DATA(arr_ch), PyArray_DATA(arr_lp),
-            PyArray_DATA(arr_lp), PyArray_DATA(arr_rrp),
+            PyArray_DATA(arr_ldp), PyArray_DATA(arr_rrp),
             PyArray_DATA(arr_lsin), PyArray_DATA(arr_lcos),
-            0 // this flag has no impact on the evaluated potential
+            is_internal
         );
     }
 
@@ -152,6 +170,7 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     if (arr_cg){Py_DECREF(arr_cg);}
     if (arr_ch){Py_DECREF(arr_ch);}
     if (arr_lp){Py_DECREF(arr_lp);}
+    if (arr_ldp){Py_DECREF(arr_ldp);}
     if (arr_rrp){Py_DECREF(arr_rrp);}
     if (arr_lsin){Py_DECREF(arr_lsin);}
     if (arr_lcos){Py_DECREF(arr_lcos);}
@@ -159,4 +178,4 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     return arr_out;
  }
 
-#endif  /* PYWMM_SPHARPOT_H */
+#endif  /* PYMM_SPHARGRD_H */

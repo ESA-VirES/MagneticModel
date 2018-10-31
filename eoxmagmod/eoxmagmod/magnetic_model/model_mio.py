@@ -28,7 +28,7 @@
 # pylint: disable=too-many-arguments,too-many-locals
 
 from numpy import asarray, empty, nditer, logical_not, isscalar
-from .._pywmm import GEOCENTRIC_SPHERICAL, convert
+from .._pymm import GEOCENTRIC_SPHERICAL, convert
 from .model import GeomagneticModel, DipoleSphericalHarmomicGeomagneticModel
 
 MIO_HEIGHT = 110.0 # km

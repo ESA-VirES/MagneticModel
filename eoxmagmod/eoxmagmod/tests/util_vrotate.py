@@ -33,8 +33,7 @@ from numpy.random import random
 from numpy.testing import assert_allclose
 from eoxmagmod.util import vrotate
 from eoxmagmod import (
-    GEODETIC_ABOVE_EGM96, GEODETIC_ABOVE_WGS84,
-    GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
+    GEODETIC_ABOVE_WGS84, GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
     convert, vrot_sph2geod, vrot_sph2cart, vrot_cart2sph,
 )
 
@@ -140,31 +139,6 @@ class VectorRotationGeodeticToSphericalMixIn(VectorRotationSphericalToGeodeticMi
 
 #-------------------------------------------------------------------------------
 
-class TestVectorRotateEGM96ToGM96(TestCase, VectorRotationIdentityMixIn):
-    source_coordinate_system = GEODETIC_ABOVE_EGM96
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-
-class TestVectorRotateEGM96ToWGS84(TestCase, VectorRotationIdentityMixIn):
-    source_coordinate_system = GEODETIC_ABOVE_EGM96
-    target_coordinate_system = GEODETIC_ABOVE_WGS84
-
-
-class TestVectorRotateEGM96ToSpherical(TestCase, VectorRotationGeodeticToSphericalMixIn):
-    source_coordinate_system = GEODETIC_ABOVE_EGM96
-    target_coordinate_system = GEOCENTRIC_SPHERICAL
-
-
-class TestVectorRotateEGM96ToCartesian(TestCase, VectorRotationSphericalToCartesianMixIn):
-    source_coordinate_system = GEODETIC_ABOVE_EGM96
-    target_coordinate_system = GEOCENTRIC_CARTESIAN
-
-
-class TestVectorRotateWGS84ToEGM96(TestCase, VectorRotationIdentityMixIn):
-    source_coordinate_system = GEODETIC_ABOVE_WGS84
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-
 class TestVectorRotateWGS84ToWGS84(TestCase, VectorRotationIdentityMixIn):
     source_coordinate_system = GEODETIC_ABOVE_WGS84
     target_coordinate_system = GEODETIC_ABOVE_WGS84
@@ -180,11 +154,6 @@ class TestVectorRotateWGS84ToCartesian(TestCase, VectorRotationSphericalToCartes
     target_coordinate_system = GEOCENTRIC_CARTESIAN
 
 
-class TestVectorRotateSphericalToEGM96(TestCase, VectorRotationGeodeticToSphericalMixIn):
-    source_coordinate_system = GEOCENTRIC_SPHERICAL
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-
 class TestVectorRotateSphericalToWGS84(TestCase, VectorRotationGeodeticToSphericalMixIn):
     source_coordinate_system = GEOCENTRIC_SPHERICAL
     target_coordinate_system = GEODETIC_ABOVE_WGS84
@@ -198,11 +167,6 @@ class TestVectorRotateSphericalToSpherical(TestCase, VectorRotationIdentityMixIn
 class TestVectorRotateSphericalToCartesian(TestCase, VectorRotationSphericalToCartesianMixIn):
     source_coordinate_system = GEOCENTRIC_SPHERICAL
     target_coordinate_system = GEOCENTRIC_CARTESIAN
-
-
-class TestVectorRotateCartesianToEGM96(TestCase, VectorRotationCartesianToSphericalMixIn):
-    source_coordinate_system = GEOCENTRIC_CARTESIAN
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
 
 
 class TestVectorRotateCartesianToWGS84(TestCase, VectorRotationCartesianToSphericalMixIn):

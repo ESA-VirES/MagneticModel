@@ -28,14 +28,14 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_VROT_SPH2CART_H
-#define PYWMM_VROT_SPH2CART_H
+#ifndef PYMM_VROT_SPH2CART_H
+#define PYMM_VROT_SPH2CART_H
 
 #include <math.h>
 #include "math_aux.h"
 #include "geo_conv.h"
-#include "pywmm_aux.h"
-#include "pywmm_vrot_common.h"
+#include "pymm_aux.h"
+#include "pymm_vrot_common.h"
 
 /* recursive vector rotation */
 
@@ -158,4 +158,4 @@ static PyObject* vrot_sph2cart(PyObject *self, PyObject *args, PyObject *kwdict)
     return retval;
 }
 
-#endif  /* PYWMM_VROT_SPH2CART_H */
+#endif  /* PYMM_VROT_SPH2CART_H */

@@ -18,7 +18,7 @@ INSTALLATION
 
 Step 1 - configure:
 
-  $ ./configure --prefix=/usr/ --libdir='${exec_prefix}/lib64'
+  $ ./configure'
 
 For more detail see
 

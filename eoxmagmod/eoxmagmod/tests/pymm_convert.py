@@ -33,10 +33,8 @@ from random import random
 from math import pi #, sin, cos, sqrt, floor
 from numpy import array, empty, sin, cos, sqrt, arctan2, hypot, fabs, copysign
 from numpy.testing import assert_allclose
-from eoxmagmod._pywmm import (
-    GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96,
-    GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
-    convert,
+from eoxmagmod._pymm import (
+    GEODETIC_ABOVE_WGS84, GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN, convert,
 )
 
 WGS84_A = 6378.137
@@ -219,56 +217,8 @@ class TargetIndetical(object):
     def reference_convert(cls, coords):
         return coords
 
-
-class TargetGeodeticToGeodetic(object):
-
-    @classmethod
-    def reference_convert(cls, coords):
-        return coords
-
-    def test_convert(self):
-        coords = self.coordinates
-        result0 = self.eval_convert(coords)
-        result1 = self.reference_convert(coords)
-        # identical latitudes and longitudes
-        assert_allclose(result0[..., :-1], result1[..., :-1])
-        # elevations do not differ more than 200 meters
-        self.assertTrue(fabs(result0[..., -1] - result1[..., -1]).max() < 0.2)
-
 #-------------------------------------------------------------------------------
 # tests
-
-class TestGeodeticEGM96ToCartesian(TestCase, SourceGeodetic, ConvertTestMixIn):
-    source_coordinate_system = GEODETIC_ABOVE_EGM96
-    target_coordinate_system = GEOCENTRIC_CARTESIAN
-
-    @classmethod
-    def reference_convert(cls, coords):
-        return cls.geodetic2cartesian(convert(
-            coords, GEODETIC_ABOVE_EGM96, GEODETIC_ABOVE_WGS84
-        ))
-
-
-class TestGeodeticEGM96ToSpherical(TestCase, SourceGeodetic, ConvertTestMixIn):
-    source_coordinate_system = GEODETIC_ABOVE_EGM96
-    target_coordinate_system = GEOCENTRIC_SPHERICAL
-
-    @classmethod
-    def reference_convert(cls, coords):
-        return cls.geodetic2spherical(convert(
-            coords, GEODETIC_ABOVE_EGM96, GEODETIC_ABOVE_WGS84
-        ))
-
-
-class TestGeodeticEGM96ToGeodeticWGS84(TestCase, SourceGeodetic, TargetGeodeticToGeodetic, ConvertTestMixIn):
-    source_coordinate_system = GEODETIC_ABOVE_EGM96
-    target_coordinate_system = GEODETIC_ABOVE_WGS84
-
-
-class TestGeodeticEGM96ToGeodeticEGM96(TestCase, SourceGeodetic, TargetIndetical, ConvertTestMixIn):
-    source_coordinate_system = GEODETIC_ABOVE_EGM96
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
 
 class TestGeodeticWGS84ToCartesian(TestCase, SourceGeodetic, ConvertTestMixIn):
     source_coordinate_system = GEODETIC_ABOVE_WGS84
@@ -293,11 +243,6 @@ class TestGeodeticWGS84ToGeodeticWGS84(TestCase, SourceGeodetic, TargetIndetical
     target_coordinate_system = GEODETIC_ABOVE_WGS84
 
 
-class TestGeodeticWGS84ToGeodeticEGM96(TestCase, SourceGeodetic, TargetGeodeticToGeodetic, ConvertTestMixIn):
-    source_coordinate_system = GEODETIC_ABOVE_WGS84
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-
 class TestSphericalToCartesian(TestCase, SourceSpherical, ConvertTestMixIn):
     target_coordinate_system = GEOCENTRIC_CARTESIAN
 
@@ -318,17 +263,6 @@ class TestSphericalToGeodeticWGS84(TestCase, SourceSpherical, ConvertTestMixIn):
         return cls.spherical2geodetic(coords)
 
 
-class TestSphericalToGeodeticEGM96(TestCase, SourceSpherical, ConvertTestMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-    @classmethod
-    def reference_convert(cls, coords):
-        return convert(
-            cls.spherical2geodetic(coords),
-            GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96
-        )
-
-
 class TestCartesianToCartesian(TestCase, SourceCartesian, TargetIndetical, ConvertTestMixIn):
     target_coordinate_system = GEOCENTRIC_CARTESIAN
 
@@ -347,17 +281,6 @@ class TestCartesianToGeodeticWGS84(TestCase, SourceCartesian, ConvertTestMixIn):
     @classmethod
     def reference_convert(cls, coords):
         return cls.cartesian2geodetic(coords)
-
-
-class TestCartesianToGeodeticEGM96(TestCase, SourceCartesian, ConvertTestMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-    @classmethod
-    def reference_convert(cls, coords):
-        return convert(
-            cls.cartesian2geodetic(coords),
-            GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96
-        )
 
 
 if __name__ == "__main__":

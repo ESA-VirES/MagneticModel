@@ -28,12 +28,12 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef PYWMM_LEGENDRE_H
-#define PYWMM_LEGENDRE_H
+#ifndef PYMM_LEGENDRE_H
+#define PYMM_LEGENDRE_H
 
 #include "shc.h"
-#include "pywmm_aux.h"
-#include "pywmm_cconv.h"
+#include "pymm_aux.h"
+#include "pymm_cconv.h"
 
 /* python function definition */
 
@@ -120,5 +120,5 @@ static PyObject* legendre(PyObject *self, PyObject *args, PyObject *kwdict)
     return retval;
 }
 
-#endif  /* PYWMM_LEGENDRE_H */
+#endif  /* PYMM_LEGENDRE_H */
 
