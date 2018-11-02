@@ -43,3 +43,19 @@ $ cd eoxmagmod/
 $ python ./setup.py build
 $ sudo python ./setup.py install
 ```
+
+### Conda installation
+
+The package contains the `conda-buidl` scripts allowing local conda build and
+installation following this procedure:
+
+```
+conda activate <target-environment>
+conda install numpy scipy matplotlib h5py networkx cython conda-build
+conda-build ./qdipole
+conda-build ./cdf
+conda-build purge
+conda install --use-local qdipole cdf
+pip install spacepy
+pip install eoxmagmod
+```
