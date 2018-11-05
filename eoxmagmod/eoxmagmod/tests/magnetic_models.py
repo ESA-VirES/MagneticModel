@@ -144,7 +144,7 @@ class TestCHAOS6Static(TestCase, MagneticModelMixIn):
 
 
 class TestCHAOS6Core(TestCase, MagneticModelMixIn):
-    validity = (1997.102, 2018.601)
+    validity = (1997.102, 2019.1006)
     model = read_model_shc(CHAOS6_CORE_LATEST)
 
 #-------------------------------------------------------------------------------
