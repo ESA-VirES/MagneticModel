@@ -27,31 +27,15 @@
  *-----------------------------------------------------------------------------
 */
 
-#define VERSION "0.7.0"
-
-// needed to prevent dual definition
-#ifdef _POSIX_C_SOURCE
-#undef _POSIX_C_SOURCE
-#endif
-
-#define PY_SSIZE_T_CLEAN 1
+#include "common.h" /* common definitions - to be included before Python.h */
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
-#if PY_MAJOR_VERSION != 2
-#error "Non-supported Python major version!"
-#endif
-#if PY_MINOR_VERSION < 6
-#error "Non-supported Python minor version!"
-#endif
+/* module version */
+#include "version.h"
 
-/* maximum allowed output array dimension */
-#define MAX_OUT_ARRAY_NDIM 16
-
-/*---------------------------------------------------------------------------*/
-
-/* Module specific exceptions. */
-#include "pymm_exc.h"
+/* common python utilities */
+#include "py_common.h"
 
 /* Coordinate conversions. */
 #include "pymm_cconv.h"
@@ -103,42 +87,53 @@ static PyMethodDef pymm_methods[] =
 } ;
 
 /*---------------------------------------------------------------------------*/
-
 /* module initialization  */
-PyMODINIT_FUNC init_pymm(void)
+
+static PyObject* init_module(void)
 {
-    PyObject *dict, *module;
+    PyObject *module = init_python_module("_pymm", DOC_PYMM, pymm_methods);
+    if (NULL == module)
+        goto exit;
 
-    /* define module */
-    module = Py_InitModule3("_pymm", pymm_methods, DOC_PYMM);
-    if (NULL == module) return ;
+    PyObject *dict = PyModule_GetDict(module);
+    if (NULL == dict)
+        goto exit;
 
-    /* initialize numpy arrays */
-    import_array();
+    /* add module specific exception */
+    //set_dict_item_str(dict, "MMError", PyErr_NewException("_pymm.MMError", NULL, NULL));
 
-    dict = PyModule_GetDict(module);
-    if (NULL == dict) return;
+    /* integer constants */
+    set_dict_item_str_long(dict, "GEODETIC_ABOVE_WGS84", CT_GEODETIC_ABOVE_WGS84);
+    set_dict_item_str_long(dict, "GEOCENTRIC_SPHERICAL", CT_GEOCENTRIC_SPHERICAL);
+    set_dict_item_str_long(dict, "GEOCENTRIC_CARTESIAN", CT_GEOCENTRIC_CARTESIAN);
+    set_dict_item_str_long(dict, "POTENTIAL", SM_POTENTIAL);
+    set_dict_item_str_long(dict, "GRADIENT", SM_GRADIENT);
+    set_dict_item_str_long(dict, "POTENTIAL_AND_GRADIENT", SM_POTENTIAL_AND_GRADIENT);
 
-    /* add RT2Error */
-    PyExc_MMError = PyErr_NewException("_pymm.MMError", NULL, NULL);
+    /* module metadata */
+    set_dict_item_str_str(dict, "__author__", "Martin Paces (martin.paces@eox.at)");
+    set_dict_item_str_str(dict, "__copyright__", "Copyright (C) 2014 EOX IT Services GmbH");
+    set_dict_item_str_str(dict, "__licence__", "EOX licence (MIT style)");
+    set_dict_item_str_str(dict, "__version__", VERSION);
 
-    PyDict_SetItemString(dict, "MMError", PyExc_MMError);
-
-    /* constants */
-    #define SET_INT_ITEM(d, s, i) \
-    {PyObject *tmp = PyInt_FromLong(i);  PyDict_SetItemString(d,s,tmp); Py_DECREF(tmp);}
-    SET_INT_ITEM(dict, "GEODETIC_ABOVE_WGS84", CT_GEODETIC_ABOVE_WGS84);
-    SET_INT_ITEM(dict, "GEOCENTRIC_SPHERICAL", CT_GEOCENTRIC_SPHERICAL);
-    SET_INT_ITEM(dict, "GEOCENTRIC_CARTESIAN", CT_GEOCENTRIC_CARTESIAN);
-    SET_INT_ITEM(dict, "POTENTIAL", SM_POTENTIAL);
-    SET_INT_ITEM(dict, "GRADIENT", SM_GRADIENT);
-    SET_INT_ITEM(dict, "POTENTIAL_AND_GRADIENT", SM_POTENTIAL_AND_GRADIENT);
-
-    /* metadata */
-    PyDict_SetItemString(dict, "__author__", PyString_FromString("Martin Paces (martin.paces@eox.at)"));
-    PyDict_SetItemString(dict, "__copyright__", PyString_FromString("Copyright (C) 2014 EOX IT Services GmbH"));
-    PyDict_SetItemString(dict, "__licence__", PyString_FromString("EOX licence (MIT style)"));
-    PyDict_SetItemString(dict, "__version__", PyString_FromString(VERSION));
+  exit:
+    return module;
 }
 
-/*---------------------------------------------------------------------------*/
+#if PY_MAJOR_VERSION == 2
+
+PyMODINIT_FUNC init_pymm(void)
+{
+    import_array();
+    init_module();
+}
+
+#else
+
+PyObject* PyInit__pymm(void)
+{
+    import_array();
+    return init_module();
+}
+
+#endif

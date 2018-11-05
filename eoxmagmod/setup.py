@@ -28,17 +28,20 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+import sys
+from os.path import join
 from distutils.core import setup
 from distutils.extension import Extension
 import numpy
 
-
 COMMON_INCLUDE_DIRS = [
+    join(sys.prefix, 'include'),
     numpy.get_include(),
     './eoxmagmod',
     './eoxmagmod/include',
 ]
 
+print(COMMON_INCLUDE_DIRS)
 
 setup(
     name="eoxmagmod",
@@ -59,7 +62,7 @@ setup(
         'eoxmagmod.magnetic_model.tests.data',
     ],
     license='EOX licence (MIT style)',
-    version='0.7.0',
+    version='0.8.0',
     package_data={
         'eoxmagmod': [
             'data/*',
