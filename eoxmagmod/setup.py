@@ -49,7 +49,7 @@ setup(
     author="Martin Paces",
     author_email="martin.paces@eox.at",
     install_requires=[
-        'numpy',
+        'numpy>=1.13.0',
         'spacepy',
     ],
     packages=[
