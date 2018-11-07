@@ -46,16 +46,24 @@ $ sudo python ./setup.py install
 
 ### Conda installation
 
-The package contains the `conda-buidl` scripts allowing local conda build and
+The package contains the `conda-build` scripts allowing local conda build and
 installation following this procedure:
 
+1) build the binary dependencies:
+```
+conda install conda-build
+conda build ./qdipole
+conda build ./libcdf
+conda build purge
+```
+Tested on GNU/Linux. Possibly works on other POSIX systems. Does not work on MS
+Windows (primarily because of a missing Fortran compiler).
+
+2) install the `eoxmagmod` in your conda environment:
 ```
 conda activate <target-environment>
-conda install numpy scipy matplotlib h5py networkx cython conda-build
-conda-build ./qdipole
-conda-build ./cdf
-conda-build purge
+conda install numpy scipy matplotlib h5py networkx
 conda install --use-local qdipole cdf
 pip install spacepy
-pip install eoxmagmod
+pip install ./eoxmagmod
 ```
