@@ -35,17 +35,17 @@
 /* checking the Python version */
 
 #if PY_MAJOR_VERSION == 2
-#define IS_PYTHON_2
-#if PY_MINOR_VERSION < 6
-#error "Non-supported Python minor version!"
-#endif
+  #define IS_PYTHON_2
+  #if PY_MINOR_VERSION < 6
+    #error "Non-supported Python minor version!"
+  #endif
 #elif PY_MAJOR_VERSION == 3
-#define IS_PYTHON_3
-#if PY_MINOR_VERSION < 4
-#error "Non-supported Python minor version!"
-#endif
+  #define IS_PYTHON_3
+  #if PY_MINOR_VERSION < 4
+    #error "Non-supported Python minor version!"
+  #endif
 #else
-#error "Non-supported Python major version!"
+  #error "Non-supported Python major version!"
 #endif
 
 /* Python 2/3 compatibility */
@@ -54,7 +54,30 @@
 #define PyString_FromString PyUnicode_FromString
 #endif
 
+/* Python dictionary operations */
+
+static void set_dict_item_str(PyObject *dict, const char * key, PyObject *value)
+{
+    PyDict_SetItemString(dict, key, value);
+    Py_DECREF(value);
+}
+
+static void set_dict_item_str_long(PyObject *dict, const char * key, long value)
+{
+    set_dict_item_str(dict, key, PyLong_FromLong(value));
+}
+
+static void set_dict_item_str_str(PyObject *dict, const char * key, const char *value)
+{
+    #ifdef IS_PYTHON_2
+    set_dict_item_str(dict, key, PyString_FromString(value));
+    #else
+    set_dict_item_str(dict, key, PyUnicode_FromString(value));
+    #endif
+}
+
 /* Python module initialization */
+
 #ifdef IS_PYTHON_3
 static struct PyModuleDef module_definition = {
     PyModuleDef_HEAD_INIT, NULL, NULL, -1, NULL, NULL, NULL, NULL, NULL

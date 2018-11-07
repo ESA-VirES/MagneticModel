@@ -223,7 +223,7 @@ class SHModelTestMixIn(object):
         try:
             assert_allclose(self.eval_model(times, coords), results)
         except:
-            print tuple(float(f) for f in self.eval_model(times, coords))
+            print(tuple(float(f) for f in self.eval_model(times, coords)))
         assert_allclose(self.eval_model(times, coords), results)
 
     def test_eval_empty_coords(self):

@@ -30,7 +30,7 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-import _pysunpos
+from . import _pysunpos
 
 
 def sunpos(time_mjd2k, lat, lon, rad=6371.2, dtt=0):

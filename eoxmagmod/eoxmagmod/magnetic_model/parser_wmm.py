@@ -38,7 +38,7 @@ def parse_wmm_file(file_in):
     containing the parsed model data.
     """
     lines = file_in
-    data = parse_wmm_header(lines.next())
+    data = parse_wmm_header(next(lines))
     data["nm"], data["gh"], data["t"] = parse_wmm_coefficients(lines, data)
     data["degree_min"] = data["nm"][:, 0].min()
     data["degree_max"] = data["nm"][:, 0].max()

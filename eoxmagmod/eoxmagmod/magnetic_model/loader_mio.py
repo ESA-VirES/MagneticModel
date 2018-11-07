@@ -26,6 +26,7 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+from io import open
 from numpy import arange
 from .model_mio import (
     DipoleMIOPrimaryGeomagneticModel, DipoleMIOGeomagneticModel,
@@ -45,7 +46,7 @@ def load_model_swarm_mio_internal(path):
 def load_model_swarm_mio_external(path, above_ionosphere=None):
     """ Load external (primary field) model from a Swarm MIO_SHA_2* product.
     """
-    with open(path, "rb") as file_in:
+    with open(path, encoding="ascii") as file_in:
         params = parse_swarm_mio_file(file_in)
 
     if above_ionosphere is None:
@@ -80,7 +81,7 @@ def load_coeff_swarm_mio_internal(path):
     """ Load internal model coefficients and other parameters
     from a Swarm MIO_SHA_2* product file.
     """
-    with open(path, "rb") as file_in:
+    with open(path, encoding="ascii") as file_in:
         data = parse_swarm_mio_file(file_in)
 
     return SparseSHCoefficientsMIO(
@@ -94,7 +95,7 @@ def load_coeff_swarm_mio_external(path, above_ionosphere=True):
     """ Load external model coefficients from a Swarm MIO_SHA_2* product file.
     Use the `above_ionosphere` to pick the right model variant.
     """
-    with open(path, "rb") as file_in:
+    with open(path, encoding="ascii") as file_in:
         data = parse_swarm_mio_file(file_in)
 
     return _get_coeff_swarm_mio_external(data, above_ionosphere), data

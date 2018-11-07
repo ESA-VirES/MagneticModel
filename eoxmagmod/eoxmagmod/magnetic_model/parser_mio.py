@@ -35,7 +35,7 @@ def parse_swarm_mio_file(file_in):
     containing the parsed model data.
     """
     lines = strip_shc_comments(file_in)
-    data = parse_swarm_mio_header(lines.next())
+    data = parse_swarm_mio_header(next(lines))
     data["nm"], data["qs"], data["gh"] = parse_swarm_mio_coefficients(lines, data)
     data["degree_min"] = data["nm"][:, 0].min()
     data["degree_max"] = data["nm"][:, 0].max()

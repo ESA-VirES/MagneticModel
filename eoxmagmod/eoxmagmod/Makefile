@@ -1,19 +1,19 @@
-CC=gcc
-CPP=g++
-LD=gcc
+CC?=gcc
 RM=rm -fv
 
-INC_WMM=
-LIB_WMM=-lgeomag -lm
+INC_MM=
+LIB_MM=-lm
 INC_QD=-I./include
 LIB_QD=-lqdipole -lm
 INC_SP=-I./include
 LIB_SP=-lm
-INC_PYTHON=$(shell python-config --includes )
-LIB_PYTHON=$(shell python-config --libs )
+PYTHON_CONFIG ?=python-config
+INC_NUMPY=-I$(shell python -c 'import numpy; print(numpy.get_include())')
+INC_PYTHON=$(shell $(PYTHON_CONFIG) --includes )
+LIB_PYTHON=$(shell $(PYTHON_CONFIG) --ldflags )
 
-INCS=$(INC_PYTHON) $(INC_WMM) $(INC_QD)
-LIBS_WMM=$(LIB_PYTHON) $(LIB_WMM)
+INCS=$(INC_NUMPY) $(INC_PYTHON) $(INC_MM) $(INC_QD) $(INCLUDE)
+LIBS_MM=$(LIB_PYTHON) $(LIB_MM)
 LIBS_QD=$(LIB_PYTHON) $(LIB_QD)
 LIBS_QD=$(LIB_PYTHON) $(LIB_QD)
 
@@ -22,15 +22,14 @@ CCFLAGS= -c -O2 -Wall -Wno-unused-function -fPIC $(INCS)
 #CCFLAGS= -c -O2 -g -DDEBUG=1 -Wall -fPIC $(INCS)
 #CCFLAGS= -c -O2 -Wall -fPIC $(INC)
 
-HDR_WMM=pymm_aux.h pymm_sheval.h pymm_sphargrd.h pymm_spharpot.h\
+HDR_MM=pymm_aux.h pymm_sheval.h pymm_sphargrd.h pymm_spharpot.h\
     pymm_legendre.h pymm_lonsincos.h pymm_relradpow.h\
     pymm_vrot_common.h pymm_vrot_sph2cart.h pymm_vrot_sph2geod.h\
-    pymm_vrot_cart2sph.h pymm_cconv.h pymm_coord.h pymm_exc.h
-OBJ_WMM=pymm.o
-DST_WMM=_pymm.so
+    pymm_vrot_cart2sph.h pymm_cconv.h pymm_coord.h
+OBJ_MM=pymm.o
+DST_MM=_pymm.so
 
-HDR_QD=pymm_aux.h pyqd_exc.h\
-    pyqd_eval_qdlatlon.h pyqd_eval_mlt.h pyqd_eval_subsol.h pyqd_eval_apex.h
+HDR_QD=pymm_aux.h pyqd_eval_qdlatlon.h pyqd_eval_mlt.h pyqd_eval_subsol.h pyqd_eval_apex.h
 OBJ_QD=pyqd.o
 DST_QD=_pyqd.so
 
@@ -52,25 +51,25 @@ all: pymm pyqd pysunpos pytimeconv
 %.o: %.cpp
 	$(CC) $< $(CCFLAGS) -o $@
 
-pymm: $(OBJ_WMM)
-	$(LD) -shared -o $(DST_WMM) $(OBJ_WMM) $(LIBS_WMM)
+pymm: $(OBJ_MM)
+	$(CC) -shared -o $(DST_MM) $(OBJ_MM) $(LIBS_MM)
 
 pyqd: $(OBJ_QD)
-	$(LD) -shared -o $(DST_QD) $(OBJ_QD) $(LIBS_QD)
+	$(CC) -shared -o $(DST_QD) $(OBJ_QD) $(LIBS_QD)
 
 pysunpos: $(OBJ_SP)
-	$(LD) -shared -o $(DST_SP) $(OBJ_SP) $(LIBS_SP)
+	$(CC) -shared -o $(DST_SP) $(OBJ_SP) $(LIBS_SP)
 
 pytimeconv: $(OBJ_TC)
-	$(LD) -shared -o $(DST_TC) $(OBJ_TC) $(LIBS_TC)
+	$(CC) -shared -o $(DST_TC) $(OBJ_TC) $(LIBS_TC)
 
 clean:
 	$(RM) *.o
 
 purge: clean
-	$(RM) $(DST_WMM)
+	$(RM) $(DST_MM)
 
-pymm.o: pymm.c $(HDR_WMM)
+pymm.o: pymm.c $(HDR_MM)
 pyqd.o: pyqd.c $(HDR_QD)
 pysunpos.o: pysunpos.c $(HDR_SP)
 pytimeconv.o: pytimeconv.c $(HDR_TC)

@@ -26,6 +26,7 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+from io import open
 from .model import SphericalHarmomicGeomagneticModel
 from .coefficients import SparseSHCoefficientsTimeDependentDecimalYear
 from .parser_wmm import parse_wmm_file
@@ -38,8 +39,7 @@ def load_model_wmm(path):
 
 def load_coeff_wmm(path):
     """ Load coefficients from a WMM COF file. """
-
-    with open(path, "rb") as file_in:
+    with open(path, encoding="ascii") as file_in:
         data = parse_wmm_file(file_in)
 
     return SparseSHCoefficientsTimeDependentDecimalYear(

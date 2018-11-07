@@ -38,8 +38,8 @@ def parse_igrf_file(file_in):
     """
     lines = strip_igrf_comments(file_in)
     data = {}
-    data["labels"] = parse_igrf_header(lines.next())
-    data["t"] = parse_igrf_times(lines.next())
+    data["labels"] = parse_igrf_header(next(lines))
+    data["t"] = parse_igrf_times(next(lines))
     data["nm"], data["gh"] = parse_igrf_coefficients(lines)
     data["degree_min"] = data["nm"][:, 0].min()
     data["degree_max"] = data["nm"][:, 0].max()

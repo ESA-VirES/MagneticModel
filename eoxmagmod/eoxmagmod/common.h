@@ -27,10 +27,8 @@
  *-----------------------------------------------------------------------------
 */
 
-#ifndef COMMON
-#define COMMON
-
-#include "version.h"
+#ifndef COMMON_H
+#define COMMON_H
 
 // needed to prevent dual definition
 #ifdef _POSIX_C_SOURCE
@@ -43,4 +41,4 @@
 /* maximum allowed output array dimension */
 #define MAX_OUT_ARRAY_NDIM 16
 
-#endif /* COMMON */
+#endif /* COMMON_H */

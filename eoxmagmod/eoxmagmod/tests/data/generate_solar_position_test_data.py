@@ -28,7 +28,12 @@
 #pylint: disable=missing-docstring
 
 import sys
-from itertools import product, izip
+try:
+    # Python 2
+    from itertools import izip as zip
+except ImportError:
+    pass
+from itertools import product
 from numpy import array
 from numpy.random import uniform
 from eoxmagmod.solar_position import sunpos
@@ -53,7 +58,7 @@ def generate_test_data(file_out):
         "MJD2000", "Latitude", "Longitude", "Radius",
         "Declination", "RightAscension", "HourAngle", "Azimuth", "Zenith",
     ]
-    records = izip(time_mjd2000, lat, lon, rad, decl, rasc, lha, azim, znth)
+    records = zip(time_mjd2000, lat, lon, rad, decl, rasc, lha, azim, znth)
 
     file_out.write("\t".join(header) + "\r\n")
     for record in records:

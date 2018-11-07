@@ -26,6 +26,12 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+try:
+    # Python 2 - range as an iterator
+    from buildins import xrange as range
+except ImportError:
+    pass
+
 from numpy import asarray, copy
 from .._pymm import GEOCENTRIC_CARTESIAN, GEOCENTRIC_SPHERICAL, convert
 from ..util import vnorm, vrotate
@@ -121,7 +127,7 @@ def _trace_field_line(eval_model, did_converge, start_point,
     points = [tuple(start_point)]
     point = copy(start_point)
 
-    for _ in xrange(max_steps):
+    for _ in range(max_steps):
         direction, vector = eval_model(point)
         vectors.append(tuple(vector))
 
