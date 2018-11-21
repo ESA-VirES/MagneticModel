@@ -25,14 +25,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
-# pylint: disable=missing-docstring,no-self-use
+# pylint: disable=missing-docstring,no-self-use,invalid-name
 
 from unittest import TestCase, main
 from itertools import product
 from numpy import nan, inf, isinf, array, empty, full, nditer, asarray
 from numpy.random import uniform
 from numpy.testing import assert_allclose
-from eoxmagmod import decimal_year_to_mjd2000
+from eoxmagmod.time_util import (
+    decimal_year_to_mjd2000, decimal_year_to_mjd2000_simple,
+)
 from eoxmagmod.magnetic_model.loader_shc import (
     load_model_shc, load_model_shc_combined,
 )
@@ -341,7 +343,7 @@ class TestIGRF12(TestCase, SHModelTestMixIn):
     validity = decimal_year_to_mjd2000((1900.0, 2020.0))
 
     def load(self):
-        return load_model_shc(IGRF12)
+        return load_model_shc(IGRF12, interpolate_in_decimal_years=True)
 
 
 class TestSIFM(TestCase, SHModelTestMixIn):
@@ -369,12 +371,14 @@ class TestCHAOS5Static(TestCase, SHModelTestMixIn):
 class TestCHAOS5Core(TestCase, SHModelTestMixIn):
     reference_values = (
         2192.51, (30.0, 40.0, 8000.0),
-        (15126.610410635147, 302.75469100239826, -14477.55985460029)
+        (15126.611217467429, 302.7784261453687, -14477.586706907041)
     )
-    validity = decimal_year_to_mjd2000((1997.0021, 2015.0007))
+    validity = decimal_year_to_mjd2000_simple((1997.0021, 2015.0007))
 
     def load(self):
-        return load_model_shc(CHAOS5_CORE)
+        return load_model_shc(
+            CHAOS5_CORE, to_mjd2000=decimal_year_to_mjd2000_simple,
+        )
 
 
 class TestCHAOS5CoreV4(TestCase, SHModelTestMixIn):
@@ -391,12 +395,15 @@ class TestCHAOS5CoreV4(TestCase, SHModelTestMixIn):
 class TestCHAOS5Combined(TestCase, SHModelTestMixIn):
     reference_values = (
         2411.9, (30.0, 40.0, 8000.0),
-        (15127.018522088763, 313.6359151041108, -14489.200214608843)
+        (15127.018861793757, 313.6542615062537, -14489.218457022034)
     )
-    validity = decimal_year_to_mjd2000((1997.1020, 2016.1027))
+    validity = decimal_year_to_mjd2000_simple((1997.1020, 2016.1027))
 
     def load(self):
-        return load_model_shc_combined(CHAOS5_STATIC, CHAOS5_CORE_V4)
+        return load_model_shc_combined(
+            CHAOS5_STATIC, CHAOS5_CORE_V4,
+            to_mjd2000=decimal_year_to_mjd2000_simple,
+        )
 
 
 class TestCHAOS6Static(TestCase, SHModelTestMixIn):

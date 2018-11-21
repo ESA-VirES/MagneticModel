@@ -26,9 +26,11 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+from ..time_util import decimal_year_to_mjd2000
 from .util import parse_file
 from .model import SphericalHarmomicGeomagneticModel
 from .coefficients import (
+    SparseSHCoefficientsTimeDependent,
     SparseSHCoefficientsTimeDependentDecimalYear,
     SparseSHCoefficientsConstant,
     CombinedSHCoefficients,
@@ -36,29 +38,39 @@ from .coefficients import (
 from .parser_shc import parse_shc_file
 
 
-def load_model_shc_combined(*paths):
+def load_model_shc_combined(*paths, **kwargs):
     """ Load model with coefficients combined from multiple SHC files. """
-    return SphericalHarmomicGeomagneticModel(load_coeff_shc_combined(*paths))
+    return SphericalHarmomicGeomagneticModel(
+        load_coeff_shc_combined(*paths, **kwargs)
+    )
 
 
-def load_model_shc(path):
+def load_model_shc(path, **kwargs):
     """ Load model from an SHC file. """
-    return SphericalHarmomicGeomagneticModel(load_coeff_shc(path))
+    return SphericalHarmomicGeomagneticModel(load_coeff_shc(path, **kwargs))
 
 
-def load_coeff_shc_combined(*paths):
+def load_coeff_shc_combined(*paths, **kwargs):
     """ Load coefficients combined from multiple SHC files. """
-    return CombinedSHCoefficients(*[load_coeff_shc(path) for path in paths])
+    return CombinedSHCoefficients(*[
+        load_coeff_shc(path, **kwargs) for path in paths
+    ])
 
 
-def load_coeff_shc(path):
-    """ Load coefficients from an SHC file. """
+def load_coeff_shc(path, interpolate_in_decimal_years=False, **kwargs):
+    """ Load coefficients from an SHC file.
+
+    The `interpolate_in_decimal_years` flag forces interpolation
+    of time dependent models to be performed in the decimal years
+    rather then in the default.
+    """
     data = parse_file(parse_shc_file, path)
 
     options = {
         key: data[key]
         for key in ("validity_start", "validity_end") if key in data
     }
+    options.update(kwargs) # extend or override the default model options
 
     times = data["t"]
     if len(times) == 1:
@@ -66,6 +78,13 @@ def load_coeff_shc(path):
             data["nm"], data["gh"][:, 0], **options
         )
     else:
-        return SparseSHCoefficientsTimeDependentDecimalYear(
+        if interpolate_in_decimal_years:
+            coeff_class = SparseSHCoefficientsTimeDependentDecimalYear
+        else:
+            coeff_class = SparseSHCoefficientsTimeDependent
+            if not options.get('to_mjd2000'):
+                options["to_mjd2000"] = decimal_year_to_mjd2000
+
+        return coeff_class(
             data["nm"], data["gh"], times, **options
         )
