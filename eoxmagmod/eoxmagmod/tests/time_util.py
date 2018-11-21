@@ -28,7 +28,7 @@
 # pylint: disable=missing-docstring, invalid-name, too-few-public-methods
 
 from unittest import TestCase, main
-from numpy import vectorize
+from numpy import vectorize, inf, nan
 from numpy.random import uniform
 from numpy.testing import assert_allclose
 from eoxmagmod.time_util import (
@@ -93,6 +93,9 @@ class TestMjd2000ToDecimalYearSimple(TestCase):
         self._assert(self.eval([-365.25, 365.25]), [1999.0, 2001])
         self._assert(self.eval([6757.125, 7487.625]), [2018.5, 2020.5])
 
+    def test_mjd2000_to_decimal_year_special_values(self):
+        self._assert(self.eval([-inf, inf, nan]), [-inf, inf, nan])
+
 
 class TestDecimalYearToMjd2000Simple(TestCase):
 
@@ -120,6 +123,9 @@ class TestDecimalYearToMjd2000Simple(TestCase):
         self._assert(self.eval(2000.), 0.0)
         self._assert(self.eval([1999., 2001.0]), [-365.25, 365.25])
         self._assert(self.eval([2018.5, 2020.5]), [6757.125, 7487.625])
+
+    def test_decimal_year_to_mjd2000_special_values(self):
+        self._assert(self.eval([-inf, inf, nan]), [-inf, inf, nan])
 
 #-------------------------------------------------------------------------------
 # reference implementation
