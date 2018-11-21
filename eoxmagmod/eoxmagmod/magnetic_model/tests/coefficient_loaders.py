@@ -30,7 +30,7 @@
 from unittest import TestCase, main
 from numpy import inf
 from numpy.testing import assert_allclose
-from eoxmagmod._pytimeconv import decimal_year_to_mjd2000
+from eoxmagmod.time_util import decimal_year_to_mjd2000
 from eoxmagmod.data import (
     CHAOS5_CORE, CHAOS5_CORE_V4, CHAOS5_STATIC,
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,

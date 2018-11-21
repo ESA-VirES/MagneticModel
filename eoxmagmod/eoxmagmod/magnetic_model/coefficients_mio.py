@@ -31,7 +31,7 @@ from math import pi
 from numpy import zeros, arange, broadcast_to, sin, cos
 from .coefficients import SparseSHCoefficients, coeff_size
 from ..magnetic_time import mjd2000_to_magnetic_universal_time
-from .._pytimeconv import mjd2000_to_year_fraction
+from ..time_util import mjd2000_to_year_fraction
 
 F_SEASONAL = 2*pi
 F_DIURNAL = 2*pi/24.
@@ -46,12 +46,14 @@ class SparseSHCoefficientsMIO(SparseSHCoefficients):
             is_internal - set False for an external model
     """
 
-    def __init__(self, indices, coefficients, ps_extent, **kwargs):
+    def __init__(self, indices, coefficients, ps_extent,
+                 mjd2000_to_year_fraction=mjd2000_to_year_fraction, **kwargs):
         SparseSHCoefficients.__init__(self, indices, coefficients, **kwargs)
         pmin, pmax, smin, smax = ps_extent
         if pmin > pmax or smin > smax:
             raise Exception("Invalid ps_extent %s!" % ps_extent)
         self.ps_extent = (pmin, pmax, smin, smax)
+        self.mjd2000_to_year_fraction = mjd2000_to_year_fraction
 
     def __call__(self, time, lat_ngp, lon_ngp, lat_sol=None, lon_sol=None,
                  **parameters):
@@ -78,7 +80,7 @@ class SparseSHCoefficientsMIO(SparseSHCoefficients):
         pmin, pmax, smin, smax = self.ps_extent
         n_col = pmax - pmin + 1
         n_row = smax - smin + 1
-        f0_seasonal = F_SEASONAL * mjd2000_to_year_fraction(mjd2000)
+        f0_seasonal = F_SEASONAL * self.mjd2000_to_year_fraction(mjd2000)
         f0_diurnal = F_DIURNAL * mjd2000_to_magnetic_universal_time(
             mjd2000, lat_ngp, lon_ngp, lat_sol, lon_sol,
         )

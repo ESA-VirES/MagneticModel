@@ -28,7 +28,7 @@
 # pylint: disable=too-few-public-methods,abstract-method
 
 from numpy import inf, array, zeros, dot, digitize, argsort, abs as aabs, stack
-from .._pytimeconv import decimal_year_to_mjd2000, mjd2000_to_decimal_year
+from ..time_util import decimal_year_to_mjd2000, mjd2000_to_decimal_year
 
 
 class SHCoefficients(object):
@@ -164,16 +164,20 @@ class SparseSHCoefficientsConstant(SparseSHCoefficients):
 
 class SparseSHCoefficientsTimeDependent(SparseSHCoefficients):
     """ Time dependent sparse spherical harmonic coefficients
-    evaluated interpolation.
+    evaluated by piecewise linear interpolation of a time series of
+    coefficients snapshots.
     """
-    def __init__(self, indices, coefficients, times, **kwargs):
+    def __init__(self, indices, coefficients, times, to_mjd2000=None, **kwargs):
+        convert = to_mjd2000 or (lambda v: v)
         order = argsort(times)
-        self._times = times[order]
+        self._times = convert(times[order])
 
-        if kwargs.get("validity_start") is None:
-            kwargs["validity_start"] = self._times[0]
-        if kwargs.get("validity_end") is None:
-            kwargs["validity_end"] = self._times[-1]
+        def _convert_arg(args, key, default):
+            value = args.get(key)
+            args[key] = default if value is None else convert(value)
+
+        _convert_arg(kwargs, "validity_start", self._times[0])
+        _convert_arg(kwargs, "validity_end", self._times[-1])
 
         SparseSHCoefficients.__init__(
             self, indices, coefficients[:, order], **kwargs
@@ -204,19 +208,25 @@ class SparseSHCoefficientsTimeDependent(SparseSHCoefficients):
 
 class SparseSHCoefficientsTimeDependentDecimalYear(SparseSHCoefficientsTimeDependent):
     """ Time dependent sparse spherical harmonic coefficients
-    evaluated interpolation in the decimal-year time domain.
+    evaluated by piecewise linear interpolation of a time series of
+    coefficients snapshots with time in decimal year interpolated
+    in the decimal years time domain.
     """
 
-    def __init__(self, indices, coefficients, times, **kwargs):
+    def __init__(self, indices, coefficients, times,
+                 to_mjd2000=decimal_year_to_mjd2000,
+                 to_decimal_year=mjd2000_to_decimal_year,
+                 **kwargs):
         SparseSHCoefficientsTimeDependent.__init__(
             self, indices, coefficients, times, **kwargs
         )
         # Fix the validity range to be in the expected MJD2000.
         self.validity = tuple(decimal_year_to_mjd2000(self.validity))
+        self._to_decimal_year = to_decimal_year
 
     def __call__(self, time, **parameters):
         return SparseSHCoefficientsTimeDependent.__call__(
-            self, mjd2000_to_decimal_year(time), **parameters
+            self, self._to_decimal_year(time), **parameters
         )
 
 

@@ -32,7 +32,7 @@ from .util import (
     vrotate,
     vincdecnorm,
 )
-from ._pytimeconv import (
+from .time_util import (
     decimal_year_to_mjd2000,
     mjd2000_to_decimal_year,
     mjd2000_to_year_fraction,
