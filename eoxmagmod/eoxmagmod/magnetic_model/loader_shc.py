@@ -72,6 +72,9 @@ def load_coeff_shc(path, interpolate_in_decimal_years=False, **kwargs):
     }
     options.update(kwargs) # extend or override the default model options
 
+    if not "to_mjd2000" in options:
+        options["to_mjd2000"] = decimal_year_to_mjd2000
+
     times = data["t"]
     if len(times) == 1:
         return SparseSHCoefficientsConstant(
@@ -82,8 +85,6 @@ def load_coeff_shc(path, interpolate_in_decimal_years=False, **kwargs):
             coeff_class = SparseSHCoefficientsTimeDependentDecimalYear
         else:
             coeff_class = SparseSHCoefficientsTimeDependent
-            if not options.get('to_mjd2000'):
-                options["to_mjd2000"] = decimal_year_to_mjd2000
 
         return coeff_class(
             data["nm"], data["gh"], times, **options

@@ -381,6 +381,17 @@ class TestCHAOS5Core(TestCase, SHModelTestMixIn):
         )
 
 
+class TestCHAOS5CoreWithOverridenValidity(TestCHAOS5Core):
+    validity = decimal_year_to_mjd2000_simple((1999.0, 2015.0))
+
+    def load(self):
+        return load_model_shc(
+            CHAOS5_CORE,
+            to_mjd2000=decimal_year_to_mjd2000_simple,
+            validity_start=1999.0, validity_end=2015.0
+        )
+
+
 class TestCHAOS5CoreV4(TestCase, SHModelTestMixIn):
     reference_values = (
         2411.9, (30.0, 40.0, 8000.0),
@@ -406,6 +417,17 @@ class TestCHAOS5Combined(TestCase, SHModelTestMixIn):
         )
 
 
+class TestCHAOS5CombinedOverridenValidity(TestCHAOS5Combined):
+    validity = decimal_year_to_mjd2000_simple((1999.0, 2015.0))
+
+    def load(self):
+        return load_model_shc_combined(
+            CHAOS5_STATIC, CHAOS5_CORE_V4,
+            to_mjd2000=decimal_year_to_mjd2000_simple,
+            validity_start=1999.0, validity_end=2015.0
+        )
+
+
 class TestCHAOS6Static(TestCase, SHModelTestMixIn):
     reference_values = (
         0.0, (30.0, 40.0, 8000.0),
@@ -428,6 +450,17 @@ class TestCHAOS6Core(TestCase, SHModelTestMixIn):
         return load_model_shc(CHAOS6_CORE_LATEST)
 
 
+class TestCHAOS6CoreWithOverridenValidity(TestCHAOS6Core):
+    validity = decimal_year_to_mjd2000((2000.0, 2018.0))
+
+    def load(self):
+        return load_model_shc(
+            CHAOS6_CORE_LATEST,
+            validity_start=2000.0,
+            validity_end=2018.0
+        )
+
+
 class TestCHAOS6Combined(TestCase, SHModelTestMixIn):
     reference_values = (
         2685.9, (30.0, 40.0, 8000.0),
@@ -437,6 +470,16 @@ class TestCHAOS6Combined(TestCase, SHModelTestMixIn):
 
     def load(self):
         return load_model_shc_combined(CHAOS6_CORE_LATEST, CHAOS6_STATIC)
+
+
+class TestCHAOS6CombinedOverridenValidity(TestCHAOS6Combined):
+    validity = decimal_year_to_mjd2000((2000.0, 2018.0))
+
+    def load(self):
+        return load_model_shc_combined(
+            CHAOS6_CORE_LATEST, CHAOS6_STATIC,
+            validity_start=2000.0, validity_end=2018.0
+        )
 
 #-------------------------------------------------------------------------------
 

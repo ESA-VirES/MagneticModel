@@ -162,7 +162,6 @@ static double decimal_year_to_mjd2k(double decimal_year) {
     if (isfinite(decimal_year)) {
         const double whole_year = floor(decimal_year);
         const int year = (int)whole_year;
-        printf("year = %d; whole_year = %g \n", year, whole_year);
         return mjd2k_year_start(year) + (decimal_year - whole_year)*days_per_year(year);
     } else {
         return decimal_year;

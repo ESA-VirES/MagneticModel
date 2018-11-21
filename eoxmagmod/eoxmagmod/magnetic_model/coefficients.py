@@ -36,10 +36,27 @@ class SHCoefficients(object):
 
     def __init__(self, is_internal=True, **kwargs):
         self.is_internal = is_internal
-        self.validity = (
-            kwargs.get("validity_start", -inf),
-            kwargs.get("validity_end", +inf)
+        self.validity = self._get_converted_validity(**kwargs)
+
+    @staticmethod
+    def _get_converted_validity(validity_start=None, validity_end=None,
+                                to_mjd2000=None, **_):
+        """ Get validity range converted to MJD2000 using the optionally
+        provided conversion function.
+        """
+
+        def _get_converted_value_or_default(value, default, conversion_function):
+            if value is None:
+                value = default
+            if conversion_function is not None:
+                value = conversion_function(value)
+            return value
+
+        return (
+            _get_converted_value_or_default(validity_start, -inf, to_mjd2000),
+            _get_converted_value_or_default(validity_end, +inf, to_mjd2000),
         )
+
 
     def is_valid(self, time):
         """ Check if the time is within the coefficients validity range. """
@@ -167,18 +184,11 @@ class SparseSHCoefficientsTimeDependent(SparseSHCoefficients):
     evaluated by piecewise linear interpolation of a time series of
     coefficients snapshots.
     """
-    def __init__(self, indices, coefficients, times, to_mjd2000=None, **kwargs):
-        convert = to_mjd2000 or (lambda v: v)
+    def __init__(self, indices, coefficients, times, **kwargs):
         order = argsort(times)
-        self._times = convert(times[order])
-
-        def _convert_arg(args, key, default):
-            value = args.get(key)
-            args[key] = default if value is None else convert(value)
-
-        _convert_arg(kwargs, "validity_start", self._times[0])
-        _convert_arg(kwargs, "validity_end", self._times[-1])
-
+        kwargs['validity_start'] = kwargs.get('validity_start', times[order[0]])
+        kwargs['validity_end'] = kwargs.get('validity_end', times[order[-1]])
+        self._times = _convert(times[order], kwargs.get("to_mjd2000"))
         SparseSHCoefficients.__init__(
             self, indices, coefficients[:, order], **kwargs
         )
@@ -220,9 +230,11 @@ class SparseSHCoefficientsTimeDependentDecimalYear(SparseSHCoefficientsTimeDepen
         SparseSHCoefficientsTimeDependent.__init__(
             self, indices, coefficients, times, **kwargs
         )
-        # Fix the validity range to be in the expected MJD2000.
-        self.validity = tuple(decimal_year_to_mjd2000(self.validity))
         self._to_decimal_year = to_decimal_year
+        # Fix the validity range to be in the expected MJD2000.
+        self.validity = self._get_converted_validity(
+            *self.validity, to_mjd2000=to_mjd2000
+        )
 
     def __call__(self, time, **parameters):
         return SparseSHCoefficientsTimeDependent.__call__(
@@ -233,3 +245,10 @@ class SparseSHCoefficientsTimeDependentDecimalYear(SparseSHCoefficientsTimeDepen
 def coeff_size(degree):
     """ Size of the full coefficient array. """
     return ((degree + 2)*(degree + 1))//2
+
+
+def _convert(value, conversion_function):
+    """ Convert value using the optional conversion function. """
+    if conversion_function is not None:
+        value = conversion_function(value)
+    return value
