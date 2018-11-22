@@ -79,7 +79,7 @@ class CombinedSHCoefficients(SHCoefficients):
     def __init__(self, *items):
         if len(items) < 1:
             raise ValueError(
-                "The composed model must be composed from at least "
+                "The composed model must be composed from at least one "
                 "coefficient set."
             )
 
@@ -91,7 +91,7 @@ class CombinedSHCoefficients(SHCoefficients):
         for item in items[1:]:
             if is_internal != item.is_internal:
                 raise ValueError(
-                    "Mixing of external and iternal coefficient sets!"
+                    "Mixing of external and internal coefficient sets!"
                 )
             new_start, new_end = item.validity
             validity_start = max(validity_start, new_start)
@@ -139,7 +139,8 @@ class SparseSHCoefficients(SHCoefficients):
         return self._degree
 
     def _subset(self, min_degree, max_degree):
-        """ Get subset of the coefficients for the give min and max degrees. """
+        """ Get subset of the coefficients for the give min. and max. degrees.
+        """
         degree = self._degree
         index = self._index
         coeff = self._coeff
