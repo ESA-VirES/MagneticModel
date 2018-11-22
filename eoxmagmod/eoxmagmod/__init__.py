@@ -133,7 +133,7 @@ __all__ = [
     'trace_field_line',
 ]
 
-__version__ = '0.8.0'
+__version__ = '0.8.1'
 __author__ = 'Martin Paces (martin.paces@eox.at)'
 __copyright__ = 'Copyright (C) 2014 EOX IT Services GmbH'
 __licence__ = 'EOX licence (MIT style)'
