@@ -1,5 +1,5 @@
 /**
- * @file sph_harm.h
+ * @file time_conversion.h
  * @author Martin Paces <martin.paces@eox.at>
  * @brief Time Conversion Subroutines
  *
