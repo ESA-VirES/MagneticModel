@@ -1,5 +1,5 @@
 /**
- * @file sph_harm.h
+ * @file sunpos.h
  * @author Martin Paces <martin.paces@eox.at>
  * @brief Sun Position
  *
