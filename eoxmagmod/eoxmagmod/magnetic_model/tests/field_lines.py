@@ -181,7 +181,7 @@ class TestFieldLineTracing(TestCase):
     @property
     def model(self):
         if not hasattr(self, "_model"):
-            self._model = load_model_shc(IGRF12)
+            self._model = load_model_shc(IGRF12, interpolate_in_decimal_years=True)
         return self._model
 
     def test_trace_field_line_wgs84(self):
