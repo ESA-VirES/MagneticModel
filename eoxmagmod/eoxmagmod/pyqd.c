@@ -27,31 +27,15 @@
  *-----------------------------------------------------------------------------
 */
 
-#define VERSION "0.2.0"
-
-// needed to prevent dual definition
-#ifdef _POSIX_C_SOURCE
-#undef _POSIX_C_SOURCE
-#endif
-
-#define PY_SSIZE_T_CLEAN 1
+#include "common.h" /* common definitions - to be included before Python.h */
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
-#if PY_MAJOR_VERSION != 2
-#error "Non-supported Python major version!"
-#endif
-#if PY_MINOR_VERSION < 6
-#error "Non-supported Python minor version!"
-#endif
+/* module version */
+#include "version.h"
 
-/* maximum allowed output array dimension */
-#define MAX_OUT_ARRAY_NDIM 16
-
-/*---------------------------------------------------------------------------*/
-
-/* module specific exceptions */
-#include "pyqd_exc.h"
+/* common python utilities */
+#include "py_common.h"
 
 /* quasi dipole coordinates evaluation - old API with wrong MLT */
 #include "pyqd_eval_apex.h"
@@ -64,6 +48,7 @@
 
 /* sub-solar point coordinates evaluation */
 #include "pyqd_eval_subsol.h"
+
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
 
@@ -82,36 +67,47 @@ static PyMethodDef pyqd_methods[] =
 } ;
 
 /*---------------------------------------------------------------------------*/
-
 /* module initialization  */
-PyMODINIT_FUNC init_pyqd(void)
+
+static PyObject* init_module(void)
 {
-    PyObject *dict, *module;
+    PyObject *module = init_python_module("_pyqd", DOC_PYQD, pyqd_methods);
+    if (NULL == module)
+        goto exit;
 
-    /* define module */
-    if (NULL == (module = Py_InitModule3("_pyqd", pyqd_methods, DOC_PYQD)))
-        return;
+    PyObject *dict = PyModule_GetDict(module);
+    if (NULL == dict)
+        goto exit;
 
-    /* initialize numpy arrays */
-    import_array();
-
-    if (NULL == (dict = PyModule_GetDict(module)))
-        return;
-
-    /* add RT2Error */
-    PyExc_QDError = PyErr_NewException("_pywmm.QDError", NULL, NULL);
-
-    PyDict_SetItemString(dict, "QDError", PyExc_QDError);
-
-    /* constants */
-    #define SET_INT_ITEM(d, s, i) \
-    {PyObject *tmp = PyInt_FromLong(i);  PyDict_SetItemString(d,s,tmp); Py_DECREF(tmp);}
+    /* add module specific exception */
+    //PyDict_SetItemString(dict, "QDError", PyErr_NewException("_pyqd.QDError", NULL, NULL));
 
     /* metadata */
-    PyDict_SetItemString(dict, "__author__", PyString_FromString("Martin Paces (martin.paces@eox.at)"));
-    PyDict_SetItemString(dict, "__copyright__", PyString_FromString("Copyright (C) 2015 EOX IT Services GmbH"));
-    PyDict_SetItemString(dict, "__licence__", PyString_FromString("EOX licence (MIT style)"));
-    PyDict_SetItemString(dict, "__version__", PyString_FromString(VERSION));
+    set_dict_item_str_str(dict, "__author__", "Martin Paces (martin.paces@eox.at)");
+    set_dict_item_str_str(dict, "__copyright__", "Copyright (C) 2015 EOX IT Services GmbH");
+    set_dict_item_str_str(dict, "__licence__", "EOX licence (MIT style)");
+    set_dict_item_str_str(dict, "__version__", VERSION);
+
+  exit:
+    return module;
 }
 
 /*---------------------------------------------------------------------------*/
+
+#if PY_MAJOR_VERSION == 2
+
+PyMODINIT_FUNC init_pyqd(void)
+{
+    import_array();
+    init_module();
+}
+
+#else
+
+PyObject* PyInit__pyqd(void)
+{
+    import_array();
+    return init_module();
+}
+
+#endif

@@ -28,23 +28,48 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+import sys
+from os.path import join
 from distutils.core import setup
 from distutils.extension import Extension
-import numpy
-
 
 COMMON_INCLUDE_DIRS = [
-    numpy.get_include(),
     './eoxmagmod',
     './eoxmagmod/include',
+    join(sys.prefix, 'include'),
 ]
 
+try:
+    import numpy
+    COMMON_INCLUDE_DIRS.append(numpy.get_include())
+except ImportError:
+    pass
 
 setup(
     name="eoxmagmod",
     description="Earth magnetic field utilities.",
     author="Martin Paces",
     author_email="martin.paces@eox.at",
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: POSIX',
+        'Operating System :: POSIX :: Linux',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Topic :: Scientific/Engineering :: Physics',
+        'Topic :: Utilities',
+    ],
+    install_requires=[
+        'numpy>=1.13.0',
+        'spacepy',
+    ],
     packages=[
         'eoxmagmod',
         'eoxmagmod.data',
@@ -55,7 +80,7 @@ setup(
         'eoxmagmod.magnetic_model.tests.data',
     ],
     license='EOX licence (MIT style)',
-    version='0.5.4',
+    version='0.8.1',
     package_data={
         'eoxmagmod': [
             'data/*',
@@ -66,11 +91,11 @@ setup(
     },
     ext_modules=[
         Extension(
-            'eoxmagmod._pywmm',
+            'eoxmagmod._pymm',
             sources=[
-                'eoxmagmod/pywmm.c',
+                'eoxmagmod/pymm.c',
             ],
-            libraries=['geomag'],
+            libraries=[],
             library_dirs=[],
             include_dirs=COMMON_INCLUDE_DIRS,
         ),

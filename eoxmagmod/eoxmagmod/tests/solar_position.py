@@ -28,6 +28,7 @@
 #pylint: disable=missing-docstring
 
 from unittest import TestCase, main
+from io import open
 from numpy import array
 from numpy.testing import assert_allclose
 from eoxmagmod.quasi_dipole_coordinates import eval_subsol
@@ -38,7 +39,7 @@ from eoxmagmod.tests.data import SUN_POSITION_TEST_DATA
 def load_test_data(filename):
     """ Load test data from a tab-separated values file. """
     def _load_test_data(file_in):
-        header = file_in.next().strip().split("\t")
+        header = next(file_in).strip().split("\t")
         records = array([
             [float(v) for v in line.strip().split("\t")] for line in file_in
         ])
@@ -46,13 +47,13 @@ def load_test_data(filename):
             variable: records[..., idx] for idx, variable in enumerate(header)
         }
 
-    with file(filename, "rb") as file_in:
+    with open(filename, encoding="ascii") as file_in:
         return _load_test_data(file_in)
 
 
 class TestSunPosition(TestCase):
     test_data = load_test_data(SUN_POSITION_TEST_DATA)
-    
+
     def test_sunpos(self):
         decl, rasc, lha, azimuth, zenith = sunpos(
             self.test_data["MJD2000"],
@@ -67,7 +68,7 @@ class TestSunPosition(TestCase):
         assert_allclose(zenith, self.test_data["Zenith"], atol=1e-8)
 
     def test_sunpos_original(self):
-        # Note: the original code does handle correctly only days 
+        # Note: the original code does handle correctly only days
         #       between 2000-03-01 and 2400-02-29.
         mask = (
             (self.test_data["MJD2000"] >= 60.0) &

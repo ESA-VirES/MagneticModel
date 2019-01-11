@@ -30,7 +30,9 @@
 from unittest import TestCase, main
 from numpy import inf
 from numpy.testing import assert_allclose
-from eoxmagmod._pytimeconv import decimal_year_to_mjd2000
+from eoxmagmod.time_util import (
+    decimal_year_to_mjd2000, decimal_year_to_mjd2000_simple,
+)
 from eoxmagmod.data import (
     CHAOS5_CORE, CHAOS5_CORE_V4, CHAOS5_STATIC,
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,
@@ -41,6 +43,7 @@ from eoxmagmod.magnetic_model.tests.data import (
     SWARM_MMA_SHA_2C_TEST_DATA,
     SWARM_MMA_SHA_2F_TEST_DATA,
     SWARM_MIO_SHA_2_TEST_DATA,
+    CHAOS_MMA_TEST_DATA,
 )
 from eoxmagmod.magnetic_model.coefficients import (
     SparseSHCoefficientsTimeDependent,
@@ -138,20 +141,24 @@ class MIOCoefficietLoaderTestMixIn(CoefficietLoaderTestMixIn):
 
 class ShcTestMixIn(CoefficietLoaderTestMixIn):
     path = None
+    kwargs = {}
 
     @classmethod
     def load(cls):
-        return load_coeff_shc(cls.path)
+        return load_coeff_shc(cls.path, **cls.kwargs)
 
 
 class CombinedShcTestMixIn(CoefficietLoaderTestMixIn):
     class_ = CombinedSHCoefficients
     path_core = None
     path_static = None
+    kwargs = {}
 
     @classmethod
     def load(cls):
-        return load_coeff_shc_combined(cls.path_core, cls.path_static)
+        return load_coeff_shc_combined(
+            cls.path_core, cls.path_static, **cls.kwargs
+        )
 
 
 class WmmTestMixIn(CoefficietLoaderTestMixIn):
@@ -167,6 +174,9 @@ class TestCoeffSIFM(TestCase, ShcTestMixIn):
     class_ = SparseSHCoefficientsTimeDependentDecimalYear
     path = SIFM
     degree = 70
+    kwargs = {
+        "interpolate_in_decimal_years": True,
+    }
     validity = decimal_year_to_mjd2000((2013.4976, 2015.4962))
 
 
@@ -174,6 +184,9 @@ class TestCoeffIGRF12(TestCase, ShcTestMixIn):
     class_ = SparseSHCoefficientsTimeDependentDecimalYear
     path = IGRF12
     degree = 13
+    kwargs = {
+        "interpolate_in_decimal_years": True,
+    }
     validity = decimal_year_to_mjd2000((1900.0, 2020.0))
 
 
@@ -189,17 +202,23 @@ class TestCoeffIGRF11(TestCase, CoefficietLoaderTestMixIn):
 #-------------------------------------------------------------------------------
 
 class TestCoeffCHAOS5Core(TestCase, ShcTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependentDecimalYear
+    class_ = SparseSHCoefficientsTimeDependent
     path = CHAOS5_CORE
     degree = 20
-    validity = decimal_year_to_mjd2000((1997.0021, 2015.0007))
+    kwargs = {
+        "to_mjd2000": decimal_year_to_mjd2000_simple
+    }
+    validity = decimal_year_to_mjd2000_simple((1997.0021, 2015.0007))
 
 
 class TestCoeffCHAOS5CoreV4(TestCase, ShcTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependentDecimalYear
+    class_ = SparseSHCoefficientsTimeDependent
     path = CHAOS5_CORE_V4
     degree = 20
-    validity = decimal_year_to_mjd2000((1997.1020, 2016.1027))
+    kwargs = {
+        "to_mjd2000": decimal_year_to_mjd2000_simple
+    }
+    validity = decimal_year_to_mjd2000_simple((1997.1020, 2016.1027))
 
 
 class TestCoeffCHAOS5Static(TestCase, ShcTestMixIn):
@@ -218,7 +237,7 @@ class TestCoeffCHAOS5Combined(TestCase, CombinedShcTestMixIn):
 #-------------------------------------------------------------------------------
 
 class TestCoeffCHAOS6Core(TestCase, ShcTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependentDecimalYear
+    class_ = SparseSHCoefficientsTimeDependent
     path = CHAOS6_CORE_LATEST
     degree = 20
     validity = decimal_year_to_mjd2000((1997.102, 2019.1006))
@@ -284,6 +303,28 @@ class TestCoeffMMA2CExternal(TestCase, CoefficietLoaderTestMixIn):
     @staticmethod
     def load():
         return load_coeff_swarm_mma_2c_external(SWARM_MMA_SHA_2C_TEST_DATA)
+
+
+class TestCoeffChaosMMAInternal(TestCase, CoefficietLoaderTestMixIn):
+    is_internal = True
+    class_ = CombinedSHCoefficients
+    degree = 2
+    validity = (6179.00000, 6209.979167)
+
+    @staticmethod
+    def load():
+        return load_coeff_swarm_mma_2c_internal(CHAOS_MMA_TEST_DATA)
+
+
+class TestCoeffChaosMMAExternal(TestCase, CoefficietLoaderTestMixIn):
+    is_internal = False
+    class_ = CombinedSHCoefficients
+    degree = 2
+    validity = (6179.00000, 6209.979167)
+
+    @staticmethod
+    def load():
+        return load_coeff_swarm_mma_2c_external(CHAOS_MMA_TEST_DATA)
 
 
 class TestCoeffMMA2FGeoInternal(TestCase, CoefficietLoaderTestMixIn):

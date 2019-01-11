@@ -29,7 +29,7 @@
 #ifndef PYSUNPOS_H
 #define PYSUNPOS_H
 
-#include "pywmm_aux.h"
+#include "pymm_aux.h"
 #include "sunpos.h"
 #include <math.h>
 

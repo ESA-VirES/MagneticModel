@@ -47,7 +47,7 @@
       epoch_old = -9999.9
 
       do i = 1, n_data
-!        the eopoch is approximated by neglecting the leap years
+!        the epoch is approximated by neglecting the leap years
          epoch = t_mjd2k(i) / 365.25 + 2000
 !        reload coefficients and evaluate the pole location
 !        if time has changed by more than epoch_limit

@@ -1,0 +1,33 @@
+#
+# qdipole conda build metadata
+#
+
+{% set version = "0.2.0" %}
+
+package:
+  name: "qdipole"
+  version: {{ version }}
+
+source:
+  git_rev: {{ "qdipole-" + version }}
+  git_url: "https://github.com/ESA-VirES/MagneticModel"
+
+requirements:
+  build:
+   - {{ compiler('c') }}
+   - {{ compiler('fortran') }}
+
+test:
+  commands:
+    - ls -l $PREFIX/share/qdipole/
+    - cd $PREFIX/share/qdipole/
+    - qdipole_test apexsh_1995-2015.txt | diff - test_result.apexsh_1995-2015.txt
+    - qdipole_test apexsh_1980-2020.txt | diff - test_result.apexsh_1980-2020.txt
+    - qdlatlon_test apexsh_1995-2015.txt | diff - test_result.qdlatlon.apexsh_1995-2015.txt
+    - qdlatlon_test apexsh_1980-2020.txt | diff - test_result.qdlatlon.apexsh_1980-2020.txt
+    - mlt_test apexsh_1995-2015.txt | diff - test_result.mlt.apexsh_1995-2015.txt
+    - mlt_test apexsh_1980-2020.txt | diff - test_result.mlt.apexsh_1980-2020.txt
+    - subsol_test | diff - test_result.subsol.txt
+
+about:
+  home: https://github.com/ESA-VirES/MagneticModel/

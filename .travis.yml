@@ -1,6 +1,17 @@
 language: python
-python: 2.7
-sudo: enabled
+matrix:
+  include:
+    - python: 2.7
+      dist: trusty
+    - python: 3.4
+      dist: trusty
+    - python: 3.5
+      dist: trusty
+    - python: 3.6
+      dist: trusty
+    - python: 3.7
+      dist: xenial
+sudo: true
 addons:
   apt:
     sources:
@@ -10,10 +21,8 @@ addons:
     - gfortran
 install:
 - ( cd libcdf && make build && sudo make install )
-- ( cd wmm && ./configure && make build && sudo make install )
 - ( cd qdipole && ./configure && make build && sudo make install )
-- pip install numpy
-- pip install SpacePy
+- pip install scipy
 - pip install ./eoxmagmod/
 script:
 - pip list

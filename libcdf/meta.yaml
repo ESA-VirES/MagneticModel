@@ -1,0 +1,23 @@
+#
+# CDF library conda build metadata
+#
+
+{% set version = "3.6.4" %}
+{% set file_version = "cdf36_4" %}
+
+package:
+  name: "cdf"
+  version: {{ version }}
+
+source:
+  - url: https://spdf.sci.gsfc.nasa.gov/pub/software/cdf/dist/{{ file_version }}/unix/{{ file_version }}-dist-cdf.tar.gz
+    sha256: 84e582ec24c5159842c79c63e38852a71541741b030792d0e8890fd23a96d4b2
+
+requirements:
+  build:
+   - ncurses
+   - {{ compiler('c') }}
+   - {{ compiler('fortran') }}
+
+about:
+  home: https://github.com/ESA-VirES/MagneticModel/

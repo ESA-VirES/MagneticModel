@@ -34,8 +34,8 @@ def parse_shc_file(file_in):
     model data.
     """
     lines = strip_shc_comments(file_in)
-    data = parse_shc_header(lines.next())
-    data["t"] = parse_shc_times(lines.next())
+    data = parse_shc_header(next(lines))
+    data["t"] = parse_shc_times(next(lines))
     data["nm"], data["gh"] = parse_shc_coefficients(lines)
     return data
 

@@ -38,7 +38,7 @@ class TestSwarmMIOParser(TestCase):
 
     @staticmethod
     def parse(filename):
-        with file(filename) as file_in:
+        with open(filename) as file_in:
             return parse_swarm_mio_file(file_in)
 
     def _assert_valid(self, data, expected_data):

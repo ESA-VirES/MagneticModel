@@ -26,34 +26,18 @@
  * THE SOFTWARE.
  *-----------------------------------------------------------------------------
 */
-//#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
-#define VERSION "0.1.0"
-
-// needed to prevent dual definition
-#ifdef _POSIX_C_SOURCE
-#undef _POSIX_C_SOURCE
-#endif
-
-#define PY_SSIZE_T_CLEAN 1
+#include "common.h" /* common definitions - to be included before Python.h */
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
-#if PY_MAJOR_VERSION != 2
-#error "Non-supported Python major version!"
-#endif
-#if PY_MINOR_VERSION < 6
-#error "Non-supported Python minor version!"
-#endif
+/* module version */
+#include "version.h"
 
-/* maximum allowed output array dimension */
-#define MAX_OUT_ARRAY_NDIM 16
+/* common python utilities */
+#include "py_common.h"
 
-#include <string.h>
-#include <stdlib.h>
-
-/*---------------------------------------------------------------------------*/
-
+/* Sun ephemeris algorithms */
 #include "pysunpos.h"
 #include "pysunpos_original.h"
 
@@ -74,26 +58,40 @@ static PyMethodDef pysunpos_methods[] =
 
 /*---------------------------------------------------------------------------*/
 
-/* module initialization  */
-PyMODINIT_FUNC init_pysunpos(void)
+static PyObject* init_module(void)
 {
-    PyObject *dict, *module;
+    PyObject *module = init_python_module("_pysunpos", DOC_PYSUNPOS, pysunpos_methods);
+    if (NULL == module)
+        goto exit;
 
-    /* define module */
-    module = Py_InitModule3("_pysunpos", pysunpos_methods, DOC_PYSUNPOS);
-    if (NULL == module) return ;
+    PyObject *dict = PyModule_GetDict(module);
+    if (NULL == dict)
+        goto exit;
 
-    /* initialize Numpy arrays */
-    import_array();
+    /* module metadata */
+    set_dict_item_str_str(dict, "__author__", "Martin Paces (martin.paces@eox.at)");
+    set_dict_item_str_str(dict, "__copyright__", "Copyright (C) 2017 EOX IT Services GmbH");
+    set_dict_item_str_str(dict, "__licence__", "EOX licence (MIT style)");
+    set_dict_item_str_str(dict, "__version__", VERSION);
 
-    dict = PyModule_GetDict(module);
-    if (NULL == dict) return;
-
-    /* metadata */
-    PyDict_SetItemString(dict, "__author__", PyString_FromString("Martin Paces (martin.paces@eox.at)"));
-    PyDict_SetItemString(dict, "__copyright__", PyString_FromString("Copyright (C) 2017 EOX IT Services GmbH"));
-    PyDict_SetItemString(dict, "__licence__", PyString_FromString("EOX licence (MIT style)"));
-    PyDict_SetItemString(dict, "__version__", PyString_FromString(VERSION));
+  exit:
+    return module;
 }
 
-/*---------------------------------------------------------------------------*/
+#if PY_MAJOR_VERSION == 2
+
+PyMODINIT_FUNC init_pysunpos(void)
+{
+    import_array();
+    init_module();
+}
+
+#else
+
+PyObject* PyInit__pysunpos(void)
+{
+    import_array();
+    return init_module();
+}
+
+#endif

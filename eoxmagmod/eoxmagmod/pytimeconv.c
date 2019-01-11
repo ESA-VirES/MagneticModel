@@ -26,34 +26,18 @@
  * THE SOFTWARE.
  *-----------------------------------------------------------------------------
 */
-//#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
-#define VERSION "0.1.0"
-
-// needed to prevent dual definition
-#ifdef _POSIX_C_SOURCE
-#undef _POSIX_C_SOURCE
-#endif
-
-#define PY_SSIZE_T_CLEAN 1
+#include "common.h" /* common definitions - to be included before Python.h */
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
-#if PY_MAJOR_VERSION != 2
-#error "Non-supported Python major version!"
-#endif
-#if PY_MINOR_VERSION < 6
-#error "Non-supported Python minor version!"
-#endif
+/* module version */
+#include "version.h"
 
-/* maximum allowed output array dimension */
-#define MAX_OUT_ARRAY_NDIM 16
+/* common python utilities */
+#include "py_common.h"
 
-#include <string.h>
-#include <stdlib.h>
-
-/*---------------------------------------------------------------------------*/
-
+/* time conversion subroutines */
 #include "pytimeconv_mjd2000_to_decimal_year.h"
 #include "pytimeconv_mjd2000_to_year_fraction.h"
 #include "pytimeconv_decimal_year_to_mjd2000.h"
@@ -61,7 +45,7 @@
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
 
-#define DOC_PYSUNPOS \
+#define DOC_PYTIMECONV \
 "Time conversion utilities."
 
 /*---------------------------------------------------------------------------*/
@@ -77,25 +61,40 @@ static PyMethodDef pytimeconv_methods[] =
 /*---------------------------------------------------------------------------*/
 
 /* module initialization  */
-PyMODINIT_FUNC init_pytimeconv(void)
+static PyObject* init_module(void)
 {
-    PyObject *dict, *module;
+    PyObject *module = init_python_module("_pytimeconv", DOC_PYTIMECONV, pytimeconv_methods);
+    if (NULL == module)
+        goto exit;
 
-    /* define module */
-    module = Py_InitModule3("_pytimeconv", pytimeconv_methods, DOC_PYSUNPOS);
-    if (NULL == module) return ;
-
-    /* initialize Numpy arrays */
-    import_array();
-
-    dict = PyModule_GetDict(module);
-    if (NULL == dict) return;
+    PyObject *dict = PyModule_GetDict(module);
+    if (NULL == dict)
+        goto exit;
 
     /* metadata */
-    PyDict_SetItemString(dict, "__author__", PyString_FromString("Martin Paces (martin.paces@eox.at)"));
-    PyDict_SetItemString(dict, "__copyright__", PyString_FromString("Copyright (C) 2018 EOX IT Services GmbH"));
-    PyDict_SetItemString(dict, "__licence__", PyString_FromString("EOX licence (MIT style)"));
-    PyDict_SetItemString(dict, "__version__", PyString_FromString(VERSION));
+    set_dict_item_str_str(dict, "__author__", "Martin Paces (martin.paces@eox.at)");
+    set_dict_item_str_str(dict, "__copyright__", "Copyright (C) 2018 EOX IT Services GmbH");
+    set_dict_item_str_str(dict, "__licence__", "EOX licence (MIT style)");
+    set_dict_item_str_str(dict, "__version__", VERSION);
+
+  exit:
+    return module;
 }
 
-/*---------------------------------------------------------------------------*/
+#if PY_MAJOR_VERSION == 2
+
+PyMODINIT_FUNC init_pytimeconv(void)
+{
+    import_array();
+    init_module();
+}
+
+#else
+
+PyObject* PyInit__pytimeconv(void)
+{
+    import_array();
+    return init_module();
+}
+
+#endif

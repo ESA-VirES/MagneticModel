@@ -9,11 +9,10 @@ modelling and spherical harmonics.
 The repository contains following directories:
 
 - `eoxmagmod` - Collection models of the Earth magnetic field - python module
-- `wmm` - World Magnetic Model 2015 - re-packed to be compiled as a shared
-  library (dependency of the `eoxmagmod` package.)
 - `qdipole` - Quasi-Dipole apex coordinates evaluation - Fortran code compiled
-  as a shared library (dependency of the `eoxmagmod` package.)
+  as a shared library (dependency of the `eoxmagmod` package)
 - `libcdf` - [CDF library](https://cdf.gsfc.nasa.gov/) source installation
+  (dependency of the `eoxmagmod` package)
 
 ### Installation from Sources
 
@@ -25,26 +24,17 @@ $ make build
 $ sudo make install
 ```
 
-#### WMM
-
-```
-$ cd wmm/
-$ ./configure --prefix=/usr/ --libdir='${exec_prefix}/lib64'
-$ make build
-$ sudo make install
-```
-
 #### QDIPOLE
 
 ```
 $ cd qdipole/
-$ ./configure --prefix=/usr/ --libdir='${exec_prefix}/lib64'
+$ ./configure
 $ make build
 $ sudo make install
 ```
 
 #### EOxMagMod
-Requires WMM, QDIPOLE, CDF libraries + NumPy and SpacePy Python packages
+Requires QDIPOLE, CDF libraries + NumPy and SpacePy Python packages
 to be installed.
 NumPy and SpacePy can be installed using `pip`.
 
@@ -54,7 +44,26 @@ $ python ./setup.py build
 $ sudo python ./setup.py install
 ```
 
-### Installation from compiled binary packages
+### Conda installation
 
-Packages for CensOS 6 and 7 are available from EOX yum RPM repository
-[here](http://yum.packages.eox.at/).
+The package contains the `conda-build` scripts allowing local conda build and
+installation following this procedure:
+
+1) build the binary dependencies:
+```
+conda install conda-build
+conda build ./qdipole
+conda build ./libcdf
+conda build purge
+```
+Tested on GNU/Linux. Possibly works on other POSIX systems. Does not work on MS
+Windows (primarily because of a missing Fortran compiler).
+
+2) install the `eoxmagmod` in your conda environment:
+```
+conda activate <target-environment>
+conda install numpy scipy matplotlib h5py networkx
+conda install --use-local qdipole cdf
+pip install spacepy
+pip install ./eoxmagmod
+```

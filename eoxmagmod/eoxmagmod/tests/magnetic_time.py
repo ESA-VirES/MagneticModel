@@ -25,13 +25,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
-# pylint: disable=missing-docstring
+# pylint: disable=missing-docstring, invalid-name
 
 from unittest import TestCase, main
 from numpy import asarray, empty, nditer
 from numpy.random import uniform
 from numpy.testing import assert_allclose
-from eoxmagmod._pytimeconv import decimal_year_to_mjd2000
+from eoxmagmod.time_util import decimal_year_to_mjd2000
 from eoxmagmod.solar_position import sunpos
 from eoxmagmod.dipole_coords import convert_to_dipole
 from eoxmagmod.magnetic_time import mjd2000_to_magnetic_universal_time

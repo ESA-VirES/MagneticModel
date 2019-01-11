@@ -32,6 +32,7 @@ from numpy import abs as aabs
 from spacepy import pycdf
 from eoxmagmod.magnetic_model.tests.data import (
     SWARM_MMA_SHA_2C_TEST_DATA, SWARM_MMA_SHA_2F_TEST_DATA,
+    CHAOS_MMA_TEST_DATA,
 )
 from eoxmagmod.magnetic_model.parser_mma import (
     read_swarm_mma_2c_internal, read_swarm_mma_2c_external,
@@ -98,6 +99,44 @@ class TestSwarmMMA2CExternalParser(TestCase, SwarmMMAParserMixIn):
         })
 
 
+class TestChaosMMAInternalParser(TestCase, SwarmMMAParserMixIn):
+    filename = CHAOS_MMA_TEST_DATA
+
+    @staticmethod
+    def parse(cdf):
+        return read_swarm_mma_2c_internal(cdf)
+
+    def test_read_chaos_mma_internal(self):
+        data = self.data
+        self._assert_valid("gh", data[0], {
+            "degree_min": 1,
+            "degree_max": 1,
+        })
+        self._assert_valid("gh", data[1], {
+            "degree_min": 1,
+            "degree_max": 2,
+        })
+
+
+class TestChaosMMAExternalParser(TestCase, SwarmMMAParserMixIn):
+    filename = CHAOS_MMA_TEST_DATA
+
+    @staticmethod
+    def parse(cdf):
+        return read_swarm_mma_2c_external(cdf)
+
+    def test_read_chaos_mma_external(self):
+        data = self.data
+        self._assert_valid("qs", data[0], {
+            "degree_min": 1,
+            "degree_max": 1,
+        })
+        self._assert_valid("qs", data[1], {
+            "degree_min": 1,
+            "degree_max": 2,
+        })
+
+
 class TestSwarmMMA2FGeoInternalParser(TestCase, SwarmMMAParserMixIn):
     filename = SWARM_MMA_SHA_2F_TEST_DATA
 
@@ -106,7 +145,6 @@ class TestSwarmMMA2FGeoInternalParser(TestCase, SwarmMMAParserMixIn):
         return read_swarm_mma_2f_geo_internal(cdf)
 
     def test_read_swarm_mma_2f_geo_internal(self):
-        data = self.data
         self._assert_valid("gh", self.data, {
             "degree_min": 1,
             "degree_max": 1,
@@ -121,7 +159,6 @@ class TestSwarmMMA2FGeoExternalParser(TestCase, SwarmMMAParserMixIn):
         return read_swarm_mma_2f_geo_external(cdf)
 
     def test_read_swarm_mma_2f_geo_external(self):
-        data = self.data
         self._assert_valid("qs", self.data, {
             "degree_min": 1,
             "degree_max": 1,

@@ -28,7 +28,7 @@
 # pylint: disable=missing-docstring, invalid-name, too-few-public-methods
 
 from math import modf, floor
-from numpy import array, vectorize
+from numpy import array, vectorize, inf, nan
 from numpy.random import uniform
 from numpy.testing import assert_allclose
 from unittest import TestCase, main
@@ -93,6 +93,9 @@ class TestMjd2000ToDecimalYear(TestCase):
         self._assert(self.eval([-365.0, 366.0]), [1999.0, 2001])
         self._assert(self.eval([6757.5, 7488.0]), [2018.5, 2020.5])
 
+    def test_mjd2000_to_decimal_year_special_values(self):
+        self._assert(self.eval([-inf, inf, nan]), [-inf, inf, nan])
+
 
 class TestDecimalYearToMjd2000(TestCase):
 
@@ -120,6 +123,9 @@ class TestDecimalYearToMjd2000(TestCase):
         self._assert(self.eval(2000.), 0.0)
         self._assert(self.eval([1999., 2001.0]), [-365., 366.])
         self._assert(self.eval([2018.5, 2020.5]), [6757.5, 7488.0])
+
+    def test_decimal_year_to_mjd2000_special_values(self):
+        self._assert(self.eval([-inf, inf, nan]), [-inf, inf, nan])
 
 #-------------------------------------------------------------------------------
 # reference implementation

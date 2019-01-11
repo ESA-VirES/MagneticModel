@@ -26,9 +26,12 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+from io import open
+
+
 def parse_file(parser, file_, *args, **kwargs):
-    if isinstance(file_, basestring):
-        with file(file_, "rb") as file_in:
+    if isinstance(file_, str):
+        with open(file_, encoding="ascii") as file_in:
             return parser(file_in, *args, **kwargs)
     else:
         return parser(file_, *args, **kwargs)

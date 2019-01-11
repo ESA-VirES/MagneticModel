@@ -32,10 +32,9 @@ from itertools import product
 from random import random
 from numpy import array, empty, nditer
 from numpy.testing import assert_allclose
-from eoxmagmod._pywmm import (
+from eoxmagmod._pymm import (
     POTENTIAL, GRADIENT, POTENTIAL_AND_GRADIENT,
-    GEODETIC_ABOVE_WGS84, GEODETIC_ABOVE_EGM96,
-    GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
+    GEODETIC_ABOVE_WGS84, GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
     convert,
     relradpow, lonsincos, legendre,
     spharpot, sphargrd,
@@ -242,13 +241,6 @@ class TestDipoleSHEvalCartesian2WGS84Internal(TestCase, SourceCartesian, SHTypeI
 class TestDipoleSHEvalCartesian2WGS84External(TestCase, SourceCartesian, SHTypeExternal, DipoleSphericalHarmonicsMixIn):
     target_coordinate_system = GEODETIC_ABOVE_WGS84
 
-
-class TestDipoleSHEvalCartesian2EGM96Internal(TestCase, SourceCartesian, SHTypeInternal, DipoleSphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-class TestDipoleSHEvalCartesian2EGM96External(TestCase, SourceCartesian, SHTypeExternal, DipoleSphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
 #-------------------------------------------------------------------------------
 
 class TestDipoleSHEvalSpherical2CartesianInternal(TestCase, SourceSpherical, SHTypeInternal, DipoleSphericalHarmonicsMixIn):
@@ -271,13 +263,6 @@ class TestDipoleSHEvalSpherical2WGS84Internal(TestCase, SourceSpherical, SHTypeI
 class TestDipoleSHEvalSpherical2WGS84External(TestCase, SourceSpherical, SHTypeExternal, DipoleSphericalHarmonicsMixIn):
     target_coordinate_system = GEODETIC_ABOVE_WGS84
 
-
-class TestDipoleSHEvalSpherical2EGM96Internal(TestCase, SourceSpherical, SHTypeInternal, DipoleSphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-class TestDipoleSHEvalSpherical2EGM96External(TestCase, SourceSpherical, SHTypeExternal, DipoleSphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
 #-------------------------------------------------------------------------------
 
 class TestDipoleSHEvalWGS842CartesianInternal(TestCase, SourceGeodetic, SHTypeInternal, DipoleSphericalHarmonicsMixIn):
@@ -299,42 +284,6 @@ class TestDipoleSHEvalWGS842WGS84Internal(TestCase, SourceGeodetic, SHTypeIntern
 
 class TestDipoleSHEvalWGS842WGS84External(TestCase, SourceGeodetic, SHTypeExternal, DipoleSphericalHarmonicsMixIn):
     target_coordinate_system = GEODETIC_ABOVE_WGS84
-
-
-class TestDipoleSHEvalWGS842EGM96Internal(TestCase, SourceGeodetic, SHTypeInternal, DipoleSphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-class TestDipoleSHEvalWGS842EGM96External(TestCase, SourceGeodetic, SHTypeExternal, DipoleSphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-#-------------------------------------------------------------------------------
-
-class TestDipoleSHEvalEGM962CartesianInternal(TestCase, SourceGeodetic, SHTypeInternal, DipoleSphericalHarmonicsMixIn):
-    target_coordinate_system = GEOCENTRIC_CARTESIAN
-
-class TestDipoleSHEvalEGM962CartesianExternal(TestCase, SourceGeodetic, SHTypeExternal, DipoleSphericalHarmonicsMixIn):
-    target_coordinate_system = GEOCENTRIC_CARTESIAN
-
-
-class TestDipoleSHEvalEGM962SphericalInternal(TestCase, SourceGeodetic, SHTypeInternal, DipoleSphericalHarmonicsMixIn):
-    target_coordinate_system = GEOCENTRIC_SPHERICAL
-
-class TestDipoleSHEvalEGM962SphericalExternal(TestCase, SourceGeodetic, SHTypeExternal, DipoleSphericalHarmonicsMixIn):
-    target_coordinate_system = GEOCENTRIC_SPHERICAL
-
-
-class TestDipoleSHEvalEGM962WGS84Internal(TestCase, SourceGeodetic, SHTypeInternal, DipoleSphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_WGS84
-
-class TestDipoleSHEvalEGM962WGS84External(TestCase, SourceGeodetic, SHTypeExternal, DipoleSphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_WGS84
-
-
-class TestDipoleSHEvalEGM962EGM96Internal(TestCase, SourceGeodetic, SHTypeInternal, DipoleSphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
-
-class TestDipoleSHEvalEGM962EGM96External(TestCase, SourceGeodetic, SHTypeExternal, DipoleSphericalHarmonicsMixIn):
-    target_coordinate_system = GEODETIC_ABOVE_EGM96
 
 #-------------------------------------------------------------------------------
 

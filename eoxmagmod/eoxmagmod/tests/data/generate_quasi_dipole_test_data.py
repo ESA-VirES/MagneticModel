@@ -28,7 +28,12 @@
 #pylint: disable=missing-docstring
 
 import sys
-from itertools import product, izip
+try:
+    # Python 2
+    from itertools import izip as zip
+except ImportError:
+    pass
+from itertools import product
 from numpy import array, vectorize
 from numpy.random import uniform
 from eoxmagmod import mjd2000_to_decimal_year
@@ -64,7 +69,7 @@ def generate_test_data(file_out):
         "QDLatitude", "QDLongitude", "F11", "F12", "F21", "F22", "F",
         "MagneticLocalTime", "SubsolarLatitude", "SubsolarLongitude",
     ]
-    records = izip(
+    records = zip(
         time_mjd2000, time_decimal_year, lat, lon, rad,
         qdlat, qdlon, f11, f12, f21, f22, f__,
         mlt, sol_lat, sol_lon
