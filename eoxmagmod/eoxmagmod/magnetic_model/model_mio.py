@@ -42,6 +42,13 @@ class DipoleMIOPrimaryGeomagneticModel(GeomagneticModel):
     """
     parameters = ("time", "location", "f107", "subsolar_point")
 
+    @property
+    def degree(self):
+        return max(
+            self.model_below_ionosphere.degree,
+            self.model_above_ionosphere.degree
+        )
+
     def __init__(self, model_below_ionosphere, model_above_ionosphere,
                  height=MIO_HEIGHT, earth_radius=MIO_EARTH_RADIUS):
         self.model_below_ionosphere = model_below_ionosphere

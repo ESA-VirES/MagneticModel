@@ -83,6 +83,7 @@ class SHModelTestMixIn(object):
     range_lat = range(-90, 91, 5)
     range_lon = range(-180, 181, 10)
     validity = None
+    degree = None
     model_class = SphericalHarmomicGeomagneticModel
     options = {}
 
@@ -166,6 +167,9 @@ class SHModelTestMixIn(object):
 
     def test_class(self):
         self.assertIsInstance(self.model, self.model_class)
+
+    def test_degree(self):
+        self.assertEqual(self.model.degree, self.degree)
 
     def test_validity(self):
         assert_allclose(self.model.validity, self.validity)
@@ -290,6 +294,7 @@ class TestWMM2010(TestCase, SHModelTestMixIn):
         4566.0, (30.0, 40.0, 8000.0),
         (15123.605974201277, 431.1067254253052, 14617.02644010297)
     )
+    degree = 12
     validity = decimal_year_to_mjd2000((2010.0, 2015.0))
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
@@ -303,6 +308,7 @@ class TestWMM2015(TestCase, SHModelTestMixIn):
         6392.0, (30.0, 40.0, 8000.0),
         (15124.716592471135, 533.1027023540182, -14728.4938691708)
     )
+    degree = 12
     validity = decimal_year_to_mjd2000((2015.0, 2020.0))
 
     def load(self):
@@ -317,6 +323,7 @@ class TestEMM2010(TestCase, SHModelTestMixIn):
     # The EMM models is huge and the test ranges have to be reduced.
     range_lat = range(-90, 91, 30)
     range_lon = range(-180, 181, 60)
+    degree = 739
     validity = decimal_year_to_mjd2000((2010.0, 2015.0))
     options = {"max_degree": 300}
 
@@ -329,6 +336,7 @@ class TestIGRF11(TestCase, SHModelTestMixIn):
         -14609.5, (30.0, 40.0, 8000.0),
         (15265.918081037888, -142.6442876878355, -14044.282413158882)
     )
+    degree = 13
     validity = decimal_year_to_mjd2000((1900.0, 2015.0))
 
     def load(self):
@@ -340,6 +348,7 @@ class TestIGRF12(TestCase, SHModelTestMixIn):
         -15522.5, (30.0, 40.0, 8000.0),
         (15259.57386772841, -159.00767967612023, -14015.952721753336)
     )
+    degree = 13
     validity = decimal_year_to_mjd2000((1900.0, 2020.0))
 
     def load(self):
@@ -351,6 +360,7 @@ class TestSIFM(TestCase, SHModelTestMixIn):
         5295.36, (30.0, 40.0, 8000.0),
         (15122.448070753977, 474.14615304317635, -14669.16289251053)
     )
+    degree = 70
     validity = decimal_year_to_mjd2000((2013.4976, 2015.4962))
 
     def load(self):
@@ -362,6 +372,7 @@ class TestCHAOS5Static(TestCase, SHModelTestMixIn):
         0.0, (30.0, 40.0, 8000.0),
         (-0.019165363389425448, 0.017766807977599153, 0.007245125734944849)
     )
+    degree = 90
     validity = (-inf, inf)
 
     def load(self):
@@ -373,6 +384,7 @@ class TestCHAOS5Core(TestCase, SHModelTestMixIn):
         2192.51, (30.0, 40.0, 8000.0),
         (15126.611217467429, 302.7784261453687, -14477.586706907041)
     )
+    degree = 20
     validity = decimal_year_to_mjd2000_simple((1997.0021, 2015.0007))
 
     def load(self):
@@ -397,6 +409,7 @@ class TestCHAOS5CoreV4(TestCase, SHModelTestMixIn):
         2411.9, (30.0, 40.0, 8000.0),
         (15127.03768745214, 313.61814829613326, -14489.207459734534)
     )
+    degree = 20
     validity = decimal_year_to_mjd2000((1997.1020, 2016.1027))
 
     def load(self):
@@ -408,6 +421,7 @@ class TestCHAOS5Combined(TestCase, SHModelTestMixIn):
         2411.9, (30.0, 40.0, 8000.0),
         (15127.018861793757, 313.6542615062537, -14489.218457022034)
     )
+    degree = 90
     validity = decimal_year_to_mjd2000_simple((1997.1020, 2016.1027))
 
     def load(self):
@@ -433,6 +447,7 @@ class TestCHAOS6Static(TestCase, SHModelTestMixIn):
         0.0, (30.0, 40.0, 8000.0),
         (-0.006745769467490476, 0.00860457221837856, -0.010495388357779979)
     )
+    degree = 110
     validity = (-inf, inf)
 
     def load(self):
@@ -444,6 +459,7 @@ class TestCHAOS6Core(TestCase, SHModelTestMixIn):
         2503.33, (30.0, 40.0, 8000.0),
         (15127.112741712719, 318.52904189382974, -14493.826457120203)
     )
+    degree = 20
     validity = decimal_year_to_mjd2000((1997.102, 2019.1006))
 
     def load(self):
@@ -466,6 +482,7 @@ class TestCHAOS6Combined(TestCase, SHModelTestMixIn):
         2685.9, (30.0, 40.0, 8000.0),
         (15127.164745882454, 328.584740011225, -14503.5849807797)
     )
+    degree = 110
     validity = decimal_year_to_mjd2000((1997.102, 2019.1006))
 
     def load(self):
@@ -488,6 +505,7 @@ class TestMMA2CSecondary(TestCase, DipoleSHModelTestMixIn):
         6194.5, (30.0, 40.0, 8000.0),
         (1.7252467863888683, 0.27791273383414994, -0.12422361564742368)
     )
+    degree = 3 
     validity = (6179.125, 6209.875)
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
@@ -501,6 +519,7 @@ class TestMMA2CPrimary(TestCase, DipoleSHModelTestMixIn):
         6194.5, (30.0, 40.0, 8000.0),
         (-7.474051407972587, 3.531499380152684, -4.628812102394507)
     )
+    degree = 2
     validity = (6179.125, 6209.875)
 
     def load(self):
@@ -512,6 +531,7 @@ class TestChaosMMASecondary(TestCase, DipoleSHModelTestMixIn):
         6194.5, (30.0, 40.0, 8000.0),
         (1.8492638163980442, 0.5125018012040559, 1.0821299594918217)
     )
+    degree = 2
     validity = (6179.00000, 6209.979167)
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
@@ -525,6 +545,7 @@ class TestChaosMMAPrimary(TestCase, DipoleSHModelTestMixIn):
         6194.5, (30.0, 40.0, 8000.0),
         (-8.667405753073385, 4.538967766836233, 6.576263454698334)
     )
+    degree = 2
     validity = (6179.00000, 6209.979167)
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
@@ -538,6 +559,7 @@ class TestMMA2FGeoSecondary(TestCase, SHModelTestMixIn):
         6194.5, (30.0, 40.0, 8000.0),
         (1.7678502698292433, 0.6267115585524842, 2.7484695371405405)
     )
+    degree = 1
     validity = (6179.03125, 6209.96875)
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
@@ -551,6 +573,7 @@ class TestMMA2FGeoPrimary(TestCase, SHModelTestMixIn):
         6194.5, (30.0, 40.0, 8000.0),
         (-9.114015792291584, 6.856282080637684, 3.208391426427198)
     )
+    degree = 1
     validity = (6179.03125, 6209.96875)
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
@@ -564,6 +587,7 @@ class TestMMA2FSMSecondary(TestCase, SHModelTestMixIn):
         6194.5, (30.0, 40.0, 8000.0),
         (1.6186505587469782, 1.0283338998596887, 2.6779138076728497)
     )
+    degree = 1
     validity = (6179.03125, 6209.96875)
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
@@ -577,6 +601,7 @@ class TestMMA2FSMPrimary(TestCase, SHModelTestMixIn):
         6194.5, (30.0, 40.0, 8000.0),
         (-9.42096313502333, 5.586931375284516, 4.7449677343745975)
     )
+    degree = 1
     validity = (6179.03125, 6209.96875)
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
@@ -591,6 +616,7 @@ class TestMIOSecondary(TestCase, DipoleMIOSHModelTestMixIn):
         5661.87, (30.0, 40.0, 8000.0),
         (-0.5388282699123806, -0.17622120922727555, -1.6137152691151841)
     )
+    degree = 2
     validity = (-inf, inf)
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
@@ -601,6 +627,7 @@ class TestMIOSecondary(TestCase, DipoleMIOSHModelTestMixIn):
 
 class TestMIOPrimary(TestCase, DipoleMIOSHModelTestMixIn):
     model_class = DipoleMIOPrimaryGeomagneticModel
+    degree = 2
     reference_values = (
         5661.87,
         [
@@ -642,6 +669,7 @@ class TestMIOPrimaryAboveIonosphere(TestCase, DipoleMIOSHModelTestMixIn):
         (30.0, 40.0, 8000.0),
         (0.2356719922628632, 0.19030444647263053, -1.9489199024730584)
     )
+    degree = 2
     validity = (-inf, inf)
 
     def load(self):
@@ -655,6 +683,7 @@ class TestMIOPrimaryBelowIonosphere(TestCase, DipoleMIOSHModelTestMixIn):
         5661.87, (30.0, 40.0, 6400.0),
         (-0.6061225119866813, -0.6088386296175435, -4.733769204526618)
     )
+    degree = 2
     validity = (-inf, inf)
 
     def load(self):
