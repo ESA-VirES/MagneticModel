@@ -109,6 +109,7 @@ static PyObject* init_module(void)
     set_dict_item_str_long(dict, "POTENTIAL", SM_POTENTIAL);
     set_dict_item_str_long(dict, "GRADIENT", SM_GRADIENT);
     set_dict_item_str_long(dict, "POTENTIAL_AND_GRADIENT", SM_POTENTIAL_AND_GRADIENT);
+    set_dict_item_str_double(dict, "EARTH_RADIUS", RADIUS);
 
     /* module metadata */
     set_dict_item_str_str(dict, "__author__", "Martin Paces (martin.paces@eox.at)");

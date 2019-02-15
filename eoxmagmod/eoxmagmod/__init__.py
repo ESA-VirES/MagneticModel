@@ -38,6 +38,7 @@ from .time_util import (
     mjd2000_to_year_fraction,
 )
 from ._pymm import (
+    EARTH_RADIUS,
     GEODETIC_ABOVE_WGS84,
     GEOCENTRIC_SPHERICAL,
     GEOCENTRIC_CARTESIAN,
@@ -102,6 +103,7 @@ __all__ = [
     'vrot_from_dipole',
     'convert_to_dipole',
     'sheval_dipole',
+    'EARTH_RADIUS',
     'GEODETIC_ABOVE_WGS84',
     'GEOCENTRIC_SPHERICAL',
     'GEOCENTRIC_CARTESIAN',

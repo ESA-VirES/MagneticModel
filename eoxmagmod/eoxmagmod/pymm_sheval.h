@@ -348,7 +348,6 @@ static void _sheval3(ARRAY_DATA arrd_in, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_gr
 "                  POTENTIAL\n"\
 "                  GRADIENT (default)\n"\
 "                  POTENTIAL_AND_GRADIENT\n"\
-"       rad_ref - reference (Earth) radius\n"\
 "       is_internal - boolean flag set to True by default. When set to False \n"\
 "                     external field evaluation is used.\n"\
 "       scale_potential - scalar value multiplied with the result potentials.\n"\
