@@ -27,7 +27,7 @@
 #-------------------------------------------------------------------------------
 # pylint: disable=too-many-arguments,too-many-locals
 
-from numpy import asarray, empty, nditer, logical_not, isscalar
+from numpy import asarray, empty, nditer, logical_not, ndim
 from .._pymm import GEOCENTRIC_SPHERICAL, convert
 from .model import GeomagneticModel, DipoleSphericalHarmomicGeomagneticModel
 
@@ -77,7 +77,7 @@ class DipoleMIOPrimaryGeomagneticModel(GeomagneticModel):
         def _eval_masked_time_and_location(model, time, location, mask):
             return _eval_masked_location(model, time[mask], location, mask)
 
-        if isscalar(time):
+        if ndim(time) == 0:
             _eval_masked = _eval_masked_location
         else:
             _eval_masked = _eval_masked_time_and_location
