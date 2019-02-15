@@ -82,6 +82,7 @@ from .magnetic_model.loader_mio import (
     load_model_swarm_mio_external,
 )
 from .magnetic_model.field_lines import trace_field_line
+from .magnetic_model.model_composed import ComposedGeomagneticModel
 
 __all__ = [
     'vnorm',
@@ -131,6 +132,7 @@ __all__ = [
     'load_model_swarm_mio_internal',
     'load_model_swarm_mio_external',
     'trace_field_line',
+    'ComposedGeomagneticModel',
 ]
 
 __version__ = '0.9.0'

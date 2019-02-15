@@ -27,6 +27,7 @@
 #-------------------------------------------------------------------------------
 # pylint: disable=missing-docstring,no-self-use,invalid-name
 
+from __future__ import print_function
 from unittest import TestCase, main
 from itertools import product
 from numpy import nan, inf, isinf, array, empty, full, nditer, asarray
@@ -73,11 +74,19 @@ from eoxmagmod.magnetic_model.model_mio import (
     DipoleMIOPrimaryGeomagneticModel,
     DipoleMIOGeomagneticModel,
 )
-from eoxmagmod._pymm import GEOCENTRIC_SPHERICAL, sheval, GRADIENT
+from eoxmagmod.magnetic_model.model_composed import (
+    ComposedGeomagneticModel,
+)
+from eoxmagmod._pymm import (
+    GEOCENTRIC_CARTESIAN, GEODETIC_ABOVE_WGS84, GEOCENTRIC_SPHERICAL, convert,
+    GRADIENT, sheval,
+)
 from eoxmagmod.sheval_dipole import sheval_dipole
 
 
 class SHModelTestMixIn(object):
+    coord_type_in = GEOCENTRIC_SPHERICAL
+    coord_type_out = GEOCENTRIC_SPHERICAL
     parameters = ("time", "location")
     scale = 1.0
     range_lat = range(-90, 91, 5)
@@ -95,10 +104,10 @@ class SHModelTestMixIn(object):
 
     @property
     def coordinates(self):
-        return array([
+        return convert(array([
             (lat, lon, 6371.2*uniform(1.0, 2.0)) for lat, lon
             in product(self.range_lat, self.range_lon)
-        ])
+        ]), GEOCENTRIC_SPHERICAL, self.coord_type_in)
 
     @staticmethod
     def _constrain_validity(time_min, time_max):
@@ -127,7 +136,10 @@ class SHModelTestMixIn(object):
         )
 
     def eval_model(self, times, coords):
-        return self.model.eval(times, coords, **self.options)
+        return self.model.eval(
+            times, coords, input_coordinate_system=self.coord_type_in,
+            output_coordinate_system=self.coord_type_out, **self.options
+        )
 
     def eval_reference(self, times, coords):
         result = empty(coords.shape)
@@ -160,8 +172,8 @@ class SHModelTestMixIn(object):
         return sheval(
             coords, degree, coeff[..., 0], coeff[..., 1],
             is_internal=is_internal, mode=GRADIENT,
-            coord_type_in=GEOCENTRIC_SPHERICAL,
-            coord_type_out=GEOCENTRIC_SPHERICAL,
+            coord_type_in=self.coord_type_in,
+            coord_type_out=self.coord_type_out,
             scale_gradient=-asarray(self.scale),
         )
 
@@ -169,13 +181,14 @@ class SHModelTestMixIn(object):
         self.assertIsInstance(self.model, self.model_class)
 
     def test_degree(self):
-        self.assertEqual(self.model.degree, self.degree)
+        if hasattr(self.model, 'degree'):
+            self.assertEqual(self.model.degree, self.degree)
 
     def test_validity(self):
         assert_allclose(self.model.validity, self.validity)
 
     def test_parameters(self):
-        self.assertEqual(self.model.parameters, self.parameters)
+        self.assertEqual(set(self.model.parameters), set(self.parameters))
 
     def test_eval_single_time(self):
         time = self.time
@@ -218,19 +231,24 @@ class SHModelTestMixIn(object):
             time for time in [nan, self.time_before, self.time, self.time_after]
             if not isinf(time)
         ])
-        coords = array([(0, 0, 6371.2) for _ in times])
+        coords = convert(
+            array([(0, 0, 6371.2) for _ in times]),
+            GEOCENTRIC_SPHERICAL, self.coord_type_in
+        )
         assert_allclose(
             self.eval_model(times, coords),
             self.eval_reference(times, coords),
         )
 
     def test_eval_reference_values(self):
-        times, coords, results = self.reference_values
+        times, src_coords, expected_result = self.reference_values
+        coords = convert(src_coords, GEOCENTRIC_SPHERICAL, self.coord_type_in)
+        model_result = self.eval_model(times, coords)
         try:
-            assert_allclose(self.eval_model(times, coords), results)
-        except:
-            print(tuple(float(f) for f in self.eval_model(times, coords)))
-        assert_allclose(self.eval_model(times, coords), results)
+            assert_allclose(model_result, expected_result)
+        except AssertionError:
+            print(tuple(float(f) for f in model_result))
+            raise
 
     def test_eval_empty_coords(self):
         assert_allclose(
@@ -255,8 +273,8 @@ class DipoleSHModelTestMixIn(SHModelTestMixIn):
         return sheval_dipole(
             coords, degree, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
             is_internal=is_internal, mode=GRADIENT,
-            coord_type_in=GEOCENTRIC_SPHERICAL,
-            coord_type_out=GEOCENTRIC_SPHERICAL,
+            coord_type_in=self.coord_type_in,
+            coord_type_out=self.coord_type_out,
             scale_gradient=-asarray(self.scale),
         )
 
@@ -267,7 +285,11 @@ class DipoleMIOSHModelTestMixIn(SHModelTestMixIn):
     model_class = DipoleMIOGeomagneticModel
 
     def eval_model(self, times, coords):
-        return self.model.eval(times, coords, f107=self.f107, **self.options)
+        return self.model.eval(
+            times, coords, f107=self.f107,
+            input_coordinate_system=self.coord_type_in,
+            output_coordinate_system=self.coord_type_out, **self.options
+        )
 
     def _eval_reference(self, time, coords):
         return self._eval_reference_mio(self.model, time, coords)
@@ -282,10 +304,120 @@ class DipoleMIOSHModelTestMixIn(SHModelTestMixIn):
         return sheval_dipole(
             coords, degree, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
             is_internal=is_internal, mode=GRADIENT,
-            coord_type_in=GEOCENTRIC_SPHERICAL,
-            coord_type_out=GEOCENTRIC_SPHERICAL,
+            coord_type_in=self.coord_type_in,
+            coord_type_out=self.coord_type_out,
             scale_gradient=scale
         )
+
+class ComposedModelTestMixIn(SHModelTestMixIn):
+    components = None
+    model_class = ComposedGeomagneticModel
+
+    def load(self):
+        composed_model = ComposedGeomagneticModel()
+        for model, scale, parameters in self.components:
+            composed_model.push(model, scale, **parameters)
+        return composed_model
+
+    def _eval_reference(self, time, coords):
+        result = 0
+        for model, scale, parameters in self.components:
+            kwargs = {}
+            kwargs.update(getattr(self, 'options', {}))
+            kwargs.update(parameters)
+            kwargs.update({
+                "input_coordinate_system": self.coord_type_in,
+                "output_coordinate_system": self.coord_type_out,
+            })
+            result += scale * model.eval(time, coords, **kwargs)
+        return result
+
+#-------------------------------------------------------------------------------
+
+class TestComposedModelFull(TestCase, ComposedModelTestMixIn):
+    parameters = ("time", "location", "f107", "subsolar_point")
+    options = {"f107": 70, "scale": [1, 1, -1]}
+    components = [
+        (
+            load_model_shc_combined(
+                CHAOS6_STATIC, CHAOS6_CORE_LATEST,
+                to_mjd2000=decimal_year_to_mjd2000_simple,
+            ), 1.0, {}
+        ),
+        (load_model_swarm_mma_2c_internal(CHAOS_MMA_TEST_DATA), 1.0, {}),
+        (load_model_swarm_mma_2c_external(CHAOS_MMA_TEST_DATA), 1.0, {}),
+        (load_model_swarm_mio_internal(SWARM_MIO_SHA_2_TEST_DATA), 1.0, {}),
+        (load_model_swarm_mio_external(SWARM_MIO_SHA_2_TEST_DATA), 1.0, {}),
+    ]
+    reference_values = (
+        6201.125, (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
+        (30289.26960669176, 2254.2152561714115, 31788.9069112966)
+    )
+    validity = (6179.00000, 6209.979167)
+
+
+class TestComposedModelFullCartToWGS84(TestComposedModelFull):
+    coord_type_in = GEOCENTRIC_CARTESIAN
+    coord_type_out = GEODETIC_ABOVE_WGS84
+    reference_values = (
+        6201.125, (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
+        (30381.359560356446, 2254.2152561714115, 31700.90609408948)
+    )
+
+
+class TestComposedModelFullWGS84ToCart(TestComposedModelFull):
+    coord_type_in = GEODETIC_ABOVE_WGS84
+    coord_type_out = GEOCENTRIC_CARTESIAN
+    reference_values = (
+        6201.125, (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
+        (-34139.649212401426, -25703.898035517483, -10336.823485822737)
+    )
+
+
+class TestComposedModelDiffConstrained(TestCase, ComposedModelTestMixIn):
+    parameters = ("time", "location")
+    options = {"scale": [1, 1, -1]}
+    components = [
+        (
+            load_model_shc_combined(
+                CHAOS6_STATIC, CHAOS6_CORE_LATEST,
+                to_mjd2000=decimal_year_to_mjd2000_simple
+            ), 1.0, {"max_degree": 15}
+        ),
+        (
+            load_model_shc(
+                CHAOS6_CORE_LATEST,
+                to_mjd2000=decimal_year_to_mjd2000_simple
+            ), -1.0, {"min_degree": 5, "max_degree": 15}
+        ),
+    ]
+    reference_values = (
+        6201.125,
+        (30.0, 40.0, 6400.0),
+        (31513.116189124143, 2660.4562533211647, 30567.71751831368)
+    )
+    validity = (-1058.4945, 6976.49415)
+
+
+class TestComposedModelDiffConstrainedCartToWGS84(TestComposedModelDiffConstrained):
+    coord_type_in = GEOCENTRIC_CARTESIAN
+    coord_type_out = GEODETIC_ABOVE_WGS84
+    reference_values = (
+        6201.125, (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
+        (31601.658407935865, 2660.4562533211647, 30476.17154592741)
+    )
+
+
+class TestComposedModelDiffConstrainedWGS84ToCart(TestComposedModelDiffConstrained):
+    coord_type_in = GEODETIC_ABOVE_WGS84
+    coord_type_out = GEOCENTRIC_CARTESIAN
+    reference_values = (
+        6201.125, (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
+        (-34059.382252106414, -25106.236099833302, -12007.300413035513)
+    )
+
+
+# TODO coordinate system conversions
 
 #-------------------------------------------------------------------------------
 
@@ -505,7 +637,7 @@ class TestMMA2CSecondary(TestCase, DipoleSHModelTestMixIn):
         6194.5, (30.0, 40.0, 8000.0),
         (1.7252467863888683, 0.27791273383414994, -0.12422361564742368)
     )
-    degree = 3 
+    degree = 3
     validity = (6179.125, 6209.875)
     options = {"scale": [1, 1, -1]}
     scale = [1, 1, -1]
