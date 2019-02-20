@@ -38,6 +38,7 @@ from .time_util import (
     mjd2000_to_year_fraction,
 )
 from ._pymm import (
+    EARTH_RADIUS,
     GEODETIC_ABOVE_WGS84,
     GEOCENTRIC_SPHERICAL,
     GEOCENTRIC_CARTESIAN,
@@ -82,6 +83,7 @@ from .magnetic_model.loader_mio import (
     load_model_swarm_mio_external,
 )
 from .magnetic_model.field_lines import trace_field_line
+from .magnetic_model.model_composed import ComposedGeomagneticModel
 
 __all__ = [
     'vnorm',
@@ -101,6 +103,7 @@ __all__ = [
     'vrot_from_dipole',
     'convert_to_dipole',
     'sheval_dipole',
+    'EARTH_RADIUS',
     'GEODETIC_ABOVE_WGS84',
     'GEOCENTRIC_SPHERICAL',
     'GEOCENTRIC_CARTESIAN',
@@ -131,9 +134,10 @@ __all__ = [
     'load_model_swarm_mio_internal',
     'load_model_swarm_mio_external',
     'trace_field_line',
+    'ComposedGeomagneticModel',
 ]
 
-__version__ = '0.8.1'
+__version__ = '0.9.0'
 __author__ = 'Martin Paces (martin.paces@eox.at)'
 __copyright__ = 'Copyright (C) 2014 EOX IT Services GmbH'
 __licence__ = 'EOX licence (MIT style)'

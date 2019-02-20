@@ -65,6 +65,10 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
     def validity(self):
         return self.coefficients.validity
 
+    @property
+    def degree(self):
+        return self.coefficients.degree
+
     def eval(self, time, location,
              input_coordinate_system=GEOCENTRIC_SPHERICAL,
              output_coordinate_system=GEOCENTRIC_SPHERICAL,

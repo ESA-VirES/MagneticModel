@@ -67,6 +67,11 @@ static void set_dict_item_str_long(PyObject *dict, const char * key, long value)
     set_dict_item_str(dict, key, PyLong_FromLong(value));
 }
 
+static void set_dict_item_str_double(PyObject *dict, const char * key, double value)
+{
+    set_dict_item_str(dict, key, PyFloat_FromDouble(value));
+}
+
 static void set_dict_item_str_str(PyObject *dict, const char * key, const char *value)
 {
     #ifdef IS_PYTHON_2

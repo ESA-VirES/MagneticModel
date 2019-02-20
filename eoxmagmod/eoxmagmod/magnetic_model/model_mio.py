@@ -27,7 +27,7 @@
 #-------------------------------------------------------------------------------
 # pylint: disable=too-many-arguments,too-many-locals
 
-from numpy import asarray, empty, nditer, logical_not, isscalar
+from numpy import asarray, empty, nditer, logical_not, ndim
 from .._pymm import GEOCENTRIC_SPHERICAL, convert
 from .model import GeomagneticModel, DipoleSphericalHarmomicGeomagneticModel
 
@@ -41,6 +41,13 @@ class DipoleMIOPrimaryGeomagneticModel(GeomagneticModel):
     above and below the Ionosphere.
     """
     parameters = ("time", "location", "f107", "subsolar_point")
+
+    @property
+    def degree(self):
+        return max(
+            self.model_below_ionosphere.degree,
+            self.model_above_ionosphere.degree
+        )
 
     def __init__(self, model_below_ionosphere, model_above_ionosphere,
                  height=MIO_HEIGHT, earth_radius=MIO_EARTH_RADIUS):
@@ -70,7 +77,7 @@ class DipoleMIOPrimaryGeomagneticModel(GeomagneticModel):
         def _eval_masked_time_and_location(model, time, location, mask):
             return _eval_masked_location(model, time[mask], location, mask)
 
-        if isscalar(time):
+        if ndim(time) == 0:
             _eval_masked = _eval_masked_location
         else:
             _eval_masked = _eval_masked_time_and_location
