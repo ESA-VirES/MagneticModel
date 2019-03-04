@@ -55,35 +55,26 @@ class SparseSHCoefficientsMIO(SparseSHCoefficients):
         self.ps_extent = (pmin, pmax, smin, smax)
         self.mjd2000_to_year_fraction = mjd2000_to_year_fraction
 
-    def __call__(self, time, lat_ngp, lon_ngp, lat_sol=None, lon_sol=None,
-                 **parameters):
+    def __call__(self, time, mut, **parameters):
         degree, coeff, index, kind = self._subset(
             parameters.get("min_degree", -1), parameters.get("max_degree", -1)
         )
         coeff_full = zeros((coeff_size(degree), 2))
-        coeff_full[index, kind] = self._eval_coeff_fourier2d(
-            coeff, time, lat_ngp, lon_ngp, lat_sol, lon_sol,
-        )
+        coeff_full[index, kind] = self._eval_coeff_fourier2d(coeff, time, mut)
         return coeff_full, degree
 
-    def _eval_coeff_fourier2d(self, coeff, mjd2000, lat_ngp, lon_ngp,
-                              lat_sol, lon_sol):
+    def _eval_coeff_fourier2d(self, coeff, mjd2000, mut):
         """ Evaluate model coefficients using the 2D Fourier series. """
-        sin_f, cos_f = self._get_sincos_matrices(
-            coeff.shape[0], mjd2000, lat_ngp, lon_ngp, lat_sol, lon_sol
-        )
+        sin_f, cos_f = self._get_sincos_matrices(coeff.shape[0], mjd2000, mut)
         return (coeff[..., 0]*cos_f + coeff[..., 1]*sin_f).sum(axis=(1, 2))
 
-    def _get_sincos_matrices(self, n_coeff, mjd2000, lat_ngp, lon_ngp,
-                             lat_sol, lon_sol):
+    def _get_sincos_matrices(self, n_coeff, mjd2000, mut):
         """ Get sin/cos matrices used by the 2D Fourier transform. """
         pmin, pmax, smin, smax = self.ps_extent
         n_col = pmax - pmin + 1
         n_row = smax - smin + 1
         f0_seasonal = F_SEASONAL * self.mjd2000_to_year_fraction(mjd2000)
-        f0_diurnal = F_DIURNAL * mjd2000_to_magnetic_universal_time(
-            mjd2000, lat_ngp, lon_ngp, lat_sol, lon_sol,
-        )
+        f0_diurnal = F_DIURNAL * mut
         f_diurnal = f0_diurnal * arange(pmin, pmax + 1)
         f_seasonal = f0_seasonal * arange(smin, smax + 1)
         f_combined = (

@@ -33,6 +33,7 @@ from itertools import product
 from numpy import nan, inf, isinf, array, empty, full, nditer, asarray
 from numpy.random import uniform
 from numpy.testing import assert_allclose
+from eoxmagmod.magnetic_time import mjd2000_to_magnetic_universal_time
 from eoxmagmod.time_util import (
     decimal_year_to_mjd2000, decimal_year_to_mjd2000_simple,
 )
@@ -268,7 +269,7 @@ class DipoleSHModelTestMixIn(SHModelTestMixIn):
 
     def _eval_reference(self, time, coords):
         is_internal = self.model.coefficients.is_internal
-        lat_ngp, lon_ngp = self.model.north_pole(time)
+        lat_ngp, lon_ngp = self.model.north_pole #(time)
         coeff, degree = self.model.coefficients(time)
         return sheval_dipole(
             coords, degree, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
@@ -299,8 +300,10 @@ class DipoleMIOSHModelTestMixIn(SHModelTestMixIn):
         scale = -(
             1.0 + self.f107 * model.wolf_ratio
         ) * asarray(self.scale)
-        lat_ngp, lon_ngp = model.north_pole(time)
-        coeff, degree = model.coefficients(time, lat_ngp, lon_ngp)
+        lat_ngp, lon_ngp = model.north_pole #(time)
+        coeff, degree = model.coefficients(
+            time, mjd2000_to_magnetic_universal_time(time, lat_ngp, lon_ngp)
+        )
         return sheval_dipole(
             coords, degree, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
             is_internal=is_internal, mode=GRADIENT,

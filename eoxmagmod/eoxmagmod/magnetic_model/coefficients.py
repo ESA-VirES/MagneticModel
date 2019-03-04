@@ -61,7 +61,7 @@ class SHCoefficients(object):
     def is_valid(self, time):
         """ Check if the time is within the coefficients validity range. """
         validity_start, validity_end = self.validity
-        return validity_start <= time <= validity_end
+        return (validity_start <= time) & (time <= validity_end)
 
     @property
     def degree(self):
