@@ -137,7 +137,7 @@ __all__ = [
     'ComposedGeomagneticModel',
 ]
 
-__version__ = '0.9.0'
+__version__ = '0.9.1'
 __author__ = 'Martin Paces (martin.paces@eox.at)'
 __copyright__ = 'Copyright (C) 2014 EOX IT Services GmbH'
 __licence__ = 'EOX licence (MIT style)'
