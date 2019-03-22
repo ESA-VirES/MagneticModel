@@ -33,6 +33,7 @@ from .solar_position import sunpos
 DEG2RAD = pi/180.0
 RAD2HOUR = 12.0/pi
 
+
 def mjd2000_to_magnetic_universal_time(mjd2000, lat_ngp, lon_ngp,
                                        lat_sol=None, lon_sol=None):
     """ Evaluate magnetic universal time for the given MJD2000 and
@@ -46,14 +47,17 @@ def mjd2000_to_magnetic_universal_time(mjd2000, lat_ngp, lon_ngp,
     overriding the default Sun model.
     """
     if lat_sol is None or lon_sol is None:
-        declination, _, hour_angle, _, _ = sunpos(mjd2000, 0, 0, rad=0)
-        return _mjd2000_to_magnetic_universal_time(
-            mjd2000, lat_ngp, lon_ngp, declination, -hour_angle
-        )
-    else:
-        return _mjd2000_to_magnetic_universal_time(
-            mjd2000, lat_ngp, lon_ngp, lat_sol, lon_sol
-        )
+        lat_sol, lon_sol = get_subsol(mjd2000)
+
+    return _mjd2000_to_magnetic_universal_time(
+        mjd2000, lat_ngp, lon_ngp, lat_sol, lon_sol
+    )
+
+
+def get_subsol(mjd2000):
+    """ Calculate sub-solar point coordinates for the given MJD2000 time. """
+    declination, _, hour_angle, _, _ = sunpos(mjd2000, 0, 0, rad=0)
+    return declination, -hour_angle
 
 
 def _mjd2000_to_magnetic_universal_time(mjd2000, lat_ngp, lon_ngp,

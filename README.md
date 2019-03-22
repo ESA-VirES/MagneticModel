@@ -24,6 +24,13 @@ $ make build
 $ sudo make install
 ```
 
+By default, the library gets installed in `/usr/local/cdf` directory.
+To install it to a different path override the `INSTALLDIR`
+variable:
+```
+$ make install INSTALLDIR=<install directory>
+```
+
 #### QDIPOLE
 
 ```

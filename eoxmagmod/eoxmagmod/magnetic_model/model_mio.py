@@ -27,8 +27,9 @@
 #-------------------------------------------------------------------------------
 # pylint: disable=too-many-arguments,too-many-locals
 
-from numpy import asarray, empty, nditer, logical_not, isscalar
+from numpy import asarray, empty, nditer, ndim, isnan, full, newaxis, ones
 from .._pymm import GEOCENTRIC_SPHERICAL, convert
+from ..magnetic_time import mjd2000_to_magnetic_universal_time
 from .model import GeomagneticModel, DipoleSphericalHarmomicGeomagneticModel
 
 MIO_HEIGHT = 110.0 # km
@@ -42,6 +43,14 @@ class DipoleMIOPrimaryGeomagneticModel(GeomagneticModel):
     """
     parameters = ("time", "location", "f107", "subsolar_point")
 
+    @property
+    def degree(self):
+        """ Get maximum degree of the model. """
+        return max(
+            self.model_below_ionosphere.degree,
+            self.model_above_ionosphere.degree
+        )
+
     def __init__(self, model_below_ionosphere, model_above_ionosphere,
                  height=MIO_HEIGHT, earth_radius=MIO_EARTH_RADIUS):
         self.model_below_ionosphere = model_below_ionosphere
@@ -53,6 +62,7 @@ class DipoleMIOPrimaryGeomagneticModel(GeomagneticModel):
              input_coordinate_system=GEOCENTRIC_SPHERICAL,
              output_coordinate_system=GEOCENTRIC_SPHERICAL,
              **options):
+        time = asarray(time)
         location = convert(
             location, input_coordinate_system, GEOCENTRIC_SPHERICAL
         )
@@ -61,30 +71,32 @@ class DipoleMIOPrimaryGeomagneticModel(GeomagneticModel):
         radius = location[..., 2]
         mask_below_ionosphere = radius <= radius_ionosphere
 
-        def _eval_masked_location(model, time, location, mask):
+        result = empty(location.shape)
+
+        def _eval_model(model, mask, **options):
+
+            def _mask_array(data):
+                return data[mask] if data.ndim else data
+
+            def _mask_option(key):
+                data = options.get(key)
+                if data is not None:
+                    options[key] = _mask_array(asarray(data))
+
+            _mask_option('f107')
+            _mask_option('lat_sol')
+            _mask_option('lon_sol')
+
             result[mask] = model.eval(
-                time, location[mask], GEOCENTRIC_SPHERICAL,
+                _mask_array(time), location[mask], GEOCENTRIC_SPHERICAL,
                 output_coordinate_system, **options
             )
 
-        def _eval_masked_time_and_location(model, time, location, mask):
-            return _eval_masked_location(model, time[mask], location, mask)
-
-        if isscalar(time):
-            _eval_masked = _eval_masked_location
-        else:
-            _eval_masked = _eval_masked_time_and_location
-
-        result = empty(location.shape)
-
-        _eval_masked(
-            self.model_below_ionosphere, time, location,
-            mask_below_ionosphere
+        _eval_model(
+            self.model_below_ionosphere, mask_below_ionosphere, **options
         )
-
-        _eval_masked(
-            self.model_above_ionosphere, time, location,
-            logical_not(mask_below_ionosphere)
+        _eval_model(
+            self.model_above_ionosphere, ~mask_below_ionosphere, **options
         )
 
         return result
@@ -120,33 +132,48 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
             self, coefficients, north_pole
         )
         self.wolf_ratio = wolf_ratio
-        self.height = height
-        self.earth_radius = earth_radius
+
+    def eval(self, time, location,
+             input_coordinate_system=GEOCENTRIC_SPHERICAL,
+             output_coordinate_system=GEOCENTRIC_SPHERICAL,
+             **options):
+        time = asarray(time)
+        location = asarray(location)
+
+        lat_ngp, lon_ngp = self.north_pole
+        mut = mjd2000_to_magnetic_universal_time(
+            time, lat_ngp, lon_ngp,
+            lat_sol=options.pop('lat_sol', None),
+            lon_sol=options.pop('lon_sol', None),
+        )
+
+        mio_scale = 1.0 + self.wolf_ratio * asarray(options.pop('f107'))
+
+        mask = self.coefficients.is_valid(time) & ~isnan(mio_scale)
+
+        if time.ndim:
+            if not mio_scale.ndim:
+                mio_scale = full(time.shape, mio_scale)
+            mio_scale = mio_scale[mask, newaxis]
+            mut = mut[mask]
+
+        scale = (options.pop('scale', 1.0) * ones(3)) * mio_scale
+
+        return self._eval_masked(
+            mask, time, location,
+            input_coordinate_system, output_coordinate_system,
+            scale=scale, mut=mut, **options
+        )
 
     def _eval_multi_time(self, time, coords, input_coordinate_system,
-                         output_coordinate_system, f107=0.0,
-                         lat_sol=None, lon_sol=None, **options):
-        # TOOD: figure out a less clumsy way to iterate the optional arrays
-        if lat_sol is None or lon_sol is None:
-            return self._eval_multi_time_short(
-                time, coords, input_coordinate_system, output_coordinate_system,
-                f107, **options
-            )
-        else:
-            return self._eval_multi_time_long(
-                time, coords, input_coordinate_system, output_coordinate_system,
-                f107, lat_sol, lon_sol, **options
-            )
-
-    def _eval_multi_time_short(self, time, coords, input_coordinate_system,
-                               output_coordinate_system, f107, **options):
+                         output_coordinate_system, mut, **options):
         result = empty(coords.shape)
         if result.size > 0:
             iterator = nditer(
                 [
                     result[..., 0], result[..., 1], result[..., 2],
                     time, coords[..., 0], coords[..., 1], coords[..., 2],
-                    asarray(f107),
+                    mut,
                 ],
                 op_flags=[
                     ['writeonly'], ['writeonly'], ['writeonly'],
@@ -157,49 +184,11 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
             for item in iterator:
                 (
                     vect0, vect1, vect2,
-                    time_, coord0, coord1, coord2, f107_,
+                    time_, coord0, coord1, coord2, mut_,
                 ) = item
                 vect0[...], vect1[...], vect2[...] = self._eval_single_time(
-                    time_, [coord0, coord1, coord2], input_coordinate_system,
-                    output_coordinate_system, f107=f107_, **options
+                    time_, [coord0, coord1, coord2],
+                    input_coordinate_system, output_coordinate_system,
+                    mut=mut_, **options
                 )
         return result
-
-    def _eval_multi_time_long(self, time, coords, input_coordinate_system,
-                              output_coordinate_system, f107,
-                              lat_sol, lon_sol, **options):
-        result = empty(coords.shape)
-        if result.size > 0:
-            iterator = nditer(
-                [
-                    result[..., 0], result[..., 1], result[..., 2],
-                    time, coords[..., 0], coords[..., 1], coords[..., 2],
-                    asarray(f107), asarray(lat_sol), asarray(lon_sol),
-                ],
-                op_flags=[
-                    ['writeonly'], ['writeonly'], ['writeonly'],
-                    ['readonly'], ['readonly'], ['readonly'], ['readonly'],
-                    ['readonly'], ['readonly'], ['readonly'],
-                ],
-            )
-            for item in iterator:
-                (
-                    vect0, vect1, vect2,
-                    time_, coord0, coord1, coord2, f107_, sslat, sslon,
-                ) = item
-                vect0[...], vect1[...], vect2[...] = self._eval_single_time(
-                    time_, [coord0, coord1, coord2], input_coordinate_system,
-                    output_coordinate_system, f107=f107_,
-                    lat_sol=sslat, lon_sol=sslon, **options
-                )
-        return result
-
-    def _eval_single_time(self, time, coords, input_coordinate_system,
-                          output_coordinate_system, f107=0.0, **options):
-        options["scale"] = (
-            1.0 + self.wolf_ratio * f107
-        ) * asarray(options.get("scale", 1.0))
-        return DipoleSphericalHarmomicGeomagneticModel._eval_single_time(
-            self, time, coords, input_coordinate_system,
-            output_coordinate_system, **options
-        )

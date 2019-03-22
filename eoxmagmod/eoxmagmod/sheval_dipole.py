@@ -27,7 +27,6 @@
 #-------------------------------------------------------------------------------
 # pylint: disable=no-name-in-module
 
-from numpy import asarray, ones
 from ._pymm import (
     GEODETIC_ABOVE_WGS84, GEOCENTRIC_CARTESIAN, GEOCENTRIC_SPHERICAL,
     POTENTIAL, GRADIENT, convert, sheval,
@@ -73,30 +72,24 @@ def sheval_dipole(arr_in, degree, coef_g, coef_h, lat_ngp, lon_ngp,
     )
 
     if mode == GRADIENT:
-        return _scale_gradient(_rotate_vectors_from_dipole(
+        return rotate_vectors_from_dipole(
             result, lat_ngp, lon_ngp, arr_in_dipole, arr_in,
             coord_type_in, coord_type_out,
-        ), scale_gradient)
+        ) * scale_gradient
     elif mode == POTENTIAL:
         return result
     else: #mode == POTENTIAL_AND_GRADIENT
         potential, gradient = result
-        return potential, _scale_gradient(_rotate_vectors_from_dipole(
+        return potential, rotate_vectors_from_dipole(
             gradient, lat_ngp, lon_ngp, arr_in_dipole, arr_in,
             coord_type_in, coord_type_out,
-        ), scale_gradient)
+        ) * scale_gradient
 
 
-def _scale_gradient(vectors, scale):
-    for idx, value in enumerate(asarray(scale) * ones(3)):
-        vectors[..., idx] *= value
-    return vectors
-
-
-def _rotate_vectors_from_dipole(vectors, lat_ngp, lon_ngp,
-                                coords_dipole, coord_in,
-                                coord_type_in=GEODETIC_ABOVE_WGS84,
-                                coord_type_out=GEODETIC_ABOVE_WGS84):
+def rotate_vectors_from_dipole(vectors, lat_ngp, lon_ngp,
+                               coords_dipole, coord_in,
+                               coord_type_in=GEODETIC_ABOVE_WGS84,
+                               coord_type_out=GEODETIC_ABOVE_WGS84):
     """ Rotate vectors from the Dipole spherical coordinate frame
     to the requested output coordinate frame.
     """

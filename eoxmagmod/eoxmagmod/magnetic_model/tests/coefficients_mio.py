@@ -32,6 +32,7 @@ from io import open
 from numpy import inf, nan
 from numpy.testing import assert_allclose
 from eoxmagmod.time_util import decimal_year_to_mjd2000
+from eoxmagmod.magnetic_time import mjd2000_to_magnetic_universal_time
 from eoxmagmod.magnetic_model.coefficients_mio import SparseSHCoefficientsMIO
 from eoxmagmod.magnetic_model.tests.data import SWARM_MIO_SHA_2_TEST_DATA
 from eoxmagmod.magnetic_model.parser_mio import parse_swarm_mio_file
@@ -57,10 +58,11 @@ class MIOSHCoeffMixIn(object):
     def test_is_valid_fail_nan(self):
         self.assertFalse(self.coefficients.is_valid(nan))
 
-    def eval_coeff(self, time, **options):
-        return self.coefficients(
-            time, lat_ngp=self.lat_ngp, lon_ngp=self.lon_ngp, **options
-        )
+    def eval_coeff(self, time, lat_sol=None, lon_sol=None, **options):
+        return self.coefficients(time, mjd2000_to_magnetic_universal_time(
+            time, lat_ngp=self.lat_ngp, lon_ngp=self.lon_ngp,
+            lat_sol=lat_sol, lon_sol=lon_sol,
+        ), **options)
 
 
 class TestSparseSHCoefficientsMIOInternal(TestCase, MIOSHCoeffMixIn):

@@ -2,11 +2,11 @@
 # install CDF library from sources
 #
 
-VERSION=36_4
+VERSION=37_0
 DIRNAME=./cdf$(VERSION)-dist/
 FILENAME=./cdf$(VERSION)-dist-cdf.tar.gz
 SOURCE_URL=https://spdf.sci.gsfc.nasa.gov/pub/software/cdf/dist/cdf$(VERSION)/linux/cdf$(VERSION)-dist-cdf.tar.gz
-MD5CHECKSUM=a0fc52ac46aec74588676ba1327e1ebf
+MD5CHECKSUM=e65e5192b81656da21c7df1afe7b3aeb
 INSTALLDIR=/usr/local/cdf
 
 all: build

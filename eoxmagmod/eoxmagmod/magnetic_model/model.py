@@ -26,9 +26,10 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-from numpy import asarray, empty, full, nan, nditer
+from numpy import asarray, empty, full, nan, nditer, ndim
 from .._pymm import GRADIENT, GEOCENTRIC_SPHERICAL, sheval
-from ..sheval_dipole import sheval_dipole
+from ..sheval_dipole import rotate_vectors_from_dipole
+from ..dipole_coords import convert_to_dipole
 
 
 class GeomagneticModel(object):
@@ -65,20 +66,39 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
     def validity(self):
         return self.coefficients.validity
 
+    @property
+    def degree(self):
+        """ Get maximum degree of the model. """
+        return self.coefficients.degree
+
     def eval(self, time, location,
              input_coordinate_system=GEOCENTRIC_SPHERICAL,
              output_coordinate_system=GEOCENTRIC_SPHERICAL,
              **options):
         time = asarray(time)
-        if len(time.shape) == 0:
-            _eval = self._eval_single_time
-        else:
-            _eval = self._eval_multi_time
+        location = asarray(location)
 
-        return _eval(
-            time, location, input_coordinate_system, output_coordinate_system,
-            **options
+        mask = self.coefficients.is_valid(time)
+
+        return self._eval_masked(
+            mask, time, location, input_coordinate_system,
+            output_coordinate_system, **options
         )
+
+    def _eval_masked(self, mask, time, location, input_coordinate_system,
+                     output_coordinate_system, **options):
+        if ndim(time):
+            eval_model = self._eval_multi_time
+            time = time[mask]
+        else:
+            eval_model = self._eval_single_time
+
+        result = full(location.shape, nan)
+        result[mask] = eval_model(
+            time, location[mask], input_coordinate_system,
+            output_coordinate_system, **options
+        )
+        return result
 
     def _eval_multi_time(self, time, coords, input_coordinate_system,
                          output_coordinate_system, **options):
@@ -106,49 +126,55 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
                           output_coordinate_system, **options):
         """ Evaluate spherical harmonic for a single time."""
         coefficients = self.coefficients
-        if coefficients.is_valid(time):
-            coeff, degree = coefficients(time, **options)
-            return sheval(
-                coords, degree, coeff[..., 0], coeff[..., 1],
-                is_internal=coefficients.is_internal, mode=GRADIENT,
-                coord_type_in=input_coordinate_system,
-                coord_type_out=output_coordinate_system,
-                scale_gradient=-asarray(options.get("scale", 1.0))
-            )
-        else:
-            return full(asarray(coords).shape, nan)
+        coeff, degree = coefficients(time, **options)
+        return sheval(
+            coords, degree, coeff[..., 0], coeff[..., 1],
+            is_internal=coefficients.is_internal, mode=GRADIENT,
+            coord_type_in=input_coordinate_system,
+            coord_type_out=output_coordinate_system,
+            scale_gradient=-asarray(options.get("scale", 1.0))
+        )
 
 class DipoleSphericalHarmomicGeomagneticModel(SphericalHarmomicGeomagneticModel):
     """ Earth magnetic field model calculated by the Spherical Harmonic
     Expansion in the dipole coordinates.
-    The dipole coordinates are defined by the time-dependent north pole
-    latitude and longitude.
+    The dipole coordinates are defined north latitude and longitude of
+    the dipole axis.
     """
 
     def __init__(self, coefficients, north_pole):
         SphericalHarmomicGeomagneticModel.__init__(self, coefficients)
-        if callable(north_pole):
-            # time dependent north pole
-            self.north_pole = north_pole
-        else:
-            # time invariant north pole
-            self.north_pole = lambda _: north_pole
+        self.north_pole = north_pole
 
+    def _eval_masked(self, mask, time, location, input_coordinate_system,
+                     output_coordinate_system, **options):
+        lat_ngp, lon_ngp = self.north_pole
+        scale = options.pop('scale', None)
 
-    def _eval_single_time(self, time, coords, input_coordinate_system,
-                          output_coordinate_system, **options):
-        coefficients = self.coefficients
-        if coefficients.is_valid(time):
-            lat_ngp, lon_ngp = self.north_pole(time)
-            coeff, degree = coefficients(
-                time, lat_ngp=lat_ngp, lon_ngp=lon_ngp, **options
-            )
-            return sheval_dipole(
-                coords, degree, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
-                is_internal=coefficients.is_internal, mode=GRADIENT,
-                coord_type_in=input_coordinate_system,
-                coord_type_out=output_coordinate_system,
-                scale_gradient=-asarray(options.get("scale", 1.0))
-            )
+        result = full(location.shape, nan)
+
+        if ndim(time):
+            eval_model = self._eval_multi_time
+            time = time[mask]
         else:
-            return full(asarray(coords).shape, nan)
+            eval_model = self._eval_single_time
+
+        location = location[mask]
+        location_dipole = convert_to_dipole(
+            location, lat_ngp, lon_ngp, input_coordinate_system
+        )
+
+        result[mask] = rotate_vectors_from_dipole(
+            eval_model(
+                time, location_dipole,
+                GEOCENTRIC_SPHERICAL, GEOCENTRIC_SPHERICAL,
+                **options
+            ),
+            lat_ngp, lon_ngp, location_dipole, location,
+            input_coordinate_system, output_coordinate_system
+        )
+
+        if scale is not None:
+            result[mask] *= scale
+
+        return result
