@@ -71,6 +71,11 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
         """ Get maximum degree of the model. """
         return self.coefficients.degree
 
+    @property
+    def min_degree(self):
+        """ Get minimum degree of the model. """
+        return self.coefficients.min_degree
+
     def eval(self, time, location,
              input_coordinate_system=GEOCENTRIC_SPHERICAL,
              output_coordinate_system=GEOCENTRIC_SPHERICAL,
@@ -134,6 +139,7 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
             coord_type_out=output_coordinate_system,
             scale_gradient=-asarray(options.get("scale", 1.0))
         )
+
 
 class DipoleSphericalHarmomicGeomagneticModel(SphericalHarmomicGeomagneticModel):
     """ Earth magnetic field model calculated by the Spherical Harmonic

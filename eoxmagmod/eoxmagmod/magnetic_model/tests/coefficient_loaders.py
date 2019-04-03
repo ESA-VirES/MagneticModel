@@ -75,6 +75,7 @@ class CoefficietLoaderTestMixIn(object):
     class_ = None
     validity = None
     degree = 0
+    min_degree = -1
 
     @property
     def coeff(self):
@@ -94,6 +95,9 @@ class CoefficietLoaderTestMixIn(object):
 
     def test_degree(self):
         self.assertEqual(self.coeff.degree, self.degree)
+
+    def test_min_degree(self):
+        self.assertEqual(self.coeff.min_degree, self.min_degree)
 
     def test_model_type(self):
         self.assertEqual(self.coeff.is_internal, self.is_internal)
@@ -174,6 +178,7 @@ class TestCoeffSIFM(TestCase, ShcTestMixIn):
     class_ = SparseSHCoefficientsTimeDependentDecimalYear
     path = SIFM
     degree = 70
+    min_degree = 1
     kwargs = {
         "interpolate_in_decimal_years": True,
     }
@@ -184,6 +189,7 @@ class TestCoeffIGRF12(TestCase, ShcTestMixIn):
     class_ = SparseSHCoefficientsTimeDependentDecimalYear
     path = IGRF12
     degree = 13
+    min_degree = 1
     kwargs = {
         "interpolate_in_decimal_years": True,
     }
@@ -193,6 +199,7 @@ class TestCoeffIGRF12(TestCase, ShcTestMixIn):
 class TestCoeffIGRF11(TestCase, CoefficietLoaderTestMixIn):
     class_ = SparseSHCoefficientsTimeDependentDecimalYear
     degree = 13
+    min_degree = 1
     validity = decimal_year_to_mjd2000((1900.0, 2015.0))
 
     @staticmethod
@@ -205,6 +212,7 @@ class TestCoeffCHAOS5Core(TestCase, ShcTestMixIn):
     class_ = SparseSHCoefficientsTimeDependent
     path = CHAOS5_CORE
     degree = 20
+    min_degree = 1
     kwargs = {
         "to_mjd2000": decimal_year_to_mjd2000_simple
     }
@@ -215,6 +223,7 @@ class TestCoeffCHAOS5CoreV4(TestCase, ShcTestMixIn):
     class_ = SparseSHCoefficientsTimeDependent
     path = CHAOS5_CORE_V4
     degree = 20
+    min_degree = 1
     kwargs = {
         "to_mjd2000": decimal_year_to_mjd2000_simple
     }
@@ -225,6 +234,7 @@ class TestCoeffCHAOS5Static(TestCase, ShcTestMixIn):
     class_ = SparseSHCoefficientsConstant
     path = CHAOS5_STATIC
     degree = 90
+    min_degree = 20
     validity = (-inf, inf)
 
 
@@ -232,6 +242,7 @@ class TestCoeffCHAOS5Combined(TestCase, CombinedShcTestMixIn):
     path_core = CHAOS5_CORE_V4
     path_static = CHAOS5_STATIC
     degree = 90
+    min_degree = 1
     validity = decimal_year_to_mjd2000((1997.1020, 2016.1027))
 
 #-------------------------------------------------------------------------------
@@ -240,6 +251,7 @@ class TestCoeffCHAOS6Core(TestCase, ShcTestMixIn):
     class_ = SparseSHCoefficientsTimeDependent
     path = CHAOS6_CORE_LATEST
     degree = 20
+    min_degree = 1
     validity = decimal_year_to_mjd2000((1997.102, 2019.1006))
 
 
@@ -247,6 +259,7 @@ class TestCoeffCHAOS6Static(TestCase, ShcTestMixIn):
     class_ = SparseSHCoefficientsConstant
     path = CHAOS6_STATIC
     degree = 110
+    min_degree = 21
     validity = (-inf, inf)
 
 
@@ -254,6 +267,7 @@ class TestCoeffCHAOS6Combined(TestCase, CombinedShcTestMixIn):
     path_core = CHAOS6_CORE_LATEST
     path_static = CHAOS6_STATIC
     degree = 110
+    min_degree = 1
     validity = decimal_year_to_mjd2000((1997.1020, 2019.1006))
 
 #-------------------------------------------------------------------------------
@@ -262,6 +276,7 @@ class TestCoeffWMM2010(TestCase, WmmTestMixIn):
     class_ = SparseSHCoefficientsTimeDependentDecimalYear
     path = WMM_2010
     degree = 12
+    min_degree = 1
     validity = decimal_year_to_mjd2000((2010., 2015.))
 
 
@@ -269,12 +284,14 @@ class TestCoeffWMM2015(TestCase, WmmTestMixIn):
     class_ = SparseSHCoefficientsTimeDependentDecimalYear
     path = WMM_2015
     degree = 12
+    min_degree = 1
     validity = decimal_year_to_mjd2000((2015., 2020.))
 
 
 class TestCoeffEMM2010(TestCase, CoefficietLoaderTestMixIn):
     class_ = CombinedSHCoefficients
     degree = 739
+    min_degree = 1
     validity = decimal_year_to_mjd2000((2010.0, 2015.0))
 
     @staticmethod
@@ -287,6 +304,7 @@ class TestCoeffMMA2CInternal(TestCase, CoefficietLoaderTestMixIn):
     is_internal = True
     class_ = CombinedSHCoefficients
     degree = 3
+    min_degree = 1
     validity = (6179.125, 6209.875)
 
     @staticmethod
@@ -298,6 +316,7 @@ class TestCoeffMMA2CExternal(TestCase, CoefficietLoaderTestMixIn):
     is_internal = False
     class_ = CombinedSHCoefficients
     degree = 2
+    min_degree = 1
     validity = (6179.125, 6209.875)
 
     @staticmethod
@@ -309,6 +328,7 @@ class TestCoeffChaosMMAInternal(TestCase, CoefficietLoaderTestMixIn):
     is_internal = True
     class_ = CombinedSHCoefficients
     degree = 2
+    min_degree = 1
     validity = (6179.00000, 6209.979167)
 
     @staticmethod
@@ -320,6 +340,7 @@ class TestCoeffChaosMMAExternal(TestCase, CoefficietLoaderTestMixIn):
     is_internal = False
     class_ = CombinedSHCoefficients
     degree = 2
+    min_degree = 1
     validity = (6179.00000, 6209.979167)
 
     @staticmethod
@@ -331,6 +352,7 @@ class TestCoeffMMA2FGeoInternal(TestCase, CoefficietLoaderTestMixIn):
     is_internal = True
     class_ = SparseSHCoefficientsTimeDependent
     degree = 1
+    min_degree = 1
     validity = (6179.03125, 6209.96875)
 
     @staticmethod
@@ -342,6 +364,7 @@ class TestCoeffMMA2FGeoExternal(TestCase, CoefficietLoaderTestMixIn):
     is_internal = False
     class_ = SparseSHCoefficientsTimeDependent
     degree = 1
+    min_degree = 1
     validity = (6179.03125, 6209.96875)
 
     @staticmethod
@@ -353,6 +376,7 @@ class TestCoeffMMA2FSMInternal(TestCase, CoefficietLoaderTestMixIn):
     is_internal = True
     class_ = SparseSHCoefficientsTimeDependent
     degree = 1
+    min_degree = 1
     validity = (6179.03125, 6209.96875)
 
     @staticmethod
@@ -364,6 +388,7 @@ class TestCoeffMMA2FSMExternal(TestCase, CoefficietLoaderTestMixIn):
     is_internal = False
     class_ = SparseSHCoefficientsTimeDependent
     degree = 1
+    min_degree = 1
     validity = (6179.03125, 6209.96875)
 
     @staticmethod
@@ -375,6 +400,7 @@ class TestCoeffMMA2FSMExternal(TestCase, CoefficietLoaderTestMixIn):
 class TestCoeffMIOSecondary(TestCase, MIOCoefficietLoaderTestMixIn):
     is_internal = True
     degree = 2
+    min_degree = 1
     options = {}
 
     @classmethod
@@ -387,6 +413,7 @@ class TestCoeffMIOSecondary(TestCase, MIOCoefficietLoaderTestMixIn):
 class TestCoeffMIOPrimary(TestCase, MIOCoefficietLoaderTestMixIn):
     is_internal = True # default model above the ionosphere
     degree = 2
+    min_degree = 1
     options = {}
 
     @classmethod
