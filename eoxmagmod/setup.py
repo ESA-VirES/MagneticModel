@@ -29,6 +29,7 @@
 #-------------------------------------------------------------------------------
 
 import sys
+import eoxmagmod
 from os.path import join
 from distutils.core import setup
 from distutils.extension import Extension
@@ -80,7 +81,7 @@ setup(
         'eoxmagmod.magnetic_model.tests.data',
     ],
     license='EOX licence (MIT style)',
-    version='0.9.1',
+    version=eoxmagmod.__version__,
     package_data={
         'eoxmagmod': [
             'data/*',

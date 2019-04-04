@@ -41,7 +41,11 @@ from eoxmagmod.magnetic_model.parser_mio import parse_swarm_mio_file
 class MIOSHCoeffMixIn(object):
     is_internal = None
     degree = 2
+    min_degree = 1
     validity = (-inf, inf)
+
+    def test_min_degree(self):
+        self.assertEqual(self.coefficients.min_degree, self.min_degree)
 
     def test_degree(self):
         self.assertEqual(self.coefficients.degree, self.degree)

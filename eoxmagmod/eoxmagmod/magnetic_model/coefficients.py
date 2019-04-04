@@ -27,7 +27,9 @@
 #-------------------------------------------------------------------------------
 # pylint: disable=too-few-public-methods,abstract-method
 
-from numpy import inf, array, zeros, dot, digitize, argsort, abs as aabs, stack
+from numpy import (
+    inf, array, zeros, dot, digitize, argsort, abs as aabs, stack,
+)
 from ..time_util import decimal_year_to_mjd2000, mjd2000_to_decimal_year
 
 
@@ -65,8 +67,16 @@ class SHCoefficients(object):
 
     @property
     def degree(self):
-        """ Get model degree. """
+        """ Get [maximum] model degree. """
         raise NotImplementedError
+
+    @property
+    def min_degree(self):
+        """ Get minimum model degree.
+        Below this degree all model coefficients are zero.
+        """
+        raise NotImplementedError
+
 
     def __call__(self, time, **parameters):
         """ Return the matrix of the full model coefficients. """
@@ -87,6 +97,7 @@ class CombinedSHCoefficients(SHCoefficients):
         is_internal = item.is_internal
         validity_start, validity_end = item.validity
         degree = item.degree
+        min_degree = item.min_degree
 
         for item in items[1:]:
             if is_internal != item.is_internal:
@@ -97,6 +108,7 @@ class CombinedSHCoefficients(SHCoefficients):
             validity_start = max(validity_start, new_start)
             validity_end = min(validity_end, new_end)
             degree = max(degree, item.degree)
+            min_degree = min(min_degree, item.min_degree)
 
         SHCoefficients. __init__(
             self, is_internal=is_internal, validity_start=validity_start,
@@ -104,11 +116,16 @@ class CombinedSHCoefficients(SHCoefficients):
         )
 
         self._degree = degree
+        self._min_degree = min_degree
         self._items = items
 
     @property
     def degree(self):
         return self._degree
+
+    @property
+    def min_degree(self):
+        return self._min_degree
 
     def __call__(self, time, **parameters):
         max_degree = parameters.get("max_degree", -1)
@@ -127,6 +144,7 @@ class SparseSHCoefficients(SHCoefficients):
         SHCoefficients.__init__(self, **kwargs)
         n_idx, m_idx = indices[..., 0], indices[..., 1]
         self._degree = n_idx.max()
+        self._min_degree = n_idx.min()
         self._index = stack((
             aabs(m_idx) + (n_idx*(n_idx + 1))//2,
             (m_idx < 0).astype('int'),
@@ -138,30 +156,40 @@ class SparseSHCoefficients(SHCoefficients):
     def degree(self):
         return self._degree
 
+    @property
+    def min_degree(self):
+        return self._min_degree
+
     def _subset(self, min_degree, max_degree):
         """ Get subset of the coefficients for the give min. and max. degrees.
         """
-        degree = self._degree
+        default_max_degree = self._degree
+        default_min_degree = self._min_degree
+
+        #degree = self._degree
         index = self._index
         coeff = self._coeff
 
-        if max_degree >= 0 and max_degree < degree:
-            idx, = (index[:, 2] <= max_degree).nonzero()
+        if max_degree < 0:
+            max_degree = default_max_degree
+
+        if min_degree < 0:
+            min_degree = default_min_degree
+
+        if min_degree > default_min_degree or max_degree < default_max_degree:
+            idx, = (
+                (index[:, 2] <= max_degree) & (index[:, 2] >= min_degree)
+            ).nonzero()
             coeff = coeff[idx]
             index = index[idx]
-            degree = None
+            degree = default_max_degree
 
-        if min_degree > 0:
-            idx, = (index[:, 2] >= min_degree).nonzero()
-            coeff = coeff[idx]
-            index = index[idx]
-            degree = None
-
-        if degree is None:
             if index.shape[0] > 0:
                 degree = index[:, 2].max()
             else:
                 degree = 0
+        else:
+            degree = default_max_degree
 
         return degree, coeff, index[:, 0], index[:, 1]
 
