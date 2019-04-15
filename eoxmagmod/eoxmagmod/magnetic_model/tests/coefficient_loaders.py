@@ -35,7 +35,7 @@ from eoxmagmod.time_util import (
 )
 from eoxmagmod.data import (
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,
-    IGRF11, IGRF12, SIFM, WMM_2010, WMM_2015,
+    IGRF11, IGRF12, SIFM, WMM_2015,
     EMM_2010_STATIC, EMM_2010_SECVAR,
 )
 from eoxmagmod.magnetic_model.tests.data import (
@@ -231,14 +231,6 @@ class TestCoeffCHAOS6Combined(TestCase, CombinedShcTestMixIn):
     validity = decimal_year_to_mjd2000((1997.1020, 2019.7002))
 
 #-------------------------------------------------------------------------------
-
-class TestCoeffWMM2010(TestCase, WmmTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependentDecimalYear
-    path = WMM_2010
-    degree = 12
-    min_degree = 1
-    validity = decimal_year_to_mjd2000((2010., 2015.))
-
 
 class TestCoeffWMM2015(TestCase, WmmTestMixIn):
     class_ = SparseSHCoefficientsTimeDependentDecimalYear

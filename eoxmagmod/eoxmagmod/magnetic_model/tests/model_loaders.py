@@ -56,7 +56,7 @@ from eoxmagmod.magnetic_model.loader_mio import (
     load_model_swarm_mio_external,
 )
 from eoxmagmod.data import (
-    EMM_2010_STATIC, EMM_2010_SECVAR, WMM_2010, WMM_2015,
+    EMM_2010_STATIC, EMM_2010_SECVAR, WMM_2015,
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,
     IGRF11, IGRF12, SIFM,
 )
@@ -426,25 +426,10 @@ class TestComposedModelDiffConstrainedWGS84ToCart(TestComposedModelDiffConstrain
 
 #-------------------------------------------------------------------------------
 
-class TestWMM2010(TestCase, SHModelTestMixIn):
-    reference_values = (
-        4566.0, (30.0, 40.0, 8000.0),
-        (15123.605974201277, 431.1067254253052, 14617.02644010297)
-    )
-    degree = 12
-    min_degree = 1
-    validity = decimal_year_to_mjd2000((2010.0, 2015.0))
-    options = {"scale": [1, 1, -1]}
-    scale = [1, 1, -1]
-
-    def load(self):
-        return load_model_wmm(WMM_2010)
-
-
 class TestWMM2015(TestCase, SHModelTestMixIn):
     reference_values = (
         6392.0, (30.0, 40.0, 8000.0),
-        (15124.716592471135, 533.1027023540182, -14728.4938691708)
+        (15124.421927514817, 532.3321104099762, -14755.455538253298)
     )
     degree = 12
     min_degree = 1

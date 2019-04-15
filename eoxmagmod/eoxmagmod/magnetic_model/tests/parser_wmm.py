@@ -40,7 +40,7 @@ from numpy import abs as aabs
 from eoxmagmod.magnetic_model.parser_wmm import (
     parse_wmm_file, WMM_VALIDITY_PERIOD,
 )
-from eoxmagmod.data import WMM_2010, WMM_2015
+from eoxmagmod.data import WMM_2015
 
 
 class TestWMMParser(TestCase):
@@ -83,21 +83,11 @@ class TestWMMParser(TestCase):
             "degree_max": 13,
         })
 
-    def test_parse_wmm_file_wmm2010(self):
-        data = self.parse(WMM_2010)
-        self._assert_valid(data, {
-            "name": "WMM-2010",
-            "version": "11/20/2009",
-            "epoch": 2010.0,
-            "degree_min": 1,
-            "degree_max": 12,
-        })
-
     def test_parse_wmm_file_wmm2015(self):
         data = self.parse(WMM_2015)
         self._assert_valid(data, {
-            "name": "WMM-2015",
-            "version": "12/15/2014",
+            "name": "WMM-2015v2",
+            "version": "09/18/2018",
             "epoch": 2015.0,
             "degree_min": 1,
             "degree_max": 12,

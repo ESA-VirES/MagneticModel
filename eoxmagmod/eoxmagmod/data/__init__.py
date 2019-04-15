@@ -31,8 +31,7 @@ from os.path import dirname, join
 _DIRNAME = dirname(__file__)
 
 # magnetic models
-WMM_2010 = join(_DIRNAME, 'WMM2010.COF')
-WMM_2015 = join(_DIRNAME, 'WMM2015.COF')
+WMM_2015 = join(_DIRNAME, 'WMM2015v2.COF')
 EMM_2010_STATIC = join(_DIRNAME, 'EMM-720_V3p0_static.cof')
 EMM_2010_SECVAR = join(_DIRNAME, 'EMM-720_V3p0_secvar.cof')
 CHAOS6_CORE_X8 = join(_DIRNAME, 'CHAOS-6-x8_core.shc')
