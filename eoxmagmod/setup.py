@@ -29,10 +29,11 @@
 #-------------------------------------------------------------------------------
 
 import sys
-import eoxmagmod
 from os.path import join
 from distutils.core import setup
 from distutils.extension import Extension
+import eoxmagmod
+
 
 COMMON_INCLUDE_DIRS = [
     './eoxmagmod',
