@@ -34,7 +34,6 @@ from eoxmagmod.time_util import (
     decimal_year_to_mjd2000, decimal_year_to_mjd2000_simple,
 )
 from eoxmagmod.data import (
-    CHAOS5_CORE, CHAOS5_CORE_V4, CHAOS5_STATIC,
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,
     IGRF11, IGRF12, SIFM, WMM_2010, WMM_2015,
     EMM_2010_STATIC, EMM_2010_SECVAR,
@@ -208,51 +207,12 @@ class TestCoeffIGRF11(TestCase, CoefficietLoaderTestMixIn):
 
 #-------------------------------------------------------------------------------
 
-class TestCoeffCHAOS5Core(TestCase, ShcTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependent
-    path = CHAOS5_CORE
-    degree = 20
-    min_degree = 1
-    kwargs = {
-        "to_mjd2000": decimal_year_to_mjd2000_simple
-    }
-    validity = decimal_year_to_mjd2000_simple((1997.0021, 2015.0007))
-
-
-class TestCoeffCHAOS5CoreV4(TestCase, ShcTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependent
-    path = CHAOS5_CORE_V4
-    degree = 20
-    min_degree = 1
-    kwargs = {
-        "to_mjd2000": decimal_year_to_mjd2000_simple
-    }
-    validity = decimal_year_to_mjd2000_simple((1997.1020, 2016.1027))
-
-
-class TestCoeffCHAOS5Static(TestCase, ShcTestMixIn):
-    class_ = SparseSHCoefficientsConstant
-    path = CHAOS5_STATIC
-    degree = 90
-    min_degree = 20
-    validity = (-inf, inf)
-
-
-class TestCoeffCHAOS5Combined(TestCase, CombinedShcTestMixIn):
-    path_core = CHAOS5_CORE_V4
-    path_static = CHAOS5_STATIC
-    degree = 90
-    min_degree = 1
-    validity = decimal_year_to_mjd2000((1997.1020, 2016.1027))
-
-#-------------------------------------------------------------------------------
-
 class TestCoeffCHAOS6Core(TestCase, ShcTestMixIn):
     class_ = SparseSHCoefficientsTimeDependent
     path = CHAOS6_CORE_LATEST
     degree = 20
     min_degree = 1
-    validity = decimal_year_to_mjd2000((1997.102, 2019.1006))
+    validity = decimal_year_to_mjd2000((1997.102, 2019.7002))
 
 
 class TestCoeffCHAOS6Static(TestCase, ShcTestMixIn):
@@ -268,7 +228,7 @@ class TestCoeffCHAOS6Combined(TestCase, CombinedShcTestMixIn):
     path_static = CHAOS6_STATIC
     degree = 110
     min_degree = 1
-    validity = decimal_year_to_mjd2000((1997.1020, 2019.1006))
+    validity = decimal_year_to_mjd2000((1997.1020, 2019.7002))
 
 #-------------------------------------------------------------------------------
 

@@ -25,14 +25,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
+# pylint: disable=missing-docstring
 
 from unittest import TestCase, main
 from numpy import abs as aabs
 from eoxmagmod.magnetic_model.parser_shc import parse_shc_file
 from eoxmagmod.data import (
-    CHAOS5_CORE, CHAOS5_CORE_V4, CHAOS5_STATIC,
-    CHAOS6_CORE, CHAOS6_CORE_X3, CHAOS6_CORE_X4, CHAOS6_CORE_X5, CHAOS6_CORE_X6,
-    CHAOS6_CORE_X7,
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,
     IGRF12, SIFM,
 )
@@ -76,65 +74,6 @@ class TestSHCParser(TestCase):
             "nstep": 1,
         })
 
-    def test_parse_shc_file_chaos6core(self):
-        data = self.parse(CHAOS6_CORE)
-        self._assert_valid(data, {
-            "degree_min": 1,
-            "degree_max": 20,
-            "spline_order": 6,
-            "ntime": 196,
-            "nstep": 5,
-        })
-
-    def test_parse_shc_file_chaos6core_x3(self):
-        data = self.parse(CHAOS6_CORE_X3)
-        self._assert_valid(data, {
-            "degree_min": 1,
-            "degree_max": 20,
-            "spline_order": 6,
-            "ntime": 206,
-            "nstep": 5,
-        })
-
-    def test_parse_shc_file_chaos6core_x4(self):
-        data = self.parse(CHAOS6_CORE_X4)
-        self._assert_valid(data, {
-            "degree_min": 1,
-            "degree_max": 20,
-            "spline_order": 6,
-            "ntime": 211,
-            "nstep": 5,
-        })
-
-    def test_parse_shc_file_chaos6core_x5(self):
-        data = self.parse(CHAOS6_CORE_X5)
-        self._assert_valid(data, {
-            "degree_min": 1,
-            "degree_max": 20,
-            "spline_order": 6,
-            "ntime": 211,
-            "nstep": 5,
-        })
-
-    def test_parse_shc_file_chaos6core_x6(self):
-        data = self.parse(CHAOS6_CORE_X6)
-        self._assert_valid(data, {
-            "degree_min": 1,
-            "degree_max": 20,
-            "spline_order": 6,
-            "ntime": 216,
-            "nstep": 5,
-        })
-
-    def test_parse_shc_file_chaos6core_x7(self):
-        data = self.parse(CHAOS6_CORE_X7)
-        self._assert_valid(data, {
-            "degree_min": 1,
-            "degree_max": 20,
-            "spline_order": 6,
-            "ntime": 221,
-            "nstep": 5,
-        })
 
     def test_parse_shc_file_chaos6core_latest(self):
         data = self.parse(CHAOS6_CORE_LATEST)
@@ -142,7 +81,7 @@ class TestSHCParser(TestCase):
             "degree_min": 1,
             "degree_max": 20,
             "spline_order": 6,
-            "ntime": 221,
+            "ntime": 227,
             "nstep": 5,
         })
 
@@ -155,37 +94,6 @@ class TestSHCParser(TestCase):
             "ntime": 1,
             "nstep": 1,
         })
-
-    def test_parse_shc_file_chaos5core(self):
-        data = self.parse(CHAOS5_CORE)
-        self._assert_valid(data, {
-            "degree_min": 1,
-            "degree_max": 20,
-            "spline_order": 6,
-            "ntime": 181,
-            "nstep": 5,
-        })
-
-    def test_parse_shc_file_chaos5core_v4(self):
-        data = self.parse(CHAOS5_CORE_V4)
-        self._assert_valid(data, {
-            "degree_min": 1,
-            "degree_max": 20,
-            "spline_order": 6,
-            "ntime": 191,
-            "nstep": 5,
-        })
-
-    def test_parse_shc_file_chaos5static(self):
-        data = self.parse(CHAOS5_STATIC)
-        self._assert_valid(data, {
-            "degree_min": 20,
-            "degree_max": 90,
-            "spline_order": 1,
-            "ntime": 1,
-            "nstep": 1,
-        })
-
 
 if __name__ == "__main__":
     main()
