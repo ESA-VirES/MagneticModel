@@ -25,15 +25,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
-# pylint: disable=missing-docstring
+# pylint: disable=missing-docstring,invalid-name
 
 from unittest import TestCase, main
 from numpy import abs as aabs
-from eoxmagmod.magnetic_model.parser_shc import parse_shc_file
+from numpy.testing import assert_equal
+from eoxmagmod.magnetic_model.parser_shc import parse_shc_file, parse_shc_header
 from eoxmagmod.data import (
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,
     IGRF12, SIFM,
 )
+
 
 class TestSHCParser(TestCase):
 
@@ -41,6 +43,11 @@ class TestSHCParser(TestCase):
     def parse(filename):
         with open(filename) as file_in:
             return parse_shc_file(file_in)
+
+    @staticmethod
+    def parse_header(filename):
+        with open(filename) as file_in:
+            return parse_shc_header(file_in)
 
     def _assert_valid(self, data, expected_data):
         tested_data = {
@@ -54,6 +61,15 @@ class TestSHCParser(TestCase):
         self.assertEqual(data["nm"][..., 0].max(), data["degree_max"])
         self.assertTrue(aabs(data["nm"][..., 1]).max() <= data["degree_max"])
 
+    def _test_header(self, filename):
+        reference = self.parse(filename)
+        tested = self.parse_header(filename)
+        assert_equal(reference["t"], tested["t"])
+        for remove_key in ["nm", "gh", "t"]:
+            reference.pop(remove_key)
+        tested.pop("t")
+        self.assertEqual(reference, tested)
+
     def test_parse_shc_file_sifm(self):
         data = self.parse(SIFM)
         self._assert_valid(data, {
@@ -63,6 +79,9 @@ class TestSHCParser(TestCase):
             "ntime": 2,
             "nstep": 1,
         })
+
+    def test_parse_shc_header_sifm(self):
+        self._test_header(SIFM)
 
     def test_parse_shc_file_igrf12(self):
         data = self.parse(IGRF12)
@@ -74,6 +93,8 @@ class TestSHCParser(TestCase):
             "nstep": 1,
         })
 
+    def test_parse_shc_header_igrf12(self):
+        self._test_header(IGRF12)
 
     def test_parse_shc_file_chaos6core_latest(self):
         data = self.parse(CHAOS6_CORE_LATEST)
@@ -85,6 +106,9 @@ class TestSHCParser(TestCase):
             "nstep": 5,
         })
 
+    def test_parse_shc_header_chaos6core_latest(self):
+        self._test_header(CHAOS6_CORE_LATEST)
+
     def test_parse_shc_file_chaos6static(self):
         data = self.parse(CHAOS6_STATIC)
         self._assert_valid(data, {
@@ -94,6 +118,10 @@ class TestSHCParser(TestCase):
             "ntime": 1,
             "nstep": 1,
         })
+
+    def test_parse_shc_header_chaos6static(self):
+        self._test_header(CHAOS6_STATIC)
+
 
 if __name__ == "__main__":
     main()

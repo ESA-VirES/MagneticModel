@@ -27,14 +27,14 @@
 #-------------------------------------------------------------------------------
 
 from numpy import array
-from .parser_shc import strip_shc_comments
+from .parser_shc import _strip_shc_comments
 
 
 def parse_swarm_mio_file(file_in):
     """ Parse Swarm MIO_SHA_2* product file format and return a dictionary
     containing the parsed model data.
     """
-    lines = strip_shc_comments(file_in)
+    lines = _strip_shc_comments(file_in)
     data = parse_swarm_mio_header(next(lines))
     data["nm"], data["qs"], data["gh"] = parse_swarm_mio_coefficients(lines, data)
     data["degree_min"] = data["nm"][:, 0].min()

@@ -26,21 +26,37 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-from numpy import array
+from numpy import inf, array
 
 
 def parse_shc_file(file_in):
-    """ Parse SHC file format and return a dictionary containing the parsed
-    model data.
+    """ Parse SHC file and return a dictionary containing the parsed model data.
     """
-    lines = strip_shc_comments(file_in)
-    data = parse_shc_header(next(lines))
-    data["t"] = parse_shc_times(next(lines))
-    data["nm"], data["gh"] = parse_shc_coefficients(lines)
+    lines = _strip_shc_comments(file_in)
+    data = _parse_shc_header(lines)
+    data["nm"], data["gh"] = _parse_shc_coefficients(lines)
     return data
 
 
-def parse_shc_coefficients(lines):
+def parse_shc_header(file_in):
+    """ Parse SHC file header and return a dictionary containing the parsed
+    model info.
+    """
+    lines = _strip_shc_comments(file_in)
+    return _parse_shc_header(lines)
+
+
+def _parse_shc_header(lines):
+    data = _parse_shc_header_line(next(lines))
+    data["t"] = times = _parse_shc_times(next(lines))
+    if "validity_start" not in data:
+        data["validity_start"] = times.min() if times.size > 1 else -inf
+    if "validity_end" not in data:
+        data["validity_end"] = data["t"].max() if times.size > 1 else +inf
+    return data
+
+
+def _parse_shc_coefficients(lines):
     """ Parse SHC coefficients. """
     nm_index = []
     coefficients = []
@@ -51,12 +67,12 @@ def parse_shc_coefficients(lines):
     return array(nm_index), array(coefficients)
 
 
-def parse_shc_times(line):
+def _parse_shc_times(line):
     """ Parse SHC times. """
     return array([float(v) for v in line.split()])
 
 
-def parse_shc_header(line):
+def _parse_shc_header_line(line):
     """ Parse the SHC file header. """
     fields = line.split()
     header = {
@@ -72,7 +88,7 @@ def parse_shc_header(line):
     return header
 
 
-def strip_shc_comments(file_in):
+def _strip_shc_comments(file_in):
     """ Strip initial comments and empty lines from a text file stream. """
     for line in file_in:
         line = line.partition("#")[0].strip()
