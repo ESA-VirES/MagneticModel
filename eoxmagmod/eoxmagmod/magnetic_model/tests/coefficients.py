@@ -25,7 +25,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
-# pylint: disable=missing-docstring, line-too-long
+# pylint: disable=missing-docstring, line-too-long, too-few-public-methods
 
 from unittest import TestCase, main
 from numpy import nan, inf, isinf, array, dot
@@ -38,7 +38,11 @@ from eoxmagmod.magnetic_model.coefficients import (
     CombinedSHCoefficients,
 )
 
+
 class SHCoefficinetTestMixIn(object):
+
+    def test_min_degree(self):
+        self.assertEqual(self.coefficients.min_degree, self.min_degree)
 
     def test_degree(self):
         self.assertEqual(self.coefficients.degree, self.degree)
@@ -92,6 +96,7 @@ class CombinedSHCoefficientsMixIn(object):
     options0 = {}
     options1 = {}
     degree = 2
+    min_degree = 1
     validity = (2012.0, 2016.0)
 
     @property
@@ -164,6 +169,7 @@ class TestSparseSHCoefficientsConstantDefault(TestCase, SHCoefficinetTestMixIn):
     indices = array([(1, 0), (1, 1), (1, -1)])
     coeff = array([1, 5, 10])
     degree = 1
+    min_degree = 1
     is_internal = True
     validity = (-inf, inf)
     options = {}
@@ -205,6 +211,7 @@ class TestSparseSHCoefficientsTimeDependentDefault(TestCase, SHCoefficinetTestMi
         [10, 30, 20],
     ])
     degree = 1
+    min_degree = 1
     is_internal = True
     validity = (2012.0, 2016.0)
     options = {}
@@ -252,6 +259,7 @@ class TestSparseSHCoefficientsTimeDependentConvertedDefault(TestCase, SHCoeffici
         [10, 30, 20],
     ])
     degree = 1
+    min_degree = 1
     is_internal = True
     validity = tuple(decimal_year_to_mjd2000((2012.0, 2016.0)))
     options = {}
@@ -303,6 +311,7 @@ class TestSparseSHCoefficientsTimeDependentDecimalYearDefault(TestCase, SHCoeffi
         [10, 30, 20],
     ])
     degree = 1
+    min_degree = 1
     is_internal = True
     validity = tuple(decimal_year_to_mjd2000((2012.0, 2016.0)))
     options = {}
@@ -344,6 +353,7 @@ class TestSparseSHCoefficientsConstantSubset(TestCase, SHCoefficinetTestMixIn):
     indices = array([(1, 0), (2, 1), (3, -2)])
     coeff = array([1, 5, 10])
     degree = 3
+    min_degree = 1
     is_internal = True
     validity = (-inf, inf)
     options = {}
@@ -409,6 +419,7 @@ class TestSparseSHCoefficientsTimeDependentSubset(TestCase, SHCoefficinetTestMix
         [10, 20],
     ])
     degree = 3
+    min_degree = 1
     is_internal = True
     validity = (2012.0, 2014.0)
     options = {}

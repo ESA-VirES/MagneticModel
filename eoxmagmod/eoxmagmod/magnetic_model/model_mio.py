@@ -51,6 +51,14 @@ class DipoleMIOPrimaryGeomagneticModel(GeomagneticModel):
             self.model_above_ionosphere.degree
         )
 
+    @property
+    def min_degree(self):
+        """ Get minimum degree of the model. """
+        return max(
+            self.model_below_ionosphere.min_degree,
+            self.model_above_ionosphere.min_degree
+        )
+
     def __init__(self, model_below_ionosphere, model_above_ionosphere,
                  height=MIO_HEIGHT, earth_radius=MIO_EARTH_RADIUS):
         self.model_below_ionosphere = model_below_ionosphere
