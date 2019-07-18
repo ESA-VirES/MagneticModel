@@ -2,8 +2,8 @@
 # CDF library conda build metadata
 #
 
-{% set version = "3.7.0" %}
-{% set file_version = "cdf37_0" %}
+{% set version = "3.7.1" %}
+{% set file_version = "cdf37_1" %}
 
 package:
   name: "cdf"
