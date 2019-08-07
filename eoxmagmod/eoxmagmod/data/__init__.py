@@ -40,6 +40,8 @@ CHAOS6_STATIC = join(_DIRNAME, 'CHAOS-6_static.shc')
 IGRF11 = join(_DIRNAME, 'igrf11coeffs.txt')
 IGRF12 = join(_DIRNAME, 'IGRF12.shc')
 SIFM = join(_DIRNAME, 'SIFM.shc')
+LCS1 = join(_DIRNAME, 'LCS-1.shc')
+MF7 = join(_DIRNAME, 'MF7.shc')
 
 # magnetic models used by the apex point calculation
 APEX_2015 = join(_DIRNAME, 'apexsh_1995-2015.txt')

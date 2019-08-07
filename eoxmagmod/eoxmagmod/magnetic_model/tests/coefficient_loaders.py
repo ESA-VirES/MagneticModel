@@ -37,6 +37,7 @@ from eoxmagmod.data import (
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,
     IGRF11, IGRF12, SIFM, WMM_2015,
     EMM_2010_STATIC, EMM_2010_SECVAR,
+    LCS1, MF7,
 )
 from eoxmagmod.magnetic_model.tests.data import (
     SWARM_MMA_SHA_2C_TEST_DATA,
@@ -204,6 +205,22 @@ class TestCoeffIGRF11(TestCase, CoefficietLoaderTestMixIn):
     @staticmethod
     def load():
         return load_coeff_igrf(IGRF11)
+
+
+class TestCoeffLCS1(TestCase, ShcTestMixIn):
+    class_ = SparseSHCoefficientsConstant
+    path = LCS1
+    degree = 185
+    min_degree = 1
+    validity = (-inf, inf)
+
+
+class TestCoeffMF7(TestCase, ShcTestMixIn):
+    class_ = SparseSHCoefficientsConstant
+    path = MF7
+    degree = 133
+    min_degree = 16
+    validity = (-inf, inf)
 
 #-------------------------------------------------------------------------------
 
