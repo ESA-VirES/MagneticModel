@@ -58,7 +58,7 @@ from eoxmagmod.magnetic_model.loader_mio import (
 from eoxmagmod.data import (
     EMM_2010_STATIC, EMM_2010_SECVAR, WMM_2015,
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,
-    IGRF11, IGRF12, SIFM,
+    IGRF11, IGRF12, SIFM, LCS1, MF7,
 )
 from eoxmagmod.magnetic_model.tests.data import (
     SWARM_MMA_SHA_2C_TEST_DATA,
@@ -493,6 +493,32 @@ class TestSIFM(TestCase, SHModelTestMixIn):
 
     def load(self):
         return load_model_shc(SIFM)
+
+
+class TestLCS1(TestCase, SHModelTestMixIn):
+    reference_values = (
+        0.0, (30.0, 40.0, 8000.0),
+        (-0.1462693302627296, 0.2952205019109063, 0.07607835693198658)
+    )
+    degree = 185
+    min_degree = 1
+    validity = (-inf, inf)
+
+    def load(self):
+        return load_model_shc(LCS1)
+
+
+class TestMF7(TestCase, SHModelTestMixIn):
+    reference_values = (
+        0.0, (30.0, 40.0, 8000.0),
+        (0.00021797438990513486, 0.0026642277297469325, -0.013644661754665577)
+    )
+    degree = 133
+    min_degree = 16
+    validity = (-inf, inf)
+
+    def load(self):
+        return load_model_shc(MF7)
 
 
 class TestCHAOS6Static(TestCase, SHModelTestMixIn):
