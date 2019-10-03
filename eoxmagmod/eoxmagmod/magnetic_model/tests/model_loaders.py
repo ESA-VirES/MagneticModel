@@ -58,6 +58,7 @@ from eoxmagmod.magnetic_model.loader_mio import (
 from eoxmagmod.data import (
     EMM_2010_STATIC, EMM_2010_SECVAR, WMM_2015,
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,
+    CHAOS7_CORE_LATEST, CHAOS7_STATIC,
     IGRF11, IGRF12, SIFM, LCS1, MF7,
 )
 from eoxmagmod.magnetic_model.tests.data import (
@@ -346,10 +347,7 @@ class TestComposedModelFull(TestCase, ComposedModelTestMixIn):
     options = {"f107": 70, "scale": [1, 1, -1]}
     components = [
         (
-            load_model_shc_combined(
-                CHAOS6_STATIC, CHAOS6_CORE_LATEST,
-                to_mjd2000=decimal_year_to_mjd2000_simple,
-            ), 1.0, {}
+            load_model_shc_combined(CHAOS7_STATIC, CHAOS7_CORE_LATEST), 1.0, {}
         ),
         (load_model_swarm_mma_2c_internal(CHAOS_MMA_TEST_DATA), 1.0, {}),
         (load_model_swarm_mma_2c_external(CHAOS_MMA_TEST_DATA), 1.0, {}),
@@ -358,8 +356,7 @@ class TestComposedModelFull(TestCase, ComposedModelTestMixIn):
     ]
     reference_values = (
         6201.125, (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
-        (30289.033068165958, 2254.1619753516857, 31789.098240600066)
-
+        (30291.199879280495, 2262.1065657195545, 31770.55085707301)
     )
     validity = (6179.00000, 6209.979167)
 
@@ -369,7 +366,7 @@ class TestComposedModelFullCartToWGS84(TestComposedModelFull):
     coord_type_out = GEODETIC_ABOVE_WGS84
     reference_values = (
         6201.125, (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
-        (30381.123577858896, 2254.1619753516857, 31701.09810876966)
+        (30383.23657518998, 2262.1065657195545, 31682.544517516624)
     )
 
 
@@ -378,7 +375,7 @@ class TestComposedModelFullWGS84ToCart(TestComposedModelFull):
     coord_type_out = GEOCENTRIC_CARTESIAN
     reference_values = (
         6201.125, (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
-        (-34139.65129516762, -25703.969336336282, -10336.522972798683)
+        (-34133.28332329303, -25688.25504730797, -10347.673178032675)
     )
 
 
@@ -387,24 +384,20 @@ class TestComposedModelDiffConstrained(TestCase, ComposedModelTestMixIn):
     options = {"scale": [1, 1, -1]}
     components = [
         (
-            load_model_shc_combined(
-                CHAOS6_STATIC, CHAOS6_CORE_LATEST,
-                to_mjd2000=decimal_year_to_mjd2000_simple
-            ), 1.0, {"max_degree": 15}
+            load_model_shc_combined(CHAOS7_STATIC, CHAOS7_CORE_LATEST), 1.0,
+            {"max_degree": 15}
         ),
         (
-            load_model_shc(
-                CHAOS6_CORE_LATEST,
-                to_mjd2000=decimal_year_to_mjd2000_simple
-            ), -1.0, {"min_degree": 5, "max_degree": 15}
+            load_model_shc(CHAOS7_CORE_LATEST), -1.0,
+            {"min_degree": 5, "max_degree": 15}
         ),
     ]
     reference_values = (
         6201.125,
         (30.0, 40.0, 6400.0),
-        (31512.85733779784, 2660.412538490814, 30567.851101678763)
+        (31513.033550872005, 2660.4395297707433, 30568.076139868404)
     )
-    validity = (-1058.4945, 7195.49805)
+    validity = (-1057.77, 7416.1176)
 
 
 class TestComposedModelDiffConstrainedCartToWGS84(TestComposedModelDiffConstrained):
@@ -412,7 +405,7 @@ class TestComposedModelDiffConstrainedCartToWGS84(TestComposedModelDiffConstrain
     coord_type_out = GEODETIC_ABOVE_WGS84
     reference_values = (
         6201.125, (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
-        (31601.39994521476, 2660.412538490814, 30476.305879640062)
+        (31601.576810367565, 2660.4395297707433, 30476.530405700963)
     )
 
 
@@ -421,7 +414,7 @@ class TestComposedModelDiffConstrainedWGS84ToCart(TestComposedModelDiffConstrain
     coord_type_out = GEOCENTRIC_CARTESIAN
     reference_values = (
         6201.125, (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
-        (-34059.34362801266, -25106.26075602867, -12007.00944952859)
+        (-34059.57776467, -25106.421985397923, -12007.049535432494)
     )
 
 #-------------------------------------------------------------------------------
@@ -537,7 +530,7 @@ class TestCHAOS6Static(TestCase, SHModelTestMixIn):
 class TestCHAOS6Core(TestCase, SHModelTestMixIn):
     reference_values = (
         2503.33, (30.0, 40.0, 8000.0),
-        (15127.023594737328, 318.5295048927941, -14493.86656020781)
+        (15126.82943355118, 318.5424866747154, -14493.674497808082)
     )
     degree = 20
     min_degree = 1
@@ -561,7 +554,7 @@ class TestCHAOS6CoreWithOverridenValidity(TestCHAOS6Core):
 class TestCHAOS6Combined(TestCase, SHModelTestMixIn):
     reference_values = (
         2685.9, (30.0, 40.0, 8000.0),
-        (15127.078702047753, 328.58833488534174, -14503.610818133817)
+        (15126.846514889372, 328.6152387760897, -14503.41320342751)
     )
     degree = 110
     min_degree = 1
@@ -577,6 +570,66 @@ class TestCHAOS6CombinedOverridenValidity(TestCHAOS6Combined):
     def load(self):
         return load_model_shc_combined(
             CHAOS6_CORE_LATEST, CHAOS6_STATIC,
+            validity_start=2000.0, validity_end=2018.0
+        )
+
+
+class TestCHAOS7Static(TestCase, SHModelTestMixIn):
+    reference_values = (
+        0.0, (30.0, 40.0, 8000.0),
+        (-0.006882103717828515, 0.008563805870310179, -0.010268443346867141)
+    )
+    degree = 185
+    min_degree = 21
+    validity = (-inf, inf)
+
+    def load(self):
+        return load_model_shc(CHAOS7_STATIC)
+
+
+class TestCHAOS7Core(TestCase, SHModelTestMixIn):
+    reference_values = (
+        2503.33, (30.0, 40.0, 8000.0),
+        (15127.045139657823, 318.50032374650084, -14493.825323293026)
+    )
+    degree = 20
+    min_degree = 1
+    validity = decimal_year_to_mjd2000((1997.102, 2020.3036))
+
+    def load(self):
+        return load_model_shc(CHAOS7_CORE_LATEST)
+
+
+class TestCHAOS7CoreWithOverridenValidity(TestCHAOS7Core):
+    validity = decimal_year_to_mjd2000((2000.0, 2018.0))
+
+    def load(self):
+        return load_model_shc(
+            CHAOS7_CORE_LATEST,
+            validity_start=2000.0,
+            validity_end=2018.0
+        )
+
+
+class TestCHAOS7Combined(TestCase, SHModelTestMixIn):
+    reference_values = (
+        2685.9, (30.0, 40.0, 8000.0),
+        (15127.12453561178, 328.5699830229952, -14503.561841084533)
+    )
+    degree = 185
+    min_degree = 1
+    validity = decimal_year_to_mjd2000((1997.102, 2020.3036))
+
+    def load(self):
+        return load_model_shc_combined(CHAOS7_CORE_LATEST, CHAOS7_STATIC)
+
+
+class TestCHAOS7CombinedOverridenValidity(TestCHAOS7Combined):
+    validity = decimal_year_to_mjd2000((2000.0, 2018.0))
+
+    def load(self):
+        return load_model_shc_combined(
+            CHAOS7_CORE_LATEST, CHAOS7_STATIC,
             validity_start=2000.0, validity_end=2018.0
         )
 
