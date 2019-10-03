@@ -35,6 +35,7 @@ from eoxmagmod.time_util import (
 )
 from eoxmagmod.data import (
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,
+    CHAOS7_CORE_LATEST, CHAOS7_STATIC,
     IGRF11, IGRF12, SIFM, WMM_2015,
     EMM_2010_STATIC, EMM_2010_SECVAR,
     LCS1, MF7,
@@ -221,6 +222,31 @@ class TestCoeffMF7(TestCase, ShcTestMixIn):
     degree = 133
     min_degree = 16
     validity = (-inf, inf)
+
+#-------------------------------------------------------------------------------
+
+class TestCoeffCHAOS7Core(TestCase, ShcTestMixIn):
+    class_ = SparseSHCoefficientsTimeDependent
+    path = CHAOS7_CORE_LATEST
+    degree = 20
+    min_degree = 1
+    validity = decimal_year_to_mjd2000((1997.102, 2020.3036))
+
+
+class TestCoeffCHAOS7Static(TestCase, ShcTestMixIn):
+    class_ = SparseSHCoefficientsConstant
+    path = CHAOS7_STATIC
+    degree = 185
+    min_degree = 21
+    validity = (-inf, inf)
+
+
+class TestCoeffCHAOS7Combined(TestCase, CombinedShcTestMixIn):
+    path_core = CHAOS7_CORE_LATEST
+    path_static = CHAOS7_STATIC
+    degree = 185
+    min_degree = 1
+    validity = decimal_year_to_mjd2000((1997.102, 2020.3036))
 
 #-------------------------------------------------------------------------------
 
