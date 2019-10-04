@@ -33,6 +33,7 @@ from numpy.testing import assert_equal
 from eoxmagmod.magnetic_model.parser_shc import parse_shc_file, parse_shc_header
 from eoxmagmod.data import (
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,
+    CHAOS7_CORE_LATEST, CHAOS7_STATIC,
     IGRF12, SIFM, LCS1, MF7,
 )
 
@@ -121,6 +122,33 @@ class TestSHCParser(TestCase):
 
     def test_parse_shc_header_chaos6static(self):
         self._test_header(CHAOS6_STATIC)
+
+
+    def test_parse_shc_file_chaos7core_latest(self):
+        data = self.parse(CHAOS7_CORE_LATEST)
+        self._assert_valid(data, {
+            "degree_min": 1,
+            "degree_max": 20,
+            "spline_order": 6,
+            "ntime": 233,
+            "nstep": 5,
+        })
+
+    def test_parse_shc_header_chaos7core_latest(self):
+        self._test_header(CHAOS7_CORE_LATEST)
+
+    def test_parse_shc_file_chaos7static(self):
+        data = self.parse(CHAOS7_STATIC)
+        self._assert_valid(data, {
+            "degree_min": 21,
+            "degree_max": 185,
+            "spline_order": 1,
+            "ntime": 1,
+            "nstep": 1,
+        })
+
+    def test_parse_shc_header_chaos7static(self):
+        self._test_header(CHAOS7_STATIC)
 
     def test_parse_shc_file_lcs1(self):
         data = self.parse(LCS1)
