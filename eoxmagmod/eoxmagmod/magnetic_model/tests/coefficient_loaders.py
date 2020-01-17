@@ -36,7 +36,7 @@ from eoxmagmod.time_util import (
 from eoxmagmod.data import (
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,
     CHAOS7_CORE_LATEST, CHAOS7_STATIC,
-    IGRF11, IGRF12, SIFM, WMM_2015,
+    IGRF11, IGRF12, IGRF13, SIFM, WMM_2015,
     EMM_2010_STATIC, EMM_2010_SECVAR,
     LCS1, MF7,
 )
@@ -184,6 +184,17 @@ class TestCoeffSIFM(TestCase, ShcTestMixIn):
         "interpolate_in_decimal_years": True,
     }
     validity = decimal_year_to_mjd2000((2013.4976, 2015.4962))
+
+
+class TestCoeffIGRF13(TestCase, CoefficietLoaderTestMixIn):
+    class_ = SparseSHCoefficientsTimeDependentDecimalYear
+    degree = 13
+    min_degree = 1
+    validity = decimal_year_to_mjd2000((1900.0, 2025.0))
+
+    @staticmethod
+    def load():
+        return load_coeff_igrf(IGRF13)
 
 
 class TestCoeffIGRF12(TestCase, ShcTestMixIn):

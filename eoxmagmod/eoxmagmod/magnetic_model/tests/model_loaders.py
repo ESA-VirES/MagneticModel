@@ -34,9 +34,7 @@ from numpy import nan, inf, isinf, array, empty, full, nditer, asarray
 from numpy.random import uniform
 from numpy.testing import assert_allclose
 from eoxmagmod.magnetic_time import mjd2000_to_magnetic_universal_time
-from eoxmagmod.time_util import (
-    decimal_year_to_mjd2000, decimal_year_to_mjd2000_simple,
-)
+from eoxmagmod.time_util import decimal_year_to_mjd2000
 from eoxmagmod.magnetic_model.loader_shc import (
     load_model_shc, load_model_shc_combined,
 )
@@ -59,7 +57,7 @@ from eoxmagmod.data import (
     EMM_2010_STATIC, EMM_2010_SECVAR, WMM_2015,
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,
     CHAOS7_CORE_LATEST, CHAOS7_STATIC,
-    IGRF11, IGRF12, SIFM, LCS1, MF7,
+    IGRF11, IGRF12, IGRF13, SIFM, LCS1, MF7,
 )
 from eoxmagmod.magnetic_model.tests.data import (
     SWARM_MMA_SHA_2C_TEST_DATA,
@@ -473,6 +471,19 @@ class TestIGRF12(TestCase, SHModelTestMixIn):
 
     def load(self):
         return load_model_shc(IGRF12, interpolate_in_decimal_years=True)
+
+
+class TestIGRF13(TestCase, SHModelTestMixIn):
+    reference_values = (
+        -15522.5, (30.0, 40.0, 8000.0),
+        (15259.57386772841, -159.00767967612023, -14015.952721753336)
+    )
+    degree = 13
+    min_degree = 1
+    validity = decimal_year_to_mjd2000((1900.0, 2025.0))
+
+    def load(self):
+        return load_model_igrf(IGRF13)
 
 
 class TestSIFM(TestCase, SHModelTestMixIn):

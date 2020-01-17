@@ -31,7 +31,7 @@
 from unittest import TestCase, main
 from numpy import abs as aabs
 from eoxmagmod.magnetic_model.parser_igrf import parse_igrf_file
-from eoxmagmod.data import IGRF11
+from eoxmagmod.data import IGRF11, IGRF13
 
 
 class TestIGRFParser(TestCase):
@@ -55,6 +55,13 @@ class TestIGRFParser(TestCase):
 
     def test_parse_igrf_file_igrf11(self):
         data = self.parse(IGRF11)
+        self._assert_valid(data, {
+            "degree_min": 1,
+            "degree_max": 13,
+        })
+
+    def test_parse_igrf_file_igrf13(self):
+        data = self.parse(IGRF13)
         self._assert_valid(data, {
             "degree_min": 1,
             "degree_max": 13,

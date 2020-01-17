@@ -34,9 +34,6 @@ from .parser_igrf import parse_igrf_file
 
 def load_model_igrf(path):
     """ Load model from an IGRF coefficient file.
-
-    Note: IGRF file format was discontinued after IGRF11. Starting by IGRF12
-    the IRFF models uses SHC format which is loaded by the SHC file loader.
     """
     return SphericalHarmomicGeomagneticModel(load_coeff_igrf(path))
 
