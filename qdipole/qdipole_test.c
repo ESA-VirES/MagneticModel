@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     double gcrad[N] = { 7000.0, 6371.0, 6371.0 };
     double qdlon[N], qdlat[N], xmlt[N];
     double f11[N], f12[N], f21[N], f22[N];
-    const char *fname = "apexsh_1980-2020.txt";
+    const char *fname = "apexsh_1980-2025.txt";
 
     if (argc > 1)
     {

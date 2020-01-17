@@ -12,6 +12,9 @@ EOX IT Services GmbH, Vienna, Austria
 CHANGE LOG
 ----------
 
+2020-01-17 - 0.3.0 Update
+ - update of the IGRF coefficients
+
 2016-06-09 - 0.2.0 Update
  - review and re-factoring of the C interface
  - separating MLT calculation from the DQ latitude/longitude evaluation
@@ -30,7 +33,7 @@ INSTALLATION
 
 Step 1 - configure:
 
-  $ ./configure --prefix=/usr/ --libdir='${exec_prefix}/lib64'
+  $ ./configure --prefix=/usr/
 
 For more detail see
 
@@ -52,8 +55,11 @@ TESTING
 
   $ ./qdipole_test apexsh_1995-2015.txt | diff - test_result.apexsh_1995-2015.txt
   $ ./qdipole_test apexsh_1980-2020.txt | diff - test_result.apexsh_1980-2020.txt
+  $ ./qdipole_test apexsh_1980-2025.txt | diff - test_result.apexsh_1980-2025.txt
   $ ./qdlatlon_test apexsh_1995-2015.txt | diff - test_result.qdlatlon.apexsh_1995-2015.txt
   $ ./qdlatlon_test apexsh_1980-2020.txt | diff - test_result.qdlatlon.apexsh_1980-2020.txt
+  $ ./qdlatlon_test apexsh_1980-2025.txt | diff - test_result.qdlatlon.apexsh_1980-2025.txt
   $ ./mlt_test apexsh_1995-2015.txt | diff - test_result.mlt.apexsh_1995-2015.txt
   $ ./mlt_test apexsh_1980-2020.txt | diff - test_result.mlt.apexsh_1980-2020.txt
+  $ ./mlt_test apexsh_1980-2025.txt | diff - test_result.mlt.apexsh_1980-2025.txt
   $ ./subsol_test | diff - test_result.subsol.txt
