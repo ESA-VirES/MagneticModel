@@ -30,9 +30,7 @@
 from unittest import TestCase, main
 from numpy import inf
 from numpy.testing import assert_allclose
-from eoxmagmod.time_util import (
-    decimal_year_to_mjd2000, decimal_year_to_mjd2000_simple,
-)
+from eoxmagmod.time_util import decimal_year_to_mjd2000
 from eoxmagmod.data import (
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,
     CHAOS7_CORE_LATEST, CHAOS7_STATIC,
@@ -186,15 +184,15 @@ class TestCoeffSIFM(TestCase, ShcTestMixIn):
     validity = decimal_year_to_mjd2000((2013.4976, 2015.4962))
 
 
-class TestCoeffIGRF13(TestCase, CoefficietLoaderTestMixIn):
+class TestCoeffIGRF13(TestCase, ShcTestMixIn):
     class_ = SparseSHCoefficientsTimeDependentDecimalYear
+    path = IGRF13
     degree = 13
     min_degree = 1
+    kwargs = {
+        "interpolate_in_decimal_years": True,
+    }
     validity = decimal_year_to_mjd2000((1900.0, 2025.0))
-
-    @staticmethod
-    def load():
-        return load_coeff_igrf(IGRF13)
 
 
 class TestCoeffIGRF12(TestCase, ShcTestMixIn):

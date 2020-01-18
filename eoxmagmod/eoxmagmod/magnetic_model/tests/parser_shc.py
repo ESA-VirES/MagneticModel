@@ -34,7 +34,7 @@ from eoxmagmod.magnetic_model.parser_shc import parse_shc_file, parse_shc_header
 from eoxmagmod.data import (
     CHAOS6_CORE_LATEST, CHAOS6_STATIC,
     CHAOS7_CORE_LATEST, CHAOS7_STATIC,
-    IGRF12, SIFM, LCS1, MF7,
+    IGRF12, IGRF13, SIFM, LCS1, MF7,
 )
 
 
@@ -91,6 +91,16 @@ class TestSHCParser(TestCase):
             "degree_max": 13,
             "spline_order": 2,
             "ntime": 25,
+            "nstep": 1,
+        })
+
+    def test_parse_shc_file_igrf13(self):
+        data = self.parse(IGRF13)
+        self._assert_valid(data, {
+            "degree_min": 1,
+            "degree_max": 13,
+            "spline_order": 2,
+            "ntime": 26,
             "nstep": 1,
         })
 

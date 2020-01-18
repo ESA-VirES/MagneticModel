@@ -483,8 +483,7 @@ class TestIGRF13(TestCase, SHModelTestMixIn):
     validity = decimal_year_to_mjd2000((1900.0, 2025.0))
 
     def load(self):
-        return load_model_igrf(IGRF13)
-
+        return load_model_shc(IGRF13, interpolate_in_decimal_years=True)
 
 class TestSIFM(TestCase, SHModelTestMixIn):
     reference_values = (

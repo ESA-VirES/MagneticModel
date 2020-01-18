@@ -34,6 +34,12 @@ from .parser_igrf import parse_igrf_file
 
 def load_model_igrf(path):
     """ Load model from an IGRF coefficient file.
+
+    This loader can be used load to load the models in the original IGRF
+    coefficient file format.
+
+    Starting by IGRF12, the eoxmagmod package contains IGRF models
+    converted to the common SHC format which are loaded by the SHC file loader.
     """
     return SphericalHarmomicGeomagneticModel(load_coeff_igrf(path))
 
