@@ -219,8 +219,8 @@ subroutine makeapxsh(datafilein,epochgridin,nepochin,lmaxin,mmaxin,nmaxin)
     
     !WRITE COEFFICIENTS TO OUTPUT FILE
     open(unit=iun, file=trim(datafilein), form='formatted')
-    write(iun,*), nepoch, nmax, mmax, lmax, nterm
-    write(iun,*), epochgrid, coeff0
+    write(iun,*) nepoch, nmax, mmax, lmax, nterm
+    write(iun,*) epochgrid, coeff0
     close(iun)
     
     return
