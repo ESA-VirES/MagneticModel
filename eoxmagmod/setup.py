@@ -82,6 +82,7 @@ setup(
         'eoxmagmod.magnetic_model.tests',
         'eoxmagmod.magnetic_model.tests.data',
     ],
+    extra_link_args=["-L/usr/lib/x86_64-linux-gnu/"], # was experiencing https://github.com/cocodataset/cocoapi/issues/94
     license='EOX licence (MIT style)',
     version=eoxmagmod.__version__,
     package_data={
