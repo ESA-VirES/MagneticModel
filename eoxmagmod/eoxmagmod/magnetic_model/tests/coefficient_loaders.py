@@ -239,7 +239,7 @@ class TestCoeffCHAOS7Core(TestCase, ShcTestMixIn):
     path = CHAOS7_CORE_LATEST
     degree = 20
     min_degree = 1
-    validity = decimal_year_to_mjd2000((1997.102, 2020.3036))
+    validity = decimal_year_to_mjd2000((1997.102, 2020.7023))
 
 
 class TestCoeffCHAOS7Static(TestCase, ShcTestMixIn):
@@ -255,7 +255,7 @@ class TestCoeffCHAOS7Combined(TestCase, CombinedShcTestMixIn):
     path_static = CHAOS7_STATIC
     degree = 185
     min_degree = 1
-    validity = decimal_year_to_mjd2000((1997.102, 2020.3036))
+    validity = decimal_year_to_mjd2000((1997.102, 2020.7023))
 
 #-------------------------------------------------------------------------------
 

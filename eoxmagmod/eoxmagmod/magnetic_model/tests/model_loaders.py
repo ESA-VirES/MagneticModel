@@ -354,7 +354,7 @@ class TestComposedModelFull(TestCase, ComposedModelTestMixIn):
     ]
     reference_values = (
         6201.125, (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
-        (30291.199879280495, 2262.1065657195545, 31770.55085707301)
+        (30291.163649689825, 2261.8711625775154, 31770.406483283576)
     )
     validity = (6179.00000, 6209.979167)
 
@@ -364,7 +364,7 @@ class TestComposedModelFullCartToWGS84(TestComposedModelFull):
     coord_type_out = GEODETIC_ABOVE_WGS84
     reference_values = (
         6201.125, (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
-        (30383.23657518998, 2262.1065657195545, 31682.544517516624)
+        (30383.19992693346, 2261.8711625775154, 31682.40024943419)
     )
 
 
@@ -373,7 +373,7 @@ class TestComposedModelFullWGS84ToCart(TestComposedModelFull):
     coord_type_out = GEOCENTRIC_CARTESIAN
     reference_values = (
         6201.125, (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
-        (-34133.28332329303, -25688.25504730797, -10347.673178032675)
+        (-34133.02235274605, -25688.3433639958, -10347.713989181475)
     )
 
 
@@ -393,9 +393,9 @@ class TestComposedModelDiffConstrained(TestCase, ComposedModelTestMixIn):
     reference_values = (
         6201.125,
         (30.0, 40.0, 6400.0),
-        (31513.033550872005, 2660.4395297707433, 30568.076139868404)
+        (31513.05255980798, 2660.416719430906, 30568.163704306862)
     )
-    validity = (-1057.77, 7416.1176)
+    validity = (-1057.77, 7562.0418)
 
 
 class TestComposedModelDiffConstrainedCartToWGS84(TestComposedModelDiffConstrained):
@@ -403,7 +403,7 @@ class TestComposedModelDiffConstrainedCartToWGS84(TestComposedModelDiffConstrain
     coord_type_out = GEODETIC_ABOVE_WGS84
     reference_values = (
         6201.125, (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
-        (31601.576810367565, 2660.4395297707433, 30476.530405700963)
+        (31601.596073241886, 2660.416719430906, 30476.617914627383)
     )
 
 
@@ -412,7 +412,7 @@ class TestComposedModelDiffConstrainedWGS84ToCart(TestComposedModelDiffConstrain
     coord_type_out = GEOCENTRIC_CARTESIAN
     reference_values = (
         6201.125, (30.0, 40.0, 6400.0), # below ionosphere r < (a + h)
-        (-34059.57776467, -25106.421985397923, -12007.049535432494)
+        (-34059.628474780875, -25106.49431301715, -12007.022215434698)
     )
 
 #-------------------------------------------------------------------------------
@@ -600,11 +600,11 @@ class TestCHAOS7Static(TestCase, SHModelTestMixIn):
 class TestCHAOS7Core(TestCase, SHModelTestMixIn):
     reference_values = (
         2503.33, (30.0, 40.0, 8000.0),
-        (15127.045139657823, 318.50032374650084, -14493.825323293026)
+        (15127.054737197504, 318.49774668091186, -14493.864361798987)
     )
     degree = 20
     min_degree = 1
-    validity = decimal_year_to_mjd2000((1997.102, 2020.3036))
+    validity = decimal_year_to_mjd2000((1997.102, 2020.7023))
 
     def load(self):
         return load_model_shc(CHAOS7_CORE_LATEST)
@@ -624,11 +624,11 @@ class TestCHAOS7CoreWithOverridenValidity(TestCHAOS7Core):
 class TestCHAOS7Combined(TestCase, SHModelTestMixIn):
     reference_values = (
         2685.9, (30.0, 40.0, 8000.0),
-        (15127.12453561178, 328.5699830229952, -14503.561841084533)
+        (15127.140448185208, 328.57021261912007, -14503.604241121742)
     )
     degree = 185
     min_degree = 1
-    validity = decimal_year_to_mjd2000((1997.102, 2020.3036))
+    validity = decimal_year_to_mjd2000((1997.102, 2020.7023))
 
     def load(self):
         return load_model_shc_combined(CHAOS7_CORE_LATEST, CHAOS7_STATIC)
