@@ -29,7 +29,7 @@ HDR_MM=pymm_aux.h pymm_sheval.h pymm_sphargrd.h pymm_spharpot.h\
 OBJ_MM=pymm.o
 DST_MM=_pymm.so
 
-HDR_QD=pymm_aux.h pyqd_eval_qdlatlon.h pyqd_eval_mlt.h pyqd_eval_subsol.h pyqd_eval_apex.h
+HDR_QD=pymm_aux.h pyqd_eval_qdlatlon.h pyqd_eval_mlt.h pyqd_eval_subsol.h
 OBJ_QD=pyqd.o
 DST_QD=_pyqd.so
 

@@ -37,9 +37,6 @@
 /* common python utilities */
 #include "py_common.h"
 
-/* quasi dipole coordinates evaluation - old API with wrong MLT */
-#include "pyqd_eval_apex.h"
-
 /* Quasi-Dipole coordinates evaluation */
 #include "pyqd_eval_qdlatlon.h"
 
@@ -53,7 +50,7 @@
 /* module's doc string */
 
 #define DOC_PYQD \
-"library evaluation magnetic quasi-dipole coordinates and local magnetic time."
+"A library calculating magnetic coordinated (e.g., QD and MLT) and related parameters."
 
 /*---------------------------------------------------------------------------*/
 /*define module's methods */
@@ -62,7 +59,6 @@ static PyMethodDef pyqd_methods[] =
     {"eval_qdlatlon", (PyCFunction)eval_qdlatlon, METH_VARARGS|METH_KEYWORDS, DOC_EVAL_QDLATLON},
     {"eval_mlt", (PyCFunction)eval_mlt, METH_VARARGS|METH_KEYWORDS, DOC_EVAL_MLT},
     {"eval_subsol", (PyCFunction)eval_subsol, METH_VARARGS|METH_KEYWORDS, DOC_EVAL_SUBSOL},
-    {"eval_apex", (PyCFunction)eval_apex, METH_VARARGS|METH_KEYWORDS, DOC_EVAL_APEX},
     {NULL, NULL, 0, NULL} /* Sentinel - DO NOT REMOVE! */
 } ;
 

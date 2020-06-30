@@ -53,4 +53,5 @@ MF7 = join(_DIRNAME, 'MF7.shc')
 # magnetic models used by the apex point calculation
 APEX_2015 = join(_DIRNAME, 'apexsh_1995-2015.txt')
 APEX_2020 = join(_DIRNAME, 'apexsh_1980-2020.txt')
-APEX = APEX_2020
+APEX_2025 = join(_DIRNAME, 'apexsh_1980-2025.txt')
+APEX = APEX_2025
