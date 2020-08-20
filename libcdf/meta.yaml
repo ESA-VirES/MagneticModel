@@ -2,16 +2,16 @@
 # CDF library conda build metadata
 #
 
-{% set version = "3.7.1" %}
-{% set file_version = "cdf37_1" %}
+{% set version = "3.8.0" %}
+{% set file_version = "cdf38_0" %}
 
 package:
   name: "cdf"
   version: {{ version }}
 
 source:
-  - url: https://spdf.sci.gsfc.nasa.gov/pub/software/cdf/dist/{{ file_version }}/unix/{{ file_version }}-dist-cdf.tar.gz
-    sha256: ef29025b9ac04b02b610803fb6abc84307ae34137742fd6f0c738f9315f0296c
+  - url: https://spdf.gsfc.nasa.gov/pub/software/cdf/dist/{{ file_version }}/unix/{{ file_version }}-dist-cdf.tar.gz
+    sha256: aceb1263f1a1bf76e4adefc3a79bbe7d725e590b0938ab440bb3a64fe2f1417b
 
 requirements:
   build:
