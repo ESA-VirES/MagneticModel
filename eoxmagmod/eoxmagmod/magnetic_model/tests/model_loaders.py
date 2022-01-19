@@ -36,7 +36,7 @@ from numpy.testing import assert_allclose
 from eoxmagmod.magnetic_time import mjd2000_to_magnetic_universal_time
 from eoxmagmod.time_util import decimal_year_to_mjd2000
 from eoxmagmod.magnetic_model.loader_shc import (
-    load_model_shc, load_model_shc_combined,
+    load_model_shc, load_model_shc_combined, load_coeff_shc_composed,
 )
 from eoxmagmod.magnetic_model.loader_igrf import load_model_igrf
 from eoxmagmod.magnetic_model.loader_wmm import load_model_wmm
@@ -344,7 +344,13 @@ class TestComposedModelFull(TestCase, ComposedModelTestMixIn):
     options = {"f107": 70, "scale": [1, 1, -1]}
     components = [
         (
-            load_model_shc_combined(CHAOS_STATIC_LATEST, CHAOS_CORE_LATEST), 1.0, {}
+            load_model_shc_combined(
+                CHAOS_STATIC_LATEST,
+                load_coeff_shc_composed(
+                    CHAOS_CORE_LATEST,
+                    CHAOS_CORE_PREDICTION_LATEST,
+                )
+            ), 1.0, {}
         ),
         (load_model_swarm_mma_2c_internal(CHAOS_MMA_TEST_DATA), 1.0, {}),
         (load_model_swarm_mma_2c_external(CHAOS_MMA_TEST_DATA), 1.0, {}),
@@ -571,6 +577,22 @@ class TestCHAOSCoreWithOverridenValidity(TestCHAOSCore):
             validity_start=2000.0,
             validity_end=2018.0
         )
+
+
+class TestCHAOSComposedMixIn(object):
+    validity = decimal_year_to_mjd2000((1997.10198494, 2022.49691992))
+
+    def load(self):
+        return load_model_shc(
+            CHAOS_CORE_LATEST,
+            CHAOS_CORE_PREDICTION_LATEST,
+        )
+
+class TestCHAOSComposedPart1Core(TestCHAOSCore, TestCHAOSComposedMixIn):
+    pass
+
+class TestCHAOSComposedPart2CorePrediction(TestCHAOSCorePrediction, TestCHAOSComposedMixIn):
+    pass
 
 
 class TestCHAOSCombined(TestCase, SHModelTestMixIn):

@@ -83,14 +83,102 @@ class SHCoefficients(object):
         raise NotImplementedError
 
 
-class CombinedSHCoefficients(SHCoefficients):
-    """ Model composed of multiple coefficient sets. """
+class ComposedSHCoefficients(SHCoefficients):
+    """ Model composed of a sequence of multiple time-non-overlapping
+    coefficient sets, i.e., there not more than one model set applicable
+    for the requested time instant.
+
+    The order in which the coefficients are composed matters. The first set
+    of coefficients matching the requested time instance is evaluated.
+    """
+
+    def __new__(cls, *items):
+        if len(items) == 1:
+            return items[0]
+        return super(ComposedSHCoefficients, cls).__new__(cls)
 
     def __init__(self, *items):
+
         if len(items) < 1:
             raise ValueError(
-                "The composed model must be composed from at least one "
-                "coefficient set."
+                "The composed model requires at least one set of coefficients!"
+            )
+
+        validity_start, validity_end = inf, -inf
+        last_item_validity_end = inf
+        degree = -inf
+        min_degree = inf
+        is_internal = items[0].is_internal
+
+        for item in sorted(items, key=lambda item: item.validity):
+            item_validity_start, item_validity_end = item.validity
+
+            if item_validity_start > last_item_validity_end:
+                # time-gaps between the models are not allowed
+                raise ValueError(
+                    "The composed model does not allow time-gaps between "
+                    "the sets of coefficients!"
+                )
+
+            last_item_validity_end = item_validity_end
+
+            validity_start = min(validity_start, item_validity_start)
+            validity_end = max(validity_end, item_validity_end)
+
+            degree = max(degree, item.degree)
+            min_degree = min(min_degree, item.min_degree)
+
+            if is_internal != item.is_internal:
+                raise ValueError(
+                    "Mixing of external and internal coefficient sets"
+                    "is not allowed!"
+                )
+
+        SHCoefficients.__init__(
+            self,
+            is_internal=is_internal,
+            validity_start=validity_start,
+            validity_end=validity_end,
+        )
+
+        self._degree = degree
+        self._min_degree = min_degree
+        self._items = items
+
+    @property
+    def degree(self):
+        return self._degree
+
+    @property
+    def min_degree(self):
+        return self._min_degree
+
+    def __call__(self, time, **parameters):
+        for item in self._items:
+            if item.is_valid(time):
+                return item(time, **parameters)
+        return self._items[0](time, **parameters)
+
+
+class CombinedSHCoefficients(SHCoefficients):
+    """ Coefficients combined of multiple time-overlapping coefficient sets.
+    These sets evaluated together to form a single set of coefficients
+    and for a time instant all combined coefficient sets are applicable.
+
+    The combined coefficients can be used e.g., to merge time-variable core and
+    constant lithospheric model coefficients.
+    """
+
+    def __new__(cls, *items):
+        if len(items) == 1:
+            return items[0]
+        return super(CombinedSHCoefficients, cls).__new__(cls)
+
+    def __init__(self, *items):
+
+        if len(items) < 1:
+            raise ValueError(
+                "The combined model requires at least one set of coefficients!"
             )
 
         item = items[0]
@@ -102,7 +190,8 @@ class CombinedSHCoefficients(SHCoefficients):
         for item in items[1:]:
             if is_internal != item.is_internal:
                 raise ValueError(
-                    "Mixing of external and internal coefficient sets!"
+                    "Mixing of external and internal coefficient sets"
+                    "is not allowed!"
                 )
             new_start, new_end = item.validity
             validity_start = max(validity_start, new_start)
@@ -111,7 +200,9 @@ class CombinedSHCoefficients(SHCoefficients):
             min_degree = min(min_degree, item.min_degree)
 
         SHCoefficients. __init__(
-            self, is_internal=is_internal, validity_start=validity_start,
+            self,
+            is_internal=is_internal,
+            validity_start=validity_start,
             validity_end=validity_end,
         )
 

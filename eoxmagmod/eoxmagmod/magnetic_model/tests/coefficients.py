@@ -36,6 +36,7 @@ from eoxmagmod.magnetic_model.coefficients import (
     SparseSHCoefficientsTimeDependentDecimalYear,
     SparseSHCoefficientsConstant,
     CombinedSHCoefficients,
+    ComposedSHCoefficients,
 )
 
 
@@ -79,6 +80,70 @@ class SHCoefficinetTestMixIn(object):
 
     def test_is_valid_fail_nan(self):
         self.assertFalse(self.coefficients.is_valid(nan))
+
+#-------------------------------------------------------------------------------
+
+class ComposedSHCoefficientsMixIn(object):
+    is_internal = True
+    options = [{}, {}]
+    indices = array([(1, 0), (1, 1), (1, -1)])
+    times = array([[2012.0, 2014.0], [2014.0, 2016.0]])
+    coeff = array([
+        [
+            [1, 2],
+            [5, 10],
+            [10, 20],
+        ],
+        [
+            [2, 3],
+            [10, 15],
+            [20, 30],
+        ],
+    ])
+    degree = 1
+    min_degree = 1
+    validity = (2012.0, 2016.0)
+
+    @property
+    def coefficients(self):
+        return ComposedSHCoefficients(*[
+            SparseSHCoefficientsTimeDependent(
+                self.indices, coeff, times, **options
+            )
+            for options, times, coeff in zip(self.options, self.times, self.coeff)
+        ])
+
+
+class TestComposedSHCoefficientsDefault1(TestCase, SHCoefficinetTestMixIn, ComposedSHCoefficientsMixIn):
+    def test_callable(self):
+        coeff, degree = self.coefficients(2013.0)
+        assert_allclose(coeff, [[0., 0.], [1.5, 0], [7.5, 15.0]])
+        self.assertEqual(degree, self.degree)
+
+
+class TestComposedSHCoefficientsDefault2(TestCase, SHCoefficinetTestMixIn, ComposedSHCoefficientsMixIn):
+    def test_callable(self):
+        coeff, degree = self.coefficients(2015.0)
+        assert_allclose(coeff, [[0., 0.], [2.5, 0], [12.5, 25.0]])
+        self.assertEqual(degree, self.degree)
+
+
+class TestComposedSHCoefficientsInternal(TestComposedSHCoefficientsDefault1):
+    is_internal = True
+    options = [{"is_internal": True}, {"is_internal": True}]
+
+
+class TestComposedSHCoefficientsExternal(TestComposedSHCoefficientsDefault1):
+    is_internal = False
+    options = [{"is_internal": False}, {"is_internal": False}]
+
+
+class TestComposedSHCoefficientsMixed(TestCase, ComposedSHCoefficientsMixIn):
+    options = [{"is_internal": True}, {"is_internal": False}]
+
+    def test_mixed_type_failure(self):
+        with self.assertRaises(ValueError):
+            self.coefficients # pylint: disable=pointless-statement
 
 #-------------------------------------------------------------------------------
 

@@ -48,12 +48,13 @@ from eoxmagmod.magnetic_model.coefficients import (
     SparseSHCoefficientsTimeDependentDecimalYear,
     SparseSHCoefficientsConstant,
     CombinedSHCoefficients,
+    ComposedSHCoefficients,
 )
 from eoxmagmod.magnetic_model.coefficients_mio import (
     SparseSHCoefficientsMIO,
 )
 from eoxmagmod.magnetic_model.loader_shc import (
-    load_coeff_shc, load_coeff_shc_combined,
+    load_coeff_shc, load_coeff_shc_combined, load_coeff_shc_composed,
 )
 from eoxmagmod.magnetic_model.loader_igrf import load_coeff_igrf
 from eoxmagmod.magnetic_model.loader_wmm import load_coeff_wmm
@@ -263,6 +264,37 @@ class TestCoeffCHAOSCombined(TestCase, CombinedShcTestMixIn):
     degree = 185
     min_degree = 1
     validity = decimal_year_to_mjd2000((1997.10198494, 2022.10130048))
+
+
+class TestCoeffCHAOSComposed(TestCase, CoefficietLoaderTestMixIn):
+    class_ = ComposedSHCoefficients
+    degree = 20
+    min_degree = 1
+    validity = decimal_year_to_mjd2000((1997.10198494, 2022.49691992))
+
+    @classmethod
+    def load(cls):
+        return load_coeff_shc_composed(
+            CHAOS_CORE_LATEST,
+            CHAOS_CORE_PREDICTION_LATEST,
+        )
+
+
+class TestCoeffCHAOSComposedCombined(TestCase, CoefficietLoaderTestMixIn):
+    class_ = CombinedSHCoefficients
+    degree = 185
+    min_degree = 1
+    validity = decimal_year_to_mjd2000((1997.10198494, 2022.49691992))
+
+    @classmethod
+    def load(cls):
+        return load_coeff_shc_combined(
+            load_coeff_shc_composed(
+                CHAOS_CORE_LATEST,
+                CHAOS_CORE_PREDICTION_LATEST,
+            ),
+            CHAOS_STATIC_LATEST,
+        )
 
 #-------------------------------------------------------------------------------
 
