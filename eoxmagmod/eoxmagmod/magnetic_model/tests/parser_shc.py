@@ -32,8 +32,7 @@ from numpy import abs as aabs
 from numpy.testing import assert_equal
 from eoxmagmod.magnetic_model.parser_shc import parse_shc_file, parse_shc_header
 from eoxmagmod.data import (
-    CHAOS6_CORE_LATEST, CHAOS6_STATIC,
-    CHAOS7_CORE_LATEST, CHAOS7_STATIC,
+    CHAOS_CORE_LATEST, CHAOS_CORE_PREDICTION_LATEST, CHAOS_STATIC_LATEST,
     IGRF12, IGRF13, SIFM, LCS1, MF7,
 )
 
@@ -107,48 +106,34 @@ class TestSHCParser(TestCase):
     def test_parse_shc_header_igrf12(self):
         self._test_header(IGRF12)
 
-    def test_parse_shc_file_chaos6core_latest(self):
-        data = self.parse(CHAOS6_CORE_LATEST)
+    def test_parse_shc_file_chaos_core_latest(self):
+        data = self.parse(CHAOS_CORE_LATEST)
         self._assert_valid(data, {
             "degree_min": 1,
             "degree_max": 20,
             "spline_order": 6,
-            "ntime": 227,
+            "ntime": 251,
             "nstep": 5,
         })
 
-    def test_parse_shc_header_chaos6core_latest(self):
-        self._test_header(CHAOS6_CORE_LATEST)
+    def test_parse_shc_header_chaos_core_latest(self):
+        self._test_header(CHAOS_CORE_LATEST)
 
-    def test_parse_shc_file_chaos6static(self):
-        data = self.parse(CHAOS6_STATIC)
+    def test_parse_shc_file_chaos_core_prediction_latest(self):
+        data = self.parse(CHAOS_CORE_PREDICTION_LATEST)
         self._assert_valid(data, {
-            "degree_min": 21,
-            "degree_max": 110,
-            "spline_order": 1,
-            "ntime": 1,
+            "degree_min": 1,
+            "degree_max": 20,
+            "spline_order": 2,
+            "ntime": 2,
             "nstep": 1,
         })
 
-    def test_parse_shc_header_chaos6static(self):
-        self._test_header(CHAOS6_STATIC)
+    def test_parse_shc_header_chaos_core_prediction_latest(self):
+        self._test_header(CHAOS_CORE_PREDICTION_LATEST)
 
-
-    def test_parse_shc_file_chaos7core_latest(self):
-        data = self.parse(CHAOS7_CORE_LATEST)
-        self._assert_valid(data, {
-            "degree_min": 1,
-            "degree_max": 20,
-            "spline_order": 6,
-            "ntime": 237,
-            "nstep": 5,
-        })
-
-    def test_parse_shc_header_chaos7core_latest(self):
-        self._test_header(CHAOS7_CORE_LATEST)
-
-    def test_parse_shc_file_chaos7static(self):
-        data = self.parse(CHAOS7_STATIC)
+    def test_parse_shc_file_chaos_static(self):
+        data = self.parse(CHAOS_STATIC_LATEST)
         self._assert_valid(data, {
             "degree_min": 21,
             "degree_max": 185,
@@ -157,8 +142,8 @@ class TestSHCParser(TestCase):
             "nstep": 1,
         })
 
-    def test_parse_shc_header_chaos7static(self):
-        self._test_header(CHAOS7_STATIC)
+    def test_parse_shc_header_chaos_static(self):
+        self._test_header(CHAOS_STATIC_LATEST)
 
     def test_parse_shc_file_lcs1(self):
         data = self.parse(LCS1)

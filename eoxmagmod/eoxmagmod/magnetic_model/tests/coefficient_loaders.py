@@ -32,8 +32,7 @@ from numpy import inf
 from numpy.testing import assert_allclose
 from eoxmagmod.time_util import decimal_year_to_mjd2000
 from eoxmagmod.data import (
-    CHAOS6_CORE_LATEST, CHAOS6_STATIC,
-    CHAOS7_CORE_LATEST, CHAOS7_STATIC,
+    CHAOS_CORE_LATEST, CHAOS_CORE_PREDICTION_LATEST, CHAOS_STATIC_LATEST,
     IGRF11, IGRF12, IGRF13, SIFM, WMM_2015,
     EMM_2010_STATIC, EMM_2010_SECVAR,
     LCS1, MF7,
@@ -234,53 +233,36 @@ class TestCoeffMF7(TestCase, ShcTestMixIn):
 
 #-------------------------------------------------------------------------------
 
-class TestCoeffCHAOS7Core(TestCase, ShcTestMixIn):
+class TestCoeffCHAOSCore(TestCase, ShcTestMixIn):
     class_ = SparseSHCoefficientsTimeDependent
-    path = CHAOS7_CORE_LATEST
+    path = CHAOS_CORE_LATEST
     degree = 20
     min_degree = 1
-    validity = decimal_year_to_mjd2000((1997.102, 2020.7023))
+    validity = decimal_year_to_mjd2000((1997.10198494, 2022.10130048))
 
 
-class TestCoeffCHAOS7Static(TestCase, ShcTestMixIn):
+class TestCoeffCHAOSCorePrediction(TestCase, ShcTestMixIn):
+    class_ = SparseSHCoefficientsTimeDependent
+    path = CHAOS_CORE_PREDICTION_LATEST
+    degree = 20
+    min_degree = 1
+    validity = decimal_year_to_mjd2000((2022.10130048, 2022.49691992))
+
+
+class TestCoeffCHAOSStatic(TestCase, ShcTestMixIn):
     class_ = SparseSHCoefficientsConstant
-    path = CHAOS7_STATIC
+    path = CHAOS_STATIC_LATEST
     degree = 185
     min_degree = 21
     validity = (-inf, inf)
 
 
-class TestCoeffCHAOS7Combined(TestCase, CombinedShcTestMixIn):
-    path_core = CHAOS7_CORE_LATEST
-    path_static = CHAOS7_STATIC
+class TestCoeffCHAOSCombined(TestCase, CombinedShcTestMixIn):
+    path_core = CHAOS_CORE_LATEST
+    path_static = CHAOS_STATIC_LATEST
     degree = 185
     min_degree = 1
-    validity = decimal_year_to_mjd2000((1997.102, 2020.7023))
-
-#-------------------------------------------------------------------------------
-
-class TestCoeffCHAOS6Core(TestCase, ShcTestMixIn):
-    class_ = SparseSHCoefficientsTimeDependent
-    path = CHAOS6_CORE_LATEST
-    degree = 20
-    min_degree = 1
-    validity = decimal_year_to_mjd2000((1997.102, 2019.7002))
-
-
-class TestCoeffCHAOS6Static(TestCase, ShcTestMixIn):
-    class_ = SparseSHCoefficientsConstant
-    path = CHAOS6_STATIC
-    degree = 110
-    min_degree = 21
-    validity = (-inf, inf)
-
-
-class TestCoeffCHAOS6Combined(TestCase, CombinedShcTestMixIn):
-    path_core = CHAOS6_CORE_LATEST
-    path_static = CHAOS6_STATIC
-    degree = 110
-    min_degree = 1
-    validity = decimal_year_to_mjd2000((1997.1020, 2019.7002))
+    validity = decimal_year_to_mjd2000((1997.10198494, 2022.10130048))
 
 #-------------------------------------------------------------------------------
 
