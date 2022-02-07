@@ -30,10 +30,12 @@ from ..time_util import decimal_year_to_mjd2000
 from .util import parse_file
 from .model import SphericalHarmomicGeomagneticModel
 from .coefficients import (
+    SHCoefficients,
     SparseSHCoefficientsTimeDependent,
     SparseSHCoefficientsTimeDependentDecimalYear,
     SparseSHCoefficientsConstant,
     CombinedSHCoefficients,
+    ComposedSHCoefficients,
 )
 from .parser_shc import parse_shc_file
 
@@ -45,16 +47,35 @@ def load_model_shc_combined(*paths, **kwargs):
     )
 
 
-def load_model_shc(path, **kwargs):
+def load_model_shc(*paths, **kwargs):
     """ Load model from an SHC file. """
-    return SphericalHarmomicGeomagneticModel(load_coeff_shc(path, **kwargs))
+    return SphericalHarmomicGeomagneticModel(
+        load_coeff_shc_composed(*paths, **kwargs)
+    )
 
 
 def load_coeff_shc_combined(*paths, **kwargs):
-    """ Load coefficients combined from multiple SHC files. """
+    """ Load coefficients combined from multiple SHC files.
+    To be used for a combination of complementing models (core + lithosphere).
+    """
     return CombinedSHCoefficients(*[
-        load_coeff_shc(path, **kwargs) for path in paths
+        _load_coeff_shc_or_coeff(path, **kwargs) for path in paths
     ])
+
+
+def load_coeff_shc_composed(*paths, **kwargs):
+    """ Load coefficients composed of multiple SHC files.
+    To be used for a temporal sequence of models.
+    """
+    return ComposedSHCoefficients(*[
+        _load_coeff_shc_or_coeff(path, **kwargs) for path in paths
+    ])
+
+
+def _load_coeff_shc_or_coeff(input_, **kwargs):
+    if isinstance(input_, SHCoefficients):
+        return input_
+    return load_coeff_shc(input_, **kwargs)
 
 
 def load_coeff_shc(path, interpolate_in_decimal_years=False, **kwargs):
