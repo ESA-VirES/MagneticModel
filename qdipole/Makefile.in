@@ -8,7 +8,7 @@ LD=$(FC)
 RM_FILE=rm -fv
 RM_DIR=rm -rfv
 CFLAGS=@CFLAGS@
-LFLAGS=-shared -lm
+LDFLAGS=@LDFLAGS@
 LIB_DIR=@libdir@
 BIN_DIR=@bindir@
 INC_DIR=@includedir@/${PACKAGE_TARNAME}
@@ -65,16 +65,16 @@ clean:
 	$(RM_FILE) $(OBJ) $(LIB_TARGET) $(BIN_TARGET) $(MOD)
 
 $(LIB_TARGET): $(OBJ)
-	$(LD) -o $(LIB_TARGET) $(OBJ) $(LFLAGS)
+	$(LD) -o $(LIB_TARGET) $(OBJ) -shared -lm $(LDFLAGS)
 
 qdipole_test: $(LIB_TARGET) qdipole_test.c
-	$(CC) -o qdipole_test qdipole_test.c -lqdipole -L./
+	$(CC) -o qdipole_test qdipole_test.c -lqdipole -L./ $(LDFLAGS)
 
 qdlatlon_test: $(LIB_TARGET) qdlatlon_test.c
-	$(CC) -o qdlatlon_test qdlatlon_test.c -lqdipole -L./
+	$(CC) -o qdlatlon_test qdlatlon_test.c -lqdipole -L./ $(LDFLAGS)
 
 mlt_test: $(LIB_TARGET) mlt_test.c
-	$(CC) -o mlt_test mlt_test.c -lqdipole -lm -L./
+	$(CC) -o mlt_test mlt_test.c -lqdipole -lm -L./ $(LDFLAGS)
 
 subsol_test: $(LIB_TARGET) subsol_test.c
-	$(CC) -o subsol_test subsol_test.c -lqdipole -lm -L./
+	$(CC) -o subsol_test subsol_test.c -lqdipole -lm -L./ $(LDFLAGS)

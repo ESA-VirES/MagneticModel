@@ -2,7 +2,7 @@
 # qdipole conda build metadata
 #
 
-{% set version = "0.3.0" %}
+{% set version = "0.3.0.a" %}
 
 package:
   name: "qdipole"
