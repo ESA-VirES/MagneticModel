@@ -2,7 +2,12 @@
 # qdipole conda build metadata
 #
 
-{% set version = "0.3.0.a" %}
+# NOTE: scipy is installed during the build to assure a compatible version
+#       of the Fortran compiler and its run-time libraries.
+#       conda is not able to resolve version conflicts if the scipy and qdipole
+#       are compiled with different versions of the GFortran compiler.
+
+{% set version = "0.3.0.b" %}
 
 package:
   name: "qdipole"
@@ -14,8 +19,10 @@ source:
 
 requirements:
   build:
+   - make
    - {{ compiler('c') }}
    - {{ compiler('fortran') }}
+   - scipy
 
 test:
   commands:
