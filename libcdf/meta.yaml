@@ -8,8 +8,8 @@
 #       are compiled with different versions of the GFortran compiler.
 
 
-{% set version = "3.8.0" %}
-{% set file_version = "cdf38_0" %}
+{% set version = "3.8.1" %}
+{% set file_version = "cdf38_1" %}
 
 package:
   name: "cdf"
@@ -17,7 +17,7 @@ package:
 
 source:
   - url: https://spdf.gsfc.nasa.gov/pub/software/cdf/dist/{{ file_version }}/unix/{{ file_version }}-dist-cdf.tar.gz
-    sha256: 30a8bc22819791717c0e58ade52cfc1c41c6b5e45a0314718e322874d99fe078
+    sha256: 8d8b2d8238516c892c60e60e96272106341b306c09b397094bc8d4192bbcfa64
 
 requirements:
   build:
