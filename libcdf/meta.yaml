@@ -2,6 +2,12 @@
 # CDF library conda build metadata
 #
 
+# NOTE: scipy is installed during the build to assure a compatible version
+#       of the Fortran compiler and its run-time libraries.
+#       conda is not able to resolve version conflicts if the scipy and libcdf
+#       are compiled with different versions of the GFortran compiler.
+
+
 {% set version = "3.8.0" %}
 {% set file_version = "cdf38_0" %}
 
@@ -15,9 +21,11 @@ source:
 
 requirements:
   build:
-   - ncurses
+   - make
    - {{ compiler('c') }}
    - {{ compiler('fortran') }}
+   - ncurses
+   - scipy
 
 about:
   home: https://github.com/ESA-VirES/MagneticModel/
