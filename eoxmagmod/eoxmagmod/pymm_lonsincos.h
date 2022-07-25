@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2014 EOX IT Services GmbH
+ * Copyright (C) 2014-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@
 #include "shc.h"
 #include "pymm_aux.h"
 
-/* python function definition */
+/* Python function definition */
 
 #define DOC_LONSINCOS "\n"\
 "  lonsin, loncos = lonsincos(longitude, degree, fast_alg=True)\n"\
@@ -55,8 +55,8 @@ static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
     int degree;
     int fast_alg = 1;
     double lon_dg;
-    PyObject *arr_lonsin = NULL; // lonsin array
-    PyObject *arr_loncos = NULL; // loncos array
+    PyArrayObject *arr_lonsin = NULL; // lonsin array
+    PyArrayObject *arr_loncos = NULL; // loncos array
     PyObject *retval = NULL; // output tuple
 
     // parse input arguments
@@ -78,10 +78,10 @@ static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
     if (NULL == (arr_loncos = _get_new_double_array(1, NULL, degree+1)))
         goto exit;
 
-    if (NULL == (retval = Py_BuildValue("NN", arr_lonsin, arr_loncos)))
+    if (NULL == (retval = Py_BuildValue("NN", (PyObject*) arr_lonsin, (PyObject*) arr_loncos)))
         goto exit;
 
-    // evaluate series
+    // evaluate sin/cos series
     if (fast_alg)
         shc_azmsincos(PyArray_DATA(arr_lonsin), PyArray_DATA(arr_loncos), degree, DG2RAD*lon_dg);
     else
@@ -90,8 +90,8 @@ static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
   exit:
 
     // decrease reference counters to the arrays
-    if (!retval && arr_lonsin){Py_DECREF(arr_lonsin);}
-    if (!retval && arr_loncos){Py_DECREF(arr_loncos);}
+    if (!retval && arr_lonsin) Py_DECREF(arr_lonsin);
+    if (!retval && arr_loncos) Py_DECREF(arr_loncos);
 
     return retval;
 }

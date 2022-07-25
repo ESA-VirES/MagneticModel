@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2014 EOX IT Services GmbH
+ * Copyright (C) 2014-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,7 +36,7 @@
 #include "pymm_aux.h"
 #include "pymm_vrot_common.h"
 
-/* recursive vector rotation */
+/* n-D recursive vector rotation */
 
 static void _vrot_sph2geod(ARRAY_DATA ad_i, ARRAY_DATA ad_dlat,
                            ARRAY_DATA ad_o)
@@ -90,9 +90,9 @@ static PyObject* vrot_sph2geod(PyObject *self, PyObject *args, PyObject *kwdict)
     static char *keywords[] = {"arr_in", "arr_dlat", NULL};
     PyObject *obj_in = NULL; // input object
     PyObject *obj_dlat = NULL; // input object
-    PyObject *arr_in = NULL; // input array
-    PyObject *arr_dlat = NULL; // input array
-    PyObject *arr_out = NULL; // output array
+    PyArrayObject *arr_in = NULL; // input array
+    PyArrayObject *arr_dlat = NULL; // input array
+    PyArrayObject *arr_out = NULL; // output array
     PyObject *retval = NULL;
 
     // parse input arguments
@@ -102,10 +102,10 @@ static PyObject* vrot_sph2geod(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     // cast the objects to arrays
-    if (NULL == (arr_in=_get_as_double_array(obj_in, 1, 0, NPY_ALIGNED, keywords[0])))
+    if (NULL == (arr_in = _get_as_double_array(obj_in, 1, 0, NPY_ARRAY_ALIGNED, keywords[0])))
         goto exit;
 
-    if (NULL == (arr_dlat=_get_as_double_array(obj_dlat, 0, 0, NPY_ALIGNED, keywords[1])))
+    if (NULL == (arr_dlat = _get_as_double_array(obj_dlat, 0, 0, NPY_ARRAY_ALIGNED, keywords[1])))
         goto exit;
 
     // check maximum allowed input array dimension
@@ -131,14 +131,14 @@ static PyObject* vrot_sph2geod(PyObject *self, PyObject *args, PyObject *kwdict)
     // rotate the vector(s)
     _vrot_sph2geod(_array_to_arrd(arr_in), _array_to_arrd(arr_dlat), _array_to_arrd(arr_out));
 
-    retval = arr_out;
+    retval = (PyObject*) arr_out;
 
   exit:
 
     // decrease reference counters to the arrays
-    if (arr_in){Py_DECREF(arr_in);}
-    if (arr_dlat){Py_DECREF(arr_dlat);}
-    if (!retval && arr_out){Py_DECREF(arr_out);}
+    if (arr_in) Py_DECREF(arr_in);
+    if (arr_dlat) Py_DECREF(arr_dlat);
+    if (!retval && arr_out) Py_DECREF(arr_out);
 
     return retval;
 }

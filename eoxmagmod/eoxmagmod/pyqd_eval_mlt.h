@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2016 EOX IT Services GmbH
+ * Copyright (C) 2016-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@
 #include "pymm_aux.h"
 #include "qdipole/cqdipole.h"
 
-/* python function definition */
+/* Python function definition */
 
 #define DOC_EVAL_MLT "\n"\
 "   mlt = eval_mlt(qdlon, time, fname)\n"\
@@ -53,9 +53,9 @@ static PyObject* eval_mlt(PyObject *self, PyObject *args, PyObject *kwdict)
     const char *model_fname = NULL;
     PyObject *obj_qdlon = NULL; // gclon object
     PyObject *obj_time = NULL; // time object
-    PyObject *arr_qdlon = NULL; // qdlon array
-    PyObject *arr_time = NULL; // time array
-    PyObject *arr_mlt = NULL; // mlt array
+    PyArrayObject *arr_qdlon = NULL; // qdlon array
+    PyArrayObject *arr_time = NULL; // time array
+    PyArrayObject *arr_mlt = NULL; // mlt array
     PyObject *retval = NULL;
 
     // parse input arguments
@@ -65,13 +65,13 @@ static PyObject* eval_mlt(PyObject *self, PyObject *args, PyObject *kwdict)
     ))
         goto exit;
 
-    #define NPY_REQ (NPY_ALIGNED|NPY_CONTIGUOUS)
+    #define NPY_REQ (NPY_ARRAY_ALIGNED|NPY_ARRAY_C_CONTIGUOUS)
 
     // cast the objects to arrays
-    if (NULL == (arr_qdlon=_get_as_double_array(obj_qdlon, 0, 1, NPY_REQ, keywords[1])))
+    if (NULL == (arr_qdlon = _get_as_double_array(obj_qdlon, 0, 1, NPY_REQ, keywords[1])))
         goto exit;
 
-    if (NULL == (arr_time=_get_as_double_array(obj_time, 0, 1, NPY_REQ, keywords[3])))
+    if (NULL == (arr_time = _get_as_double_array(obj_time, 0, 1, NPY_REQ, keywords[3])))
         goto exit;
 
     // check the dimensions
@@ -82,32 +82,28 @@ static PyObject* eval_mlt(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     // create the output arrays
-    if (NULL == (arr_mlt = PyArray_EMPTY(ndim, dims, NPY_DOUBLE, 0)))
+    if (NULL == (arr_mlt = (PyArrayObject*) PyArray_EMPTY(ndim, dims, NPY_DOUBLE, 0)))
         goto exit;
 
     // evaluate the output values
     c_eval_mlt(
-        (double*)PyArray_DATA(arr_mlt),
-        (double*)PyArray_DATA(arr_qdlon),
-        (double*)PyArray_DATA(arr_time),
+        (double*) PyArray_DATA(arr_mlt),
+        (double*) PyArray_DATA(arr_qdlon),
+        (double*) PyArray_DATA(arr_time),
         ndim == 0 ? 1 : dims[0],
         model_fname
     );
 
-    retval = arr_mlt;
+    retval = (PyObject*) arr_mlt;
 
   exit:
 
     // decrease reference counters to the arrays
-    if (arr_qdlon){Py_DECREF(arr_qdlon);}
-    if (arr_time){Py_DECREF(arr_time);}
-    if (!retval)
-    {
-        if (arr_mlt){Py_DECREF(arr_mlt);}
-    }
+    if (arr_qdlon) Py_DECREF(arr_qdlon);
+    if (arr_time) Py_DECREF(arr_time);
+    if (!retval && arr_mlt) Py_DECREF(arr_mlt);
 
     return retval;
 }
 
 #endif  /* PYQD_EVAL_MLT_H */
-

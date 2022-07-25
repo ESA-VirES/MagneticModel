@@ -5,7 +5,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2014 EOX IT Services GmbH
+ * Copyright (C) 2014-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,57 +38,70 @@
 #define NAN (0.0/0.0)
 #endif
 
-/* low-level conversion handlers */
+/*
+ *  low-level conversion handlers
+ */
 
 typedef void (*f_conv)(double*, double*, double*, double, double, double);
 
+
+/* identity - no change of the coordinate system */
 static void conv_identity(double *x1, double *y1, double *z1,
-                        double x0, double y0, double z0)
+                          double x0, double y0, double z0)
 {
     *x1 = x0; *y1 = y0; *z1 = z0;
 }
 
+/* WGS84 geodetic to geocentric Cartesian coordinates */
 static void conv_WGS84_to_cartECEF(double *x, double *y, double *z,
-                        double lat, double lon, double h)
+                                   double lat, double lon, double h)
 {
     geodetic2geocentric_cart(x, y, z, lat, lon, h, WGS84_A, WGS84_EPS2);
 }
 
+/* WGS84 geodetic to geocentric spherical coordinates */
 static void conv_WGS84_to_sphECEF(double *lat1, double *lon1, double *r1,
-                        double lat0, double lon0, double h0)
+                                  double lat0, double lon0, double h0)
 {
     geodetic2geocentric_sph(r1, lat1, lon1, lat0, lon0, h0, WGS84_A, WGS84_EPS2);
     *lat1 *= RAD2DG;
     *lon1 *= RAD2DG;
 }
 
+/* geocentric Cartesian to geocentric spherical coordinates */
 static void conv_cartECEF_to_sphECEF(double *lat, double *lon, double *r,
-                         double x, double y, double z)
+                                     double x, double y, double z)
 {
     cart2sph(r, lat, lon, x, y, z);
     *lat *= RAD2DG;
     *lon *= RAD2DG;
 }
 
+/* geocentric Cartesian to WGS84 geodetic coordinates */
 static void conv_cartECEF_to_WGS84(double *lat, double *lon, double *h,
-                         double x, double y, double z)
+                                   double x, double y, double z)
 {
     geocentric_cart2geodetic(lat, lon, h, x, y, z, WGS84_A, WGS84_EPS2);
 }
 
 
+/* geocentric spherical to geocentric Cartesian coordinates */
 static void conv_sphECEF_to_cartECEF(double *x, double *y, double *z,
-                         double lat, double lon, double r)
+                                     double lat, double lon, double r)
 {
     sph2cart(x, y, z, r, DG2RAD*lat, DG2RAD*lon);
 }
 
+/* geocentric spherical to WGS84 geodetic coordinates */
 static void conv_sphECEF_to_WGS84(double *lat1, double *lon1, double *h1,
-                           double lat0, double lon0, double r0)
+                                  double lat0, double lon0, double r0)
 {
     geocentric_sph2geodetic(lat1, lon1, h1, r0, DG2RAD*lat0, DG2RAD*lon0, WGS84_A, WGS84_EPS2);
 }
 
+/* selection of the right conversion function for the requested source and
+ * target coordinate system.
+ */
 static f_conv _get_fconv(int ct_in, int ct_out)
 {
     f_conv mtx[3][3] = {
@@ -100,8 +113,9 @@ static f_conv _get_fconv(int ct_in, int ct_out)
     return mtx[ct_in][ct_out];
 }
 
-/* recursive coordinate conversion */
-
+/*
+ * high level nD-array recursive coordinate conversion
+ */
 static void _convert(ARRAY_DATA arrd_in, ARRAY_DATA arrd_out, f_conv fconv)
 {
     if (arrd_in.ndim > 1)
@@ -124,7 +138,7 @@ static void _convert(ARRAY_DATA arrd_in, ARRAY_DATA arrd_out, f_conv fconv)
 }
 
 
-/* python function definition */
+/* Python function definition */
 
 #define DOC_CONVERT "\n"\
 "   arr_out = convert(arr_in, coord_type_in=GEODETIC_ABOVE_WGS84, coord_type_out=GEODETIC_ABOVE_WGS84)\n"\
@@ -137,9 +151,9 @@ static PyObject* convert(PyObject *self, PyObject *args, PyObject *kwdict)
     int ct_in = CT_GEODETIC_ABOVE_WGS84;
     int ct_out = CT_GEODETIC_ABOVE_WGS84;
     PyObject *obj_in = NULL; // input object
-    PyObject *arr_in = NULL; // input array
-    PyObject *arr_out = NULL; // output array
-    PyObject *retval = NULL;
+    PyArrayObject *arr_in = NULL; // input array
+    PyArrayObject *arr_out = NULL; // output array
+    PyObject *retval = NULL; // output object
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
@@ -151,8 +165,8 @@ static PyObject* convert(PyObject *self, PyObject *args, PyObject *kwdict)
     if (CT_INVALID == _check_coord_type(ct_in, keywords[0])) goto exit;
     if (CT_INVALID == _check_coord_type(ct_out, keywords[1])) goto exit;
 
-    // cast the object to an array
-    if (NULL == (arr_in=_get_as_double_array(obj_in, 1, 0, NPY_ALIGNED, keywords[0])))
+    // cast the input object to an array
+    if (NULL == (arr_in=_get_as_double_array(obj_in, 1, 0, NPY_ARRAY_ALIGNED, keywords[0])))
         goto exit;
 
     // check maximum allowed input array dimension
@@ -168,24 +182,24 @@ static PyObject* convert(PyObject *self, PyObject *args, PyObject *kwdict)
     if (_check_array_dim_eq(arr_in, -1, 3, keywords[0]))
         goto exit;
 
-    // fast-track identity
-    if (ct_in == ct_out) return arr_in;
+    // shortcut identity handling
+    if (ct_in == ct_out)
+        return (PyObject*) arr_in;
 
-    // create the output array
+    // create a new output array
     if (NULL == (arr_out = _get_new_double_array(PyArray_NDIM(arr_in), PyArray_DIMS(arr_in), 3)))
         goto exit;
 
-    // process
+    // perform the coordinate conversions
     _convert(_array_to_arrd(arr_in), _array_to_arrd(arr_out), _get_fconv(ct_in, ct_out));
 
-    //retval = Py_None; Py_INCREF(Py_None);
-    retval = arr_out;
+    retval = (PyObject*) arr_out;
 
   exit:
 
     // decrease reference counters to the arrays
-    if (arr_in){Py_DECREF(arr_in);}
-    if (!retval && arr_out){Py_DECREF(arr_out);}
+    if (arr_in) Py_DECREF(arr_in);
+    if (!retval && arr_out) Py_DECREF(arr_out);
 
     return retval;
 }

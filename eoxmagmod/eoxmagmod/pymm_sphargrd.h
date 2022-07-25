@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2014 EOX IT Services GmbH
+ * Copyright (C) 2014-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,8 @@
 #include "pymm_aux.h"
 #include "pymm_cconv.h"
 
-/* python function definition */
+/* Python function definition */
+
 #define DOC_SPHARGRD "\n"\
 "  v_grad = sphargrd(latitude, degree, coef_g, coef_h, leg_p, leg_dp, rrp, lonsin, loncos, is_internal=True)\n"\
 "\n"\
@@ -72,18 +73,18 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *obj_ch = NULL; // coef_h object
     PyObject *obj_lp = NULL; // P object
     PyObject *obj_ldp = NULL; // dP object
-    PyObject *obj_rrp = NULL; // rel.rad.pow. object
-    PyObject *obj_lsin = NULL; // lonsin object
-    PyObject *obj_lcos = NULL; // loncos object
+    PyObject *obj_rrp = NULL; // RRP object
+    PyObject *obj_lsin = NULL; // lon-sin object
+    PyObject *obj_lcos = NULL; // lon-cos object
 
-    PyObject *arr_out = NULL; // output array
-    PyObject *arr_cg = NULL; // coef_g array
-    PyObject *arr_ch = NULL; // coef_h array
-    PyObject *arr_lp = NULL; // P array
-    PyObject *arr_ldp = NULL; // dP array
-    PyObject *arr_rrp = NULL; // rel.rad.pow. array
-    PyObject *arr_lsin = NULL; // lonsin array
-    PyObject *arr_lcos = NULL; // loncos array
+    PyArrayObject *arr_out = NULL; // output array
+    PyArrayObject *arr_cg = NULL; // coef_g array
+    PyArrayObject *arr_ch = NULL; // coef_h array
+    PyArrayObject *arr_lp = NULL; // P array
+    PyArrayObject *arr_ldp = NULL; // dP array
+    PyArrayObject *arr_rrp = NULL; // RRP array
+    PyArrayObject *arr_lsin = NULL; // lon-sin array
+    PyArrayObject *arr_lcos = NULL; // lon-cos array
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
@@ -104,25 +105,25 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     nterm = ((degree+1)*(degree+2))/2;
 
     // cast the objects to arrays
-    if (NULL == (arr_cg=_get_as_double_array(obj_cg, 1, 1, NPY_IN_ARRAY, keywords[2])))
+    if (NULL == (arr_cg = _get_as_double_array(obj_cg, 1, 1, NPY_ARRAY_IN_ARRAY, keywords[2])))
         goto exit;
 
-    if (NULL == (arr_ch=_get_as_double_array(obj_ch, 1, 1, NPY_IN_ARRAY, keywords[3])))
+    if (NULL == (arr_ch = _get_as_double_array(obj_ch, 1, 1, NPY_ARRAY_IN_ARRAY, keywords[3])))
         goto exit;
 
-    if (NULL == (arr_lp=_get_as_double_array(obj_lp, 1, 1, NPY_IN_ARRAY, keywords[4])))
+    if (NULL == (arr_lp = _get_as_double_array(obj_lp, 1, 1, NPY_ARRAY_IN_ARRAY, keywords[4])))
         goto exit;
 
-    if (NULL == (arr_ldp=_get_as_double_array(obj_ldp, 1, 1, NPY_IN_ARRAY, keywords[5])))
+    if (NULL == (arr_ldp = _get_as_double_array(obj_ldp, 1, 1, NPY_ARRAY_IN_ARRAY, keywords[5])))
         goto exit;
 
-    if (NULL == (arr_rrp=_get_as_double_array(obj_rrp, 1, 1, NPY_IN_ARRAY, keywords[6])))
+    if (NULL == (arr_rrp = _get_as_double_array(obj_rrp, 1, 1, NPY_ARRAY_IN_ARRAY, keywords[6])))
         goto exit;
 
-    if (NULL == (arr_lsin=_get_as_double_array(obj_lsin, 1, 1, NPY_IN_ARRAY, keywords[7])))
+    if (NULL == (arr_lsin = _get_as_double_array(obj_lsin, 1, 1, NPY_ARRAY_IN_ARRAY, keywords[7])))
         goto exit;
 
-    if (NULL == (arr_lcos=_get_as_double_array(obj_lcos, 1, 1, NPY_IN_ARRAY, keywords[8])))
+    if (NULL == (arr_lcos = _get_as_double_array(obj_lcos, 1, 1, NPY_ARRAY_IN_ARRAY, keywords[8])))
         goto exit;
 
     // check the arrays' dimensions
@@ -175,7 +176,7 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     if (arr_lsin){Py_DECREF(arr_lsin);}
     if (arr_lcos){Py_DECREF(arr_lcos);}
 
-    return arr_out;
+    return (PyObject*) arr_out;
  }
 
 #endif  /* PYMM_SPHARGRD_H */

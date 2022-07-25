@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2014 EOX IT Services GmbH
+ * Copyright (C) 2014-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,22 +33,21 @@
 
 #include "pymm_aux.h"
 
-/* array check*/
+/* checking  */
 
 static int _vrot_arr_check(
-    PyObject *arr_ref, PyObject *arr_checked,
+    PyArrayObject *arr_ref, PyArrayObject *arr_checked,
     const char *label_ref, const char *label_checked
 )
 {
-    //if ((PyArray_NDIM(arr_ref) > 1)||(PyArray_NDIM(arr_checked) > 0))
     if (PyArray_NDIM(arr_checked) > 0)
     {
         int d;
 
         if (PyArray_NDIM(arr_ref) != PyArray_NDIM(arr_checked)+1)
         {
-            PyErr_Format(PyExc_ValueError, "Shape mismatch between '%s' and "
-                "'%s'!", label_ref, label_checked);
+            PyErr_Format(PyExc_ValueError, "Dimension mismatch between '%s' "
+                "and '%s'!", label_ref, label_checked);
             return 1;
         }
 

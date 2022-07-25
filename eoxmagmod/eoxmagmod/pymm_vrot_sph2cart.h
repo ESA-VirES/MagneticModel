@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2014 EOX IT Services GmbH
+ * Copyright (C) 2014-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@
 #include "pymm_aux.h"
 #include "pymm_vrot_common.h"
 
-/* recursive vector rotation */
+/* nD-array recursive vector rotation */
 
 static void _vrot_sph2cart(ARRAY_DATA ad_i, ARRAY_DATA ad_lat,
                            ARRAY_DATA ad_lon, ARRAY_DATA ad_o)
@@ -74,7 +74,7 @@ static void _vrot_sph2cart(ARRAY_DATA ad_i, ARRAY_DATA ad_lat,
     }
 }
 
-/* python function definition */
+/* Python function definition */
 
 #define DOC_VROT_SPH2CART "\n"\
 "   arr_out = vrot_sph2cart(arr_in, arr_lat, arr_lon)\n"\
@@ -95,10 +95,10 @@ static PyObject* vrot_sph2cart(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *obj_in = NULL; // input object
     PyObject *obj_lat = NULL; // input object
     PyObject *obj_lon = NULL; // input object
-    PyObject *arr_in = NULL; // input array
-    PyObject *arr_lat = NULL; // input array
-    PyObject *arr_lon = NULL; // input array
-    PyObject *arr_out = NULL; // output array
+    PyArrayObject *arr_in = NULL; // input array
+    PyArrayObject *arr_lat = NULL; // input array
+    PyArrayObject *arr_lon = NULL; // input array
+    PyArrayObject *arr_out = NULL; // output array
     PyObject *retval = NULL;
 
     // parse input arguments
@@ -109,13 +109,13 @@ static PyObject* vrot_sph2cart(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     // cast the objects to arrays
-    if (NULL == (arr_in=_get_as_double_array(obj_in, 1, 0, NPY_ALIGNED, keywords[0])))
+    if (NULL == (arr_in = _get_as_double_array(obj_in, 1, 0, NPY_ARRAY_ALIGNED, keywords[0])))
         goto exit;
 
-    if (NULL == (arr_lat=_get_as_double_array(obj_lat, 0, 0, NPY_ALIGNED, keywords[1])))
+    if (NULL == (arr_lat = _get_as_double_array(obj_lat, 0, 0, NPY_ARRAY_ALIGNED, keywords[1])))
         goto exit;
 
-    if (NULL == (arr_lon=_get_as_double_array(obj_lon, 0, 0, NPY_ALIGNED, keywords[2])))
+    if (NULL == (arr_lon = _get_as_double_array(obj_lon, 0, 0, NPY_ARRAY_ALIGNED, keywords[2])))
         goto exit;
 
     // check maximum allowed input array dimension
@@ -145,15 +145,15 @@ static PyObject* vrot_sph2cart(PyObject *self, PyObject *args, PyObject *kwdict)
     _vrot_sph2cart(_array_to_arrd(arr_in), _array_to_arrd(arr_lat),
                    _array_to_arrd(arr_lon), _array_to_arrd(arr_out));
 
-    retval = arr_out;
+    retval = (PyObject*) arr_out;
 
   exit:
 
     // decrease reference counters of the arrays
-    if (arr_in){Py_DECREF(arr_in);}
-    if (arr_lat){Py_DECREF(arr_lat);}
-    if (arr_lon){Py_DECREF(arr_lon);}
-    if (!retval && arr_out){Py_DECREF(arr_out);}
+    if (arr_in) Py_DECREF(arr_in);
+    if (arr_lat) Py_DECREF(arr_lat);
+    if (arr_lon) Py_DECREF(arr_lon);
+    if (!retval && arr_out) Py_DECREF(arr_out);
 
     return retval;
 }

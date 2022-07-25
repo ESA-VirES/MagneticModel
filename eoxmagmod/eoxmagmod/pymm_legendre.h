@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2014 EOX IT Services GmbH
+ * Copyright (C) 2014-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,14 +35,14 @@
 #include "pymm_aux.h"
 #include "pymm_cconv.h"
 
-/* python function definition */
+/* Python function definition */
 
 #define DOC_LEGENDRE "\n"\
 "   p, dp = legendre(latitude, degree)\n"\
 "\n"\
 "     For given the 'latitude' in degrees and the model's 'degree' evaluate\n"\
-"     the Schmidt semi-normalised associated Legendre functions and its\n"\
-"     and its derivatives: \n"\
+"     the Schmidt semi-normalised associated Legendre functions and\n"\
+"     their derivatives: \n"\
 "         P_n^m(sin(latitude))  and  dP_n^m(sin(latitude))\n"\
 "     where n = 0..degree and m = 0..n \n"\
 "\n"\
@@ -58,8 +58,8 @@ static PyObject* legendre(PyObject *self, PyObject *args, PyObject *kwdict)
 
     int degree, nterm;
     double lat_sph;
-    PyObject *arr_p = NULL; // P array
-    PyObject *arr_dp = NULL; // dP array
+    PyArrayObject *arr_p = NULL; // P array
+    PyArrayObject *arr_dp = NULL; // dP array
     PyObject *retval = NULL; // output tuple
 
     // parse input arguments
@@ -84,7 +84,7 @@ static PyObject* legendre(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
     }
 
-    nterm = ((degree+1)*(degree+2))/2;
+    nterm = ((degree + 1)*(degree + 2))/2;
 
     // create the output arrays
     if (NULL == (arr_p = _get_new_double_array(1, NULL, nterm)))
@@ -114,11 +114,10 @@ static PyObject* legendre(PyObject *self, PyObject *args, PyObject *kwdict)
   exit:
 
     // decrease reference counters to the arrays
-    if (!retval && arr_p){Py_DECREF(arr_p);}
-    if (!retval && arr_dp){Py_DECREF(arr_dp);}
+    if (!retval && arr_p) Py_DECREF(arr_p);
+    if (!retval && arr_dp) Py_DECREF(arr_dp);
 
     return retval;
 }
 
 #endif  /* PYMM_LEGENDRE_H */
-
