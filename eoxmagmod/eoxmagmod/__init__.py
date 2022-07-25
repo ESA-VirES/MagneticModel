@@ -5,7 +5,7 @@
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
-# Copyright (C) 2014 EOX IT Services GmbH
+# Copyright (C) 2014-2022 EOX IT Services GmbH
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -140,7 +140,7 @@ try:
 except ImportError:
     pass
 
-__version__ = '0.9.10'
+__version__ = '0.10.0'
 __author__ = 'Martin Paces (martin.paces@eox.at)'
-__copyright__ = 'Copyright (C) 2014 EOX IT Services GmbH'
+__copyright__ = 'Copyright (C) 2014-2022 EOX IT Services GmbH'
 __licence__ = 'EOX licence (MIT style)'
