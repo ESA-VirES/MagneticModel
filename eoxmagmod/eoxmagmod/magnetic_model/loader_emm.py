@@ -26,7 +26,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-from io import open
 from .model import SphericalHarmomicGeomagneticModel
 from .coefficients import (
     SparseSHCoefficientsTimeDependentDecimalYear,
