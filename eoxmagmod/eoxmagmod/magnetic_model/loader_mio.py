@@ -26,7 +26,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-from io import open
 from numpy import arange
 from .model_mio import (
     DipoleMIOPrimaryGeomagneticModel, DipoleMIOGeomagneticModel,

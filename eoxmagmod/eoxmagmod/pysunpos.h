@@ -5,7 +5,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2017 EOX IT Services GmbH
+ * Copyright (C) 2017-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,8 +33,9 @@
 #include "sunpos.h"
 #include <math.h>
 
-/*---------------------------------------------------------------------------*/
-/* recursive array evaluation */
+/*
+ *  nD-array recursive evaluation
+ */
 
 #ifndef RAD2DEG
 #define RAD2DEG (180.0/M_PI)
@@ -98,6 +99,11 @@ static void _sunpos(
     }
 }
 
+
+/*
+ * Python function definition
+ */
+
 #define DOC_SUNPOS "\n"\
 "   arr_out = sunpos(time_mjd2k, lat, lon, rad, dtt)\n\n"\
 "     Output:\n"\
@@ -118,14 +124,19 @@ static void _sunpos(
 static PyObject* pysunpos_sunpos(PyObject *self, PyObject *args, PyObject *kwdict)
 {
     static char *keywords[] = {"time_mjd2k", "lat", "lon", "rad", "dtt", NULL};
-    PyObject *obj_mjd = NULL, *arr_mjd = NULL;
-    PyObject *obj_lat = NULL, *arr_lat = NULL;
-    PyObject *obj_lon = NULL, *arr_lon = NULL;
-    PyObject *obj_rad = NULL, *arr_rad = NULL;
-    PyObject *obj_dtt = NULL, *arr_dtt = NULL;
-    PyObject *arr_out = NULL; // return object
+    PyObject *obj_mjd = NULL;
+    PyObject *obj_lat = NULL;
+    PyObject *obj_lon = NULL;
+    PyObject *obj_rad = NULL;
+    PyObject *obj_dtt = NULL;
+    PyArrayObject *arr_mjd = NULL;
+    PyArrayObject *arr_lat = NULL;
+    PyArrayObject *arr_lon = NULL;
+    PyArrayObject *arr_rad = NULL;
+    PyArrayObject *arr_dtt = NULL;
+    PyArrayObject *arr_out = NULL; // output array
+    PyArrayObject *arr = NULL;
     PyObject *retval = NULL; // return object
-    PyObject *arr = NULL;
     int idx = 0;
 
     // parse input arguments
@@ -136,23 +147,23 @@ static PyObject* pysunpos_sunpos(PyObject *self, PyObject *args, PyObject *kwdic
         goto exit;
 
     // cast the objects to arrays
-    if (NULL == (arr_mjd = _get_as_double_array(obj_mjd, 0, 0, NPY_ALIGNED, keywords[0])))
+    if (NULL == (arr_mjd = _get_as_double_array(obj_mjd, 0, 0, NPY_ARRAY_ALIGNED, keywords[0])))
         goto exit;
 
-    if (NULL == (arr_lat = _get_as_double_array(obj_lat, 0, 0, NPY_ALIGNED, keywords[0])))
+    if (NULL == (arr_lat = _get_as_double_array(obj_lat, 0, 0, NPY_ARRAY_ALIGNED, keywords[0])))
         goto exit;
 
-    if (NULL == (arr_lon = _get_as_double_array(obj_lon, 0, 0, NPY_ALIGNED, keywords[0])))
+    if (NULL == (arr_lon = _get_as_double_array(obj_lon, 0, 0, NPY_ARRAY_ALIGNED, keywords[0])))
         goto exit;
 
-    if (NULL == (arr_rad = _get_as_double_array(obj_rad, 0, 0, NPY_ALIGNED, keywords[0])))
+    if (NULL == (arr_rad = _get_as_double_array(obj_rad, 0, 0, NPY_ARRAY_ALIGNED, keywords[0])))
         goto exit;
 
-    if (NULL == (arr_dtt = _get_as_double_array(obj_dtt, 0, 0, NPY_ALIGNED, keywords[0])))
+    if (NULL == (arr_dtt = _get_as_double_array(obj_dtt, 0, 0, NPY_ARRAY_ALIGNED, keywords[0])))
         goto exit;
 
     // check the array dimensions and allocate the output array
-        // get array with the max.dimension
+    // get array with the maximum dimension
     arr = arr_mjd;
     idx = 0;
     if (PyArray_NDIM(arr) < PyArray_NDIM(arr_lat)) {idx = 1; arr = arr_lat;}
@@ -190,7 +201,7 @@ static PyObject* pysunpos_sunpos(PyObject *self, PyObject *args, PyObject *kwdic
         if (_check_equal_shape(arr_dtt, arr, keywords[4], keywords[idx]))
             goto exit;
 
-    // create output array (adding one extra dimension)
+    // create a new output array (adding one extra dimension)
     {
         npy_intp *dims_src = PyArray_DIMS(arr);
         npy_intp dims_dst[MAX_OUT_ARRAY_NDIM];
@@ -199,7 +210,7 @@ static PyObject* pysunpos_sunpos(PyObject *self, PyObject *args, PyObject *kwdic
         for (i = 0; i < ndim_src; ++i) dims_dst[i] = dims_src[i];
         dims_dst[ndim_src] = 5;
 
-        if (NULL == (arr_out = PyArray_EMPTY(ndim_src + 1, dims_dst, NPY_DOUBLE, 0)))
+        if (NULL == (arr_out = (PyArrayObject*) PyArray_EMPTY(ndim_src + 1, dims_dst, NPY_DOUBLE, 0)))
             goto exit;
     }
 
@@ -215,7 +226,7 @@ static PyObject* pysunpos_sunpos(PyObject *self, PyObject *args, PyObject *kwdic
     );
 
     // assign return value
-    retval = arr_out;
+    retval = (PyObject*) arr_out;
 
   exit:
 

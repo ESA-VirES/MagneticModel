@@ -26,6 +26,6 @@ else
 fi
 
 BUILD_OPTIONS="SHARED=yes FORTRAN=no CURSES=no"
-make OS=$OS ENV=$ENV "CC_$OS_$ENV"=$CC "FC_$OS"=$FC $BUILD_OPTIONS all
+make OS=$OS ENV=$ENV AR=$AR RANLIBcmd=$RANLIB LD_${OS}_${ENV}=$CC CC_${OS}_${ENV}=$CC FC_${OS}=$FC $BUILD_OPTIONS all
 make test
 make INSTALLDIR="$PREFIX" install

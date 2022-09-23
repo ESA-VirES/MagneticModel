@@ -26,8 +26,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-from io import open
-
 
 def parse_file(parser, file_, *args, **kwargs):
     if isinstance(file_, str):

@@ -69,8 +69,15 @@ Windows (primarily because of a missing Fortran compiler).
 2) install the `eoxmagmod` in your conda environment:
 ```
 conda activate <target-environment>
-conda install numpy scipy matplotlib h5py networkx
 conda install --use-local qdipole cdf
+conda install numpy scipy matplotlib h5py networkx
+conda install gcc_linux-64           # spacepy and eoxmagmod require C compiler
+conda install gfortran_linux-64      # spacepy requires Fortran compiler
+conda deactivate
+conda activate <target-environment>  # re-activation is required to update the environment variables
 pip install spacepy
 pip install ./eoxmagmod
 ```
+
+The `gfortran_linux-64` and`gcc_linux-64` compilers work on a x86_64 GNU/Linux system.
+Other platforms might provide different compilers.

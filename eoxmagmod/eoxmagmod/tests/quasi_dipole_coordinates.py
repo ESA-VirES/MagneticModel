@@ -28,7 +28,6 @@
 #pylint: disable=missing-docstring
 
 from unittest import TestCase, main
-from io import open
 from numpy import array
 from numpy.testing import assert_allclose
 from eoxmagmod.quasi_dipole_coordinates import (

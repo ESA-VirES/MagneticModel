@@ -28,11 +28,6 @@
 #pylint: disable=missing-docstring
 
 import sys
-try:
-    # Python 2
-    from itertools import izip as zip
-except ImportError:
-    pass
 from numpy import array
 from eoxmagmod import mjd2000_to_decimal_year
 from eoxmagmod.quasi_dipole_coordinates import (

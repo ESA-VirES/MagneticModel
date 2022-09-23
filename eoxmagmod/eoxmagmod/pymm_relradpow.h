@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2014 EOX IT Services GmbH
+ * Copyright (C) 2014-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,7 @@
 #define STR(x) SRINGIFY(x)
 #endif
 
-/* python function definition */
+/* Python function definition */
 
 #define DOC_RELRADPOW "\n"\
 "   rrp = relradpow(radius, degree, reference_radius="STR(RADIUS)", is_internal=True)\n"\
@@ -69,7 +69,7 @@ static PyObject* relradpow(PyObject *self, PyObject *args, PyObject *kwdict)
     int is_internal;
     double rad, rad0 = RADIUS; // radius and reference radius
     PyObject *obj_is_internal = NULL; // boolean flag
-    PyObject *arr_rrp = NULL; // P array
+    PyArrayObject *arr_rrp = NULL; // P array
     PyObject *retval = NULL; // output tuple
 
     // parse input arguments
@@ -99,7 +99,7 @@ static PyObject* relradpow(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
     }
 
-    // create the output array
+    // create a new output array
     if (NULL == (arr_rrp = _get_new_double_array(1, NULL, degree+1)))
         goto exit;
 
@@ -109,12 +109,12 @@ static PyObject* relradpow(PyObject *self, PyObject *args, PyObject *kwdict)
     else
         shc_relradpow_external(PyArray_DATA(arr_rrp), degree, rad/rad0);
 
-    retval = arr_rrp;
+    retval = (PyObject*) arr_rrp;
 
   exit:
 
     // decrease reference counters to the arrays
-    if (!retval && arr_rrp){Py_DECREF(arr_rrp);}
+    if (!retval && arr_rrp) Py_DECREF(arr_rrp);
 
     return retval;
 }

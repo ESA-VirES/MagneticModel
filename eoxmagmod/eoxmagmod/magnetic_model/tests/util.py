@@ -27,7 +27,6 @@
 #-------------------------------------------------------------------------------
 
 from unittest import TestCase, main
-from io import open
 from hashlib import md5
 from eoxmagmod.magnetic_model.util import parse_file
 from eoxmagmod.magnetic_model.tests.data import SWARM_MIO_SHA_2_TEST_DATA

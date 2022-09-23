@@ -5,7 +5,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2018 EOX IT Services GmbH
+ * Copyright (C) 2018-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,8 +35,11 @@
 #undef _POSIX_C_SOURCE
 #endif
 
-//#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+// required by Python
 #define PY_SSIZE_T_CLEAN 1
+
+// disable Numpy deprecated API
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
 /* maximum allowed output array dimension */
 #define MAX_OUT_ARRAY_NDIM 16

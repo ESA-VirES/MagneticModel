@@ -27,7 +27,6 @@
 #-------------------------------------------------------------------------------
 # pylint: disable=missing-docstring,no-self-use,invalid-name,too-many-public-methods
 
-from __future__ import print_function
 from unittest import TestCase, main
 from itertools import product
 from numpy import nan, inf, isinf, array, empty, full, nditer, asarray

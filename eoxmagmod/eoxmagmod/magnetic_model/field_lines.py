@@ -26,12 +26,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-try:
-    # Python 2 - range as an iterator
-    from buildins import xrange as range
-except ImportError:
-    pass
-
 from numpy import asarray, copy
 from .._pymm import GEOCENTRIC_CARTESIAN, GEOCENTRIC_SPHERICAL, convert
 from ..util import vnorm, vrotate

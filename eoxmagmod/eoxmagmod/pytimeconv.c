@@ -5,7 +5,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2018 EOX IT Services GmbH
+ * Copyright (C) 2018-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -73,7 +73,7 @@ static PyObject* init_module(void)
 
     /* metadata */
     set_dict_item_str_str(dict, "__author__", "Martin Paces (martin.paces@eox.at)");
-    set_dict_item_str_str(dict, "__copyright__", "Copyright (C) 2018 EOX IT Services GmbH");
+    set_dict_item_str_str(dict, "__copyright__", "Copyright (C) 2018-2022 EOX IT Services GmbH");
     set_dict_item_str_str(dict, "__licence__", "EOX licence (MIT style)");
     set_dict_item_str_str(dict, "__version__", VERSION);
 
@@ -81,20 +81,10 @@ static PyObject* init_module(void)
     return module;
 }
 
-#if PY_MAJOR_VERSION == 2
-
-PyMODINIT_FUNC init_pytimeconv(void)
-{
-    import_array();
-    init_module();
-}
-
-#else
+/*---------------------------------------------------------------------------*/
 
 PyObject* PyInit__pytimeconv(void)
 {
     import_array();
     return init_module();
 }
-
-#endif

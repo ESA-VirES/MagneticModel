@@ -5,7 +5,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2018 EOX IT Services GmbH
+ * Copyright (C) 2018-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,8 +34,9 @@
 #include "time_conversion.h"
 #include <math.h>
 
-/*---------------------------------------------------------------------------*/
-/* recursive array evaluation */
+/*
+ *  nD-array recursive evaluation
+ */
 
 static void _mjd2k_to_year_fract(ARRAY_DATA arrd_in, ARRAY_DATA arrd_out)
 {
@@ -56,6 +57,11 @@ static void _mjd2k_to_year_fract(ARRAY_DATA arrd_in, ARRAY_DATA arrd_out)
     }
 }
 
+
+/*
+ *  Python function definition
+ */
+
 #define DOC_MJD2000_TO_YEAR_FRACTION "\n"\
 "   year_fraction = mjd2000_to_year_fraction(time_mjd2k)\n\n"\
 "     Output:\n"\
@@ -71,8 +77,8 @@ static PyObject* pytimeconv_mjd2000_to_year_fraction(
 {
     static char *keywords[] = {"time_mjd2k", NULL};
     PyObject *obj_in = NULL; // input object
-    PyObject *arr_in = NULL; // input array
-    PyObject *arr_out = NULL; // return array
+    PyArrayObject *arr_in = NULL; // input array
+    PyArrayObject *arr_out = NULL; // return array
     PyObject *retval = NULL; // return object
 
     // parse input arguments
@@ -82,7 +88,7 @@ static PyObject* pytimeconv_mjd2000_to_year_fraction(
         goto exit;
 
     // cast the objects to arrays
-    if (NULL == (arr_in = _get_as_double_array(obj_in, 0, 0, NPY_ALIGNED, keywords[0])))
+    if (NULL == (arr_in = _get_as_double_array(obj_in, 0, 0, NPY_ARRAY_ALIGNED, keywords[0])))
         goto exit;
 
     // check maximum allowed input array dimension
@@ -94,18 +100,18 @@ static PyObject* pytimeconv_mjd2000_to_year_fraction(
         goto exit;
     }
 
-    // create output array (adding one extra dimension)
-    if (NULL == (arr_out = PyArray_EMPTY(PyArray_NDIM(arr_in), PyArray_DIMS(arr_in), NPY_DOUBLE, 0)))
+    // create a new output array
+    if (NULL == (arr_out = (PyArrayObject*) PyArray_EMPTY(PyArray_NDIM(arr_in), PyArray_DIMS(arr_in), NPY_DOUBLE, 0)))
         goto exit;
 
-    // evaluate solar positions
+    // convert MJD2000 times to year fractions
     _mjd2k_to_year_fract(
         _array_to_arrd(arr_in),
         _array_to_arrd(arr_out)
     );
 
     // assign return value
-    retval = arr_out;
+    retval = (PyObject*) arr_out;
 
   exit:
 

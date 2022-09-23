@@ -28,7 +28,6 @@
 # pylint: disable=missing-docstring
 
 from unittest import TestCase, main
-from io import open
 from numpy import inf, nan
 from numpy.testing import assert_allclose
 from eoxmagmod.time_util import decimal_year_to_mjd2000

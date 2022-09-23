@@ -28,11 +28,6 @@
 #pylint: disable=missing-docstring
 
 import sys
-try:
-    # Python 2
-    from itertools import izip as zip
-except ImportError:
-    pass
 from itertools import product
 from numpy import array, vectorize
 from numpy.random import uniform

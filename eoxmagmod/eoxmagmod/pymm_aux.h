@@ -5,7 +5,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2014 EOX IT Services GmbH
+ * Copyright (C) 2014-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,41 +33,38 @@
 /*
  * Check the input python object and convert it to a double precision NumPy
  * array ensuring the native byte-order.
+ * Returns NULL if the conversion failed.
  */
-static PyObject* _get_as_int_array(PyObject *data, int dmin, int dmax,
+
+static PyArrayObject* _get_as_int_array(PyObject *data, int dmin, int dmax,
                 int reqs, const char *label)
 {
     PyArray_Descr *dtype = PyArray_DescrFromType(NPY_INT32);
-    PyObject *arr = PyArray_FromAny(data, dtype, dmin, dmax, reqs, NULL);
-    /*
-    if (NULL == arr)
-        PyErr_Format(PyExc_ValueError, "Failed to cast %s to an array!", label);
-    */
-    return arr;
+    return (PyArrayObject*) PyArray_FromAny(data, dtype, dmin, dmax, reqs, NULL);
 }
+
 
 /*
  * Check the input python object and convert it to a double precision NumPy
  * array ensuring the native byte-order.
+ * Returns NULL if the conversion failed.
  */
-static PyObject* _get_as_double_array(PyObject *data, int dmin, int dmax,
+
+static PyArrayObject* _get_as_double_array(PyObject *data, int dmin, int dmax,
                 int reqs, const char *label)
 {
     PyArray_Descr *dtype = PyArray_DescrFromType(NPY_FLOAT64);
-    PyObject *arr = PyArray_FromAny(data, dtype, dmin, dmax, reqs, NULL);
-    /*
-    if (NULL == arr)
-        PyErr_Format(PyExc_ValueError, "Failed to cast %s to an array!", label);
-    */
-    return arr;
+    return (PyArrayObject*) PyArray_FromAny(data, dtype, dmin, dmax, reqs, NULL);
 }
+
 
 /*
  * Get new allocated NumPy array. The first (N-1) dimensions as read from
  * the array of dimensions (allowing easily set the same shape as the input
  * matrix). The last Nth dimension is overridden by the 'dim_last' value.
  */
-static PyObject* _get_new_double_array(npy_intp ndim, const npy_intp *dims, npy_intp dim_last)
+
+static PyArrayObject* _get_new_double_array(npy_intp ndim, const npy_intp *dims, npy_intp dim_last)
 {
     npy_intp i;
     npy_intp dims_new[MAX_OUT_ARRAY_NDIM];
@@ -84,13 +81,15 @@ static PyObject* _get_new_double_array(npy_intp ndim, const npy_intp *dims, npy_
     if (ndim >= 1)
         dims_new[ndim-1] = dim_last;
 
-    return PyArray_EMPTY(ndim, dims_new, NPY_DOUBLE, 0);
+    return (PyArrayObject*) PyArray_EMPTY(ndim, dims_new, NPY_DOUBLE, 0);
 }
+
 
 /*
  * Check that the dimension of the array has the required value.
  */
-static int _check_array_dim_eq(PyObject *arr, int dim, size_t size, const char *label)
+
+static int _check_array_dim_eq(PyArrayObject *arr, int dim, size_t size, const char *label)
 {
     if (dim < 0)
         dim += PyArray_NDIM(arr);
@@ -102,10 +101,12 @@ static int _check_array_dim_eq(PyObject *arr, int dim, size_t size, const char *
     return rv;
 }
 
+
 /*
  * Check that the dimension of the array is greater then or equal to the required value.
  */
-static int _check_array_dim_le(PyObject *arr, int dim, size_t size, const char *label)
+
+static int _check_array_dim_le(PyArrayObject *arr, int dim, size_t size, const char *label)
 {
     if (dim < 0)
         dim += PyArray_NDIM(arr);
@@ -117,11 +118,12 @@ static int _check_array_dim_le(PyObject *arr, int dim, size_t size, const char *
     return rv;
 }
 
+
 /*
  * Check that the array dimensions match the required values
  */
 
-static int _check_arr_dims_all_eq(PyObject *arr, npy_intp ndim, const npy_intp *dims, const char *label)
+static int _check_arr_dims_all_eq(PyArrayObject *arr, npy_intp ndim, const npy_intp *dims, const char *label)
 {
     npy_intp dim;
 
@@ -147,11 +149,12 @@ static int _check_arr_dims_all_eq(PyObject *arr, npy_intp ndim, const npy_intp *
     return 0;
 }
 
+
 /*
  * Check that two arrays have the same shape
  */
 
-static int _check_equal_shape(PyObject *arr0, PyObject *arr1, const char *label0, const char *label1)
+static int _check_equal_shape(PyArrayObject *arr0, PyArrayObject *arr1, const char *label0, const char *label1)
 {
     npy_intp dim;
 
@@ -179,10 +182,12 @@ static int _check_equal_shape(PyObject *arr0, PyObject *arr1, const char *label0
     return 0;
 }
 
+
 /*
  *  Extract 1D Numpy array or broadcast scalar to a 1D C array.
  */
-static int _extract_1d_double_array(double *out, size_t size, PyObject *arr_in, const char *label)
+
+static int _extract_1d_double_array(double *out, size_t size, PyArrayObject *arr_in, const char *label)
 {
     npy_intp ndim = PyArray_NDIM(arr_in);
     void *data = PyArray_DATA(arr_in);
@@ -208,6 +213,8 @@ static int _extract_1d_double_array(double *out, size_t size, PyObject *arr_in, 
 
     return 0;
 }
+
+
 /*
  * Extraction of the lower dimensional parts of the arrays.
  */
@@ -219,7 +226,7 @@ typedef struct {
     const npy_intp *stride;
 } ARRAY_DATA;
 
-static ARRAY_DATA _array_to_arrd(PyObject *arr)
+static ARRAY_DATA _array_to_arrd(PyArrayObject *arr)
 {
     ARRAY_DATA arrd = {
         PyArray_DATA(arr),

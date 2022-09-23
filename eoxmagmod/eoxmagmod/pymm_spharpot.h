@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2014 EOX IT Services GmbH
+ * Copyright (C) 2014-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,8 @@
 #include "pymm_aux.h"
 #include "pymm_cconv.h"
 
-/* python function definition */
+/* Python function definition */
+
 #define DOC_SPHARPOT "\n"\
 "  v_grad = spharpot(radius, degree, coef_g, coef_h, leg_p, rrp, lonsin, loncos)\n"\
 "\n"\
@@ -56,7 +57,7 @@
 static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
 {
     static char *keywords[] = {"radius", "degree", "coef_g", "coef_h",
-                                "leg_p", "rpp", "lonsin", "loncos", NULL};
+                               "leg_p", "rpp", "lonsin", "loncos", NULL};
 
     int degree, nterm;
     double rad;
@@ -64,17 +65,17 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *obj_cg = NULL; // coef_g object
     PyObject *obj_ch = NULL; // coef_h object
     PyObject *obj_lp = NULL; // P object
-    PyObject *obj_rrp = NULL; // rel.rad.pow. object
-    PyObject *obj_lsin = NULL; // lonsin object
-    PyObject *obj_lcos = NULL; // loncos object
+    PyObject *obj_rrp = NULL; // RRP object
+    PyObject *obj_lsin = NULL; // lon-sin object
+    PyObject *obj_lcos = NULL; // lon-cos object
 
-    PyObject *arr_out = NULL; // output array
-    PyObject *arr_cg = NULL; // coef_g array
-    PyObject *arr_ch = NULL; // coef_h array
-    PyObject *arr_lp = NULL; // P array
-    PyObject *arr_rrp = NULL; // rel.rad.pow. array
-    PyObject *arr_lsin = NULL; // lonsin array
-    PyObject *arr_lcos = NULL; // loncos array
+    PyArrayObject *arr_out = NULL; // output array
+    PyArrayObject *arr_cg = NULL; // coef_g array
+    PyArrayObject *arr_ch = NULL; // coef_h array
+    PyArrayObject *arr_lp = NULL; // P array
+    PyArrayObject *arr_rrp = NULL; // RRP array
+    PyArrayObject *arr_lsin = NULL; // lon-sin array
+    PyArrayObject *arr_lcos = NULL; // lon-cos array
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
@@ -92,22 +93,22 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     nterm = ((degree+1)*(degree+2))/2;
 
     // cast the objects to arrays
-    if (NULL == (arr_cg=_get_as_double_array(obj_cg, 1, 1, NPY_IN_ARRAY, keywords[2])))
+    if (NULL == (arr_cg = _get_as_double_array(obj_cg, 1, 1, NPY_ARRAY_IN_ARRAY, keywords[2])))
         goto exit;
 
-    if (NULL == (arr_ch=_get_as_double_array(obj_ch, 1, 1, NPY_IN_ARRAY, keywords[3])))
+    if (NULL == (arr_ch = _get_as_double_array(obj_ch, 1, 1, NPY_ARRAY_IN_ARRAY, keywords[3])))
         goto exit;
 
-    if (NULL == (arr_lp=_get_as_double_array(obj_lp, 1, 1, NPY_IN_ARRAY, keywords[4])))
+    if (NULL == (arr_lp = _get_as_double_array(obj_lp, 1, 1, NPY_ARRAY_IN_ARRAY, keywords[4])))
         goto exit;
 
-    if (NULL == (arr_rrp=_get_as_double_array(obj_rrp, 1, 1, NPY_IN_ARRAY, keywords[5])))
+    if (NULL == (arr_rrp = _get_as_double_array(obj_rrp, 1, 1, NPY_ARRAY_IN_ARRAY, keywords[5])))
         goto exit;
 
-    if (NULL == (arr_lsin=_get_as_double_array(obj_lsin, 1, 1, NPY_IN_ARRAY, keywords[6])))
+    if (NULL == (arr_lsin = _get_as_double_array(obj_lsin, 1, 1, NPY_ARRAY_IN_ARRAY, keywords[6])))
         goto exit;
 
-    if (NULL == (arr_lcos=_get_as_double_array(obj_lcos, 1, 1, NPY_IN_ARRAY, keywords[7])))
+    if (NULL == (arr_lcos = _get_as_double_array(obj_lcos, 1, 1, NPY_ARRAY_IN_ARRAY, keywords[7])))
         goto exit;
 
     // check the arrays' dimensions
@@ -130,12 +131,12 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     // allocate the output numpy scalar (zero-dimensional array)
-    if (NULL == (arr_out = PyArray_EMPTY(0, NULL, NPY_DOUBLE, 0)))
+    if (NULL == (arr_out = (PyArrayObject*) PyArray_EMPTY(0, NULL, NPY_DOUBLE, 0)))
         goto exit;
 
     // the evaluation
     {
-        double *out = (double*)PyArray_DATA(arr_out);
+        double *out = (double*) PyArray_DATA(arr_out);
         shc_eval(
             out, NULL, NULL, NULL, degree, 0x1,
             0.0, rad, PyArray_DATA(arr_cg),
@@ -149,14 +150,14 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
   exit:
 
     // decrease reference counters to the arrays
-    if (arr_cg){Py_DECREF(arr_cg);}
-    if (arr_ch){Py_DECREF(arr_ch);}
-    if (arr_lp){Py_DECREF(arr_lp);}
-    if (arr_rrp){Py_DECREF(arr_rrp);}
-    if (arr_lsin){Py_DECREF(arr_lsin);}
-    if (arr_lcos){Py_DECREF(arr_lcos);}
+    if (arr_cg) Py_DECREF(arr_cg);
+    if (arr_ch) Py_DECREF(arr_ch);
+    if (arr_lp) Py_DECREF(arr_lp);
+    if (arr_rrp) Py_DECREF(arr_rrp);
+    if (arr_lsin) Py_DECREF(arr_lsin);
+    if (arr_lcos) Py_DECREF(arr_lcos);
 
-    return arr_out;
+    return (PyObject*) arr_out;
  }
 
 #endif  /* PYMM_SPHARPOT_H */
