@@ -14,7 +14,11 @@ jobs:
         - python: python3.10
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
       - name: Get packages
+
         run: |
           sudo apt-get install ${{ matrix.python }}
           python3 --version
@@ -31,11 +35,11 @@ jobs:
           pip3 list
           mkdir -p ./test && cd ./test
           pip3 show -f eoxmagmod
-          ${{ matrix.python }} -c 'import eoxmagmod' && ${{ matrix.python }} -m unittest discover -p '[a-z]*.py' -v eoxmagmod
+          python3 -c 'import eoxmagmod' && python3 -m unittest discover -p '[a-z]*.py' -v eoxmagmod
       - name: Upload logs and outputs of failed tests
         uses: 'actions/upload-artifact@v2'
         with:
-          name: logs ${{ matrix.python }}
+          name: logs python
           path: |
             test/*
           retention-days: 1
