@@ -1,4 +1,3 @@
-![Travis-CI staus](https://api.travis-ci.org/ESA-VirES/MagneticModel.svg?branch=master)
 
 
 ## Magnetic Model
