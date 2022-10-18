@@ -2,7 +2,7 @@ name: CI
 on: push
 jobs:
   run:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
