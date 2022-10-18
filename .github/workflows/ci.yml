@@ -35,11 +35,4 @@ jobs:
           mkdir -p ./test && cd ./test
           pip3 show -f eoxmagmod
           python3 -c 'import eoxmagmod' && python3 -m unittest discover -p '[a-z]*.py' -v eoxmagmod
-      - name: Upload logs and outputs of failed tests
-        uses: 'actions/upload-artifact@v2'
-        with:
-          name: logs python
-          path: |
-            test/*
-          retention-days: 1
-        if: failure()
+
