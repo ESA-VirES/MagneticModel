@@ -1,0 +1,41 @@
+name: CI
+on: push
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - python: python3.6
+        - python: python3.7
+        - python: python3.8
+        - python: python3.9
+        - python: python3.10
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get packages
+        run: |
+          sudo apt-get install ${{ matrix.python }}
+          sudo apt-get install gfortran
+          sudo apt-get install libhdf5-dev
+      - name: Install 
+        run: |
+          ( cd libcdf && make build && sudo make install )
+          ( cd qdipole && ./configure && make build && sudo make install )
+          pip3 install scipy
+          pip3 install ./eoxmagmod/
+      - name: Scripts
+        run: |
+          pip3 list
+          mkdir -p ./test && cd ./test
+          pip3 show -f eoxmagmod
+          ${{ matrix.python }} -c 'import eoxmagmod' && ${{ matrix.python }} -m unittest discover -p '[a-z]*.py' -v eoxmagmod
+      - name: Upload logs and outputs of failed tests
+        uses: 'actions/upload-artifact@v2'
+        with:
+          name: logs ${{ matrix.python }}
+          path: |
+            test/*
+          retention-days: 1
+        if: failure()
