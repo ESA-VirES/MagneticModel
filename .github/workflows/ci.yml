@@ -17,6 +17,7 @@ jobs:
       - name: Get packages
         run: |
           sudo apt-get install ${{ matrix.python }}
+          python3 --version
           sudo apt-get install gfortran
           sudo apt-get install libhdf5-dev
       - name: Install 
