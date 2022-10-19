@@ -1,0 +1,36 @@
+name: CI
+on: push
+jobs:
+  run:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - python: '3.6'
+        - python: '3.7'
+        - python: '3.8'
+        - python: '3.9'
+        - python: '3.10'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Get packages
+        run: |
+          python3 --version
+          sudo apt-get install gfortran
+          sudo apt-get install libhdf5-dev
+      - name: Install
+        run: |
+          ( cd libcdf && make build && sudo make install )
+          ( cd qdipole && ./configure && make build && sudo make install )
+          pip3 install scipy
+          pip3 install ./eoxmagmod/
+      - name: Scripts
+        run: |
+          pip3 list
+          mkdir -p ./test && cd ./test
+          pip3 show -f eoxmagmod
+          python3 -c 'import eoxmagmod' && python3 -m unittest discover -p '[a-z]*.py' -v eoxmagmod
