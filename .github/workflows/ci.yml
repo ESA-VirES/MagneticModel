@@ -40,7 +40,7 @@ jobs:
     steps:
       # send Slack notifications to the eox organization
       - name: action-slack
-        uses: 8398a7/action-slack@v3.8.0
+        uses: 8398a7/action-slack@v3
         with:
           status: ${{ needs.run.result }}
           fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
