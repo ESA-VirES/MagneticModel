@@ -18,12 +18,11 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Get packages
-
         run: |
           python3 --version
           sudo apt-get install gfortran
           sudo apt-get install libhdf5-dev
-      - name: Install 
+      - name: Install
         run: |
           ( cd libcdf && make build && sudo make install )
           ( cd qdipole && ./configure && make build && sudo make install )
@@ -35,4 +34,3 @@ jobs:
           mkdir -p ./test && cd ./test
           pip3 show -f eoxmagmod
           python3 -c 'import eoxmagmod' && python3 -m unittest discover -p '[a-z]*.py' -v eoxmagmod
-
