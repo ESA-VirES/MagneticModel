@@ -34,3 +34,16 @@ jobs:
           mkdir -p ./test && cd ./test
           pip3 show -f eoxmagmod
           python3 -c 'import eoxmagmod' && python3 -m unittest discover -p '[a-z]*.py' -v eoxmagmod
+  note:
+    runs-on: ubuntu-20.04
+    needs: run
+    steps:
+      # send Slack notifications to the eox organization
+      - name: action-slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ needs.run.result }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()
