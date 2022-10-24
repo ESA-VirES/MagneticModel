@@ -40,7 +40,6 @@ jobs:
       - name: prepare docs
         run: |
           apt-get update && apt-get install -y git build-essential python3-pip
-          pip3 install .
           pip3 install -r requirements-docs.txt
           make html BUILDDIR=../public -C docs
           mv ./public/html/* ./public/
