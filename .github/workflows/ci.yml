@@ -39,9 +39,8 @@ jobs:
     steps:
       - name: prepare docs
         run: |
-          sudo apt-get update && sudo apt-get install -y git build-essential python3-pip
           ls -l
-          pip3 install -r ./requirements-docs.txt
+          pip3 install -r requirements-docs.txt
           make html BUILDDIR=../public -C docs
           mv ./public/html/* ./public/
       - name: Deploy github pages
