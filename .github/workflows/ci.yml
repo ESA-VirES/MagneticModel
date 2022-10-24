@@ -38,11 +38,11 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: prepare docs
-        run:
-          - ls -l
-          - pip3 install -r requirements-docs.txt
-          - make html BUILDDIR=../public -C docs
-          - mv ./public/html/* ./public/
+        run: |
+          ls
+          pip3 install -r requirements-docs.txt
+          make html BUILDDIR=../public -C docs
+          mv ./public/html/* ./public/
       - name: Deploy github pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
