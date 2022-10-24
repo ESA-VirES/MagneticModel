@@ -40,7 +40,13 @@ jobs:
       - uses: actions/checkout@v2
       - name: prepare docs
         run: |
-          ls
+          python3 --version
+          sudo apt-get install gfortran
+          sudo apt-get install libhdf5-dev
+          ( cd libcdf && make build && sudo make install )
+          ( cd qdipole && ./configure && make build && sudo make install )
+          pip3 install scipy
+          pip3 install ./eoxmagmod/
           pip3 install -r requirements-docs.txt
           make html BUILDDIR=../public -C docs
           mv ./public/html/* ./public/
