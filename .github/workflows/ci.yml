@@ -53,3 +53,24 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         if: always()
+  deploy:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: prepare docs
+        run: |
+          python3 --version
+          sudo apt-get install gfortran
+          sudo apt-get install libhdf5-dev
+          ( cd libcdf && make build && sudo make install )
+          ( cd qdipole && ./configure && make build && sudo make install )
+          pip3 install scipy
+          pip3 install ./eoxmagmod/
+          pip3 install -r requirements-docs.txt
+          make html BUILDDIR=../public -C docs
+          mv ./public/html/* ./public/
+      - name: Deploy github pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: public
+  note:
