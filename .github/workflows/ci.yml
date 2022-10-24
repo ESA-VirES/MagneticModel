@@ -34,6 +34,20 @@ jobs:
           mkdir -p ./test && cd ./test
           pip3 show -f eoxmagmod
           python3 -c 'import eoxmagmod' && python3 -m unittest discover -p '[a-z]*.py' -v eoxmagmod
+  deploy:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: prepare docs
+        run: |
+          apt-get update && apt-get install -y git build-essential python3-pip
+          pip3 install .
+          pip3 install -r requirements-docs.txt
+          make html BUILDDIR=../public -C docs
+          mv ./public/html/* ./public/
+      - name: Deploy github pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: public  
   note:
     runs-on: ubuntu-20.04
     needs: run
