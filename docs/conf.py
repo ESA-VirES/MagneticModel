@@ -23,7 +23,7 @@ __location__ = os.path.join(
 print(__location__)
 
 output_dir = os.path.join(__location__, "api")
-module_dir = os.path.join(__location__, "../eoxmagmod")
+module_dir = os.path.join(__location__, "../eoxmagmod/eoxmagmod")
 
 
 try:
