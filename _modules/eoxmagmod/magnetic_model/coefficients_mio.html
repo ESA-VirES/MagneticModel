@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eoxmagmod.magnetic_model.coefficients_mio &mdash; MagneticModel  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> MagneticModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Module Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MagneticModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>eoxmagmod.magnetic_model.coefficients_mio</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for eoxmagmod.magnetic_model.coefficients_mio</h1><div class="highlight"><pre>
+<span></span><span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1">#</span>
+<span class="c1">#  Spherical Harmonic Coefficients specific to Swarm MIO model.</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Martin Paces &lt;martin.paces@eox.at&gt;</span>
+<span class="c1">#</span>
+<span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1"># Copyright (C) 2018 EOX IT Services GmbH</span>
+<span class="c1">#</span>
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c1"># in the Software without restriction, including without limitation the rights</span>
+<span class="c1"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c1"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+<span class="c1">#</span>
+<span class="c1"># The above copyright notice and this permission notice shall be included in all</span>
+<span class="c1"># copies of this Software or works derived from this Software.</span>
+<span class="c1">#</span>
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c1"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</span>
+<span class="c1"># THE SOFTWARE.</span>
+<span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1">#pylint: disable=no-name-in-module</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">arange</span><span class="p">,</span> <span class="n">broadcast_to</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span>
+<span class="kn">from</span> <span class="nn">.coefficients</span> <span class="kn">import</span> <span class="n">SparseSHCoefficients</span><span class="p">,</span> <span class="n">coeff_size</span>
+<span class="kn">from</span> <span class="nn">..magnetic_time</span> <span class="kn">import</span> <span class="n">mjd2000_to_magnetic_universal_time</span>
+<span class="kn">from</span> <span class="nn">..time_util</span> <span class="kn">import</span> <span class="n">mjd2000_to_year_fraction</span>
+
+<span class="n">F_SEASONAL</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">pi</span>
+<span class="n">F_DIURNAL</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mf">24.</span>
+
+
+<div class="viewcode-block" id="SparseSHCoefficientsMIO"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.magnetic_model.coefficients_mio.SparseSHCoefficientsMIO">[docs]</a><span class="k">class</span> <span class="nc">SparseSHCoefficientsMIO</span><span class="p">(</span><span class="n">SparseSHCoefficients</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Time dependent 2D Fourier series Swarm MIO coefficients.</span>
+<span class="sd">        Parameters:</span>
+<span class="sd">            indices - array if the nm indices</span>
+<span class="sd">            coefficients - gh or qs coefficients</span>
+<span class="sd">            ps_extent - (pmin, pmax, smin, smax) tuple</span>
+<span class="sd">            is_internal - set False for an external model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">ps_extent</span><span class="p">,</span>
+                 <span class="n">mjd2000_to_year_fraction</span><span class="o">=</span><span class="n">mjd2000_to_year_fraction</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">SparseSHCoefficients</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">pmin</span><span class="p">,</span> <span class="n">pmax</span><span class="p">,</span> <span class="n">smin</span><span class="p">,</span> <span class="n">smax</span> <span class="o">=</span> <span class="n">ps_extent</span>
+        <span class="k">if</span> <span class="n">pmin</span> <span class="o">&gt;</span> <span class="n">pmax</span> <span class="ow">or</span> <span class="n">smin</span> <span class="o">&gt;</span> <span class="n">smax</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid ps_extent </span><span class="si">%s</span><span class="s2">!&quot;</span> <span class="o">%</span> <span class="n">ps_extent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ps_extent</span> <span class="o">=</span> <span class="p">(</span><span class="n">pmin</span><span class="p">,</span> <span class="n">pmax</span><span class="p">,</span> <span class="n">smin</span><span class="p">,</span> <span class="n">smax</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mjd2000_to_year_fraction</span> <span class="o">=</span> <span class="n">mjd2000_to_year_fraction</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">mut</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters</span><span class="p">):</span>
+        <span class="n">degree</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">kind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subset</span><span class="p">(</span>
+            <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;min_degree&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_degree&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">coeff_full</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">coeff_size</span><span class="p">(</span><span class="n">degree</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">coeff_full</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">kind</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eval_coeff_fourier2d</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">mut</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">coeff_full</span><span class="p">,</span> <span class="n">degree</span>
+
+    <span class="k">def</span> <span class="nf">_eval_coeff_fourier2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">mjd2000</span><span class="p">,</span> <span class="n">mut</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Evaluate model coefficients using the 2D Fourier series. &quot;&quot;&quot;</span>
+        <span class="n">sin_f</span><span class="p">,</span> <span class="n">cos_f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_sincos_matrices</span><span class="p">(</span><span class="n">coeff</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mjd2000</span><span class="p">,</span> <span class="n">mut</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">coeff</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">cos_f</span> <span class="o">+</span> <span class="n">coeff</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">sin_f</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_get_sincos_matrices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_coeff</span><span class="p">,</span> <span class="n">mjd2000</span><span class="p">,</span> <span class="n">mut</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get sin/cos matrices used by the 2D Fourier transform. &quot;&quot;&quot;</span>
+        <span class="n">pmin</span><span class="p">,</span> <span class="n">pmax</span><span class="p">,</span> <span class="n">smin</span><span class="p">,</span> <span class="n">smax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ps_extent</span>
+        <span class="n">n_col</span> <span class="o">=</span> <span class="n">pmax</span> <span class="o">-</span> <span class="n">pmin</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">n_row</span> <span class="o">=</span> <span class="n">smax</span> <span class="o">-</span> <span class="n">smin</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">f0_seasonal</span> <span class="o">=</span> <span class="n">F_SEASONAL</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mjd2000_to_year_fraction</span><span class="p">(</span><span class="n">mjd2000</span><span class="p">)</span>
+        <span class="n">f0_diurnal</span> <span class="o">=</span> <span class="n">F_DIURNAL</span> <span class="o">*</span> <span class="n">mut</span>
+        <span class="n">f_diurnal</span> <span class="o">=</span> <span class="n">f0_diurnal</span> <span class="o">*</span> <span class="n">arange</span><span class="p">(</span><span class="n">pmin</span><span class="p">,</span> <span class="n">pmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">f_seasonal</span> <span class="o">=</span> <span class="n">f0_seasonal</span> <span class="o">*</span> <span class="n">arange</span><span class="p">(</span><span class="n">smin</span><span class="p">,</span> <span class="n">smax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">f_combined</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">broadcast_to</span><span class="p">(</span><span class="n">f_diurnal</span><span class="p">,</span> <span class="p">(</span><span class="n">n_row</span><span class="p">,</span> <span class="n">n_col</span><span class="p">))</span> <span class="o">+</span>
+            <span class="n">broadcast_to</span><span class="p">(</span><span class="n">f_seasonal</span><span class="p">,</span> <span class="p">(</span><span class="n">n_col</span><span class="p">,</span> <span class="n">n_row</span><span class="p">))</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="n">sin_f</span> <span class="o">=</span> <span class="n">broadcast_to</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">f_combined</span><span class="p">),</span> <span class="p">(</span><span class="n">n_coeff</span><span class="p">,</span> <span class="n">n_row</span><span class="p">,</span> <span class="n">n_col</span><span class="p">))</span>
+        <span class="n">cos_f</span> <span class="o">=</span> <span class="n">broadcast_to</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">f_combined</span><span class="p">),</span> <span class="p">(</span><span class="n">n_coeff</span><span class="p">,</span> <span class="n">n_row</span><span class="p">,</span> <span class="n">n_col</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">sin_f</span><span class="p">,</span> <span class="n">cos_f</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, dolezalovat.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

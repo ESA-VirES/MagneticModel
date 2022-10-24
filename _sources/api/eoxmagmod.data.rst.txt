@@ -1,0 +1,10 @@
+eoxmagmod.data package
+======================
+
+Module contents
+---------------
+
+.. automodule:: eoxmagmod.data
+   :members:
+   :undoc-members:
+   :show-inheritance:

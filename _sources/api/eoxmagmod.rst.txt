@@ -1,7 +1,5 @@
-eoxmagmod namespace
-===================
-
-.. py:module:: eoxmagmod
+eoxmagmod package
+=================
 
 Subpackages
 -----------
@@ -9,15 +7,73 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   eoxmagmod.eoxmagmod
+   eoxmagmod.data
+   eoxmagmod.magnetic_model
+   eoxmagmod.tests
 
 Submodules
 ----------
 
-eoxmagmod.setup module
-----------------------
+eoxmagmod.dipole\_coords module
+-------------------------------
 
-.. automodule:: eoxmagmod.setup
+.. automodule:: eoxmagmod.dipole_coords
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_time module
+-------------------------------
+
+.. automodule:: eoxmagmod.magnetic_time
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.quasi\_dipole\_coordinates module
+-------------------------------------------
+
+.. automodule:: eoxmagmod.quasi_dipole_coordinates
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.sheval\_dipole module
+-------------------------------
+
+.. automodule:: eoxmagmod.sheval_dipole
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.solar\_position module
+--------------------------------
+
+.. automodule:: eoxmagmod.solar_position
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.time\_util module
+---------------------------
+
+.. automodule:: eoxmagmod.time_util
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.util module
+---------------------
+
+.. automodule:: eoxmagmod.util
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: eoxmagmod
    :members:
    :undoc-members:
    :show-inheritance:

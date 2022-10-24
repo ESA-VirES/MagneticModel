@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eoxmagmod.tests.pymm_convert &mdash; MagneticModel  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> MagneticModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Module Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MagneticModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>eoxmagmod.tests.pymm_convert</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for eoxmagmod.tests.pymm_convert</h1><div class="highlight"><pre>
+<span></span><span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1">#</span>
+<span class="c1">#  Spherical Harmonic Expansion - Geomagnetic Model - tests</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Martin Paces &lt;martin.paces@eox.at&gt;</span>
+<span class="c1">#</span>
+<span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1"># Copyright (C) 2018 EOX IT Services GmbH</span>
+<span class="c1">#</span>
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c1"># in the Software without restriction, including without limitation the rights</span>
+<span class="c1"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c1"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+<span class="c1">#</span>
+<span class="c1"># The above copyright notice and this permission notice shall be included in</span>
+<span class="c1"># all copies of this Software or works derived from this Software.</span>
+<span class="c1">#</span>
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c1"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</span>
+<span class="c1"># THE SOFTWARE.</span>
+<span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1"># pylint: disable=missing-docstring, invalid-name, too-few-public-methods</span>
+
+<span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span><span class="p">,</span> <span class="n">main</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">random</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span> <span class="c1">#, sin, cos, sqrt, floor</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span> <span class="n">empty</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">arctan2</span><span class="p">,</span> <span class="n">hypot</span><span class="p">,</span> <span class="n">fabs</span><span class="p">,</span> <span class="n">copysign</span>
+<span class="kn">from</span> <span class="nn">numpy.testing</span> <span class="kn">import</span> <span class="n">assert_allclose</span>
+<span class="kn">from</span> <span class="nn">eoxmagmod._pymm</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GEODETIC_ABOVE_WGS84</span><span class="p">,</span> <span class="n">GEOCENTRIC_SPHERICAL</span><span class="p">,</span> <span class="n">GEOCENTRIC_CARTESIAN</span><span class="p">,</span> <span class="n">convert</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">WGS84_A</span> <span class="o">=</span> <span class="mf">6378.137</span>
+<span class="n">WGS84_B</span> <span class="o">=</span> <span class="mf">6356.7523142</span>
+<span class="n">WGS84_EPS2</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="p">(</span><span class="n">WGS84_B</span><span class="o">/</span><span class="n">WGS84_A</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">DEG2RAD</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+<span class="n">RAD2DEG</span> <span class="o">=</span> <span class="mf">180.0</span> <span class="o">/</span> <span class="n">pi</span>
+
+
+<div class="viewcode-block" id="ConvertTestMixIn"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.ConvertTestMixIn">[docs]</a><span class="k">class</span> <span class="nc">ConvertTestMixIn</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">source_coordinate_system</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">target_coordinate_system</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="ConvertTestMixIn.reference_convert"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.ConvertTestMixIn.reference_convert">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">reference_convert</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="ConvertTestMixIn.eval_convert"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.ConvertTestMixIn.eval_convert">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">eval_convert</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">convert</span><span class="p">(</span>
+            <span class="n">coords</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">source_coordinate_system</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">target_coordinate_system</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ConvertTestMixIn.test_convert"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.ConvertTestMixIn.test_convert">[docs]</a>    <span class="k">def</span> <span class="nf">test_convert</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span>
+        <span class="n">assert_allclose</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eval_convert</span><span class="p">(</span><span class="n">coords</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_convert</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ConvertTestMixIn.spherical2cartesian"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.ConvertTestMixIn.spherical2cartesian">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">spherical2cartesian</span><span class="p">(</span><span class="n">coords</span><span class="p">):</span>
+        <span class="n">latr</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">DEG2RAD</span>
+        <span class="n">lonr</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">DEG2RAD</span>
+        <span class="n">rad</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">rad_cos_lat</span> <span class="o">=</span> <span class="n">rad</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">latr</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">rad_cos_lat</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lonr</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">rad_cos_lat</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lonr</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">rad</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">latr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="ConvertTestMixIn.cartesian2spherical"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.ConvertTestMixIn.cartesian2spherical">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">cartesian2spherical</span><span class="p">(</span><span class="n">coords</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">rad_xy</span> <span class="o">=</span> <span class="n">hypot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">RAD2DEG</span> <span class="o">*</span> <span class="n">arctan2</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">rad_xy</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">RAD2DEG</span> <span class="o">*</span> <span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">hypot</span><span class="p">(</span><span class="n">rad_xy</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="ConvertTestMixIn.spherical2geodetic"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.ConvertTestMixIn.spherical2geodetic">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">spherical2geodetic</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="n">latr</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">DEG2RAD</span>
+        <span class="n">lond</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">rad</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">lond</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">to_geodetic</span><span class="p">(</span>
+            <span class="n">rad</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">latr</span><span class="p">),</span> <span class="n">rad</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">latr</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="ConvertTestMixIn.cartesian2geodetic"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.ConvertTestMixIn.cartesian2geodetic">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">cartesian2geodetic</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">RAD2DEG</span><span class="o">*</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">to_geodetic</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">hypot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="ConvertTestMixIn.to_geodetic"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.ConvertTestMixIn.to_geodetic">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">to_geodetic</span><span class="p">(</span><span class="n">z_coord</span><span class="p">,</span> <span class="n">hypot_xy</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get geodetic coordinates calculated by the Ferrarri&#39;s solution. &quot;&quot;&quot;</span>
+        <span class="n">ee4</span> <span class="o">=</span> <span class="n">WGS84_EPS2</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">pa2</span> <span class="o">=</span> <span class="p">(</span><span class="n">hypot_xy</span> <span class="o">/</span> <span class="n">WGS84_A</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">zt</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">WGS84_EPS2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">z_coord</span> <span class="o">/</span> <span class="n">WGS84_A</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">rh</span> <span class="o">=</span> <span class="p">(</span><span class="n">pa2</span> <span class="o">+</span> <span class="n">zt</span> <span class="o">-</span> <span class="n">ee4</span><span class="p">)</span><span class="o">/</span><span class="mf">6.0</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.25</span><span class="o">*</span><span class="n">ee4</span><span class="p">)</span> <span class="o">*</span> <span class="n">zt</span> <span class="o">*</span> <span class="n">pa2</span>
+        <span class="n">rh3</span> <span class="o">=</span> <span class="n">rh</span><span class="o">**</span><span class="mi">3</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">rh3</span> <span class="o">+</span> <span class="n">ss</span> <span class="o">+</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">ss</span><span class="o">*</span><span class="p">(</span><span class="n">ss</span><span class="o">+</span><span class="mf">2.0</span><span class="o">*</span><span class="n">rh3</span><span class="p">))</span>
+        <span class="n">tt</span> <span class="o">=</span> <span class="n">copysign</span><span class="p">(</span><span class="n">fabs</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">3.0</span><span class="p">),</span> <span class="n">tmp</span><span class="p">)</span>
+        <span class="n">uu</span> <span class="o">=</span> <span class="n">rh</span> <span class="o">+</span> <span class="n">tt</span> <span class="o">+</span> <span class="n">rh</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">tt</span>
+        <span class="n">vv</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">uu</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">ee4</span><span class="o">*</span><span class="n">zt</span><span class="p">)</span>
+        <span class="n">ww</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">WGS84_EPS2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">uu</span> <span class="o">+</span> <span class="n">vv</span> <span class="o">-</span> <span class="n">zt</span><span class="p">)</span><span class="o">/</span><span class="n">vv</span>
+        <span class="n">kp</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">WGS84_EPS2</span><span class="o">*</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">uu</span> <span class="o">+</span> <span class="n">vv</span> <span class="o">+</span> <span class="n">ww</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">ww</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">uu</span> <span class="o">+</span> <span class="n">vv</span><span class="p">)</span>
+        <span class="n">zkp</span> <span class="o">=</span> <span class="n">kp</span> <span class="o">*</span> <span class="n">z_coord</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">RAD2DEG</span><span class="o">*</span><span class="n">arctan2</span><span class="p">(</span><span class="n">zkp</span><span class="p">,</span> <span class="n">hypot_xy</span><span class="p">),</span>
+            <span class="n">hypot</span><span class="p">(</span><span class="n">hypot_xy</span><span class="p">,</span> <span class="n">zkp</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">kp</span> <span class="o">-</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">WGS84_EPS2</span><span class="p">)</span><span class="o">/</span><span class="n">WGS84_EPS2</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ConvertTestMixIn.geodetic2spherical"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.ConvertTestMixIn.geodetic2spherical">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">geodetic2spherical</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="n">latr</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">DEG2RAD</span>
+        <span class="n">lond</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">elev</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">z_coord</span><span class="p">,</span> <span class="n">hypot_xy</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_geodetic</span><span class="p">(</span><span class="n">latr</span><span class="p">,</span> <span class="n">elev</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">RAD2DEG</span> <span class="o">*</span> <span class="n">arctan2</span><span class="p">(</span><span class="n">z_coord</span><span class="p">,</span> <span class="n">hypot_xy</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">lond</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">hypot</span><span class="p">(</span><span class="n">z_coord</span><span class="p">,</span> <span class="n">hypot_xy</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="ConvertTestMixIn.geodetic2cartesian"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.ConvertTestMixIn.geodetic2cartesian">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">geodetic2cartesian</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="n">latr</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">DEG2RAD</span>
+        <span class="n">lonr</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">DEG2RAD</span>
+        <span class="n">elev</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">z_coord</span><span class="p">,</span> <span class="n">hypot_xy</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_geodetic</span><span class="p">(</span><span class="n">latr</span><span class="p">,</span> <span class="n">elev</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">hypot_xy</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lonr</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">hypot_xy</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lonr</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">z_coord</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="ConvertTestMixIn.from_geodetic"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.ConvertTestMixIn.from_geodetic">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_geodetic</span><span class="p">(</span><span class="n">latitude</span><span class="p">,</span> <span class="n">elevation</span><span class="p">):</span>
+        <span class="n">sin_lat</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span>
+        <span class="n">cos_lat</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span>
+        <span class="n">rad_curv</span> <span class="o">=</span> <span class="n">WGS84_A</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">WGS84_EPS2</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">hypot_xy</span> <span class="o">=</span> <span class="p">(</span><span class="n">rad_curv</span> <span class="o">+</span> <span class="n">elevation</span><span class="p">)</span><span class="o">*</span><span class="n">cos_lat</span>
+        <span class="n">z_coord</span> <span class="o">=</span> <span class="p">(</span><span class="n">rad_curv</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">WGS84_EPS2</span><span class="p">)</span> <span class="o">+</span> <span class="n">elevation</span><span class="p">)</span><span class="o">*</span><span class="n">sin_lat</span>
+        <span class="k">return</span> <span class="n">z_coord</span><span class="p">,</span> <span class="n">hypot_xy</span></div></div>
+
+<span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1"># sources</span>
+
+<div class="viewcode-block" id="SourceSpherical"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.SourceSpherical">[docs]</a><span class="k">class</span> <span class="nc">SourceSpherical</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">source_coordinate_system</span> <span class="o">=</span> <span class="n">GEOCENTRIC_SPHERICAL</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">array</span><span class="p">([</span>
+            <span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="mf">6371.2</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">random</span><span class="p">()))</span> <span class="k">for</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span>
+            <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">91</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">181</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+        <span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="SourceGeodetic"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.SourceGeodetic">[docs]</a><span class="k">class</span> <span class="nc">SourceGeodetic</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">source_coordinate_system</span> <span class="o">=</span> <span class="n">GEODETIC_ABOVE_WGS84</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">array</span><span class="p">([</span>
+            <span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="o">-</span><span class="mf">50.</span> <span class="o">+</span> <span class="mf">200.0</span> <span class="o">*</span> <span class="n">random</span><span class="p">())</span> <span class="k">for</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span>
+            <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">91</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">181</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+        <span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="SourceCartesian"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.SourceCartesian">[docs]</a><span class="k">class</span> <span class="nc">SourceCartesian</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">source_coordinate_system</span> <span class="o">=</span> <span class="n">GEOCENTRIC_CARTESIAN</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spherical2cartesian</span><span class="p">(</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="mf">6371.2</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">random</span><span class="p">()))</span> <span class="k">for</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span>
+            <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">91</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">181</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+        <span class="p">]))</span></div>
+
+<span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1"># generic targets</span>
+
+<div class="viewcode-block" id="TargetIndetical"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TargetIndetical">[docs]</a><span class="k">class</span> <span class="nc">TargetIndetical</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TargetIndetical.reference_convert"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TargetIndetical.reference_convert">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">reference_convert</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">coords</span></div></div>
+
+<span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1"># tests</span>
+
+<div class="viewcode-block" id="TestGeodeticWGS84ToCartesian"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TestGeodeticWGS84ToCartesian">[docs]</a><span class="k">class</span> <span class="nc">TestGeodeticWGS84ToCartesian</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">SourceGeodetic</span><span class="p">,</span> <span class="n">ConvertTestMixIn</span><span class="p">):</span>
+    <span class="n">source_coordinate_system</span> <span class="o">=</span> <span class="n">GEODETIC_ABOVE_WGS84</span>
+    <span class="n">target_coordinate_system</span> <span class="o">=</span> <span class="n">GEOCENTRIC_CARTESIAN</span>
+
+<div class="viewcode-block" id="TestGeodeticWGS84ToCartesian.reference_convert"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TestGeodeticWGS84ToCartesian.reference_convert">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">reference_convert</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">geodetic2cartesian</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestGeodeticWGS84ToSpherical"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TestGeodeticWGS84ToSpherical">[docs]</a><span class="k">class</span> <span class="nc">TestGeodeticWGS84ToSpherical</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">SourceGeodetic</span><span class="p">,</span> <span class="n">ConvertTestMixIn</span><span class="p">):</span>
+    <span class="n">source_coordinate_system</span> <span class="o">=</span> <span class="n">GEODETIC_ABOVE_WGS84</span>
+    <span class="n">target_coordinate_system</span> <span class="o">=</span> <span class="n">GEOCENTRIC_SPHERICAL</span>
+
+<div class="viewcode-block" id="TestGeodeticWGS84ToSpherical.reference_convert"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TestGeodeticWGS84ToSpherical.reference_convert">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">reference_convert</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">geodetic2spherical</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestGeodeticWGS84ToGeodeticWGS84"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TestGeodeticWGS84ToGeodeticWGS84">[docs]</a><span class="k">class</span> <span class="nc">TestGeodeticWGS84ToGeodeticWGS84</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">SourceGeodetic</span><span class="p">,</span> <span class="n">TargetIndetical</span><span class="p">,</span> <span class="n">ConvertTestMixIn</span><span class="p">):</span>
+    <span class="n">source_coordinate_system</span> <span class="o">=</span> <span class="n">GEODETIC_ABOVE_WGS84</span>
+    <span class="n">target_coordinate_system</span> <span class="o">=</span> <span class="n">GEODETIC_ABOVE_WGS84</span></div>
+
+
+<div class="viewcode-block" id="TestSphericalToCartesian"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TestSphericalToCartesian">[docs]</a><span class="k">class</span> <span class="nc">TestSphericalToCartesian</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">SourceSpherical</span><span class="p">,</span> <span class="n">ConvertTestMixIn</span><span class="p">):</span>
+    <span class="n">target_coordinate_system</span> <span class="o">=</span> <span class="n">GEOCENTRIC_CARTESIAN</span>
+
+<div class="viewcode-block" id="TestSphericalToCartesian.reference_convert"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TestSphericalToCartesian.reference_convert">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">reference_convert</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">spherical2cartesian</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestSphericalToSpherical"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TestSphericalToSpherical">[docs]</a><span class="k">class</span> <span class="nc">TestSphericalToSpherical</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">SourceSpherical</span><span class="p">,</span> <span class="n">TargetIndetical</span><span class="p">,</span> <span class="n">ConvertTestMixIn</span><span class="p">):</span>
+    <span class="n">target_coordinate_system</span> <span class="o">=</span> <span class="n">GEOCENTRIC_SPHERICAL</span></div>
+
+
+<div class="viewcode-block" id="TestSphericalToGeodeticWGS84"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TestSphericalToGeodeticWGS84">[docs]</a><span class="k">class</span> <span class="nc">TestSphericalToGeodeticWGS84</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">SourceSpherical</span><span class="p">,</span> <span class="n">ConvertTestMixIn</span><span class="p">):</span>
+    <span class="n">target_coordinate_system</span> <span class="o">=</span> <span class="n">GEODETIC_ABOVE_WGS84</span>
+
+<div class="viewcode-block" id="TestSphericalToGeodeticWGS84.reference_convert"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TestSphericalToGeodeticWGS84.reference_convert">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">reference_convert</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">spherical2geodetic</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestCartesianToCartesian"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TestCartesianToCartesian">[docs]</a><span class="k">class</span> <span class="nc">TestCartesianToCartesian</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">SourceCartesian</span><span class="p">,</span> <span class="n">TargetIndetical</span><span class="p">,</span> <span class="n">ConvertTestMixIn</span><span class="p">):</span>
+    <span class="n">target_coordinate_system</span> <span class="o">=</span> <span class="n">GEOCENTRIC_CARTESIAN</span></div>
+
+
+<div class="viewcode-block" id="TestCartesianToSpherical"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TestCartesianToSpherical">[docs]</a><span class="k">class</span> <span class="nc">TestCartesianToSpherical</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">SourceCartesian</span><span class="p">,</span> <span class="n">ConvertTestMixIn</span><span class="p">):</span>
+    <span class="n">target_coordinate_system</span> <span class="o">=</span> <span class="n">GEOCENTRIC_SPHERICAL</span>
+
+<div class="viewcode-block" id="TestCartesianToSpherical.reference_convert"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TestCartesianToSpherical.reference_convert">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">reference_convert</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">cartesian2spherical</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestCartesianToGeodeticWGS84"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TestCartesianToGeodeticWGS84">[docs]</a><span class="k">class</span> <span class="nc">TestCartesianToGeodeticWGS84</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">SourceCartesian</span><span class="p">,</span> <span class="n">ConvertTestMixIn</span><span class="p">):</span>
+    <span class="n">target_coordinate_system</span> <span class="o">=</span> <span class="n">GEODETIC_ABOVE_WGS84</span>
+
+<div class="viewcode-block" id="TestCartesianToGeodeticWGS84.reference_convert"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TestCartesianToGeodeticWGS84.reference_convert">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">reference_convert</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">cartesian2geodetic</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, dolezalovat.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

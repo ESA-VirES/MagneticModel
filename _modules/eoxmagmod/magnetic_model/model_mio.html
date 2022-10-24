@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eoxmagmod.magnetic_model.model_mio &mdash; MagneticModel  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> MagneticModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Module Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MagneticModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>eoxmagmod.magnetic_model.model_mio</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for eoxmagmod.magnetic_model.model_mio</h1><div class="highlight"><pre>
+<span></span><span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1">#</span>
+<span class="c1">#  MIO Magnetic Model</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Martin Paces &lt;martin.paces@eox.at&gt;</span>
+<span class="c1">#</span>
+<span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1"># Copyright (C) 2018 EOX IT Services GmbH</span>
+<span class="c1">#</span>
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c1"># in the Software without restriction, including without limitation the rights</span>
+<span class="c1"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c1"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+<span class="c1">#</span>
+<span class="c1"># The above copyright notice and this permission notice shall be included in all</span>
+<span class="c1"># copies of this Software or works derived from this Software.</span>
+<span class="c1">#</span>
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c1"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</span>
+<span class="c1"># THE SOFTWARE.</span>
+<span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1"># pylint: disable=too-many-arguments,too-many-locals</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">asarray</span><span class="p">,</span> <span class="n">empty</span><span class="p">,</span> <span class="n">nditer</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">isnan</span><span class="p">,</span> <span class="n">full</span><span class="p">,</span> <span class="n">newaxis</span><span class="p">,</span> <span class="n">ones</span>
+<span class="kn">from</span> <span class="nn">.._pymm</span> <span class="kn">import</span> <span class="n">GEOCENTRIC_SPHERICAL</span><span class="p">,</span> <span class="n">convert</span>
+<span class="kn">from</span> <span class="nn">..magnetic_time</span> <span class="kn">import</span> <span class="n">mjd2000_to_magnetic_universal_time</span>
+<span class="kn">from</span> <span class="nn">.model</span> <span class="kn">import</span> <span class="n">GeomagneticModel</span><span class="p">,</span> <span class="n">DipoleSphericalHarmomicGeomagneticModel</span>
+
+<span class="n">MIO_HEIGHT</span> <span class="o">=</span> <span class="mf">110.0</span> <span class="c1"># km</span>
+<span class="n">MIO_EARTH_RADIUS</span> <span class="o">=</span> <span class="mf">6371.2</span> <span class="c1"># km</span>
+<span class="n">MIO_WOLF_RATIO</span> <span class="o">=</span> <span class="mf">0.014850</span>
+
+
+<div class="viewcode-block" id="DipoleMIOPrimaryGeomagneticModel"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.magnetic_model.model_mio.DipoleMIOPrimaryGeomagneticModel">[docs]</a><span class="k">class</span> <span class="nc">DipoleMIOPrimaryGeomagneticModel</span><span class="p">(</span><span class="n">GeomagneticModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Composed model switching between MIO primary fields evaluation</span>
+<span class="sd">    above and below the Ionosphere.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;location&quot;</span><span class="p">,</span> <span class="s2">&quot;f107&quot;</span><span class="p">,</span> <span class="s2">&quot;subsolar_point&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">degree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get maximum degree of the model. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_below_ionosphere</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_above_ionosphere</span><span class="o">.</span><span class="n">degree</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">min_degree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get minimum degree of the model. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_below_ionosphere</span><span class="o">.</span><span class="n">min_degree</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_above_ionosphere</span><span class="o">.</span><span class="n">min_degree</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_below_ionosphere</span><span class="p">,</span> <span class="n">model_above_ionosphere</span><span class="p">,</span>
+                 <span class="n">height</span><span class="o">=</span><span class="n">MIO_HEIGHT</span><span class="p">,</span> <span class="n">earth_radius</span><span class="o">=</span><span class="n">MIO_EARTH_RADIUS</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_below_ionosphere</span> <span class="o">=</span> <span class="n">model_below_ionosphere</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_above_ionosphere</span> <span class="o">=</span> <span class="n">model_above_ionosphere</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">earth_radius</span> <span class="o">=</span> <span class="n">earth_radius</span>
+
+<div class="viewcode-block" id="DipoleMIOPrimaryGeomagneticModel.eval"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.magnetic_model.model_mio.DipoleMIOPrimaryGeomagneticModel.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span>
+             <span class="n">input_coordinate_system</span><span class="o">=</span><span class="n">GEOCENTRIC_SPHERICAL</span><span class="p">,</span>
+             <span class="n">output_coordinate_system</span><span class="o">=</span><span class="n">GEOCENTRIC_SPHERICAL</span><span class="p">,</span>
+             <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">location</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span>
+            <span class="n">location</span><span class="p">,</span> <span class="n">input_coordinate_system</span><span class="p">,</span> <span class="n">GEOCENTRIC_SPHERICAL</span>
+        <span class="p">)</span>
+
+        <span class="n">radius_ionosphere</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">earth_radius</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">location</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">mask_below_ionosphere</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">&lt;=</span> <span class="n">radius_ionosphere</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">location</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">_eval_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+
+            <span class="k">def</span> <span class="nf">_mask_array</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="k">else</span> <span class="n">data</span>
+
+            <span class="k">def</span> <span class="nf">_mask_option</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">options</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_mask_array</span><span class="p">(</span><span class="n">asarray</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+            <span class="n">_mask_option</span><span class="p">(</span><span class="s1">&#39;f107&#39;</span><span class="p">)</span>
+            <span class="n">_mask_option</span><span class="p">(</span><span class="s1">&#39;lat_sol&#39;</span><span class="p">)</span>
+            <span class="n">_mask_option</span><span class="p">(</span><span class="s1">&#39;lon_sol&#39;</span><span class="p">)</span>
+
+            <span class="n">result</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span>
+                <span class="n">_mask_array</span><span class="p">(</span><span class="n">time</span><span class="p">),</span> <span class="n">location</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">GEOCENTRIC_SPHERICAL</span><span class="p">,</span>
+                <span class="n">output_coordinate_system</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span>
+            <span class="p">)</span>
+
+        <span class="n">_eval_model</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_below_ionosphere</span><span class="p">,</span> <span class="n">mask_below_ionosphere</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span>
+        <span class="p">)</span>
+        <span class="n">_eval_model</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_above_ionosphere</span><span class="p">,</span> <span class="o">~</span><span class="n">mask_below_ionosphere</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">validity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">start_above</span><span class="p">,</span> <span class="n">stop_above</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_above_ionosphere</span><span class="o">.</span><span class="n">validity</span>
+        <span class="n">start_below</span><span class="p">,</span> <span class="n">stop_below</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_below_ionosphere</span><span class="o">.</span><span class="n">validity</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">start_above</span><span class="p">,</span> <span class="n">start_below</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">stop_above</span><span class="p">,</span> <span class="n">stop_below</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="DipoleMIOGeomagneticModel"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.magnetic_model.model_mio.DipoleMIOGeomagneticModel">[docs]</a><span class="k">class</span> <span class="nc">DipoleMIOGeomagneticModel</span><span class="p">(</span><span class="n">DipoleSphericalHarmomicGeomagneticModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Swarm MIO model calculated by the Spherical Harmonic</span>
+<span class="sd">    Expansion in the dipole coordinates.</span>
+<span class="sd">    The dipole coordinates are defined by the north pole latitude and longitude.</span>
+<span class="sd">    The model requires time dependent F10.7 index values.</span>
+
+<span class="sd">    Options:</span>
+<span class="sd">        coefficients - spherical harmonic coefficients</span>
+<span class="sd">        north_pole - a tuple of dipole north pole lat/lon coordinates</span>
+<span class="sd">                     or callable returning a tuple of dipole north pole</span>
+<span class="sd">                     lat/lon coordinates for a given MJD2000 time.</span>
+<span class="sd">        wolf_ratio - Wolf ratio (F10.7 scale)</span>
+<span class="sd">        height - radius of the ionosphere (a + h)</span>
+<span class="sd">        earth_radius - mean Earth radius used by the MIO model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># list of the required model parameters</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;location&quot;</span><span class="p">,</span> <span class="s2">&quot;f107&quot;</span><span class="p">,</span> <span class="s2">&quot;subsolar_point&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">north_pole</span><span class="p">,</span> <span class="n">wolf_ratio</span><span class="o">=</span><span class="n">MIO_WOLF_RATIO</span><span class="p">,</span>
+                 <span class="n">height</span><span class="o">=</span><span class="n">MIO_HEIGHT</span><span class="p">,</span> <span class="n">earth_radius</span><span class="o">=</span><span class="n">MIO_EARTH_RADIUS</span><span class="p">):</span>
+        <span class="n">DipoleSphericalHarmomicGeomagneticModel</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">north_pole</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wolf_ratio</span> <span class="o">=</span> <span class="n">wolf_ratio</span>
+
+<div class="viewcode-block" id="DipoleMIOGeomagneticModel.eval"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.magnetic_model.model_mio.DipoleMIOGeomagneticModel.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span>
+             <span class="n">input_coordinate_system</span><span class="o">=</span><span class="n">GEOCENTRIC_SPHERICAL</span><span class="p">,</span>
+             <span class="n">output_coordinate_system</span><span class="o">=</span><span class="n">GEOCENTRIC_SPHERICAL</span><span class="p">,</span>
+             <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">location</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="n">location</span><span class="p">)</span>
+
+        <span class="n">lat_ngp</span><span class="p">,</span> <span class="n">lon_ngp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">north_pole</span>
+        <span class="n">mut</span> <span class="o">=</span> <span class="n">mjd2000_to_magnetic_universal_time</span><span class="p">(</span>
+            <span class="n">time</span><span class="p">,</span> <span class="n">lat_ngp</span><span class="p">,</span> <span class="n">lon_ngp</span><span class="p">,</span>
+            <span class="n">lat_sol</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;lat_sol&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">lon_sol</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;lon_sol&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">mio_scale</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">wolf_ratio</span> <span class="o">*</span> <span class="n">asarray</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;f107&#39;</span><span class="p">))</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">isnan</span><span class="p">(</span><span class="n">mio_scale</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">mio_scale</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
+                <span class="n">mio_scale</span> <span class="o">=</span> <span class="n">full</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">mio_scale</span><span class="p">)</span>
+            <span class="n">mio_scale</span> <span class="o">=</span> <span class="n">mio_scale</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">newaxis</span><span class="p">]</span>
+            <span class="n">mut</span> <span class="o">=</span> <span class="n">mut</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
+        <span class="n">scale</span> <span class="o">=</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="o">*</span> <span class="n">mio_scale</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eval_masked</span><span class="p">(</span>
+            <span class="n">mask</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span>
+            <span class="n">input_coordinate_system</span><span class="p">,</span> <span class="n">output_coordinate_system</span><span class="p">,</span>
+            <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">mut</span><span class="o">=</span><span class="n">mut</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_eval_multi_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">input_coordinate_system</span><span class="p">,</span>
+                         <span class="n">output_coordinate_system</span><span class="p">,</span> <span class="n">mut</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">iterator</span> <span class="o">=</span> <span class="n">nditer</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                    <span class="n">time</span><span class="p">,</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                    <span class="n">mut</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="n">op_flags</span><span class="o">=</span><span class="p">[</span>
+                    <span class="p">[</span><span class="s1">&#39;writeonly&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;writeonly&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;writeonly&#39;</span><span class="p">],</span>
+                    <span class="p">[</span><span class="s1">&#39;readonly&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;readonly&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;readonly&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;readonly&#39;</span><span class="p">],</span>
+                    <span class="p">[</span><span class="s1">&#39;readonly&#39;</span><span class="p">],</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+                <span class="p">(</span>
+                    <span class="n">vect0</span><span class="p">,</span> <span class="n">vect1</span><span class="p">,</span> <span class="n">vect2</span><span class="p">,</span>
+                    <span class="n">time_</span><span class="p">,</span> <span class="n">coord0</span><span class="p">,</span> <span class="n">coord1</span><span class="p">,</span> <span class="n">coord2</span><span class="p">,</span> <span class="n">mut_</span><span class="p">,</span>
+                <span class="p">)</span> <span class="o">=</span> <span class="n">item</span>
+                <span class="n">vect0</span><span class="p">[</span><span class="o">...</span><span class="p">],</span> <span class="n">vect1</span><span class="p">[</span><span class="o">...</span><span class="p">],</span> <span class="n">vect2</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eval_single_time</span><span class="p">(</span>
+                    <span class="n">time_</span><span class="p">,</span> <span class="p">[</span><span class="n">coord0</span><span class="p">,</span> <span class="n">coord1</span><span class="p">,</span> <span class="n">coord2</span><span class="p">],</span>
+                    <span class="n">input_coordinate_system</span><span class="p">,</span> <span class="n">output_coordinate_system</span><span class="p">,</span>
+                    <span class="n">mut</span><span class="o">=</span><span class="n">mut_</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, dolezalovat.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

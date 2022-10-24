@@ -1,0 +1,173 @@
+eoxmagmod.magnetic\_model package
+=================================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   eoxmagmod.magnetic_model.tests
+
+Submodules
+----------
+
+eoxmagmod.magnetic\_model.coefficients module
+---------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.coefficients
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.coefficients\_mio module
+--------------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.coefficients_mio
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.field\_lines module
+---------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.field_lines
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.loader\_emm module
+--------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.loader_emm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.loader\_igrf module
+---------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.loader_igrf
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.loader\_mio module
+--------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.loader_mio
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.loader\_mma module
+--------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.loader_mma
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.loader\_shc module
+--------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.loader_shc
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.loader\_wmm module
+--------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.loader_wmm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.model module
+--------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.model\_composed module
+------------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.model_composed
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.model\_mio module
+-------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.model_mio
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.parser\_emm module
+--------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.parser_emm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.parser\_igrf module
+---------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.parser_igrf
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.parser\_mio module
+--------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.parser_mio
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.parser\_mma module
+--------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.parser_mma
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.parser\_shc module
+--------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.parser_shc
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.parser\_wmm module
+--------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.parser_wmm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.magnetic\_model.util module
+-------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.util
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: eoxmagmod.magnetic_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
