@@ -1,0 +1,61 @@
+eoxmagmod.eoxmagmod.tests.data package
+======================================
+
+Submodules
+----------
+
+eoxmagmod.eoxmagmod.tests.data.generate\_quasi\_dipole\_test\_data module
+-------------------------------------------------------------------------
+
+.. automodule:: eoxmagmod.eoxmagmod.tests.data.generate_quasi_dipole_test_data
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.eoxmagmod.tests.data.generate\_solar\_position\_test\_data module
+---------------------------------------------------------------------------
+
+.. automodule:: eoxmagmod.eoxmagmod.tests.data.generate_solar_position_test_data
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.eoxmagmod.tests.data.mma\_external module
+---------------------------------------------------
+
+.. automodule:: eoxmagmod.eoxmagmod.tests.data.mma_external
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.eoxmagmod.tests.data.mma\_internal module
+---------------------------------------------------
+
+.. automodule:: eoxmagmod.eoxmagmod.tests.data.mma_internal
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.eoxmagmod.tests.data.sifm module
+------------------------------------------
+
+.. automodule:: eoxmagmod.eoxmagmod.tests.data.sifm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.eoxmagmod.tests.data.update\_quasi\_dipole\_test\_data module
+-----------------------------------------------------------------------
+
+.. automodule:: eoxmagmod.eoxmagmod.tests.data.update_quasi_dipole_test_data
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: eoxmagmod.eoxmagmod.tests.data
+   :members:
+   :undoc-members:
+   :show-inheritance:

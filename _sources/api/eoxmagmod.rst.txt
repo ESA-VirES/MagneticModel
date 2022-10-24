@@ -1,0 +1,23 @@
+eoxmagmod namespace
+===================
+
+.. py:module:: eoxmagmod
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   eoxmagmod.eoxmagmod
+
+Submodules
+----------
+
+eoxmagmod.setup module
+----------------------
+
+.. automodule:: eoxmagmod.setup
+   :members:
+   :undoc-members:
+   :show-inheritance:
