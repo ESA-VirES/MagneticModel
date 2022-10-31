@@ -66,6 +66,9 @@
 /* bisect interval search */
 #include "pymm_bisect.h"
 
+/* coefficients interpolation */
+#include "pymm_interp.h"
+
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
 
@@ -87,6 +90,7 @@ static PyMethodDef pymm_methods[] =
     {"sheval", (PyCFunction)sheval, METH_VARARGS|METH_KEYWORDS, DOC_SHEVAL},
     {"convert", (PyCFunction)convert, METH_VARARGS|METH_KEYWORDS, DOC_CONVERT},
     {"bisect", (PyCFunction)bisect, METH_VARARGS|METH_KEYWORDS, DOC_BISECT},
+    {"interp", (PyCFunction)interp, METH_VARARGS|METH_KEYWORDS, DOC_INTERP},
     {NULL, NULL, 0, NULL} /* Sentinel - DO NOT REMOVE! */
 } ;
 
@@ -116,6 +120,8 @@ static PyObject* init_module(void)
     set_dict_item_str_double(dict, "EARTH_RADIUS", RADIUS);
     set_dict_item_str_long(dict, "BISECT_SIDE_LEFT", BISECT_SIDE_LEFT);
     set_dict_item_str_long(dict, "BISECT_SIDE_RIGHT", BISECT_SIDE_RIGHT);
+    set_dict_item_str_long(dict, "INTERP_C1", INTERP_C1);
+    set_dict_item_str_long(dict, "INTERP_C1D1", INTERP_C1D1);
 
     /* module metadata */
     set_dict_item_str_str(dict, "__author__", "Martin Paces (martin.paces@eox.at)");

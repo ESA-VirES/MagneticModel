@@ -25,7 +25,8 @@ CCFLAGS= -c -O2 -Wall -Wno-unused-function -fPIC $(INCS)
 HDR_MM=pymm_aux.h pymm_sheval.h pymm_sphargrd.h pymm_spharpot.h\
     pymm_legendre.h pymm_lonsincos.h pymm_relradpow.h\
     pymm_vrot_common.h pymm_vrot_sph2cart.h pymm_vrot_sph2geod.h\
-    pymm_vrot_cart2sph.h pymm_cconv.h pymm_coord.h pymm_bisect.h
+    pymm_vrot_cart2sph.h pymm_cconv.h pymm_coord.h pymm_bisect.h\
+    pymm_interp.h
 OBJ_MM=pymm.o
 DST_MM=_pymm.so
 

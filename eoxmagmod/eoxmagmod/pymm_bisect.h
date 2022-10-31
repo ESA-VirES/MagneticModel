@@ -33,15 +33,11 @@
 #include "bisect.h"
 #include "pymm_aux.h"
 
-/* Python function definition */
-
 #define BISECT_SIDE_LEFT 0
 #define BISECT_SIDE_RIGHT 1
 
-//# include "stdio.h"
-
 /*
- * high level nD-array recursive coordinate conversion
+ * high level nD-array interval search
  */
 
 static void _bisect_left(ARRAY_DATA *arrd_in, ARRAY_DATA *arrd_out, ARRAY_DATA *arrd_nodes)
@@ -99,6 +95,8 @@ static void _bisect_right(ARRAY_DATA *arrd_in, ARRAY_DATA *arrd_out, ARRAY_DATA 
     }
 }
 
+
+/* Python function definition */
 
 #define DOC_BISECT "\n"\
 "   idx = bisect(v, x, side=BISECT_SIDE_LEFT)\n"\
