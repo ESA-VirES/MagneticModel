@@ -77,7 +77,6 @@ class SHCoefficients(object):
         """
         raise NotImplementedError
 
-
     def __call__(self, time, **parameters):
         """ Return the matrix of the full model coefficients. """
         raise NotImplementedError
