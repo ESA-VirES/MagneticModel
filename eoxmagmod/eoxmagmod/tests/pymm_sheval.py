@@ -39,8 +39,7 @@ from eoxmagmod._pymm import (
     relradpow, lonsincos, legendre,
     spharpot, sphargrd, sheval,
 )
-from eoxmagmod.tests.data import sifm
-from eoxmagmod.tests.data import mma_external
+from eoxmagmod.tests.data import sifm, mma_external
 
 
 class SphericalHarmonicsMixIn(object):

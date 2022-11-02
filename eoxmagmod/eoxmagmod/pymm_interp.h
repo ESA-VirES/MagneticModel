@@ -221,7 +221,7 @@ static PyObject* interp(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // check the array dimensions
     if (PyArray_DIMS(arr_t0)[0] != PyArray_DIMS(arr_c0)[PyArray_NDIM(arr_c0)-1]) {
-        PyErr_Format(PyExc_ValueError, "The coefficients series does no match the corresponding times.!", keywords[2]);
+        PyErr_Format(PyExc_ValueError, "The coefficients series does no match the corresponding times!", keywords[2]);
         goto exit;
     }
 

@@ -235,6 +235,7 @@ class SparseSHCoefficients(SHCoefficients):
         n_idx, m_idx = indices[..., 0], indices[..., 1]
         self._degree = n_idx.max()
         self._min_degree = n_idx.min()
+        self._nm = indices.astype('int32')
         self._index = stack((
             aabs(m_idx) + (n_idx*(n_idx + 1))//2,
             (m_idx < 0).astype('int'),

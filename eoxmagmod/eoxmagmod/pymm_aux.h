@@ -31,6 +31,18 @@
 #define PYMM_AUX_H
 
 /*
+ * Check the input python object and convert it to a NumPy array of a speciefied
+ * type, ensuring the native byte-order.Returns NULL if the conversion failed.
+ */
+
+static PyArrayObject* _get_as_array(PyObject *data, int typenum,
+        int dmin, int dmax, int reqs, const char *label)
+{
+    PyArray_Descr *dtype = PyArray_DescrFromType(typenum);
+    return (PyArrayObject*) PyArray_FromAny(data, dtype, dmin, dmax, reqs, NULL);
+}
+
+/*
  * Check the input python object and convert it to an integer NumPy
  * array ensuring the native byte-order.
  * Returns NULL if the conversion failed.
@@ -39,8 +51,7 @@
 static PyArrayObject* _get_as_int_array(PyObject *data, int dmin, int dmax,
                 int reqs, const char *label)
 {
-    PyArray_Descr *dtype = PyArray_DescrFromType(NPY_INT32);
-    return (PyArrayObject*) PyArray_FromAny(data, dtype, dmin, dmax, reqs, NULL);
+    return _get_as_array(data, NPY_INT32, dmin, dmax, reqs, label);
 }
 
 
@@ -53,6 +64,7 @@ static PyArrayObject* _get_as_int_array(PyObject *data, int dmin, int dmax,
 static PyArrayObject* _get_as_double_array(PyObject *data, int dmin, int dmax,
                 int reqs, const char *label)
 {
+    return _get_as_array(data, NPY_FLOAT64, dmin, dmax, reqs, label);
     PyArray_Descr *dtype = PyArray_DescrFromType(NPY_FLOAT64);
     return (PyArrayObject*) PyArray_FromAny(data, dtype, dmin, dmax, reqs, NULL);
 }
@@ -105,7 +117,7 @@ static int _check_array_dim_eq(PyArrayObject *arr, int dim, size_t size, const c
     int rv = PyArray_DIM(arr, dim) != size;
     if (rv)
         PyErr_Format(PyExc_ValueError, "The dimension #%d of '%s'"\
-            " %ld is not equal the allowed value %ld!", dim, label,
+            " %ld is not equal to the required value %ld!", dim, label,
             (size_t)PyArray_DIM(arr, dim), size);
     return rv;
 }
@@ -260,9 +272,20 @@ static ARRAY_DATA _get_arrd_item_nocheck(const ARRAY_DATA *arrd, npy_intp idx) {
 
 static ARRAY_DATA _get_arrd_item(const ARRAY_DATA *arrd, npy_intp idx)
 {
-    if (arrd->ndim < 1)
+    if (arrd->ndim <= 0)
     {
         // treat as scalar
+        return *arrd;
+    }
+
+    return _get_arrd_item_nocheck(arrd, idx);
+}
+
+static ARRAY_DATA _get_arrd_vector_item(const ARRAY_DATA *arrd, npy_intp idx)
+{
+    if (arrd->ndim <= 1)
+    {
+        // treat as non-iterable 1D vector
         return *arrd;
     }
 

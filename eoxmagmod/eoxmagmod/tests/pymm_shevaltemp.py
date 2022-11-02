@@ -1,0 +1,387 @@
+#-------------------------------------------------------------------------------
+#
+#  Spherical Harmonic Expansion with temporal interpolation - Geomagnetic Model
+#  - tests
+#
+# Author: Martin Paces <martin.paces@eox.at>
+#-------------------------------------------------------------------------------
+# Copyright (C) 2022 EOX IT Services GmbH
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies of this Software or works derived from this Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#-------------------------------------------------------------------------------
+# pylint: disable=missing-docstring,no-name-in-module,too-few-public-methods,line-too-long
+
+from unittest import TestCase, main
+from collections import namedtuple
+from numpy import broadcast_to, stack, empty, zeros, prod, asarray
+from numpy.random import uniform
+from numpy.testing import assert_allclose
+from numpy.lib.stride_tricks import as_strided
+from eoxmagmod._pymm import (
+    POTENTIAL, GRADIENT, POTENTIAL_AND_GRADIENT,
+    GEODETIC_ABOVE_WGS84, GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
+    INTERP_C1,
+    convert, interp, sheval, shevaltemp,
+)
+from eoxmagmod.tests.data import chaos_core
+
+
+# Coeficient set:
+# coef_times - [Nt] time nodes of the SH coefficient time-series
+# coef_coef  - [Nc,Nt] interpolated time-series of the SH coefficients
+# coef_nm    - [Nc,2] degree/order mapping of the coefficients
+# spline_order - currently only 2 is allowed
+
+CoeffSet = namedtuple("CoeffSet", ["coef_times", "coef_coef", "coef_nm", "spline_order"])
+
+
+class SphericalHarmonicsWithCoeffInterpolationMixIn(object):
+
+    options = {}
+    scale_potential = 1.0
+    scale_gradient = [1.0, 1.0, 1.0]
+    source_coordinate_system = None
+    target_coordinate_system = None
+    is_internal = True
+    degree = None
+    coef_sets = [] # list of coefficient sets
+
+    def times(self, shape=1):
+
+        start = max([cs.coef_times[0] for cs in self.coef_sets])
+        stop = min([cs.coef_times[-1] for cs in self.coef_sets])
+
+        return uniform(start, stop, shape)
+
+    def coordinates(self, shape=1):
+        raise NotImplementedError
+
+    @classmethod
+    def eval_shevaltemp(cls, times, coords, mode):
+        return shevaltemp(
+            times,
+            coords,
+            degree=cls.degree,
+            coef_set_list=cls.coef_sets,
+            coord_type_in=cls.source_coordinate_system,
+            coord_type_out=cls.target_coordinate_system,
+            mode=mode,
+            is_internal=cls.is_internal,
+            **cls.options
+        )
+
+    @classmethod
+    def reference_shevaltemp(cls, times, coords):
+
+        def _reshape(data, shape):
+            extra_shape = shape[len(data.shape):]
+            extra_strides = tuple(0 for _ in extra_shape)
+            return as_strided(
+                data,
+                shape=(*data.shape, *extra_shape),
+                strides=(*data.strides, *extra_strides)
+            )
+
+        def _interp_coef_set(time, coef_set):
+
+            # mapping raw coefficients to G/H arrays
+            degree = coef_set.coef_nm[:, 0]
+            order = coef_set.coef_nm[:, 1]
+            idx = ((degree+1)*degree)//2 + abs(order)
+
+            coef_sel = (degree <= cls.degree).nonzero()[0]
+            coef_g_sel = (order[coef_sel] >= 0).nonzero()[0]
+            coef_h_sel = (order[coef_sel] < 0).nonzero()[0]
+            coef_g_idx = idx[coef_sel][coef_g_sel]
+            coef_h_idx = idx[coef_sel][coef_h_sel]
+
+            coef = interp(
+                time,
+                coef_set.coef_times,
+                coef_set.coef_coef[coef_sel, ...],
+                kind=INTERP_C1
+            )
+
+            coef_g[coef_g_idx] = coef[coef_g_sel]
+            coef_h[coef_h_idx] = coef[coef_h_sel]
+
+        # assure NumPy arrays
+        times = asarray(times)
+        coords = asarray(coords)
+
+        # broadcast to a common shape
+        if len(times.shape) < len(coords.shape[:-1]):
+            times = _reshape(times, coords.shape[:-1]).copy()
+
+        elif len(times.shape) > len(coords.shape[:-1]):
+            coords = stack((
+                _reshape(coords[..., 0], times.shape),
+                _reshape(coords[..., 1], times.shape),
+                _reshape(coords[..., 2], times.shape),
+            ), axis=-1)
+
+        # reshape to 1D
+        shape = times.shape
+        size = prod(shape) if shape else 1
+
+        times = times.reshape((size,))
+        coords = coords.reshape((size, 3))
+
+        result_pot = empty(times.shape)
+        result_grad = empty(coords.shape)
+
+
+        # single-time coefficient arrays
+        coef_g = zeros((cls.degree+2)*(cls.degree+1)//2)
+        coef_h = zeros((cls.degree+2)*(cls.degree+1)//2)
+
+        for i in range(size):
+
+            for coef_set in cls.coef_sets:
+                _interp_coef_set(times[i], coef_set)
+
+            result_pot[i], result_grad[i, :] = sheval(
+                coords[i, :],
+                mode=POTENTIAL_AND_GRADIENT,
+                is_internal=cls.is_internal,
+                degree=cls.degree,
+                coef_g=coef_g,
+                coef_h=coef_h,
+                coord_type_in=cls.source_coordinate_system,
+                coord_type_out=cls.target_coordinate_system,
+                **cls.options
+            )
+
+        return result_pot.reshape(shape), result_grad.reshape((*shape, 3))
+
+    def _test_shevaltemp_potential_and_gradient(self, times_shape, coords_shape):
+        times = self.times(times_shape)
+        coords = self.coordinates(coords_shape)
+        potential, gradient = self.eval_shevaltemp(times, coords, POTENTIAL_AND_GRADIENT)
+        potential_ref, gradient_ref = self.reference_shevaltemp(times, coords)
+        assert_allclose(potential, potential_ref, atol=1e-6)
+        assert_allclose(gradient, gradient_ref, atol=1e-6)
+
+    def _test_shevaltemp_potential(self, times_shape, coords_shape):
+        times = self.times(times_shape)
+        coords = self.coordinates(coords_shape)
+        potential = self.eval_shevaltemp(times, coords, POTENTIAL)
+        potential_ref, _ = self.reference_shevaltemp(times, coords)
+        assert_allclose(potential, potential_ref, atol=1e-6)
+
+    def _test_shevaltemp_gradient(self, times_shape, coords_shape):
+        times = self.times(times_shape)
+        coords = self.coordinates(coords_shape)
+        gradient = self.eval_shevaltemp(times, coords, GRADIENT)
+        _, gradient_ref = self.reference_shevaltemp(times, coords)
+        assert_allclose(gradient, gradient_ref, atol=1e-6)
+
+    def test_sheval_potential_and_gradient_T0X0(self):
+        self._test_shevaltemp_potential_and_gradient((), ())
+
+    def test_sheval_potential_T0X0(self):
+        self._test_shevaltemp_potential((), ())
+
+    def test_sheval_gradient_T0X0(self):
+        self._test_shevaltemp_gradient((), ())
+
+    def test_sheval_potential_and_gradient_T0X1(self):
+        self._test_shevaltemp_potential_and_gradient((), (10,))
+
+    def test_sheval_potential_T0X1(self):
+        self._test_shevaltemp_potential((), (10,))
+
+    def test_sheval_gradient_T0X1(self):
+        self._test_shevaltemp_gradient((), (10,))
+
+    def test_sheval_potential_and_gradient_T0X2(self):
+        self._test_shevaltemp_potential_and_gradient((), (10, 5))
+
+    def test_sheval_potential_T0X2(self):
+        self._test_shevaltemp_potential((), (10, 5))
+
+    def test_sheval_gradient_T0X2(self):
+        self._test_shevaltemp_gradient((), (10, 5))
+
+    def test_sheval_potential_and_gradient_T1X0(self):
+        self._test_shevaltemp_potential_and_gradient((10,), ())
+
+    def test_sheval_potential_T1X0(self):
+        self._test_shevaltemp_potential((10,), ())
+
+    def test_sheval_gradient_T1X0(self):
+        self._test_shevaltemp_gradient((10,), ())
+
+    def test_sheval_potential_and_gradient_T1X1(self):
+        self._test_shevaltemp_potential_and_gradient((10,), (10,))
+
+    def test_sheval_potential_T1X1(self):
+        self._test_shevaltemp_potential((10,), (10,))
+
+    def test_sheval_gradient_T1X1(self):
+        self._test_shevaltemp_gradient((10,), (10,))
+
+    def test_sheval_potential_and_gradient_T1X2(self):
+        self._test_shevaltemp_potential_and_gradient((10,), (10, 5))
+
+    def test_sheval_potential_T1X2(self):
+        self._test_shevaltemp_potential((10,), (10, 5))
+
+    def test_sheval_gradient_T1X2(self):
+        self._test_shevaltemp_gradient((10,), (10, 5))
+
+    def test_sheval_potential_and_gradient_T2X1(self):
+        self._test_shevaltemp_potential_and_gradient((10, 5), (10,))
+
+    def test_sheval_potential_T2X1(self):
+        self._test_shevaltemp_potential((10, 5), (10,))
+
+    def test_sheval_gradient_T2X1(self):
+        self._test_shevaltemp_gradient((10, 5), (10,))
+
+#-------------------------------------------------------------------------------
+# type of SH expansion
+
+class SHTypeInternal(object):
+    is_internal = True
+    degree = chaos_core.DEGREE
+    coef_sets = [
+        CoeffSet(chaos_core.TIMES, chaos_core.COEFF, chaos_core.NMMAP, 2),
+    ]
+
+#-------------------------------------------------------------------------------
+# sources
+
+
+class SourceSpherical(object):
+    source_coordinate_system = GEOCENTRIC_SPHERICAL
+
+    def coordinates(self, shape=1):
+        return stack((
+            uniform(-90, 90, shape),
+            uniform(-180, 180, shape),
+            uniform(6371.2, 6371.2*1.5, shape),
+        ), axis=-1)
+
+
+class SourceGeodetic(object):
+    source_coordinate_system = GEODETIC_ABOVE_WGS84
+
+    def coordinates(self, shape=1):
+        return stack((
+            uniform(-90, 90, shape),
+            uniform(-180, 180, shape),
+            uniform(-50, 150, shape),
+        ), axis=-1)
+
+
+class SourceCartesian(object):
+    source_coordinate_system = GEOCENTRIC_CARTESIAN
+
+    def coordinates(self, shape=1):
+        return convert(
+            stack((
+                uniform(-90, 90, shape),
+                uniform(-180, 180, shape),
+                uniform(6371.2, 6371.2*1.5, shape),
+            ), axis=-1),
+            GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN
+        )
+
+#-------------------------------------------------------------------------------
+
+class TestSHEvalTempCartesian2CartesianInternal(TestCase, SourceCartesian, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_CARTESIAN
+
+# class TestSHEvalTempCartesian2CartesianExternal(TestCase, SourceCartesian, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+#     target_coordinate_system = GEOCENTRIC_CARTESIAN
+
+
+class TestSHEvalTempCartesian2SphericalInternal(TestCase, SourceCartesian, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_SPHERICAL
+
+# class TestSHEvalTempCartesian2SphericalExternal(TestCase, SourceCartesian, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+#     target_coordinate_system = GEOCENTRIC_SPHERICAL
+
+
+class TestSHEvalTempCartesian2WGS84Internal(TestCase, SourceCartesian, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEODETIC_ABOVE_WGS84
+
+# class TestSHEvalTempCartesian2WGS84External(TestCase, SourceCartesian, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+#     target_coordinate_system = GEODETIC_ABOVE_WGS84
+
+#-------------------------------------------------------------------------------
+
+class TestSHEvalTempSpherical2CartesianInternal(TestCase, SourceSpherical, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_CARTESIAN
+
+# class TestSHEvalTempSpherical2CartesianExternal(TestCase, SourceSpherical, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+#     target_coordinate_system = GEOCENTRIC_CARTESIAN
+
+
+class TestSHEvalTempSpherical2SphericalInternal(TestCase, SourceSpherical, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_SPHERICAL
+
+# class TestSHEvalTempSpherical2SphericalExternal(TestCase, SourceSpherical, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+#     target_coordinate_system = GEOCENTRIC_SPHERICAL
+
+
+class TestSHEvalTempSpherical2WGS84Internal(TestCase, SourceSpherical, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEODETIC_ABOVE_WGS84
+
+# class TestSHEvalTempSpherical2WGS84External(TestCase, SourceSpherical, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+#     target_coordinate_system = GEODETIC_ABOVE_WGS84
+
+#-------------------------------------------------------------------------------
+
+class TestSHEvalTempWGS842CartesianInternal(TestCase, SourceGeodetic, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_CARTESIAN
+
+# class TestSHEvalTempWGS842CartesianExternal(TestCase, SourceGeodetic, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+#     target_coordinate_system = GEOCENTRIC_CARTESIAN
+
+
+class TestSHEvalTempWGS842SphericalInternal(TestCase, SourceGeodetic, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_SPHERICAL
+
+# class TestSHEvalTempWGS842SphericalExternal(TestCase, SourceGeodetic, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+#     target_coordinate_system = GEOCENTRIC_SPHERICAL
+
+
+class TestSHEvalTempWGS842WGS84Internal(TestCase, SourceGeodetic, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEODETIC_ABOVE_WGS84
+
+# class TestSHEvalTempWGS842WGS84External(TestCase, SourceGeodetic, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+#     target_coordinate_system = GEODETIC_ABOVE_WGS84
+
+#-------------------------------------------------------------------------------
+
+class TestSHEvalTempCart2CartScaled(TestSHEvalTempCartesian2CartesianInternal):
+    options = {"scale_potential": 2.0, "scale_gradient": [0.5, 1.0, -1.0]}
+    scale_potential = 2.0
+    scale_gradient = [0.5, 1.0, -1.0]
+
+class TestSHEvalTempSph2SphScaled(TestSHEvalTempSpherical2SphericalInternal):
+    options = {"scale_gradient": -1.0}
+    scale_gradient = [-1.0, -1.0, -1.0]
+
+#-------------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    main()

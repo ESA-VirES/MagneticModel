@@ -42,6 +42,7 @@
 
 /* spherical harmonic model evaluation */
 #include "pymm_sheval.h"
+#include "pymm_shevaltemp.h"
 
 /* evaluation of the associative Legendre functions */
 #include "pymm_legendre.h"
@@ -88,6 +89,7 @@ static PyMethodDef pymm_methods[] =
     {"relradpow", (PyCFunction)relradpow, METH_VARARGS|METH_KEYWORDS, DOC_RELRADPOW},
     {"legendre", (PyCFunction)legendre, METH_VARARGS|METH_KEYWORDS, DOC_LEGENDRE},
     {"sheval", (PyCFunction)sheval, METH_VARARGS|METH_KEYWORDS, DOC_SHEVAL},
+    {"shevaltemp", (PyCFunction)shevaltemp, METH_VARARGS|METH_KEYWORDS, DOC_SHEVALTEMP},
     {"convert", (PyCFunction)convert, METH_VARARGS|METH_KEYWORDS, DOC_CONVERT},
     {"bisect", (PyCFunction)bisect, METH_VARARGS|METH_KEYWORDS, DOC_BISECT},
     {"interp", (PyCFunction)interp, METH_VARARGS|METH_KEYWORDS, DOC_INTERP},
