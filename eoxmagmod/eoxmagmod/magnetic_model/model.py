@@ -107,7 +107,7 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
 
     def _eval_multi_time(self, time, coords, input_coordinate_system,
                          output_coordinate_system, **options):
-        """ Evaluate spherical harmonic for multiple times. """
+        """ Evaluate spherical harmonic model for multiple times. """
         result = empty(coords.shape)
         if result.size > 0:
             iterator = nditer(
