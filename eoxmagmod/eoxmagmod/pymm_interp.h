@@ -225,12 +225,6 @@ static PyObject* interp(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
     }
 
-    // double-check coeff stride
-    if (PyArray_STRIDES(arr_c0)[PyArray_NDIM(arr_c0)-1] != sizeof(double)) {
-        PyErr_Format(PyExc_RuntimeError, "Unexpected %s array %ldB stride!", keywords[2], PyArray_STRIDES(arr_c0)[PyArray_NDIM(arr_c0)-1]);
-        goto exit;
-    }
-
     // create the output array
     {
         npy_intp ndim = PyArray_NDIM(arr_t) + PyArray_NDIM(arr_c0) - 1;
