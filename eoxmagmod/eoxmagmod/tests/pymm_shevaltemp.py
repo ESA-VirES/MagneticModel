@@ -40,6 +40,7 @@ from eoxmagmod._pymm import (
     convert, interp, sheval, shevaltemp,
 )
 from eoxmagmod.tests.data import chaos_core
+from eoxmagmod.tests.data import chaos_mma
 
 
 # Coeficient set:
@@ -258,11 +259,27 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn(object):
 #-------------------------------------------------------------------------------
 # type of SH expansion
 
-class SHTypeInternal(object):
+class SHTypeInternalCore(object):
     is_internal = True
     degree = chaos_core.DEGREE
     coef_sets = [
         CoeffSet(chaos_core.TIMES, chaos_core.COEFF, chaos_core.NMMAP, 2),
+    ]
+
+class SHTypeInternalMMA(object):
+    is_internal = True
+    degree = chaos_mma.DEGREE
+    coef_sets = [
+        CoeffSet(chaos_mma.TIMES_I_1, chaos_mma.COEFF_I_1, chaos_mma.NMMAP_I_1, 2),
+        CoeffSet(chaos_mma.TIMES_I_2, chaos_mma.COEFF_I_2, chaos_mma.NMMAP_I_2, 2),
+    ]
+
+class SHTypeExternalMMA(object):
+    is_internal = True
+    degree = chaos_mma.DEGREE
+    coef_sets = [
+        CoeffSet(chaos_mma.TIMES_E_1, chaos_mma.COEFF_E_1, chaos_mma.NMMAP_E_1, 2),
+        CoeffSet(chaos_mma.TIMES_E_2, chaos_mma.COEFF_E_2, chaos_mma.NMMAP_E_2, 2),
     ]
 
 #-------------------------------------------------------------------------------
@@ -306,78 +323,105 @@ class SourceCartesian(object):
 
 #-------------------------------------------------------------------------------
 
-class TestSHEvalTempCartesian2CartesianInternal(TestCase, SourceCartesian, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+class TestSHEvalTempCartesian2CartesianInternalCore(TestCase, SourceCartesian, SHTypeInternalCore, SphericalHarmonicsWithCoeffInterpolationMixIn):
     target_coordinate_system = GEOCENTRIC_CARTESIAN
 
-# class TestSHEvalTempCartesian2CartesianExternal(TestCase, SourceCartesian, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
-#     target_coordinate_system = GEOCENTRIC_CARTESIAN
+class TestSHEvalTempCartesian2CartesianInternalMMA(TestCase, SourceCartesian, SHTypeInternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_CARTESIAN
+
+class TestSHEvalTempCartesian2CartesianExternalMMA(TestCase, SourceCartesian, SHTypeExternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_CARTESIAN
 
 
-class TestSHEvalTempCartesian2SphericalInternal(TestCase, SourceCartesian, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+class TestSHEvalTempCartesian2SphericalInternalCore(TestCase, SourceCartesian, SHTypeInternalCore, SphericalHarmonicsWithCoeffInterpolationMixIn):
     target_coordinate_system = GEOCENTRIC_SPHERICAL
 
-# class TestSHEvalTempCartesian2SphericalExternal(TestCase, SourceCartesian, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
-#     target_coordinate_system = GEOCENTRIC_SPHERICAL
+class TestSHEvalTempCartesian2SphericalInternalMMA(TestCase, SourceCartesian, SHTypeInternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_SPHERICAL
+
+class TestSHEvalTempCartesian2SphericalExternalMMA(TestCase, SourceCartesian, SHTypeExternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_SPHERICAL
 
 
-class TestSHEvalTempCartesian2WGS84Internal(TestCase, SourceCartesian, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+class TestSHEvalTempCartesian2WGS84InternalCore(TestCase, SourceCartesian, SHTypeInternalCore, SphericalHarmonicsWithCoeffInterpolationMixIn):
     target_coordinate_system = GEODETIC_ABOVE_WGS84
 
-# class TestSHEvalTempCartesian2WGS84External(TestCase, SourceCartesian, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
-#     target_coordinate_system = GEODETIC_ABOVE_WGS84
+class TestSHEvalTempCartesian2WGS84InternalMMA(TestCase, SourceCartesian, SHTypeInternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEODETIC_ABOVE_WGS84
+
+class TestSHEvalTempCartesian2WGS84ExternalMMA(TestCase, SourceCartesian, SHTypeExternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEODETIC_ABOVE_WGS84
 
 #-------------------------------------------------------------------------------
 
-class TestSHEvalTempSpherical2CartesianInternal(TestCase, SourceSpherical, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+class TestSHEvalTempSpherical2CartesianInternalCore(TestCase, SourceSpherical, SHTypeInternalCore, SphericalHarmonicsWithCoeffInterpolationMixIn):
     target_coordinate_system = GEOCENTRIC_CARTESIAN
 
-# class TestSHEvalTempSpherical2CartesianExternal(TestCase, SourceSpherical, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
-#     target_coordinate_system = GEOCENTRIC_CARTESIAN
+class TestSHEvalTempSpherical2CartesianInternalMMA(TestCase, SourceSpherical, SHTypeInternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_CARTESIAN
+
+class TestSHEvalTempSpherical2CartesianExternalMMA(TestCase, SourceSpherical, SHTypeExternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_CARTESIAN
 
 
-class TestSHEvalTempSpherical2SphericalInternal(TestCase, SourceSpherical, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+class TestSHEvalTempSpherical2SphericalInternalCore(TestCase, SourceSpherical, SHTypeInternalCore, SphericalHarmonicsWithCoeffInterpolationMixIn):
     target_coordinate_system = GEOCENTRIC_SPHERICAL
 
-# class TestSHEvalTempSpherical2SphericalExternal(TestCase, SourceSpherical, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
-#     target_coordinate_system = GEOCENTRIC_SPHERICAL
+class TestSHEvalTempSpherical2SphericalInternalMMA(TestCase, SourceSpherical, SHTypeInternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_SPHERICAL
+
+class TestSHEvalTempSpherical2SphericalExternalMMA(TestCase, SourceSpherical, SHTypeExternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_SPHERICAL
 
 
-class TestSHEvalTempSpherical2WGS84Internal(TestCase, SourceSpherical, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+class TestSHEvalTempSpherical2WGS84InternalCore(TestCase, SourceSpherical, SHTypeInternalCore, SphericalHarmonicsWithCoeffInterpolationMixIn):
     target_coordinate_system = GEODETIC_ABOVE_WGS84
 
-# class TestSHEvalTempSpherical2WGS84External(TestCase, SourceSpherical, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
-#     target_coordinate_system = GEODETIC_ABOVE_WGS84
+class TestSHEvalTempSpherical2WGS84InternalMMA(TestCase, SourceSpherical, SHTypeInternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEODETIC_ABOVE_WGS84
+
+class TestSHEvalTempSpherical2WGS84ExternalMMA(TestCase, SourceSpherical, SHTypeExternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEODETIC_ABOVE_WGS84
 
 #-------------------------------------------------------------------------------
 
-class TestSHEvalTempWGS842CartesianInternal(TestCase, SourceGeodetic, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+class TestSHEvalTempWGS842CartesianInternalCore(TestCase, SourceGeodetic, SHTypeInternalCore, SphericalHarmonicsWithCoeffInterpolationMixIn):
     target_coordinate_system = GEOCENTRIC_CARTESIAN
 
-# class TestSHEvalTempWGS842CartesianExternal(TestCase, SourceGeodetic, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
-#     target_coordinate_system = GEOCENTRIC_CARTESIAN
+class TestSHEvalTempWGS842CartesianInternalMMA(TestCase, SourceGeodetic, SHTypeInternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_CARTESIAN
+
+class TestSHEvalTempWGS842CartesianExternalMMA(TestCase, SourceGeodetic, SHTypeExternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_CARTESIAN
 
 
-class TestSHEvalTempWGS842SphericalInternal(TestCase, SourceGeodetic, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+class TestSHEvalTempWGS842SphericalInternalCore(TestCase, SourceGeodetic, SHTypeInternalCore, SphericalHarmonicsWithCoeffInterpolationMixIn):
     target_coordinate_system = GEOCENTRIC_SPHERICAL
 
-# class TestSHEvalTempWGS842SphericalExternal(TestCase, SourceGeodetic, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
-#     target_coordinate_system = GEOCENTRIC_SPHERICAL
+class TestSHEvalTempWGS842SphericalInternalMMA(TestCase, SourceGeodetic, SHTypeInternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_SPHERICAL
+
+class TestSHEvalTempWGS842SphericalExternalMMA(TestCase, SourceGeodetic, SHTypeExternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEOCENTRIC_SPHERICAL
 
 
-class TestSHEvalTempWGS842WGS84Internal(TestCase, SourceGeodetic, SHTypeInternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
+class TestSHEvalTempWGS842WGS84InternalCore(TestCase, SourceGeodetic, SHTypeInternalCore, SphericalHarmonicsWithCoeffInterpolationMixIn):
     target_coordinate_system = GEODETIC_ABOVE_WGS84
 
-# class TestSHEvalTempWGS842WGS84External(TestCase, SourceGeodetic, SHTypeExternal, SphericalHarmonicsWithCoeffInterpolationMixIn):
-#     target_coordinate_system = GEODETIC_ABOVE_WGS84
+class TestSHEvalTempWGS842WGS84InternalMMA(TestCase, SourceGeodetic, SHTypeInternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEODETIC_ABOVE_WGS84
+
+class TestSHEvalTempWGS842WGS84ExternalMMA(TestCase, SourceGeodetic, SHTypeExternalMMA, SphericalHarmonicsWithCoeffInterpolationMixIn):
+    target_coordinate_system = GEODETIC_ABOVE_WGS84
 
 #-------------------------------------------------------------------------------
 
-class TestSHEvalTempCart2CartScaled(TestSHEvalTempCartesian2CartesianInternal):
+class TestSHEvalTempCart2CartScaled(TestSHEvalTempCartesian2CartesianInternalCore):
     options = {"scale_potential": 2.0, "scale_gradient": [0.5, 1.0, -1.0]}
     scale_potential = 2.0
     scale_gradient = [0.5, 1.0, -1.0]
 
-class TestSHEvalTempSph2SphScaled(TestSHEvalTempSpherical2SphericalInternal):
+class TestSHEvalTempSph2SphScaled(TestSHEvalTempSpherical2SphericalInternalCore):
     options = {"scale_gradient": -1.0}
     scale_gradient = [-1.0, -1.0, -1.0]
 
