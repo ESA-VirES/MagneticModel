@@ -36,7 +36,7 @@ from numpy.lib.stride_tricks import as_strided
 from eoxmagmod._pymm import (
     POTENTIAL, GRADIENT, POTENTIAL_AND_GRADIENT,
     GEODETIC_ABOVE_WGS84, GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
-    INTERP_C1,
+    INTERP_C0, INTERP_C1,
     convert, interp, sheval, shevaltemp,
 )
 from eoxmagmod.tests.data import chaos_core
@@ -47,7 +47,7 @@ from eoxmagmod.tests.data import chaos_mma
 # coef_times - [Nt] time nodes of the SH coefficient time-series
 # coef_coef  - [Nc,Nt] interpolated time-series of the SH coefficients
 # coef_nm    - [Nc,2] degree/order mapping of the coefficients
-# spline_order - currently only 2 is allowed
+# spline_order - currently only 1 and 2 are allowed
 
 CoeffSet = namedtuple("CoeffSet", ["coef_times", "coef_coef", "coef_nm", "spline_order"])
 
@@ -101,6 +101,11 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn(object):
 
         def _interp_coef_set(time, coef_set):
 
+            options = {
+                1: {"kind":INTERP_C0,"extrapolate":True},
+                2: {"kind":INTERP_C1},
+            }[coef_set.spline_order]
+
             # mapping raw coefficients to G/H arrays
             degree = coef_set.coef_nm[:, 0]
             order = coef_set.coef_nm[:, 1]
@@ -116,7 +121,7 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn(object):
                 time,
                 coef_set.coef_times,
                 coef_set.coef_coef[coef_sel, ...],
-                kind=INTERP_C1
+                **options,
             )
 
             coef_g[coef_g_idx] = coef[coef_g_sel]
@@ -258,6 +263,13 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn(object):
 
 #-------------------------------------------------------------------------------
 # type of SH expansion
+
+class SHTypeInternalStatic(object):
+    is_internal = True
+    degree = chaos_core.DEGREE
+    coef_sets = [
+        CoeffSet(chaos_core.TIMES[:1], chaos_core.COEFF[:,:1], chaos_core.NMMAP, 1),
+    ]
 
 class SHTypeInternalCore(object):
     is_internal = True

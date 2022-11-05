@@ -122,6 +122,7 @@ static PyObject* init_module(void)
     set_dict_item_str_double(dict, "EARTH_RADIUS", RADIUS);
     set_dict_item_str_long(dict, "BISECT_SIDE_LEFT", BISECT_SIDE_LEFT);
     set_dict_item_str_long(dict, "BISECT_SIDE_RIGHT", BISECT_SIDE_RIGHT);
+    set_dict_item_str_long(dict, "INTERP_C0", INTERP_C0);
     set_dict_item_str_long(dict, "INTERP_C1", INTERP_C1);
     set_dict_item_str_long(dict, "INTERP_C1D1", INTERP_C1D1);
 

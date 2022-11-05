@@ -30,17 +30,53 @@
 #ifndef INTERPOLATION_H
 #define INTERPOLATION_H 1
 
+#include <stddef.h>
 #include <bisect.h>
 
+#define MAX_SPLINE_ORDER 6
+
+#define CLIP(v, v_min, v_max) ((v)<(v_min)?(v_min):((v)>(v_max)?(v_max):(v)))
+
 /**
- * Linear interpolation basis (interval index and basis functions).
+ * Common interpolation basis structures (interval index and basis functions).
  */
 
 typedef struct {
-    size_t i0;
-    size_t i;
-    double b[2];
-} INTERP1_BASIS;
+    ptrdiff_t i0;
+    ptrdiff_t i;
+    size_t order;
+    double b[MAX_SPLINE_ORDER];
+} INTERP_BASIS;
+
+
+/**
+ * @brief common interpolation basis function type
+ *
+ */
+
+typedef INTERP_BASIS (*f_get_interp_basis) (const double x, const double *v, const size_t n);
+
+/**
+ * @brief common interpolation evaluation function type
+ *
+ */
+
+typedef double (*f_interp_eval)(INTERP_BASIS *basis, const double *v);
+
+/**
+ * @brief Get constant interpolation basis
+ *
+ */
+
+static INTERP_BASIS get_interp0_basis (const double x, const double *v, const size_t n)
+{
+    ptrdiff_t idx0 = bisect_right(x, v, n);
+    ptrdiff_t idx = CLIP(idx0, 0, n-1);
+
+    INTERP_BASIS basis = {idx0, idx, 1, {1.0}};
+
+    return basis;
+}
 
 /**
  * @brief Get linear interpolation basis (interval index and basis functions)
@@ -53,17 +89,15 @@ typedef struct {
  * extrapolated.
  */
 
-#define CLIP(v, v_min, v_max) ((v)<(v_min)?(v_min):((v)>(v_max)?(v_max):(v)))
-
-static INTERP1_BASIS get_interp1_basis (const double x, const double *v, const size_t n)
+static INTERP_BASIS get_interp1_basis (const double x, const double *v, const size_t n)
 {
-    size_t idx0 = bisect_right(x, v, n);
-    size_t idx = CLIP(idx0, 0, n-2);
+    ptrdiff_t idx0 = bisect_right(x, v, n);
+    ptrdiff_t idx = CLIP(idx0, 0, n-2);
     double alpha = (x - v[idx]) / (v[idx+1] - v[idx]);
 
-    INTERP1_BASIS result = {idx0, idx, {1.0 - alpha, alpha}};
+    INTERP_BASIS basis = {idx0, idx, 2, {1.0 - alpha, alpha}};
 
-    return result;
+    return basis;
 }
 
 /**
@@ -78,19 +112,30 @@ static INTERP1_BASIS get_interp1_basis (const double x, const double *v, const s
  * extrapolated.
  */
 
-static INTERP1_BASIS get_interp1d1_basis (const double x, const double *v, const size_t n)
+static INTERP_BASIS get_interp1d1_basis (const double x, const double *v, const size_t n)
 {
-    size_t idx0 = bisect_right(x, v, n);
-    size_t idx = CLIP(idx0, 0, n-2);
+    ptrdiff_t idx0 = bisect_right(x, v, n);
+    ptrdiff_t idx = CLIP(idx0, 0, n-2);
     double alpha = 1.0 / (v[idx+1] - v[idx]);
 
-    INTERP1_BASIS result = {idx0, idx, {-alpha, alpha}};
+    INTERP_BASIS basis = {idx0, idx, 2, {-alpha, alpha}};
 
-    return result;
+    return basis;
 }
 
+/**
+ * @brief Evaluate constant interpolation.
+ */
 
-static double interp1_eval(INTERP1_BASIS *basis, const double *v) {
+static double interp0_eval(INTERP_BASIS *basis, const double *v) {
+    return v[basis->i];
+}
+
+/**
+ * @brief Evaluate linear interpolation.
+ */
+
+static double interp1_eval(INTERP_BASIS *basis, const double *v) {
     return (basis->b[0]*v[basis->i] + basis->b[1]*v[basis->i+1]);
 }
 

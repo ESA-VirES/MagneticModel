@@ -30,12 +30,12 @@
 from unittest import TestCase, main
 from numpy import (
     nan, inf, linspace,
-    digitize, asarray, prod, full, empty,
+    searchsorted, asarray, prod, full, empty,
 )
 from numpy.random import random
 from numpy.testing import assert_equal
 from eoxmagmod._pymm import (
-    interp, INTERP_C1, INTERP_C1D1,
+    bisect, BISECT_SIDE_RIGHT, interp, INTERP_C0, INTERP_C1, INTERP_C1D1,
 )
 
 
@@ -149,7 +149,15 @@ class InterpTestMixIn():
 
 #-------------------------------------------------------------------------------
 
-class TestInterpLinear(TestCase, InterpTestMixIn):
+class TestInterpPiecewiseConstant(TestCase, InterpTestMixIn):
+    def call_interp(self, time, time0, coeff0):
+        return interp(time, time0, coeff0, kind=INTERP_C0)
+
+    def call_interp_ref(self, time, time0, coeff0):
+        return interpolate_c0(time, time0, coeff0)
+
+
+class TestInterpPiecewiseLinear(TestCase, InterpTestMixIn):
     def call_interp(self, time, time0, coeff0):
         return interp(time, time0, coeff0, kind=INTERP_C1)
 
@@ -157,53 +165,80 @@ class TestInterpLinear(TestCase, InterpTestMixIn):
         return interpolate_c1(time, time0, coeff0)
 
 
-class TestInterpDefault(TestInterpLinear):
+class TestInterpPiecewiseDefault(TestInterpPiecewiseLinear):
     def call_interp(self, time, time0, coeff0):
         return interp(time, time0, coeff0)
 
 
-class TestInterpLinearD1(TestCase, InterpTestMixIn):
+class TestInterpPiecewiseLinearD1(TestCase, InterpTestMixIn):
     def call_interp(self, time, time0, coeff0):
         return interp(time, time0, coeff0, kind=INTERP_C1D1)
 
     def call_interp_ref(self, time, time0, coeff0):
         return interpolate_c1d1(time, time0, coeff0)
 
+
+class TestInterpPiecewiseLinearExtrapolated(TestCase, InterpTestMixIn):
+    def call_interp(self, time, time0, coeff0):
+        return interp(time, time0, coeff0, kind=INTERP_C1, extrapolate=True)
+
+    def call_interp_ref(self, time, time0, coeff0):
+        return interpolate_c1(time, time0, coeff0, extrapolate=True)
+
+
+class TestInterpPiecewiseLinearD1Extrapolated(TestCase, InterpTestMixIn):
+    def call_interp(self, time, time0, coeff0):
+        return interp(time, time0, coeff0, kind=INTERP_C1D1, extrapolate=True)
+
+    def call_interp_ref(self, time, time0, coeff0):
+        return interpolate_c1d1(time, time0, coeff0, extrapolate=True)
+
 #-------------------------------------------------------------------------------
 # reference Python implementation
 
-def interpolate_c1(time, time0, coeff0):
+
+def interpolate_c0(time, time0, coeff0, **kwargs):
+    def get_basis(time, time0, idx):
+        return (1.0,)
+    return _interpolate(time, time0, coeff0, 1, get_basis, **kwargs)
+
+
+def interpolate_c1(time, time0, coeff0, **kwargs):
     def get_basis(time, time0, idx):
         alpha = (time - time0[idx]) / (time0[idx+1] - time0[idx])
         return (1.0 - alpha, alpha)
-    return _interpolate_c1(time, time0, coeff0, get_basis)
+    return _interpolate(time, time0, coeff0, 2, get_basis, **kwargs)
 
 
-def interpolate_c1d1(time, time0, coeff0):
+def interpolate_c1d1(time, time0, coeff0, **kwargs):
     def get_basis(time, time0, idx):
         del time
         alpha = 1.0 / (time0[idx+1] - time0[idx])
         return (-alpha, alpha)
-    return _interpolate_c1(time, time0, coeff0, get_basis)
+    return _interpolate(time, time0, coeff0, 2, get_basis, **kwargs)
 
 
-def _interpolate_c1(time, time0, coeff0, get_basis):
+def _interpolate(time, time0, coeff0, order, get_basis, extrapolate=False):
     time, time0, coeff0 = to_array(time, time0, coeff0)
     time, coeff0, t_shape, c_shape = _simplify_shape(time, coeff0)
 
-    if time0.size < 2:
+    if time0.size < order:
         return full(t_shape + c_shape, nan)
 
     # lookup spline segment
-    idx0 = find_interval(time, time0)
-    idx = clip(idx0.copy(), 0, time0.size-2)
+    idx0 = bisect(time0, time, side=BISECT_SIDE_RIGHT)
+    idx = clip(idx0.copy(), 0, time0.size - order)
 
     # get basis and perform its products with the coefficients
-    basis0, basis1 = get_basis(time, time0, idx)
-    coeff = basis0 * coeff0[:, idx] + basis1 * coeff0[:, idx+1]
+    basis = get_basis(time, time0, idx)
+
+    coeff = basis[0] * coeff0[:, idx]
+    for offset, basis_i in enumerate(basis[1:], 1):
+        coeff += basis_i * coeff0[:, idx + offset]
 
     # clear out of bounds values
-    coeff[:, (idx0 != idx) & (time != time0[-1])] = nan
+    if not extrapolate:
+        coeff[:, (idx0 != idx) & (time != time0[-1])] = nan
 
     return _restore_shape(coeff, t_shape, c_shape)
 
@@ -226,10 +261,6 @@ def _simplify_shape(time, coeff0):
 
 def to_array(*args):
     return tuple(asarray(arg, order='C') for arg in args)
-
-
-def find_interval(time, time0):
-    return digitize(time, time0) - 1
 
 
 def clip(values, value_min, value_max):

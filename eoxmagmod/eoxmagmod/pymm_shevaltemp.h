@@ -34,7 +34,11 @@
 #include "interpolation.h"
 #include "pymm_sheval.h"
 
-#define MAX_COEF_LIST_SIZE 16
+#define SHEVALTEMP_MIN_SPLINE_ORDER 1
+#define SHEVALTEMP_MAX_SPLINE_ORDER 2
+#define SHEVALTEMP_DEFAULT_SPLINE_ORDER 2
+
+#define SHEVALTEMP_MAX_COEF_LIST_SIZE 16
 
 #ifndef NAN
 #define NAN (0.0/0.0)
@@ -48,27 +52,55 @@
 #define MAX(a,b) ((b)>(a)?(b):(a))
 #endif
 
+#ifndef ABS
+#define ABS(a) ((a)<0?-(a):(a))
+#endif
 
-/* coeficient set - auxiliary structure */
-typedef struct {
+typedef struct ModelTs MODEL_TS;
+typedef struct CoefSet COEF_SET;
+
+typedef void (*f_coeff_set_interp)(double time, MODEL_TS *model, const COEF_SET *coefset);
+static void _coeff_set_interp0(double time, MODEL_TS *model, const COEF_SET *coefset);
+static void _coeff_set_interp1(double time, MODEL_TS *model, const COEF_SET *coefset);
+
+/* deficient set - auxiliary structure */
+typedef struct CoefSet {
     PyArrayObject *arr_ct;
     PyArrayObject *arr_cv;
     PyArrayObject *arr_cm;
     const double *ct;
     const double *cv;
     const int *cm;
+    ptrdiff_t *offset;
+    f_coeff_set_interp coeff_set_interp;
     size_t ntime;
     size_t ncoef;
     int spline_order;
+    int degree;
+    ptrdiff_t idx_last;
 } COEF_SET;
 
 
-/* coeficient set - auxiliary structure */
+/* coefficient set - auxiliary structure */
 static void _coefset_reset(COEF_SET *coefset) {
     memset(coefset, 0, sizeof(COEF_SET));
 }
 
+/* model structure - destruction */
+static void _coefset_destroy(COEF_SET *coefset)
+{
+    if(NULL != coefset->offset)
+        free(coefset->offset);
+
+    if (coefset->arr_ct) Py_DECREF(coefset->arr_ct);
+    if (coefset->arr_cv) Py_DECREF(coefset->arr_cv);
+    if (coefset->arr_cm) Py_DECREF(coefset->arr_cm);
+
+    _coefset_reset(coefset);
+}
+
 /* model structure - initialization */
+
 static int _coefset_init(
     COEF_SET *coefset,
     PyArrayObject *arr_ct,
@@ -87,21 +119,49 @@ static int _coefset_init(
     coefset->ntime = PyArray_DIMS(arr_ct)[0];
     coefset->ncoef = PyArray_DIMS(arr_cm)[0];
     coefset->spline_order = spline_order;
+    coefset->degree = 0;
+    coefset->idx_last = -1;
+
+    if (NULL == (coefset->offset = (ptrdiff_t*)calloc(coefset->ncoef, sizeof(ptrdiff_t))))
+    {
+        PyErr_Format(PyExc_MemoryError, "_coefset_init: coefset");
+        goto error;
+    }
+
+    {
+        size_t i;
+        for (i = 0; i < coefset->ncoef; ++i) {
+            int degree = coefset->cm[i*2];
+            int order = coefset->cm[i*2+1];
+            ptrdiff_t offset = ((ptrdiff_t)degree)*((ptrdiff_t)degree+1)/2 + ABS(order);
+            ptrdiff_t sign = order < 0 ? -1 : 1;
+
+            coefset->offset[i] = sign * offset;
+            coefset->degree = MAX(coefset->degree, degree);
+        }
+    }
+
+    switch (spline_order) {
+        case 1:
+            coefset->coeff_set_interp = _coeff_set_interp0;
+            break;
+        case 2:
+            coefset->coeff_set_interp = _coeff_set_interp1;
+            break;
+        default:
+            PyErr_Format(PyExc_ValueError, "Invalid spline order %d!", spline_order);
+            goto error;
+    }
 
     return 0;
-}
 
-static void _coefset_destroy(COEF_SET *coefset)
-{
-    if (coefset->arr_ct) Py_DECREF(coefset->arr_ct);
-    if (coefset->arr_cv) Py_DECREF(coefset->arr_cv);
-    if (coefset->arr_cm) Py_DECREF(coefset->arr_cm);
-
-    _coefset_reset(coefset);
+  error:
+    _coefset_destroy(coefset);
+    return 1;
 }
 
 /* magnetic model - auxiliary structure */
-typedef struct {
+typedef struct ModelTs {
     MODEL sh_model;
     const COEF_SET *coefsets;
     double time_last;
@@ -145,10 +205,16 @@ static int _shevaltemp_model_init(
 
     // allocate memory for the single time coefficients
     if (NULL == (model->sh_model.cg = (double*)calloc(model->sh_model.nterm, sizeof(double))))
+    {
+        PyErr_Format(PyExc_MemoryError, "_shevaltemp_model_init: cg");
         goto error;
+    }
 
     if (NULL == (model->sh_model.ch = (double*)calloc(model->sh_model.nterm, sizeof(double))))
+    {
+        PyErr_Format(PyExc_MemoryError, "_shevaltemp_model_init: ch");
         goto error;
+    }
 
     // initialize coefficients time-series
     model->coefsets = coefsets;
@@ -164,12 +230,12 @@ static int _shevaltemp_model_init(
 
 /* coefficients time-series interpolation */
 
-static void _coeff_set_interp(double time, MODEL_TS *model, const COEF_SET *coefset) {
-    // TODO: implement proper spline interpolation
+static void _coeff_set_interp0(double time, MODEL_TS *model, const COEF_SET *coefset) {
+    INTERP_BASIS basis = get_interp0_basis(time, coefset->ct, coefset->ntime);
 
-    INTERP1_BASIS basis = get_interp1_basis(time, coefset->ct, coefset->ntime);
-
-    int max_degree = model->sh_model.degree;
+    if (coefset->idx_last == basis.i) {
+        return;
+    }
 
     double *cg = (double*)model->sh_model.cg;
     double *ch = (double*)model->sh_model.ch;
@@ -178,14 +244,27 @@ static void _coeff_set_interp(double time, MODEL_TS *model, const COEF_SET *coef
 
     for (i = 0; i < n; ++i)
     {
-        int degree = coefset->cm[i*2];
-        int order = coefset->cm[i*2+1];
+        double *target = (coefset->offset[i] >= 0 ? cg : ch);
+        ptrdiff_t offset = abs(coefset->offset[i]);
+        target[offset] = interp0_eval(&basis, coefset->cv + i*coefset->ntime);
+    }
 
-        if (degree <= max_degree) {
-            size_t offset = ((size_t)degree)*((size_t)degree+1)/2 + abs(order);
-            double *target = (order >= 0 ? cg : ch);
-            target[offset] = interp1_eval(&basis, coefset->cv + i*coefset->ntime);
-        }
+     ((COEF_SET*)coefset)->idx_last = basis.i;
+}
+
+static void _coeff_set_interp1(double time, MODEL_TS *model, const COEF_SET *coefset) {
+    INTERP_BASIS basis = get_interp1_basis(time, coefset->ct, coefset->ntime);
+
+    double *cg = (double*)model->sh_model.cg;
+    double *ch = (double*)model->sh_model.ch;
+
+    size_t i, n = coefset->ncoef;
+
+    for (i = 0; i < n; ++i)
+    {
+        double *target = (coefset->offset[i] >= 0 ? cg : ch);
+        ptrdiff_t offset = abs(coefset->offset[i]);
+        target[offset] = interp1_eval(&basis, coefset->cv + i*coefset->ntime);
     }
 }
 
@@ -194,11 +273,14 @@ static void _coeff_interp(double time, MODEL_TS *model) {
     size_t i, n = model->ncoefset;
 
     for (i = 0; i < n; ++i) {
-        _coeff_set_interp(time, model, model->coefsets + i);
+        const COEF_SET *coefset = model->coefsets + i;
+        coefset->coeff_set_interp(time, model, coefset);
     }
 
     model->time_last = time;
 }
+
+
 
 /* high-level nD-array recursive batch model_evaluation */
 
@@ -246,7 +328,6 @@ static void _shevaltemp2(ARRAY_DATA arrd_t, ARRAY_DATA arrd_x, ARRAY_DATA arrd_g
     else
     {
         const double time = *((double*)arrd_t.data);
-        _coeff_interp(time, model);
         if (time != model->time_last)
             _coeff_interp(time, model);
         _sheval2(arrd_x, arrd_grd, &(model->sh_model));
@@ -281,10 +362,6 @@ static void _shevaltemp3(ARRAY_DATA arrd_t, ARRAY_DATA arrd_x, ARRAY_DATA arrd_p
 }
 
 /* Python function definition */
-
-#define MIN_SPLINE_ORDER 2
-#define MAX_SPLINE_ORDER 2
-#define DEFAULT_SPLINE_ORDER 2
 
 #define DOC_SHEVALTEMP "\n"\
 "   arr_out = shevaltemp(\n"\
@@ -347,7 +424,7 @@ static PyObject* shevaltemp(PyObject *self, PyObject *args, PyObject *kwdict)
     PyArrayObject *arr_scale = NULL; // gradient scale array
     PyObject *retval = NULL;
     MODEL_TS model;
-    COEF_SET coefsets[MAX_COEF_LIST_SIZE];
+    COEF_SET coefsets[SHEVALTEMP_MAX_COEF_LIST_SIZE];
 
     // clear model structure
     _shevaltemp_model_reset(&model);
@@ -355,7 +432,7 @@ static PyObject* shevaltemp(PyObject *self, PyObject *args, PyObject *kwdict)
     // clear coefficient sets
     {
         size_t i;
-        for (i = 0; i < MAX_COEF_LIST_SIZE; ++i)
+        for (i = 0; i < SHEVALTEMP_MAX_COEF_LIST_SIZE; ++i)
             _coefset_reset(&coefsets[i]);
     }
 
@@ -395,9 +472,9 @@ static PyObject* shevaltemp(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
     }
 
-    if (PyList_Size(obj_coef_list) > MAX_COEF_LIST_SIZE)
+    if (PyList_Size(obj_coef_list) > SHEVALTEMP_MAX_COEF_LIST_SIZE)
     {
-        PyErr_Format(PyExc_ValueError, "The '%s' list cannot have more that %d iitems!", keywords[3], MAX_COEF_LIST_SIZE);
+        PyErr_Format(PyExc_ValueError, "The '%s' list cannot have more that %d iitems!", keywords[3], SHEVALTEMP_MAX_COEF_LIST_SIZE);
         goto exit;
     }
 
@@ -540,10 +617,10 @@ static PyObject* shevaltemp(PyObject *self, PyObject *args, PyObject *kwdict)
 static int parse_coefset(COEF_SET *coefset, size_t idx, PyObject *obj_coef_list_item) {
 
     static char *keywords[] = {
-        "coef_t", "coef_gh", "coef_nm", "spline_order",
+        "coef_t", "coef_gh", "coef_nm", "spline_order", NULL
     };
 
-    int spline_order = DEFAULT_SPLINE_ORDER;
+    int spline_order = SHEVALTEMP_DEFAULT_SPLINE_ORDER;
     PyObject *obj_ct = NULL; // coef_t object
     PyObject *obj_cv = NULL; // coef_gh object
     PyObject *obj_cm = NULL; // coef_nm object
@@ -594,7 +671,7 @@ static int parse_coefset(COEF_SET *coefset, size_t idx, PyObject *obj_coef_list_
         if (NULL != PyErr_Occurred())
             goto error;
 
-        if ((value < MIN_SPLINE_ORDER) || (value < MAX_SPLINE_ORDER))
+        if ((value < SHEVALTEMP_MIN_SPLINE_ORDER) || (value > SHEVALTEMP_MAX_SPLINE_ORDER))
         {
             PyErr_Format(PyExc_ValueError, "Unsupported spline order %d! (#%ld)", spline_order, idx);
             goto error;

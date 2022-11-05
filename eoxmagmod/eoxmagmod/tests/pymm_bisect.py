@@ -28,7 +28,7 @@
 # pylint: disable=missing-docstring, invalid-name, too-few-public-methods
 
 from unittest import TestCase, main
-from numpy import searchsorted, nan, inf, linspace
+from numpy import searchsorted, nan, inf, linspace, isnan, asarray
 from numpy.random import random
 from numpy.testing import assert_equal
 from eoxmagmod._pymm import (
@@ -82,7 +82,10 @@ class TestBisectLeft(TestCase, BisectTestMixIn):
         return bisect(intervals, points, side=BISECT_SIDE_LEFT)
 
     def call_bisect_ref(self, intervals, points):
-        return searchsorted(intervals, points, side="left") - 1
+        points = asarray(points)
+        idx = asarray(searchsorted(intervals, points, side="left") - 1)
+        idx[isnan(points)] = -1
+        return idx
 
 
 class TestBisectRight(TestCase, BisectTestMixIn):
@@ -90,7 +93,10 @@ class TestBisectRight(TestCase, BisectTestMixIn):
         return bisect(intervals, points, side=BISECT_SIDE_RIGHT)
 
     def call_bisect_ref(self, intervals, points):
-        return searchsorted(intervals, points, side="right") - 1
+        points = asarray(points)
+        idx = asarray(searchsorted(intervals, points, side="right") - 1)
+        idx[isnan(points)] = -1
+        return idx
 
 
 class TestBisectDefault(TestBisectLeft):

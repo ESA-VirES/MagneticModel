@@ -30,12 +30,13 @@
 #ifndef BISECT_H
 #define BISECT_H 1
 
-#include<math.h>
+#include <stddef.h>
+#include <math.h>
 
 /**
  * Common function type of the bisect functions.
  */
-typedef size_t (*f_bisect)(const double x, const double* v, const size_t n);
+typedef ptrdiff_t (*f_bisect)(const double x, const double* v, const size_t n);
 
 
 /**
@@ -51,16 +52,16 @@ typedef size_t (*f_bisect)(const double x, const double* v, const size_t n);
  * The index is set to n-1 if x >= v[n-1] or x is Nan.
  */
 
-static size_t bisect_right(const double x, const double *v, const size_t n)
+static ptrdiff_t bisect_right(const double x, const double *v, const size_t n)
 {
-    size_t i_low, i_high;
+    ptrdiff_t i_low, i_high;
 
-    if ((n < 1)||(x < v[0])) {
-        // no intervals (n == 0) or below the lower bound
+    if ((n < 1)||!(x >= v[0])) {
+        // no intervals (n == 0), x is below the lower bound or NaN
         return -1;
     }
-    if (!(x < v[n-1])) {
-        // x is above the upper bound or NaN
+    if (x >= v[n-1]) {
+        // x is above the upper bound
         return n - 1;
     }
 
@@ -70,7 +71,7 @@ static size_t bisect_right(const double x, const double *v, const size_t n)
     i_high = n - 2;
 
     while (i_low < i_high) {
-        size_t i = i_low + 1 + (i_high - i_low) / 2;
+        ptrdiff_t i = i_low + 1 + (i_high - i_low) / 2;
         if (x >= v[i]) {
             i_low = i;
         } else {
@@ -95,16 +96,16 @@ static size_t bisect_right(const double x, const double *v, const size_t n)
  * The index is set to n-1 if x > v[n-1] or x is NaN.
  */
 
-static size_t bisect_left(const double x, const double *v, const size_t n)
+static ptrdiff_t bisect_left(const double x, const double *v, const size_t n)
 {
-    size_t i_low, i_high;
+    ptrdiff_t i_low, i_high;
 
-    if ((n < 1)||(x <= v[0])) {
-        // no intervals (n == 0) or below the lower bound
+    if ((n < 1)||!(x > v[0])) {
+        // no intervals (n == 0), x is below the lower bound or NaN
         return -1;
     }
-    if (!(x <= v[n-1])) {
-        // x is above the upper bound or NaN
+    if (x > v[n-1]) {
+        // x is above the upper bound
         return n - 1;
     }
 
@@ -114,7 +115,7 @@ static size_t bisect_left(const double x, const double *v, const size_t n)
     i_high = n - 2;
 
     while (i_low < i_high) {
-        size_t i = i_low + 1 + (i_high - i_low) / 2;
+        ptrdiff_t i = i_low + 1 + (i_high - i_low) / 2;
         if (x <= v[i]) {
             i_high = i - 1;
         } else {
