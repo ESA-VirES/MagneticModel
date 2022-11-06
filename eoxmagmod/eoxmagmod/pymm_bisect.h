@@ -36,65 +36,8 @@
 #define BISECT_SIDE_LEFT 0
 #define BISECT_SIDE_RIGHT 1
 
-/*
- * high level nD-array interval search
- */
-
-static void _bisect_left(ARRAY_DATA *arrd_in, ARRAY_DATA *arrd_out, ARRAY_DATA *arrd_nodes)
-{
-    if (arrd_in->ndim > 0)
-    {
-        npy_intp i, n = arrd_in->dim[0];
-
-        for(i = 0; i < n; ++i) {
-            ARRAY_DATA arrd_in_item = _get_arrd_item_nocheck(arrd_in, i);
-            ARRAY_DATA arrd_out_item = _get_arrd_item_nocheck(arrd_out, i);
-            _bisect_left(
-                &arrd_in_item,
-                &arrd_out_item,
-                arrd_nodes
-            );
-        }
-    }
-    else
-    {
-        const size_t n = arrd_nodes->dim[0];
-        const double *v = (const double*)arrd_nodes->data;
-        const double x = *((double*)arrd_in->data);
-        npy_intp *idx = (npy_intp*)arrd_out->data;
-
-        *idx = bisect_left(x, v, n);
-    }
-}
-
-
-static void _bisect_right(ARRAY_DATA *arrd_in, ARRAY_DATA *arrd_out, ARRAY_DATA *arrd_nodes)
-{
-    if (arrd_in->ndim > 0)
-    {
-        npy_intp i, n = arrd_in->dim[0];
-
-        for(i = 0; i < n; ++i) {
-            ARRAY_DATA arrd_in_item = _get_arrd_item_nocheck(arrd_in, i);
-            ARRAY_DATA arrd_out_item = _get_arrd_item_nocheck(arrd_out, i);
-            _bisect_right(
-                &arrd_in_item,
-                &arrd_out_item,
-                arrd_nodes
-            );
-        }
-    }
-    else
-    {
-        const size_t n = arrd_nodes->dim[0];
-        const double *v = (const double*)arrd_nodes->data;
-        const double x = *((double*)arrd_in->data);
-        npy_intp *idx = (npy_intp*)arrd_out->data;
-
-        *idx = bisect_right(x, v, n);
-    }
-}
-
+static void _bisect_left(ARRAY_DATA *arrd_in, ARRAY_DATA *arrd_out, ARRAY_DATA *arrd_nodes);
+static void _bisect_right(ARRAY_DATA *arrd_in, ARRAY_DATA *arrd_out, ARRAY_DATA *arrd_nodes);
 
 /* Python function definition */
 
@@ -173,6 +116,66 @@ static PyObject* bisect(PyObject *self, PyObject *args, PyObject *kwdict)
     if (!retval && arr_i) Py_DECREF(arr_i);
 
     return retval;
+}
+
+
+/*
+ * high level nD-array interval search
+ */
+
+static void _bisect_left(ARRAY_DATA *arrd_in, ARRAY_DATA *arrd_out, ARRAY_DATA *arrd_nodes)
+{
+    if (arrd_in->ndim > 0)
+    {
+        npy_intp i, n = arrd_in->dim[0];
+
+        for(i = 0; i < n; ++i) {
+            ARRAY_DATA arrd_in_item = _get_arrd_item_nocheck(arrd_in, i);
+            ARRAY_DATA arrd_out_item = _get_arrd_item_nocheck(arrd_out, i);
+            _bisect_left(
+                &arrd_in_item,
+                &arrd_out_item,
+                arrd_nodes
+            );
+        }
+    }
+    else
+    {
+        const size_t n = arrd_nodes->dim[0];
+        const double *v = (const double*)arrd_nodes->data;
+        const double x = *((double*)arrd_in->data);
+        npy_intp *idx = (npy_intp*)arrd_out->data;
+
+        *idx = bisect_left(x, v, n);
+    }
+}
+
+
+static void _bisect_right(ARRAY_DATA *arrd_in, ARRAY_DATA *arrd_out, ARRAY_DATA *arrd_nodes)
+{
+    if (arrd_in->ndim > 0)
+    {
+        npy_intp i, n = arrd_in->dim[0];
+
+        for(i = 0; i < n; ++i) {
+            ARRAY_DATA arrd_in_item = _get_arrd_item_nocheck(arrd_in, i);
+            ARRAY_DATA arrd_out_item = _get_arrd_item_nocheck(arrd_out, i);
+            _bisect_right(
+                &arrd_in_item,
+                &arrd_out_item,
+                arrd_nodes
+            );
+        }
+    }
+    else
+    {
+        const size_t n = arrd_nodes->dim[0];
+        const double *v = (const double*)arrd_nodes->data;
+        const double x = *((double*)arrd_in->data);
+        npy_intp *idx = (npy_intp*)arrd_out->data;
+
+        *idx = bisect_right(x, v, n);
+    }
 }
 
 #endif /*PYMM_BISECT_H*/

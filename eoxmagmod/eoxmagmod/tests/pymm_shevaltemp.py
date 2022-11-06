@@ -60,7 +60,6 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn(object):
     source_coordinate_system = None
     target_coordinate_system = None
     is_internal = True
-    degree = None
     coef_sets = [] # list of coefficient sets
 
     def times(self, shape=1):
@@ -78,7 +77,6 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn(object):
         return shevaltemp(
             times,
             coords,
-            degree=cls.degree,
             coef_set_list=cls.coef_sets,
             coord_type_in=cls.source_coordinate_system,
             coord_type_out=cls.target_coordinate_system,
@@ -111,16 +109,15 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn(object):
             order = coef_set.coef_nm[:, 1]
             idx = ((degree+1)*degree)//2 + abs(order)
 
-            coef_sel = (degree <= cls.degree).nonzero()[0]
-            coef_g_sel = (order[coef_sel] >= 0).nonzero()[0]
-            coef_h_sel = (order[coef_sel] < 0).nonzero()[0]
-            coef_g_idx = idx[coef_sel][coef_g_sel]
-            coef_h_idx = idx[coef_sel][coef_h_sel]
+            coef_g_sel = (order >= 0).nonzero()[0]
+            coef_h_sel = (order < 0).nonzero()[0]
+            coef_g_idx = idx[coef_g_sel]
+            coef_h_idx = idx[coef_h_sel]
 
             coef = interp(
                 time,
                 coef_set.coef_times,
-                coef_set.coef_coef[coef_sel, ...],
+                coef_set.coef_coef,
                 **options,
             )
 
@@ -154,8 +151,9 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn(object):
 
 
         # single-time coefficient arrays
-        coef_g = zeros((cls.degree+2)*(cls.degree+1)//2)
-        coef_h = zeros((cls.degree+2)*(cls.degree+1)//2)
+        degree = max(coef_set.coef_nm[:, 0].max() for coef_set in cls.coef_sets)
+        coef_g = zeros((degree+2)*(degree+1)//2)
+        coef_h = zeros((degree+2)*(degree+1)//2)
 
         for i in range(size):
 
@@ -166,7 +164,7 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn(object):
                 coords[i, :],
                 mode=POTENTIAL_AND_GRADIENT,
                 is_internal=cls.is_internal,
-                degree=cls.degree,
+                degree=degree,
                 coef_g=coef_g,
                 coef_h=coef_h,
                 coord_type_in=cls.source_coordinate_system,
@@ -266,21 +264,18 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn(object):
 
 class SHTypeInternalStatic(object):
     is_internal = True
-    degree = chaos_core.DEGREE
     coef_sets = [
         CoeffSet(chaos_core.TIMES[:1], chaos_core.COEFF[:,:1], chaos_core.NMMAP, 1),
     ]
 
 class SHTypeInternalCore(object):
     is_internal = True
-    degree = chaos_core.DEGREE
     coef_sets = [
         CoeffSet(chaos_core.TIMES, chaos_core.COEFF, chaos_core.NMMAP, 2),
     ]
 
 class SHTypeInternalMMA(object):
     is_internal = True
-    degree = chaos_mma.DEGREE
     coef_sets = [
         CoeffSet(chaos_mma.TIMES_I_1, chaos_mma.COEFF_I_1, chaos_mma.NMMAP_I_1, 2),
         CoeffSet(chaos_mma.TIMES_I_2, chaos_mma.COEFF_I_2, chaos_mma.NMMAP_I_2, 2),
@@ -288,7 +283,6 @@ class SHTypeInternalMMA(object):
 
 class SHTypeExternalMMA(object):
     is_internal = True
-    degree = chaos_mma.DEGREE
     coef_sets = [
         CoeffSet(chaos_mma.TIMES_E_1, chaos_mma.COEFF_E_1, chaos_mma.NMMAP_E_1, 2),
         CoeffSet(chaos_mma.TIMES_E_2, chaos_mma.COEFF_E_2, chaos_mma.NMMAP_E_2, 2),

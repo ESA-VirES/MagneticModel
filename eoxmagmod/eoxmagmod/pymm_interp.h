@@ -42,99 +42,10 @@
 #define NAN (0.0/0.0)
 #endif
 
-/*
- * high level nD-array recursive coefficient interpolation
- */
-
-static void _fill_value(ARRAY_DATA *arrd, double value);
-static void _interp_eval(ARRAY_DATA *arrd_c, ARRAY_DATA *arrd_c0, INTERP_BASIS *basis, f_interp_eval interp_eval);
-
 static void _interp(ARRAY_DATA *arrd_t, ARRAY_DATA *arrd_c,
                     ARRAY_DATA *arrd_t0, ARRAY_DATA *arrd_c0,
                     f_get_interp_basis get_interp_basis,
-                    f_interp_eval interp_eval, int extrapolate)
-{
-    if (arrd_t->ndim > 0)
-    {
-        npy_intp i, n = arrd_t->dim[0];
-
-        for(i = 0; i < n; ++i) {
-
-            ARRAY_DATA arrd_t_item = _get_arrd_item_nocheck(arrd_t, i);
-            ARRAY_DATA arrd_c_item = _get_arrd_item_nocheck(arrd_c, i);
-            _interp(
-                &arrd_t_item,
-                &arrd_c_item,
-                arrd_t0,
-                arrd_c0,
-                get_interp_basis,
-                interp_eval,
-                extrapolate
-            );
-        }
-    }
-    else
-    {
-        const double t = *((double*)arrd_t->data);
-        const double *t0 = ((double*)arrd_t0->data);
-        const size_t nt = arrd_t0->dim[0];
-
-        INTERP_BASIS basis = get_interp_basis(t, t0, nt);
-
-        if (extrapolate||(basis.i0 == basis.i)||(t == t0[nt-1]))
-        {
-            _interp_eval(arrd_c, arrd_c0, &basis, interp_eval);
-            return;
-        }
-
-        _fill_value(arrd_c, NAN);
-    }
-}
-
-
-static void _interp_eval(ARRAY_DATA *arrd_c, ARRAY_DATA *arrd_c0, INTERP_BASIS *basis, f_interp_eval interp_eval)
-{
-    if (arrd_c->ndim > 0)
-    {
-        npy_intp i, n = arrd_c->dim[0];
-
-        for(i = 0; i < n; ++i) {
-
-            ARRAY_DATA arrd_c_item = _get_arrd_item_nocheck(arrd_c, i);
-            ARRAY_DATA arrd_c0_item = _get_arrd_item_nocheck(arrd_c0, i);
-            _interp_eval(
-                &arrd_c_item,
-                &arrd_c0_item,
-                basis,
-                interp_eval
-            );
-        }
-    }
-    else
-    {
-        double *c = ((double*)arrd_c->data);
-        const double *c0 = ((double*)arrd_c0->data);
-
-        *c = interp_eval(basis, c0);
-    }
-}
-
-
-static void _fill_value(ARRAY_DATA *arrd, double value) {
-    if (arrd->ndim > 0)
-    {
-        npy_intp i, n = arrd->dim[0];
-
-        for(i = 0; i < n; ++i) {
-            ARRAY_DATA arrd_item = _get_arrd_item_nocheck(arrd, i);
-            _fill_value(&arrd_item, value);
-        }
-    }
-    else
-    {
-        *((double*)arrd->data) = value;
-    }
-}
+                    f_interp_eval interp_eval, int extrapolate);
 
 /* Python function definition */
 
@@ -148,8 +59,9 @@ static void _fill_value(ARRAY_DATA *arrd, double value) {
 "       time0[N] - times of the interpolated series of coefficients.\n"\
 "       coeff0[...,N] - series of the interpolated SH coefficients\n"\
 "       kind - interpolation kind. Currently supported\n"\
-"           INTERP_C1   ... linear\n"\
-"           INTERP_C1D1 ... linear - 1st derivative\n"\
+"           INTERP_C0   ... piecewise constant\n"\
+"           INTERP_C1   ... piecewise linear\n"\
+"           INTERP_C1D1 ... piecewise linear - 1st derivative\n"\
 "       extrapolate - if True the out of bound values will be extrapolated\n"\
 "\n"\
 "     Output:\n"\
@@ -283,6 +195,101 @@ static PyObject* interp(PyObject *self, PyObject *args, PyObject *kwdict)
     if (!retval && arr_c) Py_DECREF(arr_c);
 
     return retval;
+}
+
+
+/*
+ * high level nD-array recursive coefficient interpolation
+ */
+
+static void _fill_value(ARRAY_DATA *arrd, double value);
+static void _interp_eval(ARRAY_DATA *arrd_c, ARRAY_DATA *arrd_c0, INTERP_BASIS *basis, f_interp_eval interp_eval);
+
+static void _interp(ARRAY_DATA *arrd_t, ARRAY_DATA *arrd_c,
+                    ARRAY_DATA *arrd_t0, ARRAY_DATA *arrd_c0,
+                    f_get_interp_basis get_interp_basis,
+                    f_interp_eval interp_eval, int extrapolate)
+{
+    if (arrd_t->ndim > 0)
+    {
+        npy_intp i, n = arrd_t->dim[0];
+
+        for(i = 0; i < n; ++i) {
+
+            ARRAY_DATA arrd_t_item = _get_arrd_item_nocheck(arrd_t, i);
+            ARRAY_DATA arrd_c_item = _get_arrd_item_nocheck(arrd_c, i);
+            _interp(
+                &arrd_t_item,
+                &arrd_c_item,
+                arrd_t0,
+                arrd_c0,
+                get_interp_basis,
+                interp_eval,
+                extrapolate
+            );
+        }
+    }
+    else
+    {
+        const double t = *((double*)arrd_t->data);
+        const double *t0 = ((double*)arrd_t0->data);
+        const size_t nt = arrd_t0->dim[0];
+
+        INTERP_BASIS basis = get_interp_basis(t, t0, nt);
+
+        if (extrapolate||(basis.i0 == basis.i)||(t == t0[nt-1]))
+        {
+            _interp_eval(arrd_c, arrd_c0, &basis, interp_eval);
+            return;
+        }
+
+        _fill_value(arrd_c, NAN);
+    }
+}
+
+
+static void _interp_eval(ARRAY_DATA *arrd_c, ARRAY_DATA *arrd_c0, INTERP_BASIS *basis, f_interp_eval interp_eval)
+{
+    if (arrd_c->ndim > 0)
+    {
+        npy_intp i, n = arrd_c->dim[0];
+
+        for(i = 0; i < n; ++i) {
+
+            ARRAY_DATA arrd_c_item = _get_arrd_item_nocheck(arrd_c, i);
+            ARRAY_DATA arrd_c0_item = _get_arrd_item_nocheck(arrd_c0, i);
+            _interp_eval(
+                &arrd_c_item,
+                &arrd_c0_item,
+                basis,
+                interp_eval
+            );
+        }
+    }
+    else
+    {
+        double *c = ((double*)arrd_c->data);
+        const double *c0 = ((double*)arrd_c0->data);
+
+        *c = interp_eval(basis, c0);
+    }
+}
+
+
+static void _fill_value(ARRAY_DATA *arrd, double value) {
+    if (arrd->ndim > 0)
+    {
+        npy_intp i, n = arrd->dim[0];
+
+        for(i = 0; i < n; ++i) {
+            ARRAY_DATA arrd_item = _get_arrd_item_nocheck(arrd, i);
+            _fill_value(&arrd_item, value);
+        }
+    }
+    else
+    {
+        *((double*)arrd->data) = value;
+    }
 }
 
 #endif /*PYMM_INTERP_H*/

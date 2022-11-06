@@ -55,7 +55,7 @@
 #define STR(x) SRINGIFY(x)
 #endif
 
-/* modes of evaluation enumerate */
+/* modes of evaluation - enumerate */
 typedef enum {
     SM_INVALID = 0x0,
     SM_POTENTIAL = 0x1,
@@ -63,22 +63,8 @@ typedef enum {
     SM_POTENTIAL_AND_GRADIENT = 0x3,
 } SHEVAL_MODE;
 
-/* mode of evaluation check */
-static SHEVAL_MODE _check_sheval_mode(int mode, const char *label)
-{
-    switch (mode)
-    {
-        case SM_POTENTIAL:
-            return SM_POTENTIAL;
-        case SM_GRADIENT:
-            return SM_GRADIENT;
-        case SM_POTENTIAL_AND_GRADIENT:
-            return SM_POTENTIAL_AND_GRADIENT;
-    }
+static SHEVAL_MODE _check_sheval_mode(int mode, const char *label);
 
-    PyErr_Format(PyExc_ValueError, "Invalid mode '%s'!", label);
-    return SM_INVALID;
-}
 
 /* magnetic model - auxiliary structure */
 typedef struct {
@@ -107,85 +93,266 @@ typedef struct {
     double *psqrt;
 } MODEL;
 
-/* model structure - reset */
-static void _sheval_model_reset(MODEL *model)
-{
-    memset(model, 0, sizeof(MODEL));
-}
-
-/* model structure - destruction */
-static void _sheval_model_destroy(MODEL *model)
-{
-    if(NULL != model->lp)
-        free(model->lp);
-    if(NULL != model->ldp)
-        free(model->ldp);
-    if(NULL != model->lsin)
-        free(model->lsin);
-    if(NULL != model->lcos)
-        free(model->lcos);
-    if(NULL != model->rrp)
-        free(model->rrp);
-    if(NULL != model->psqrt)
-        free(model->psqrt);
-
-    _sheval_model_reset(model);
-}
-
-/* model structure - initialization */
-static int _sheval_model_init(MODEL *model, int is_internal, int degree,
+static void _model_reset(MODEL *model);
+static void _model_destroy(MODEL *model);
+static int _model_init(MODEL *model, int is_internal, int degree,
     int coord_in, int coord_out, const double *cg, const double *ch,
-    const double scale_potential, const double *scale_gradient)
+    const double scale_potential, const double *scale_gradient);
+
+static void _sheval1(ARRAY_DATA arrd_x, ARRAY_DATA arrd_pot, MODEL *model);
+static void _sheval2(ARRAY_DATA arrd_x, ARRAY_DATA arrd_grd, MODEL *model);
+static void _sheval3(ARRAY_DATA arrd_x, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_grd, MODEL *model);
+
+/* Python function definition */
+
+#define DOC_SHEVAL "\n"\
+"   arr_out = sheval(arr_x, degree, coef_g, coef_h, coord_type_in=GEODETIC_ABOVE_WGS84,\n"\
+"                    coord_type_out=GEODETIC_ABOVE_WGS84, mode=GRADIENT, is_internal=True,\n"\
+"                    scale_potential=1.0, scale_gradient=1.0)\n"\
+"\n"\
+"     Parameters:\n"\
+"       arr_x  - array of 3D coordinates (up to 16 dimensions).\n"\
+"       degree - degree of the spherical harmonic model.\n"\
+"       coef_g - vector of spherical harmonic model coefficients.\n"\
+"       coef_h - vector of spherical harmonic model coefficients.\n"\
+"       coord_type_in - type of the input coordinates.\n"\
+"       coord_type_out - type of the output coordinates frame.\n"\
+"       mode - quantity to be evaluated:\n"\
+"                  POTENTIAL\n"\
+"                  GRADIENT (default)\n"\
+"                  POTENTIAL_AND_GRADIENT\n"\
+"       is_internal - boolean flag set to True by default. When set to False \n"\
+"                     external field evaluation is used.\n"\
+"       scale_potential - scalar value multiplied with the result potentials.\n"\
+"       scale_gradient - scalar or 3 element array multiplied with the result\n"\
+"                        gradient components.\n"\
+"\n"
+
+
+static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
 {
-    const int nterm = ((degree+1)*(degree+2))/2;
+    static char *keywords[] = {
+        "arr_x", "degree", "coef_g", "coef_h", "coord_type_in",
+        "coord_type_out", "mode", "is_internal",
+        "scale_potential", "scale_gradient", NULL
+    };
+    int ct_in = CT_GEODETIC_ABOVE_WGS84;
+    int ct_out = CT_GEODETIC_ABOVE_WGS84;
+    int nterm, degree = 0, mode = 0x2, is_internal;
+    double scale_potential = 1.0;
+    double scale_gradient[3] = {1.0, 1.0, 1.0};
+    PyObject *obj_is_internal = NULL; // boolean flag
+    PyObject *obj_x = NULL; // input object
+    PyObject *obj_cg = NULL; // coef_g object
+    PyObject *obj_ch = NULL; // coef_h object
+    PyObject *obj_scale = NULL; // gradient scale object
+    PyArrayObject *arr_x = NULL; // input array
+    PyArrayObject *arr_cg = NULL; // coef_g array
+    PyArrayObject *arr_ch = NULL; // coef_h array
+    PyArrayObject *arr_pot = NULL; // output array
+    PyArrayObject *arr_grd = NULL; // output array
+    PyArrayObject *arr_scale = NULL; // gradient scale array
+    PyObject *retval = NULL;
+    MODEL model = {0};
 
-    _sheval_model_reset(model);
+    // parse input arguments
+    if (!PyArg_ParseTupleAndKeywords(
+        args, kwdict, "OiOO|iiiOdO:sheval", keywords,
+        &obj_x, &degree, &obj_cg, &obj_ch, &ct_in, &ct_out, &mode,
+        &obj_is_internal, &scale_potential, &obj_scale
+    ))
+        goto exit;
 
-    model->is_internal = is_internal;
-    model->degree = degree;
-    model->nterm = nterm;
-    model->coord_in = coord_in;
-    model->coord_out = coord_out;
-    model->elps_a = WGS84_A;
-    model->elps_eps2 = WGS84_EPS2;
-    model->crad_ref = RADIUS;
-    model->clat_last = NAN;
-    model->clon_last = NAN;
-    model->crad_last = NAN;
-    model->scale_potential = scale_potential;
-    model->scale_gradient0 = scale_gradient[0];
-    model->scale_gradient1 = scale_gradient[1];
-    model->scale_gradient2 = scale_gradient[2];
-    model->cg = cg;
-    model->ch = ch;
+    is_internal = (obj_is_internal == NULL) || PyObject_IsTrue(obj_is_internal);
 
-    if (NULL == (model->lp = (double*)malloc(nterm*sizeof(double))))
-        goto error;
+    // check the type of the coordinate transformation
+    if (CT_INVALID == _check_coord_type(ct_in, keywords[4]))
+        goto exit;
 
-    if (NULL == (model->ldp = (double*)malloc(nterm*sizeof(double))))
-        goto error;
+    if (CT_INVALID == _check_coord_type(ct_out, keywords[5]))
+        goto exit;
 
-    if (NULL == (model->lsin = (double*)malloc((degree+1)*sizeof(double))))
-        goto error;
+    // check the operation mode
+    if (SM_INVALID == _check_sheval_mode(mode, keywords[6]))
+        goto exit;
 
-    if (NULL == (model->lcos = (double*)malloc((degree+1)*sizeof(double))))
-        goto error;
+    // cast the objects to arrays
+    if (NULL == (arr_x = _get_as_double_array(obj_x, 1, 0, NPY_ARRAY_ALIGNED, keywords[0])))
+        goto exit;
 
-    if (NULL == (model->rrp = (double*)malloc((degree+1)*sizeof(double))))
-        goto error;
+    if (NULL == (arr_cg = _get_as_double_array(obj_cg, 1, 1, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_IN_ARRAY, keywords[2])))
+        goto exit;
 
-    if (NULL == (model->psqrt = shc_presqrt(degree)))
-        goto error;
+    if (NULL == (arr_ch = _get_as_double_array(obj_ch, 1, 1, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_IN_ARRAY, keywords[3])))
+        goto exit;
 
-    return 0;
+    if (degree < 0)
+    {
+        PyErr_Format(PyExc_ValueError, "Invalid degree value %d!", degree);
+        goto exit;
+    }
 
-  error:
-    _sheval_model_destroy(model);
-    return 1;
+    // check dimensions of the coefficient arrays
+    nterm = ((degree + 1)*(degree + 2))/2;
+
+    // check the last dimension (required length of the coordinates vectors)
+    if (_check_array_dim_eq(arr_x, -1, 3, keywords[0]))
+        goto exit;
+
+    // check the coefficients arrays' dimensions
+    if (_check_array_dim_le(arr_cg, 0, nterm, keywords[2]))
+        goto exit;
+
+    if (_check_array_dim_le(arr_ch, 0, nterm, keywords[3]))
+        goto exit;
+
+    // handle the gradient scale factors
+    if (NULL != obj_scale)
+    {
+        if (NULL == (arr_scale = _get_as_double_array(obj_scale, 0, 1, NPY_ARRAY_IN_ARRAY, keywords[9])))
+            goto exit;
+
+        if (_extract_1d_double_array(scale_gradient, 3, arr_scale, keywords[9]))
+            goto exit;
+    }
+
+    // create new output arrays
+    if (mode & SM_POTENTIAL)
+        if (NULL == (arr_pot = _get_new_array(PyArray_NDIM(arr_x)-1, PyArray_DIMS(arr_x), NPY_DOUBLE)))
+            goto exit;
+
+    if (mode & SM_GRADIENT)
+        if (NULL == (arr_grd = _get_new_double_array(PyArray_NDIM(arr_x), PyArray_DIMS(arr_x), 3)))
+            goto exit;
+
+    // evaluate the model
+
+    if(_model_init(
+        &model, is_internal, degree, ct_in, ct_out,
+        PyArray_DATA(arr_cg), PyArray_DATA(arr_ch),
+        scale_potential, scale_gradient
+    ))
+        goto exit;
+
+    switch(mode)
+    {
+        case SM_POTENTIAL:
+            _sheval1(_array_to_arrd(arr_x), _array_to_arrd(arr_pot), &model);
+            retval = (PyObject*) arr_pot;
+            break;
+
+        case SM_GRADIENT:
+            _sheval2(_array_to_arrd(arr_x), _array_to_arrd(arr_grd), &model);
+            retval = (PyObject*) arr_grd;
+            break;
+
+        case SM_POTENTIAL_AND_GRADIENT:
+            _sheval3(_array_to_arrd(arr_x), _array_to_arrd(arr_pot), _array_to_arrd(arr_grd), &model);
+            if (NULL == (retval = Py_BuildValue("NN", (PyObject*) arr_pot, (PyObject*) arr_grd)))
+                goto exit;
+            break;
+    }
+
+  exit:
+
+    _model_destroy(&model);
+
+    // decrease reference counters to the arrays
+    if (arr_x) Py_DECREF(arr_x);
+    if (arr_cg) Py_DECREF(arr_cg);
+    if (arr_ch) Py_DECREF(arr_ch);
+    if (arr_scale) Py_DECREF(arr_scale);
+    if (!retval && arr_grd) Py_DECREF(arr_grd);
+    if (!retval && arr_pot) Py_DECREF(arr_pot);
+
+    return retval;
 }
+
+
+/* checking the mode of the model evaluation */
+
+static SHEVAL_MODE _check_sheval_mode(int mode, const char *label)
+{
+    switch (mode)
+    {
+        case SM_POTENTIAL:
+            return SM_POTENTIAL;
+        case SM_GRADIENT:
+            return SM_GRADIENT;
+        case SM_POTENTIAL_AND_GRADIENT:
+            return SM_POTENTIAL_AND_GRADIENT;
+    }
+
+    PyErr_Format(PyExc_ValueError, "Invalid mode value!");
+    return SM_INVALID;
+}
+
+
+/* high-level nD-array recursive batch model_evaluation */
+
+static void _model_eval(MODEL *model, int mode, double *fpot,
+    double *fx, double *fy, double *fz, double x, double y, double z);
+
+#define S(a) ((double*)(a).data)
+#define P(a,i) ((double*)((a).data+(i)*(a).stride[0]))
+#define V(a,i) (*P(a,i))
+
+
+static void _sheval1(ARRAY_DATA arrd_x, ARRAY_DATA arrd_pot, MODEL *model)
+{
+    if (arrd_x.ndim > 1)
+    {
+        npy_intp i;
+        for(i = 0; i < arrd_x.dim[0]; ++i)
+            _sheval1(_get_arrd_item(&arrd_x, i), _get_arrd_item(&arrd_pot, i), model);
+        return;
+    }
+
+    _model_eval(model, SM_POTENTIAL, S(arrd_pot), NULL, NULL, NULL,
+                    V(arrd_x, 0), V(arrd_x, 1), V(arrd_x, 2));
+}
+
+
+static void _sheval2(ARRAY_DATA arrd_x, ARRAY_DATA arrd_grd, MODEL *model)
+{
+    if (arrd_x.ndim > 1)
+    {
+        npy_intp i;
+        for(i = 0; i < arrd_x.dim[0]; ++i)
+            _sheval2(_get_arrd_item(&arrd_x, i), _get_arrd_item(&arrd_grd, i), model);
+        return;
+    }
+
+    _model_eval(model, SM_GRADIENT, NULL, P(arrd_grd, 0), P(arrd_grd, 1),
+        P(arrd_grd, 2), V(arrd_x, 0), V(arrd_x, 1), V(arrd_x, 2));
+
+}
+
+
+static void _sheval3(ARRAY_DATA arrd_x, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_grd, MODEL *model)
+{
+    if (arrd_x.ndim > 1)
+    {
+        npy_intp i;
+        for(i = 0; i < arrd_x.dim[0]; ++i)
+            _sheval3(_get_arrd_item(&arrd_x, i), _get_arrd_item(&arrd_pot, i),
+                    _get_arrd_item(&arrd_grd, i), model);
+        return;
+    }
+
+    _model_eval(model, SM_POTENTIAL_AND_GRADIENT, S(arrd_pot),
+        P(arrd_grd, 0), P(arrd_grd, 1), P(arrd_grd, 2), V(arrd_x, 0),
+        V(arrd_x, 1), V(arrd_x, 2));
+}
+
+#undef V
+#undef P
+#undef S
+
 
 /* single point evaluation */
-static void _sheval_model_eval(MODEL *model, int mode, double *fpot,
+
+static void _model_eval(MODEL *model, int mode, double *fpot,
     double *fx, double *fy, double *fz, double x, double y, double z)
 {
     double glat, glon, ghgt;
@@ -280,236 +447,107 @@ static void _sheval_model_eval(MODEL *model, int mode, double *fpot,
     }
 }
 
-/* high-level nD-array recursive batch model_evaluation */
 
-#define S(a) ((double*)(a).data)
-#define P(a,i) ((double*)((a).data+(i)*(a).stride[0]))
-#define V(a,i) (*P(a,i))
+/* model structure - reset */
 
-static void _sheval1(ARRAY_DATA arrd_x, ARRAY_DATA arrd_pot, MODEL *model)
+static void _model_reset(MODEL *model)
 {
-    if (arrd_x.ndim > 1)
-    {
-        npy_intp i;
-        for(i = 0; i < arrd_x.dim[0]; ++i)
-            _sheval1(_get_arrd_item(&arrd_x, i), _get_arrd_item(&arrd_pot, i), model);
-        return;
-    }
-
-    _sheval_model_eval(model, SM_POTENTIAL, S(arrd_pot), NULL, NULL, NULL,
-                    V(arrd_x, 0), V(arrd_x, 1), V(arrd_x, 2));
+    memset(model, 0, sizeof(MODEL));
 }
 
-static void _sheval2(ARRAY_DATA arrd_x, ARRAY_DATA arrd_grd, MODEL *model)
+
+/* model structure - destruction */
+
+static void _model_destroy(MODEL *model)
 {
-    if (arrd_x.ndim > 1)
-    {
-        npy_intp i;
-        for(i = 0; i < arrd_x.dim[0]; ++i)
-            _sheval2(_get_arrd_item(&arrd_x, i), _get_arrd_item(&arrd_grd, i), model);
-        return;
-    }
+    if(NULL != model->lp)
+        free(model->lp);
+    if(NULL != model->ldp)
+        free(model->ldp);
+    if(NULL != model->lsin)
+        free(model->lsin);
+    if(NULL != model->lcos)
+        free(model->lcos);
+    if(NULL != model->rrp)
+        free(model->rrp);
+    if(NULL != model->psqrt)
+        free(model->psqrt);
 
-    _sheval_model_eval(model, SM_GRADIENT, NULL, P(arrd_grd, 0), P(arrd_grd, 1),
-        P(arrd_grd, 2), V(arrd_x, 0), V(arrd_x, 1), V(arrd_x, 2));
-
+    _model_reset(model);
 }
 
-static void _sheval3(ARRAY_DATA arrd_x, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_grd, MODEL *model)
+
+/* model structure - initialization */
+
+static int _model_init(MODEL *model, int is_internal, int degree,
+    int coord_in, int coord_out, const double *cg, const double *ch,
+    const double scale_potential, const double *scale_gradient)
 {
-    if (arrd_x.ndim > 1)
+    const int nterm = ((degree+1)*(degree+2))/2;
+
+    _model_reset(model);
+
+    model->is_internal = is_internal;
+    model->degree = degree;
+    model->nterm = nterm;
+    model->coord_in = coord_in;
+    model->coord_out = coord_out;
+    model->elps_a = WGS84_A;
+    model->elps_eps2 = WGS84_EPS2;
+    model->crad_ref = RADIUS;
+    model->clat_last = NAN;
+    model->clon_last = NAN;
+    model->crad_last = NAN;
+    model->scale_potential = scale_potential;
+    model->scale_gradient0 = scale_gradient[0];
+    model->scale_gradient1 = scale_gradient[1];
+    model->scale_gradient2 = scale_gradient[2];
+    model->cg = cg;
+    model->ch = ch;
+
+    if (NULL == (model->lp = (double*)malloc(nterm*sizeof(double))))
     {
-        npy_intp i;
-        for(i = 0; i < arrd_x.dim[0]; ++i)
-            _sheval3(_get_arrd_item(&arrd_x, i), _get_arrd_item(&arrd_pot, i),
-                    _get_arrd_item(&arrd_grd, i), model);
-        return;
+        PyErr_Format(PyExc_MemoryError, "_model_ts_init: lp");
+        goto error;
     }
 
-    _sheval_model_eval(model, SM_POTENTIAL_AND_GRADIENT, S(arrd_pot),
-        P(arrd_grd, 0), P(arrd_grd, 1), P(arrd_grd, 2), V(arrd_x, 0),
-        V(arrd_x, 1), V(arrd_x, 2));
-}
-
-#undef V
-#undef P
-#undef S
-
-/* Python function definition */
-
-#define DOC_SHEVAL "\n"\
-"   arr_out = sheval(arr_x, degree, coef_g, coef_h, coord_type_in=GEODETIC_ABOVE_WGS84,\n"\
-"                    coord_type_out=GEODETIC_ABOVE_WGS84, mode=GRADIENT, is_internal=True,\n"\
-"                    scale_potential=1.0, scale_gradient=1.0)\n"\
-"\n"\
-"     Parameters:\n"\
-"       arr_x  - array of 3D coordinates (up to 16 dimensions).\n"\
-"       degree - degree of the spherical harmonic model.\n"\
-"       coef_g - vector of spherical harmonic model coefficients.\n"\
-"       coef_h - vector of spherical harmonic model coefficients.\n"\
-"       coord_type_in - type of the input coordinates.\n"\
-"       coord_type_out - type of the output coordinates frame.\n"\
-"       mode - quantity to be evaluated:\n"\
-"                  POTENTIAL\n"\
-"                  GRADIENT (default)\n"\
-"                  POTENTIAL_AND_GRADIENT\n"\
-"       is_internal - boolean flag set to True by default. When set to False \n"\
-"                     external field evaluation is used.\n"\
-"       scale_potential - scalar value multiplied with the result potentials.\n"\
-"       scale_gradient - scalar or 3 element array multiplied with the result\n"\
-"                        gradient components.\n"\
-"\n"
-
-
-static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
-{
-    static char *keywords[] = {
-        "arr_x", "degree", "coef_g", "coef_h", "coord_type_in",
-        "coord_type_out", "mode", "is_internal",
-        "scale_potential", "scale_gradient", NULL
-    };
-    int ct_in = CT_GEODETIC_ABOVE_WGS84;
-    int ct_out = CT_GEODETIC_ABOVE_WGS84;
-    int nterm, degree = 0, mode = 0x2, is_internal;
-    double scale_potential = 1.0;
-    double scale_gradient[3] = {1.0, 1.0, 1.0};
-    PyObject *obj_is_internal = NULL; // boolean flag
-    PyObject *obj_x = NULL; // input object
-    PyObject *obj_cg = NULL; // coef_g object
-    PyObject *obj_ch = NULL; // coef_h object
-    PyObject *obj_scale = NULL; // gradient scale object
-    PyArrayObject *arr_x = NULL; // input array
-    PyArrayObject *arr_cg = NULL; // coef_g array
-    PyArrayObject *arr_ch = NULL; // coef_h array
-    PyArrayObject *arr_pot = NULL; // output array
-    PyArrayObject *arr_grd = NULL; // output array
-    PyArrayObject *arr_scale = NULL; // gradient scale array
-    PyObject *retval = NULL;
-    MODEL model;
-
-    // clear model structure
-    _sheval_model_reset(&model);
-
-    // parse input arguments
-    if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "OiOO|iiiOdO:sheval", keywords,
-        &obj_x, &degree, &obj_cg, &obj_ch, &ct_in, &ct_out, &mode,
-        &obj_is_internal, &scale_potential, &obj_scale
-    ))
-        goto exit;
-
-    is_internal = (obj_is_internal == NULL) || PyObject_IsTrue(obj_is_internal);
-
-    // check the type of the coordinate transformation
-    if (CT_INVALID == _check_coord_type(ct_in, keywords[4]))
-        goto exit;
-
-    if (CT_INVALID == _check_coord_type(ct_out, keywords[5]))
-        goto exit;
-
-    // check the operation mode
-    if (SM_INVALID == _check_sheval_mode(mode, keywords[6]))
-        goto exit;
-
-    // cast the objects to arrays
-    if (NULL == (arr_x = _get_as_double_array(obj_x, 1, 0, NPY_ARRAY_ALIGNED, keywords[0])))
-        goto exit;
-
-    if (NULL == (arr_cg = _get_as_double_array(obj_cg, 1, 1, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_IN_ARRAY, keywords[2])))
-        goto exit;
-
-    if (NULL == (arr_ch = _get_as_double_array(obj_ch, 1, 1, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_IN_ARRAY, keywords[3])))
-        goto exit;
-
-    if (degree < 0)
+    if (NULL == (model->ldp = (double*)malloc(nterm*sizeof(double))))
     {
-        PyErr_Format(PyExc_ValueError, "Invalid value %d of '%s'!", degree, keywords[1]);
-        goto exit;
+        PyErr_Format(PyExc_MemoryError, "_model_ts_init: ldp");
+        goto error;
     }
 
-    // check dimensions of the coefficient arrays
-    nterm = ((degree + 1)*(degree + 2))/2;
-
-    // check maximum allowed input array dimension
-    if (PyArray_NDIM(arr_x) > MAX_OUT_ARRAY_NDIM)
+    if (NULL == (model->lsin = (double*)malloc((degree+1)*sizeof(double))))
     {
-        PyErr_Format(PyExc_ValueError, "The input array dimension of '%s'"\
-            " %d exceeds the allowed maximum value %d!", keywords[0],
-            PyArray_NDIM(arr_x), MAX_OUT_ARRAY_NDIM);
-        goto exit;
+        PyErr_Format(PyExc_MemoryError, "_model_ts_init: lsin");
+        goto error;
     }
 
-    // check the last dimension (required length of the coordinates vectors)
-    if (_check_array_dim_eq(arr_x, -1, 3, keywords[0]))
-        goto exit;
-
-    // check the coefficients arrays' dimensions
-    if (_check_array_dim_le(arr_cg, 0, nterm, keywords[2]))
-        goto exit;
-
-    if (_check_array_dim_le(arr_ch, 0, nterm, keywords[3]))
-        goto exit;
-
-    // handle the gradient scale factors
-    if (NULL != obj_scale)
+    if (NULL == (model->lcos = (double*)malloc((degree+1)*sizeof(double))))
     {
-        if (NULL == (arr_scale = _get_as_double_array(obj_scale, 0, 1, NPY_ARRAY_IN_ARRAY, keywords[9])))
-            goto exit;
-
-        if (_extract_1d_double_array(scale_gradient, 3, arr_scale, keywords[9]))
-            goto exit;
+        PyErr_Format(PyExc_MemoryError, "_model_ts_init: lcos");
+        goto error;
     }
 
-    // create new output arrays
-    if (mode & SM_POTENTIAL)
-        if (NULL == (arr_pot = _get_new_array(PyArray_NDIM(arr_x)-1, PyArray_DIMS(arr_x), NPY_DOUBLE)))
-            goto exit;
-
-    if (mode & SM_GRADIENT)
-        if (NULL == (arr_grd = _get_new_double_array(PyArray_NDIM(arr_x), PyArray_DIMS(arr_x), 3)))
-            goto exit;
-
-    // evaluate the model
-
-    if(_sheval_model_init(
-        &model, is_internal, degree, ct_in, ct_out,
-        PyArray_DATA(arr_cg), PyArray_DATA(arr_ch),
-        scale_potential, scale_gradient
-    ))
-        goto exit;
-
-    switch(mode)
+    if (NULL == (model->rrp = (double*)malloc((degree+1)*sizeof(double))))
     {
-        case SM_POTENTIAL:
-            _sheval1(_array_to_arrd(arr_x), _array_to_arrd(arr_pot), &model);
-            retval = (PyObject*) arr_pot;
-            break;
-
-        case SM_GRADIENT:
-            _sheval2(_array_to_arrd(arr_x), _array_to_arrd(arr_grd), &model);
-            retval = (PyObject*) arr_grd;
-            break;
-
-        case SM_POTENTIAL_AND_GRADIENT:
-            _sheval3(_array_to_arrd(arr_x), _array_to_arrd(arr_pot), _array_to_arrd(arr_grd), &model);
-            if (NULL == (retval = Py_BuildValue("NN", (PyObject*) arr_pot, (PyObject*) arr_grd)))
-                goto exit;
-            break;
+        PyErr_Format(PyExc_MemoryError, "_model_ts_init: rrp");
+        goto error;
     }
 
-  exit:
+    if (NULL == (model->psqrt = shc_presqrt(degree)))
+    {
+        PyErr_Format(PyExc_MemoryError, "_model_ts_init: psqrt");
+        goto error;
+    }
 
-    _sheval_model_destroy(&model);
+    return 0;
 
-    // decrease reference counters to the arrays
-    if (arr_x) Py_DECREF(arr_x);
-    if (arr_cg) Py_DECREF(arr_cg);
-    if (arr_ch) Py_DECREF(arr_ch);
-    if (arr_scale) Py_DECREF(arr_scale);
-    if (!retval && arr_grd) Py_DECREF(arr_grd);
-    if (!retval && arr_pot) Py_DECREF(arr_pot);
+  error:
 
-    return retval;
+    _model_destroy(model);
+
+    return 1;
 }
 
 #endif  /* PYMM_SHEVAL_H */

@@ -5,7 +5,7 @@
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
-# Copyright (C) 2018 EOX IT Services GmbH
+# Copyright (C) 2018-2022 EOX IT Services GmbH
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
