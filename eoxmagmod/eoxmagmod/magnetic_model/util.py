@@ -5,7 +5,7 @@
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
-# Copyright (C) 2018 EOX IT Services GmbH
+# Copyright (C) 2018-2022 EOX IT Services GmbH
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
+
+
+def coeff_size(degree):
+    """ Calculate size of the full coefficient array from the given degree. """
+    return ((degree + 2)*(degree + 1))//2
+
+
+def convert_value(value, conversion_function):
+    """ Convert value using the optional conversion function. """
+    if conversion_function is not None:
+        value = conversion_function(value)
+    return value
 
 
 def parse_file(parser, file_, *args, **kwargs):

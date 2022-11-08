@@ -56,11 +56,11 @@ class SparseSHCoefficientsMIO(SparseSHCoefficients):
         self.mjd2000_to_year_fraction = mjd2000_to_year_fraction
 
     def __call__(self, time, mut, **parameters):
-        degree, coeff, index, kind = self._subset(
+        degree, coeff, _, index = self.subset_degree(
             parameters.get("min_degree", -1), parameters.get("max_degree", -1)
         )
         coeff_full = zeros((coeff_size(degree), 2))
-        coeff_full[index, kind] = self._eval_coeff_fourier2d(coeff, time, mut)
+        coeff_full[index[:, 0], index[:, 1]] = self._eval_coeff_fourier2d(coeff, time, mut)
         return coeff_full, degree
 
     def _eval_coeff_fourier2d(self, coeff, mjd2000, mut):
