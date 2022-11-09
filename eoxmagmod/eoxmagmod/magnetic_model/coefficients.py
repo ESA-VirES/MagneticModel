@@ -28,7 +28,7 @@
 # pylint: disable=too-few-public-methods,abstract-method
 
 from numpy import (
-    inf, asarray, zeros, argsort, abs as aabs, stack,
+    inf, asarray, zeros, ones, argsort, abs as aabs, stack,
 )
 from ..time_util import decimal_year_to_mjd2000, mjd2000_to_decimal_year
 from .._pymm import interp, INTERP_C0, INTERP_C1
@@ -155,6 +155,35 @@ class ComposedSHCoefficients(SHCoefficients):
         return self._min_degree
 
     def __call__(self, time, **parameters):
+        time = asarray(time)
+        if time.ndim == 0:
+            return self._get_coeff_single_time(time, **parameters)
+        return self._get_coeff_multi_time(time, **parameters)
+
+    def _get_coeff_multi_time(self, time, **parameters):
+        mask = ones(time.shape, 'bool')
+
+        # process parts matched by different coefficient sets ...
+        degree = 0
+        results = []
+        for item in self._items:
+            item_mask = mask & item.is_valid(time)
+            item_coeff, item_degree = item(time[item_mask], **parameters)
+            results.append((item_mask, item_coeff))
+            degree = max(degree, item_degree)
+            mask &= ~item_mask
+        item_coeff, item_degree = self._items[0](time[mask], **parameters)
+        results.append((mask, item_coeff))
+        degree = max(degree, item_degree)
+
+        # merge parts
+        coeff = zeros((*time.shape, coeff_size(degree), 2))
+        for item_mask, item_coeff in results:
+            coeff[item_mask, :item_coeff.shape[-2], :] = item_coeff
+
+        return coeff, degree
+
+    def _get_coeff_single_time(self, time, **parameters):
         for item in self._items:
             if item.is_valid(time):
                 return item(time, **parameters)
@@ -220,13 +249,19 @@ class CombinedSHCoefficients(SHCoefficients):
         return self._min_degree
 
     def __call__(self, time, **parameters):
-        max_degree = parameters.get("max_degree", -1)
-        degree = self.degree if max_degree < 0 else min(self.degree, max_degree)
-        coeff_full = zeros((coeff_size(degree), 2))
+        time = asarray(time)
+        # evaluate coefficient sets ...
+        degree = 0
+        results = []
         for item in self._items:
             item_coeff, item_degree = item(time, **parameters)
-            coeff_full[:coeff_size(item_degree), :] += item_coeff
-        return coeff_full, degree
+            results.append(item_coeff)
+            degree = max(degree, item_degree)
+        # merge coefficient sets ...
+        coeff = zeros((*time.shape, coeff_size(degree), 2))
+        for item_coeff in results:
+            coeff[..., :item_coeff.shape[-2], :] += item_coeff
+        return coeff, degree
 
 
 
@@ -345,14 +380,13 @@ class SparseSHCoefficientsTimeDependent(SparseSHCoefficients):
             raise ValueError("Unsupported spline order {spline_order}!") from None
 
     def __call__(self, time, **parameters):
-        if asarray(time).ndim > 0:
-            raise ValueError("Only one time value allowed!")
+        time = asarray(time)
         degree, coeff, _, index = self.subset_degree(
             parameters.get("min_degree", -1),
             parameters.get("max_degree", -1),
         )
-        coeff_full = zeros((coeff_size(degree), 2))
-        coeff_full[index[:, 0], index[:, 1]] = interp(
+        coeff_full = zeros((*time.shape, coeff_size(degree), 2))
+        coeff_full[..., index[:, 0], index[:, 1]] = interp(
             time, self._times, coeff, extrapolate=True, **self._interp_options
         )
         return coeff_full, degree
