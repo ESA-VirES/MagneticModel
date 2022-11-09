@@ -29,7 +29,7 @@
 
 from unittest import TestCase, main
 from itertools import product
-from numpy import nan, inf, isinf, array, empty, full, nditer, asarray
+from numpy import nan, inf, isinf, array, empty, full, nditer, asarray, zeros
 from numpy.random import uniform
 from numpy.testing import assert_allclose
 from eoxmagmod.magnetic_time import mjd2000_to_magnetic_universal_time
@@ -324,7 +324,11 @@ class ComposedModelTestMixIn(SHModelTestMixIn):
         return composed_model
 
     def _eval_reference(self, time, coords):
-        result = 0
+        time = asarray(time)
+        coords = asarray(coords)
+        result = zeros(
+            (*time.shape, 3) if time.ndim > (coords.ndim -1) else coords.shape
+        )
         for model, scale, parameters in self.components:
             kwargs = {}
             kwargs.update(getattr(self, 'options', {}))
@@ -337,6 +341,16 @@ class ComposedModelTestMixIn(SHModelTestMixIn):
         return result
 
 #-------------------------------------------------------------------------------
+
+class TestComposedModelEmpty(TestCase, ComposedModelTestMixIn):
+    parameters = ("time", "location")
+    options = {"f107": 70, "scale": [1, 1, -1]}
+    components = []
+    reference_values = (
+        6201.125, (30.0, 40.0, 6400.0), (0., 0., 0.),
+    )
+    validity = (-inf, +inf)
+
 
 class TestComposedModelFull(TestCase, ComposedModelTestMixIn):
     parameters = ("time", "location", "f107", "subsolar_point")
