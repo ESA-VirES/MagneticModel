@@ -27,10 +27,11 @@
 #-------------------------------------------------------------------------------
 # pylint: disable=too-many-arguments,too-many-locals
 
-from numpy import asarray, empty, nditer, ndim, isnan, full, newaxis, ones
+from numpy import nan, asarray, empty, nditer, isnan, full, newaxis, ones
 from .._pymm import GEOCENTRIC_SPHERICAL, convert
 from ..magnetic_time import mjd2000_to_magnetic_universal_time
 from .model import GeomagneticModel, DipoleSphericalHarmomicGeomagneticModel
+from .util import reshape_times_and_coordinates, reshape_variable
 
 MIO_HEIGHT = 110.0 # km
 MIO_EARTH_RADIUS = 6371.2 # km
@@ -145,9 +146,13 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
              input_coordinate_system=GEOCENTRIC_SPHERICAL,
              output_coordinate_system=GEOCENTRIC_SPHERICAL,
              **options):
-        time = asarray(time)
-        location = asarray(location)
 
+        # reshape time and location to a compatible shape
+        time, location = reshape_times_and_coordinates(
+            asarray(time), asarray(location)
+        )
+
+        # magnetic universal time
         lat_ngp, lon_ngp = self.north_pole
         mut = mjd2000_to_magnetic_universal_time(
             time, lat_ngp, lon_ngp,
@@ -155,26 +160,44 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
             lon_sol=options.pop('lon_sol', None),
         )
 
+        # MIO scaling factor
         mio_scale = 1.0 + self.wolf_ratio * asarray(options.pop('f107'))
+        scale = asarray(options.pop('scale', 1.0))
 
-        mask = self.coefficients.is_valid(time) & ~isnan(mio_scale)
+        def _is_valid(start, end):
+            return (time >= start) & (time <= end) & ~isnan(mio_scale)
 
-        if time.ndim:
-            if not mio_scale.ndim:
-                mio_scale = full(time.shape, mio_scale)
-            mio_scale = mio_scale[mask, newaxis]
-            mut = mut[mask]
+        def _call_eval(method, coefficients, time, mut, location):
+            scale_ = reshape_variable(time, mio_scale)[..., newaxis]
+            scale_ = (scale * ones(3)) * scale_
+            return self._eval(
+                method, coefficients, time, location,
+                input_coordinate_system, output_coordinate_system,
+                scale=scale_, mut=mut, **options
+            )
 
-        scale = (options.pop('scale', 1.0) * ones(3)) * mio_scale
+        def _get_nans():
+            return full(location.shape, nan)
 
-        return self._eval_masked(
-            mask, time, location,
-            input_coordinate_system, output_coordinate_system,
-            scale=scale, mut=mut, **options
-        )
+        if time.ndim == 0:
+            # time is a scalar value
+            for (start, end), method, coefficients in self._components:
+                if _is_valid(start, end):
+                    return _call_eval(method, coefficients, time, mut, location)
+            return _get_nans()
 
-    def _eval_multi_time(self, time, coords, input_coordinate_system,
-                         output_coordinate_system, mut, **options):
+        # time is an array
+        result = _get_nans()
+        for (start, end), method, coefficients in self._components:
+            mask = _is_valid(start, end)
+            result[mask, :] = _call_eval(
+                method, coefficients, time[mask], mut[mask], location[mask, :]
+            )
+        return result
+
+    def _eval_multi_time(self, coefficients, time, coords,
+                         input_coordinate_system, output_coordinate_system,
+                         mut, **options):
         result = empty(coords.shape)
         if result.size > 0:
             iterator = nditer(
@@ -195,7 +218,7 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
                     time_, coord0, coord1, coord2, mut_,
                 ) = item
                 vect0[...], vect1[...], vect2[...] = self._eval_single_time(
-                    time_, [coord0, coord1, coord2],
+                    coefficients, time_, [coord0, coord1, coord2],
                     input_coordinate_system, output_coordinate_system,
                     mut=mut_, **options
                 )

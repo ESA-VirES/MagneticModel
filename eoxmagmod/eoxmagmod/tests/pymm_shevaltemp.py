@@ -29,7 +29,7 @@
 
 from unittest import TestCase, main
 from collections import namedtuple
-from numpy import broadcast_to, stack, empty, zeros, prod, asarray
+from numpy import stack, empty, zeros, prod, asarray
 from numpy.random import uniform
 from numpy.testing import assert_allclose
 from numpy.lib.stride_tricks import as_strided

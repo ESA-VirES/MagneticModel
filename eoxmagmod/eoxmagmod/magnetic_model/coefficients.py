@@ -5,7 +5,7 @@
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
-# Copyright (C) 2018 EOX IT Services GmbH
+# Copyright (C) 2018-2022 EOX IT Services GmbH
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,11 +32,19 @@ from numpy import (
 )
 from ..time_util import decimal_year_to_mjd2000, mjd2000_to_decimal_year
 from .._pymm import interp, INTERP_C0, INTERP_C1
-from .util import coeff_size, convert_value
+from .util import (
+    get_nonoverlapping_intervals, aggregate_intersected_intervals,
+    coeff_size, convert_value,
+)
 
 
 class SHCoefficients:
     """ Abstract base class for all spherical harmonic coefficients. """
+    time_scales = ()
+
+    def decompose(self):
+        """ Return a sequence of decomposed coefficient sets. """
+        raise NotImplementedError
 
     def __init__(self, is_internal=True, **kwargs):
         self.is_internal = is_internal
@@ -93,10 +101,26 @@ class ComposedSHCoefficients(SHCoefficients):
     of coefficients matching the requested time instance is evaluated.
     """
 
+    def decompose(self):
+        result = []
+        for item in self:
+            result.extend(get_nonoverlapping_intervals(item.decompose()))
+        return result
+
+    @property
+    def time_scales(self):
+        time_scales = set()
+        for item in self:
+            time_scales.update(item.time_scales)
+        return tuple(time_scales)
+
     def __new__(cls, *items):
         if len(items) == 1:
             return items[0]
         return super(ComposedSHCoefficients, cls).__new__(cls)
+
+    def __iter__(self):
+        return iter(self._items)
 
     def __init__(self, *items):
 
@@ -199,10 +223,33 @@ class CombinedSHCoefficients(SHCoefficients):
     constant lithospheric model coefficients.
     """
 
+    def decompose(self):
+
+        aggergates = None
+        for item in self:
+            aggergates = aggregate_intersected_intervals(
+                item.decompose(), aggergates
+            )
+
+        result = []
+        for validity, items in aggergates:
+            result.append((validity, CombinedSHCoefficients(*items)))
+        return result
+
+    @property
+    def time_scales(self):
+        time_scales = set()
+        for item in self:
+            time_scales.update(item.time_scales)
+        return tuple(time_scales)
+
     def __new__(cls, *items):
         if len(items) == 1:
             return items[0]
         return super(CombinedSHCoefficients, cls).__new__(cls)
+
+    def __iter__(self):
+        return iter(self._items)
 
     def __init__(self, *items):
 
@@ -248,6 +295,21 @@ class CombinedSHCoefficients(SHCoefficients):
     def min_degree(self):
         return self._min_degree
 
+    def get_coefficient_sets(self, **parameters):
+        """ Extract coefficients sets which can be passed to C evaluation. """
+        coeff_sets = []
+        for item in self._items:
+            coeff_sets.extend(item.get_coefficient_sets(**parameters))
+        return coeff_sets
+
+    @property
+    def convert_time(self):
+        for item in self._items:
+            convert_time = getattr(item, "convert_time", None)
+            if convert_time:
+                return convert_time
+        return None
+
     def __call__(self, time, **parameters):
         time = asarray(time)
         # evaluate coefficient sets ...
@@ -270,6 +332,9 @@ class SparseSHCoefficients(SHCoefficients):
     Each sparse coefficient has a degree and order defining its position
     in the full coefficient array.
     """
+    def decompose(self):
+        return [(self.validity, self)]
+
     def __init__(self, indices, coefficients, **kwargs):
         SHCoefficients.__init__(self, **kwargs)
         n_idx, m_idx = indices[..., 0], indices[..., 1]
@@ -331,6 +396,8 @@ class SparseSHCoefficientsTimeDependent(SparseSHCoefficients):
     by spine interpolation of a time series of coefficients snapshots
     interpolated in the MJD2000 time domain.
     """
+    time_scale = ("MJD2000",)
+
     def __init__(self, indices, coefficients, times, spline_order=2, **kwargs):
         indices = asarray(indices)
         coefficients = asarray(coefficients)
@@ -370,6 +437,7 @@ class SparseSHCoefficientsTimeDependent(SparseSHCoefficients):
         SparseSHCoefficients.__init__(self, indices, coefficients, **kwargs)
 
         self._times = convert_value(times, kwargs.get("to_mjd2000"))
+        self._spline_order = spline_order
 
         try:
             self._interp_options = {
@@ -379,8 +447,16 @@ class SparseSHCoefficientsTimeDependent(SparseSHCoefficients):
         except KeyError:
             raise ValueError("Unsupported spline order {spline_order}!") from None
 
+    def get_coefficient_sets(self, **parameters):
+        """ Extract coefficients sets which can be passed to C evaluation. """
+        _, coeff, nm_, _ = self.subset_degree(
+            parameters.get("min_degree", -1),
+            parameters.get("max_degree", -1),
+        )
+        return [(self._times, coeff, nm_, self._spline_order)]
+
     def __call__(self, time, **parameters):
-        time = asarray(time)
+        time = convert_value(asarray(time), getattr(self, "convert_time", None))
         degree, coeff, _, index = self.subset_degree(
             parameters.get("min_degree", -1),
             parameters.get("max_degree", -1),
@@ -394,6 +470,8 @@ class SparseSHCoefficientsTimeDependent(SparseSHCoefficients):
 
 class SparseSHCoefficientsConstant(SparseSHCoefficientsTimeDependent):
     """ Time invariant sparse spherical harmonic coefficients. """
+    time_scale = ()
+
     def __init__(self, indices, coefficients, **kwargs):
         indices = asarray(indices)
         coefficients = asarray(coefficients)
@@ -426,6 +504,7 @@ class SparseSHCoefficientsTimeDependentDecimalYear(SparseSHCoefficientsTimeDepen
     by spine interpolation of a time series of coefficients snapshots.
     with time in decimal year interpolated in the decimal years time domain.
     """
+    time_scale = ("MJD2000",)
 
     def __init__(self, indices, coefficients, times,
                  to_mjd2000=decimal_year_to_mjd2000,
@@ -434,13 +513,8 @@ class SparseSHCoefficientsTimeDependentDecimalYear(SparseSHCoefficientsTimeDepen
         SparseSHCoefficientsTimeDependent.__init__(
             self, indices, coefficients, times, **kwargs
         )
-        self._to_decimal_year = to_decimal_year
+        self.convert_time = to_decimal_year
         # Fix the validity range to be in the expected MJD2000.
         self.validity = self._get_converted_validity(
             *self.validity, to_mjd2000=to_mjd2000
-        )
-
-    def __call__(self, time, **parameters):
-        return SparseSHCoefficientsTimeDependent.__call__(
-            self, self._to_decimal_year(time), **parameters
         )
