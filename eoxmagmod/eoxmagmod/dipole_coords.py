@@ -78,5 +78,4 @@ def vrot_from_dipole(vectors, lat_ngp, lon_ngp, lat_dipole, lon_dipole,
     if coord_type_out == GEOCENTRIC_CARTESIAN:
         # coordinates are already in the Cartesian coordinates
         return vectors
-    else:
-        return vrot_cart2sph(vectors, lat_out, lon_out)
+    return vrot_cart2sph(vectors, lat_out, lon_out)

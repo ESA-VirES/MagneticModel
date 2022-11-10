@@ -109,6 +109,7 @@ class ComposedSHCoefficients(SHCoefficients):
 
     @property
     def time_scales(self):
+        """ Time scales of the composed models. """
         time_scales = set()
         for item in self:
             time_scales.update(item.time_scales)
@@ -224,13 +225,11 @@ class CombinedSHCoefficients(SHCoefficients):
     """
 
     def decompose(self):
-
         aggergates = None
         for item in self:
             aggergates = aggregate_intersected_intervals(
                 item.decompose(), aggergates
             )
-
         result = []
         for validity, items in aggergates:
             result.append((validity, CombinedSHCoefficients(*items)))
@@ -238,6 +237,7 @@ class CombinedSHCoefficients(SHCoefficients):
 
     @property
     def time_scales(self):
+        """ Time scales of the combined models. """
         time_scales = set()
         for item in self:
             time_scales.update(item.time_scales)
@@ -304,6 +304,7 @@ class CombinedSHCoefficients(SHCoefficients):
 
     @property
     def convert_time(self):
+        """ Extract time-conversion function, if available. """
         for item in self._items:
             convert_time = getattr(item, "convert_time", None)
             if convert_time:
@@ -396,7 +397,7 @@ class SparseSHCoefficientsTimeDependent(SparseSHCoefficients):
     by spine interpolation of a time series of coefficients snapshots
     interpolated in the MJD2000 time domain.
     """
-    time_scale = ("MJD2000",)
+    time_scales = ("MJD2000",)
 
     def __init__(self, indices, coefficients, times, spline_order=2, **kwargs):
         indices = asarray(indices)
@@ -504,7 +505,7 @@ class SparseSHCoefficientsTimeDependentDecimalYear(SparseSHCoefficientsTimeDepen
     by spine interpolation of a time series of coefficients snapshots.
     with time in decimal year interpolated in the decimal years time domain.
     """
-    time_scale = ("MJD2000",)
+    time_scales = ("MJD2000",)
 
     def __init__(self, indices, coefficients, times,
                  to_mjd2000=decimal_year_to_mjd2000,

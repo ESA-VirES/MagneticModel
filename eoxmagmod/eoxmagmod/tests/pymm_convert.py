@@ -44,7 +44,7 @@ DEG2RAD = pi / 180.0
 RAD2DEG = 180.0 / pi
 
 
-class ConvertTestMixIn(object):
+class ConvertTestMixIn:
     source_coordinate_system = None
     target_coordinate_system = None
 
@@ -176,7 +176,7 @@ class ConvertTestMixIn(object):
 #-------------------------------------------------------------------------------
 # sources
 
-class SourceSpherical(object):
+class SourceSpherical:
     source_coordinate_system = GEOCENTRIC_SPHERICAL
 
     @property
@@ -187,7 +187,7 @@ class SourceSpherical(object):
         ])
 
 
-class SourceGeodetic(object):
+class SourceGeodetic:
     source_coordinate_system = GEODETIC_ABOVE_WGS84
 
     @property
@@ -198,7 +198,7 @@ class SourceGeodetic(object):
         ])
 
 
-class SourceCartesian(object):
+class SourceCartesian:
     source_coordinate_system = GEOCENTRIC_CARTESIAN
 
     @property
@@ -211,7 +211,7 @@ class SourceCartesian(object):
 #-------------------------------------------------------------------------------
 # generic targets
 
-class TargetIndetical(object):
+class TargetIndetical:
 
     @classmethod
     def reference_convert(cls, coords):

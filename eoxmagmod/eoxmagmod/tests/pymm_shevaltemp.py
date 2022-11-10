@@ -52,7 +52,7 @@ from eoxmagmod.tests.data import chaos_mma
 CoeffSet = namedtuple("CoeffSet", ["coef_times", "coef_coef", "coef_nm", "spline_order"])
 
 
-class SphericalHarmonicsWithCoeffInterpolationMixIn(object):
+class SphericalHarmonicsWithCoeffInterpolationMixIn:
 
     options = {}
     scale_potential = 1.0
@@ -262,26 +262,26 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn(object):
 #-------------------------------------------------------------------------------
 # type of SH expansion
 
-class SHTypeInternalStatic(object):
+class SHTypeInternalStatic:
     is_internal = True
     coef_sets = [
         CoeffSet(chaos_core.TIMES[:1], chaos_core.COEFF[:,:1], chaos_core.NMMAP, 1),
     ]
 
-class SHTypeInternalCore(object):
+class SHTypeInternalCore:
     is_internal = True
     coef_sets = [
         CoeffSet(chaos_core.TIMES, chaos_core.COEFF, chaos_core.NMMAP, 2),
     ]
 
-class SHTypeInternalMMA(object):
+class SHTypeInternalMMA:
     is_internal = True
     coef_sets = [
         CoeffSet(chaos_mma.TIMES_I_1, chaos_mma.COEFF_I_1, chaos_mma.NMMAP_I_1, 2),
         CoeffSet(chaos_mma.TIMES_I_2, chaos_mma.COEFF_I_2, chaos_mma.NMMAP_I_2, 2),
     ]
 
-class SHTypeExternalMMA(object):
+class SHTypeExternalMMA:
     is_internal = True
     coef_sets = [
         CoeffSet(chaos_mma.TIMES_E_1, chaos_mma.COEFF_E_1, chaos_mma.NMMAP_E_1, 2),
@@ -292,7 +292,7 @@ class SHTypeExternalMMA(object):
 # sources
 
 
-class SourceSpherical(object):
+class SourceSpherical:
     source_coordinate_system = GEOCENTRIC_SPHERICAL
 
     def coordinates(self, shape=1):
@@ -303,7 +303,7 @@ class SourceSpherical(object):
         ), axis=-1)
 
 
-class SourceGeodetic(object):
+class SourceGeodetic:
     source_coordinate_system = GEODETIC_ABOVE_WGS84
 
     def coordinates(self, shape=1):
@@ -314,7 +314,7 @@ class SourceGeodetic(object):
         ), axis=-1)
 
 
-class SourceCartesian(object):
+class SourceCartesian:
     source_coordinate_system = GEOCENTRIC_CARTESIAN
 
     def coordinates(self, shape=1):

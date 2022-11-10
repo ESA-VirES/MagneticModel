@@ -107,12 +107,12 @@ def load_coeff_shc(path, interpolate_in_decimal_years=False, **kwargs):
         return SparseSHCoefficientsConstant(
             data["nm"], data["gh"][:, 0], **options
         )
-    else:
-        if interpolate_in_decimal_years:
-            coeff_class = SparseSHCoefficientsTimeDependentDecimalYear
-        else:
-            coeff_class = SparseSHCoefficientsTimeDependent
 
-        return coeff_class(
-            data["nm"], data["gh"], times, **options
-        )
+    if interpolate_in_decimal_years:
+        coeff_class = SparseSHCoefficientsTimeDependentDecimalYear
+    else:
+        coeff_class = SparseSHCoefficientsTimeDependent
+
+    return coeff_class(
+        data["nm"], data["gh"], times, **options
+    )

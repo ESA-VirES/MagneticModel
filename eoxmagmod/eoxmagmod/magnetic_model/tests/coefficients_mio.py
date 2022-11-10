@@ -37,7 +37,7 @@ from eoxmagmod.magnetic_model.tests.data import SWARM_MIO_SHA_2_TEST_DATA
 from eoxmagmod.magnetic_model.parser_mio import parse_swarm_mio_file
 
 
-class MIOSHCoeffMixIn(object):
+class MIOSHCoeffMixIn:
     is_internal = None
     degree = 2
     min_degree = 1
@@ -111,7 +111,7 @@ class TestSparseSHCoefficientsMIOInternal(TestCase, MIOSHCoeffMixIn):
         )
 
     def test_extra_sub_solar_point(self):
-        coeff, degree = self.eval_coeff(
+        coeff, _ = self.eval_coeff(
             decimal_year_to_mjd2000(2018.5), lat_sol=0.0, lon_sol=0.0,
         )
         assert_allclose(coeff, [

@@ -30,7 +30,6 @@
 from unittest import TestCase, main
 from numpy.testing import assert_allclose
 from numpy import abs as aabs
-from eoxmagmod import decimal_year_to_mjd2000
 from eoxmagmod.magnetic_model.parser_emm import (
     combine_emm_coefficients, parse_emm_file, EMM_VALIDITY_PERIOD,
 )
@@ -41,7 +40,7 @@ class TestEMMParser(TestCase):
 
     @staticmethod
     def parse(filename):
-        with open(filename) as file_in:
+        with open(filename, encoding="utf8") as file_in:
             return parse_emm_file(file_in)
 
     def _assert_valid(self, data, expected_data):

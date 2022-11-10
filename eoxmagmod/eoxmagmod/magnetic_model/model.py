@@ -28,7 +28,7 @@
 # pylint: disable=too-many-locals, too-many-arguments, no-self-use
 
 
-from numpy import inf, asarray, empty, full, nan, nditer
+from numpy import asarray, empty, full, nan, nditer
 from .._pymm import GRADIENT, GEOCENTRIC_SPHERICAL, sheval, shevaltemp
 from ..sheval_dipole import rotate_vectors_from_dipole
 from ..dipole_coords import convert_to_dipole

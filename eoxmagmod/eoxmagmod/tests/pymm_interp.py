@@ -28,10 +28,7 @@
 # pylint: disable=missing-docstring, invalid-name, too-few-public-methods
 
 from unittest import TestCase, main
-from numpy import (
-    nan, inf, linspace,
-    searchsorted, asarray, prod, full, empty,
-)
+from numpy import nan, inf, linspace, asarray, prod, full, empty
 from numpy.random import random
 from numpy.testing import assert_equal
 from eoxmagmod._pymm import (
@@ -39,7 +36,7 @@ from eoxmagmod._pymm import (
 )
 
 
-class InterpTestMixIn():
+class InterpTestMixIn:
 
     def call_interp(self, time, time0, coeff0):
         raise NotImplementedError

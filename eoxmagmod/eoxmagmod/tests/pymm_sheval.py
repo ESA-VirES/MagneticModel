@@ -42,7 +42,7 @@ from eoxmagmod._pymm import (
 from eoxmagmod.tests.data import sifm, mma_external
 
 
-class SphericalHarmonicsMixIn(object):
+class SphericalHarmonicsMixIn:
     options = {}
     scale_potential = 1.0
     scale_gradient = [1.0, 1.0, 1.0]
@@ -82,15 +82,16 @@ class SphericalHarmonicsMixIn(object):
     def _rotate_gradient(cls, vectors, coords):
         if cls.target_coordinate_system == GEOCENTRIC_SPHERICAL:
             return vectors
-        elif cls.target_coordinate_system == GEOCENTRIC_CARTESIAN:
+        if cls.target_coordinate_system == GEOCENTRIC_CARTESIAN:
             latd = coords[..., 0]
             lond = coords[..., 1]
             return vrot_sph2cart(vectors, latd, lond)
-        elif cls.target_coordinate_system == GEODETIC_ABOVE_WGS84:
+        if cls.target_coordinate_system == GEODETIC_ABOVE_WGS84:
             dlatd = convert(
                 coords, GEOCENTRIC_SPHERICAL, cls.target_coordinate_system
             )[..., 0] - coords[..., 0]
             return vrot_sph2geod(vectors, dlatd)
+        return None
 
     @classmethod
     def reference_sheval(cls, coords):
@@ -160,7 +161,7 @@ class SphericalHarmonicsMixIn(object):
 #-------------------------------------------------------------------------------
 # sources
 
-class SourceSpherical(object):
+class SourceSpherical:
     source_coordinate_system = GEOCENTRIC_SPHERICAL
 
     @property
@@ -171,7 +172,7 @@ class SourceSpherical(object):
         ])
 
 
-class SourceGeodetic(object):
+class SourceGeodetic:
     source_coordinate_system = GEODETIC_ABOVE_WGS84
 
     @property
@@ -182,7 +183,7 @@ class SourceGeodetic(object):
         ])
 
 
-class SourceCartesian(object):
+class SourceCartesian:
     source_coordinate_system = GEOCENTRIC_CARTESIAN
 
     @property
@@ -194,14 +195,14 @@ class SourceCartesian(object):
 
 #-------------------------------------------------------------------------------
 
-class SHTypeInternal(object):
+class SHTypeInternal:
     is_internal = True
     degree = sifm.DEGREE
     coef_g = sifm.COEF_G
     coef_h = sifm.COEF_H
 
 
-class SHTypeExternal(object):
+class SHTypeExternal:
     is_internal = False
     degree = mma_external.DEGREE
     coef_g = mma_external.COEF_Q

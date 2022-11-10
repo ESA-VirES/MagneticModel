@@ -76,14 +76,14 @@ def sheval_dipole(arr_in, degree, coef_g, coef_h, lat_ngp, lon_ngp,
             result, lat_ngp, lon_ngp, arr_in_dipole, arr_in,
             coord_type_in, coord_type_out,
         ) * scale_gradient
-    elif mode == POTENTIAL:
+    if mode == POTENTIAL:
         return result
-    else: #mode == POTENTIAL_AND_GRADIENT
-        potential, gradient = result
-        return potential, rotate_vectors_from_dipole(
-            gradient, lat_ngp, lon_ngp, arr_in_dipole, arr_in,
-            coord_type_in, coord_type_out,
-        ) * scale_gradient
+    # mode == POTENTIAL_AND_GRADIENT
+    potential, gradient = result
+    return potential, rotate_vectors_from_dipole(
+        gradient, lat_ngp, lon_ngp, arr_in_dipole, arr_in,
+        coord_type_in, coord_type_out,
+    ) * scale_gradient
 
 
 def rotate_vectors_from_dipole(vectors, lat_ngp, lon_ngp,

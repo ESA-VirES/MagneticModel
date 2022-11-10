@@ -37,7 +37,7 @@ from eoxmagmod.tests.data import sifm
 from eoxmagmod.tests.data import mma_external
 
 
-class SphericalHarmonicsCommonMixIn(object):
+class SphericalHarmonicsCommonMixIn:
     is_internal = True
     degree = None
     coef_g = None

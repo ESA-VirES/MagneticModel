@@ -45,7 +45,7 @@ from eoxmagmod.tests.data import mma_external
 from eoxmagmod.tests.data import mma_internal
 
 
-class DipoleSphericalHarmonicsMixIn(object):
+class DipoleSphericalHarmonicsMixIn:
     options = {}
     scale_potential = 1.0
     scale_gradient = [1.0, 1.0, 1.0]
@@ -168,7 +168,7 @@ class DipoleSphericalHarmonicsMixIn(object):
 #-------------------------------------------------------------------------------
 # sources
 
-class SourceSpherical(object):
+class SourceSpherical:
     source_coordinate_system = GEOCENTRIC_SPHERICAL
 
     @property
@@ -179,7 +179,7 @@ class SourceSpherical(object):
         ])
 
 
-class SourceGeodetic(object):
+class SourceGeodetic:
     source_coordinate_system = GEODETIC_ABOVE_WGS84
 
     @property
@@ -190,7 +190,7 @@ class SourceGeodetic(object):
         ])
 
 
-class SourceCartesian(object):
+class SourceCartesian:
     source_coordinate_system = GEOCENTRIC_CARTESIAN
 
     @property
@@ -202,7 +202,7 @@ class SourceCartesian(object):
 
 #-------------------------------------------------------------------------------
 
-class SHTypeInternal(object):
+class SHTypeInternal:
     lat_ngp = 80.08
     lon_ngp = -72.22
     is_internal = True
@@ -211,7 +211,7 @@ class SHTypeInternal(object):
     coef_h = mma_internal.COEF_H
 
 
-class SHTypeExternal(object):
+class SHTypeExternal:
     lat_ngp = 80.08
     lon_ngp = -72.22
     is_internal = False

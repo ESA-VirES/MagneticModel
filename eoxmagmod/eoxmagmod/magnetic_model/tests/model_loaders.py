@@ -26,6 +26,7 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 # pylint: disable=missing-docstring,no-self-use,invalid-name,too-many-public-methods
+# pylint: disable=attribute-defined-outside-init
 
 from unittest import TestCase, main
 from itertools import product
@@ -81,7 +82,7 @@ from eoxmagmod._pymm import (
 from eoxmagmod.sheval_dipole import sheval_dipole
 
 
-class SHModelTestMixIn(object):
+class SHModelTestMixIn:
     coord_type_in = GEOCENTRIC_SPHERICAL
     coord_type_out = GEOCENTRIC_SPHERICAL
     parameters = ("time", "location")
@@ -592,7 +593,7 @@ class TestCHAOSCoreWithOverridenValidity(TestCHAOSCore):
         )
 
 
-class TestCHAOSComposedMixIn(object):
+class TestCHAOSComposedMixIn:
     validity = decimal_year_to_mjd2000((1997.10198494, 2022.49691992))
 
     def load(self):

@@ -88,7 +88,7 @@ def read_swarm_mma_2f_coefficients(cdf, variable, frame):
     The function expect a spacepy.pycdf.CDF object.
     """
     return read_swarm_mma_coefficients(
-        cdf, "t_" + variable, "nm_" + variable, "%s_%s" % (variable, frame),
+        cdf, "t_" + variable, "nm_" + variable, f"{variable}_{frame}",
         variable
     )
 
@@ -98,7 +98,7 @@ def read_swarm_mma_2c_coefficients(cdf, variable, subset):
 
     The function expect a spacepy.pycdf.CDF object.
     """
-    source_variable = "%s_%s" % (variable, subset)
+    source_variable = f"{variable}_{subset}"
     return read_swarm_mma_coefficients(
         cdf, "t_" + source_variable, "nm_" + source_variable, source_variable,
         variable
@@ -129,5 +129,4 @@ def _cdf_rawtime_to_mjd2000(raw_time, cdf_type):
     """
     if cdf_type == CDF_EPOCH_TYPE:
         return (raw_time - CDF_EPOCH_2000) * CDF_EPOCH_TO_DAYS
-    else:
-        raise TypeError("Unsupported CDF time type %r !" % cdf_type)
+    raise TypeError("Unsupported CDF time type {cdf_type!r}!")

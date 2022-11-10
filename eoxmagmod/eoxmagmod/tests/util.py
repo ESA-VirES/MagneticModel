@@ -34,8 +34,10 @@ from numpy.testing import assert_allclose
 from eoxmagmod.util import vnorm, vincdecnorm, datetime_to_decimal_year
 
 
-class FunctionTestMixIn(object):
+class FunctionTestMixIn:
     """ Simple function test mix in. """
+    ACCEPTED = []
+    REJECTED = []
 
     @staticmethod
     def eval(input_):
@@ -50,14 +52,14 @@ class FunctionTestMixIn(object):
             try:
                 self._assert(self.eval(input_), expected_output)
             except AssertionError as exc:
-                raise AssertionError("\ninput: %s\n%s" % (input_, exc))
+                raise AssertionError(f"\nInput: {input_}\n{exc}") from None
 
     def test_rejected(self):
         for input_, expected_exception in self.REJECTED:
             try:
                 self.assertRaises(expected_exception, self.eval, input_)
             except AssertionError as exc:
-                raise AssertionError("\nInput: %s\n%s" % (input_, exc))
+                raise AssertionError(f"\nInput: {input_}\n{exc}") from None
 
 
 class TestDatetimeToDecimalYear(FunctionTestMixIn, TestCase):
@@ -146,13 +148,12 @@ class TestVincdecnorm(FunctionTestMixIn, TestCase):
             assert_allclose(declination, declination_ref, atol=1e-8)
             assert_allclose(intensity, intensity_ref, atol=1e-8)
         except AssertionError as exc:
-            template = "%s: received %s expected %s\n"
             raise AssertionError(
-                (template % ("inclination", inclination, inclination_ref)) +
-                (template % ("declination", declination, declination_ref)) +
-                (template % ("intensity", intensity, intensity_ref)) +
-                "%s" % exc
-            )
+                f"inclination: received {inclination} expected {inclination_ref}\n"
+                f"declination: received {declination} expected {declination_ref}\n"
+                f"intensity: received {intensity} expected {intensity_ref}\n"
+                f"{exc}"
+            ) from None
 
 
     ACCEPTED = [

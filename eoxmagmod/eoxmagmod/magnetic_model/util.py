@@ -26,9 +26,9 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+from bisect import bisect_right
 from numpy import inf
 from numpy.lib.stride_tricks import as_strided
-from bisect import bisect_right, bisect_left
 
 
 def coeff_size(degree):
@@ -44,6 +44,7 @@ def convert_value(value, conversion_function):
 
 
 def parse_file(parser, file_, *args, **kwargs):
+    """ Parse file with the provided file parser. """
     if isinstance(file_, str):
         with open(file_, encoding="ascii") as file_in:
             return parser(file_in, *args, **kwargs)
@@ -116,12 +117,6 @@ def get_nonoverlapping_intervals(intervals):
     """
     starts, ends, items = [], [], []
 
-    def _bisect(start, end):
-        return (
-            bisect_right(ends, start),
-            bisect_left(starts, end),
-        )
-
     def _insert(idx, start, end, item):
         starts.insert(idx, start)
         ends.insert(idx, end)
@@ -132,18 +127,18 @@ def get_nonoverlapping_intervals(intervals):
             continue
 
         while start < end:
-            idx_start, idx_end = _bisect(start, end)
-            if idx_start == len(starts):
-                if idx_start == 0 or ends[idx_start-1] < end:
-                    _insert(idx_start, start, end, item)
+            idx = bisect_right(ends, start)
+            if idx == len(starts):
+                if idx == 0 or ends[idx-1] < end:
+                    _insert(idx, start, end, item)
                 break
-            if starts[idx_start] > start:
-                if starts[idx_start] >= end:
-                    _insert(idx_start, start, end, item)
+            if starts[idx] > start:
+                if starts[idx] >= end:
+                    _insert(idx, start, end, item)
                     break
-                _insert(idx_start, start, starts[idx_start], item)
-                idx_start += 1
-            start = ends[idx_start]
+                _insert(idx, start, starts[idx], item)
+                idx += 1
+            start = ends[idx]
 
     return list(zip(zip(starts, ends), items))
 

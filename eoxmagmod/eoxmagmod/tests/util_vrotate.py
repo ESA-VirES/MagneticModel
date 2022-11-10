@@ -38,7 +38,7 @@ from eoxmagmod import (
 )
 
 
-class VectorRotationMixIn(object):
+class VectorRotationMixIn:
     source_coordinate_system = None
     target_coordinate_system = None
     shape = (19, 19)

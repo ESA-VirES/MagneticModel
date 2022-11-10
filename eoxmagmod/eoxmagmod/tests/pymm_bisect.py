@@ -35,7 +35,8 @@ from eoxmagmod._pymm import (
     BISECT_SIDE_LEFT, BISECT_SIDE_RIGHT, bisect,
 )
 
-class BisectTestMixIn():
+
+class BisectTestMixIn:
 
     def call_bisect(self, intervals, points):
         raise NotImplementedError
