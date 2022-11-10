@@ -83,11 +83,11 @@ class SHCoefficinetTestMixIn:
 
     def _test_multitime_callable(self, times, expected_degree=None, **options):
         if expected_degree is None:
-
+            expected_degree = self.degree
         coeff, degree = self.coefficients(times, **options)
         coeff_ref = self.get_multitime_coefficients_ref(times, **options)
         assert_allclose(coeff, coeff_ref)
-        self.assertEqual(degree, )
+        self.assertEqual(degree, expected_degree)
 
     def get_multitime_coefficients_ref(self, times, **options):
         times = asarray(times)
@@ -516,7 +516,7 @@ class TestSparseSHCoefficientsConstantSubset(TestCase, SHCoefficinetTestMixIn):
     def test_multitime_callable(self):
         self._test_multitime_callable(
             [2005.0, 2010.0, 2012.0, 2015.0, 2016.0, 2018.0, 2020.0],
-            min_degree=2, max_degree=2,
+            expected_degree=2, min_degree=2, max_degree=2,
         )
 
 
@@ -588,13 +588,13 @@ class TestSparseSHCoefficientsTimeDependentSubset(TestCase, SHCoefficinetTestMix
     def test_multitime_callable(self):
         self._test_multitime_callable(
             [2005.0, 2010.0, 2012.0, 2015.0, 2016.0, 2018.0, 2020.0],
-            min_degree=2, max_degree=2
+            expected_degree=2, min_degree=2, max_degree=2
         )
 
     def test_multitime_callable_allzero(self):
         self._test_multitime_callable(
             [2005.0, 2010.0, 2012.0, 2015.0, 2016.0, 2018.0, 2020.0],
-            min_degree=4,
+            expected_degree=0, min_degree=4,
         )
 
 #-------------------------------------------------------------------------------

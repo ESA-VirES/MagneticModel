@@ -28,7 +28,7 @@
 # pylint: disable=missing-docstring
 
 from unittest import TestCase, main
-from numpy import inf, nan
+from numpy import inf, nan, asarray, stack
 from numpy.testing import assert_allclose
 from eoxmagmod.time_util import decimal_year_to_mjd2000
 from eoxmagmod.magnetic_time import mjd2000_to_magnetic_universal_time
@@ -67,6 +67,19 @@ class MIOSHCoeffMixIn(object):
             lat_sol=lat_sol, lon_sol=lon_sol,
         ), **options)
 
+    def eval_coeff_multitime_ref(self, times, **options):
+        times = asarray(times)
+        coeff = stack([self.eval_coeff(time, **options)[0] for time in times.ravel()], axis=0)
+        return coeff.reshape((*times.shape, *coeff.shape[1:]))
+
+    def _test_callable_multitime(self, times, expected_degree=None, **options):
+        if expected_degree is None:
+            expected_degree = self.degree
+        coeff, degree = self.eval_coeff(times, **options)
+        coeff_ref = self.eval_coeff_multitime_ref(times, **options)
+        assert_allclose(coeff, coeff_ref)
+        self.assertEqual(degree, expected_degree)
+
 
 class TestSparseSHCoefficientsMIOInternal(TestCase, MIOSHCoeffMixIn):
     is_internal = True
@@ -92,6 +105,11 @@ class TestSparseSHCoefficientsMIOInternal(TestCase, MIOSHCoeffMixIn):
         ], atol=1e-8)
         self.assertEqual(degree, self.degree)
 
+    def test_callable_multitime(self):
+        self._test_callable_multitime(
+            times=decimal_year_to_mjd2000([2017.0, 2018.5, 2020.0]),
+        )
+
     def test_extra_sub_solar_point(self):
         coeff, degree = self.eval_coeff(
             decimal_year_to_mjd2000(2018.5), lat_sol=0.0, lon_sol=0.0,
@@ -104,7 +122,13 @@ class TestSparseSHCoefficientsMIOInternal(TestCase, MIOSHCoeffMixIn):
             (-0.40755502000159416, -0.7608326017305439),
             (-0.04181600178841578, -0.16655581670562275),
         ], atol=1e-8)
-        self.assertEqual(degree, self.degree)
+
+    def test_callable_multitime_extra_sub_solar_point(self):
+        self._test_callable_multitime(
+            times=decimal_year_to_mjd2000([2017.0, 2018.5, 2020.0]),
+            lat_sol=asarray([0.0, 0.0, 0.0]),
+            lon_sol=asarray([0.0, 0.0, 0.0]),
+        )
 
     def test_callable_max_degree(self):
         coeff, degree = self.eval_coeff(
@@ -115,6 +139,12 @@ class TestSparseSHCoefficientsMIOInternal(TestCase, MIOSHCoeffMixIn):
             (0.11415226, 0), (-0.22361224, -0.02624283),
         ], atol=1e-8)
         self.assertEqual(degree, 1)
+
+    def test_callable_multitime_max_degree(self):
+        self._test_callable_multitime(
+            times=decimal_year_to_mjd2000([2017.0, 2018.5, 2020.0]),
+            expected_degree=1, max_degree=1,
+        )
 
     def test_callable_min_degree(self):
         coeff, degree = self.eval_coeff(
@@ -127,6 +157,13 @@ class TestSparseSHCoefficientsMIOInternal(TestCase, MIOSHCoeffMixIn):
         ], atol=1e-8)
         self.assertEqual(degree, self.degree)
 
+    def test_callable_multitime_min_degree(self):
+        self._test_callable_multitime(
+            times=decimal_year_to_mjd2000([2017.0, 2018.5, 2020.0]),
+            #expected_degree=1,
+            min_degree=2,
+        )
+
     def test_callable_min_max_degree(self):
         coeff, degree = self.eval_coeff(
             decimal_year_to_mjd2000(2018.5), max_degree=1, min_degree=1
@@ -137,6 +174,12 @@ class TestSparseSHCoefficientsMIOInternal(TestCase, MIOSHCoeffMixIn):
         ], atol=1e-8)
         self.assertEqual(degree, 1)
 
+    def test_callable_multitime_min_max_degree(self):
+        self._test_callable_multitime(
+            times=decimal_year_to_mjd2000([2017.0, 2018.5, 2020.0]),
+            expected_degree=1, max_degree=1, min_degree=1
+        )
+
     def test_callable_all_zero(self):
         coeff, degree = self.eval_coeff(
             decimal_year_to_mjd2000(2018.5), min_degree=3
@@ -145,6 +188,12 @@ class TestSparseSHCoefficientsMIOInternal(TestCase, MIOSHCoeffMixIn):
             [0, 0],
         ])
         self.assertEqual(degree, 0)
+
+    def test_callable_multitime_all_zero(self):
+        self._test_callable_multitime(
+            times=decimal_year_to_mjd2000([2017.0, 2018.5, 2020.0]),
+            expected_degree=0, min_degree=3
+        )
 
 
 class TestSparseSHCoefficientsMIOExternal(TestCase, MIOSHCoeffMixIn):
@@ -170,6 +219,11 @@ class TestSparseSHCoefficientsMIOExternal(TestCase, MIOSHCoeffMixIn):
             (-0.63645813, 0), (-0.22583255, -2.02305245), (0.05941826, -0.24358544),
         ], atol=1e-8)
         self.assertEqual(degree, self.degree)
+
+    def test_callable_multitime(self):
+        self._test_callable_multitime(
+            times=decimal_year_to_mjd2000([2017.0, 2018.5, 2020.0]),
+        )
 
 
 if __name__ == "__main__":

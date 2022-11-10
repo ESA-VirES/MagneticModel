@@ -28,7 +28,7 @@
 #pylint: disable=no-name-in-module
 
 from math import pi
-from numpy import zeros, arange, broadcast_to, sin, cos
+from numpy import asarray, zeros, arange, broadcast_to, sin, cos
 from .coefficients import SparseSHCoefficients, coeff_size
 from ..magnetic_time import mjd2000_to_magnetic_universal_time
 from ..time_util import mjd2000_to_year_fraction
@@ -56,12 +56,22 @@ class SparseSHCoefficientsMIO(SparseSHCoefficients):
         self.mjd2000_to_year_fraction = mjd2000_to_year_fraction
 
     def __call__(self, time, mut, **parameters):
+        time = asarray(time)
+        mut = asarray(mut)
         degree, coeff, _, index = self.subset_degree(
             parameters.get("min_degree", -1), parameters.get("max_degree", -1)
         )
-        coeff_full = zeros((coeff_size(degree), 2))
-        coeff_full[index[:, 0], index[:, 1]] = self._eval_coeff_fourier2d(coeff, time, mut)
-        return coeff_full, degree
+        coeff_full = self._eval_multi_time(time.ravel(), mut.ravel(), degree, coeff, index)
+        return coeff_full.reshape((*time.shape, *coeff_full.shape[-2:])), degree
+
+    def _eval_multi_time(self, time, mut, degree, coeff, index):
+        size = time.size
+        coeff_full = zeros((size, coeff_size(degree), 2))
+        for i in range(size):
+            coeff_full[i, index[:, 0], index[:, 1]] = (
+                self._eval_coeff_fourier2d(coeff, time[i], mut[i])
+            )
+        return coeff_full
 
     def _eval_coeff_fourier2d(self, coeff, mjd2000, mut):
         """ Evaluate model coefficients using the 2D Fourier series. """
