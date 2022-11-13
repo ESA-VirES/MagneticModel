@@ -32,7 +32,7 @@
 #define PYMM_LONSINCOS_H
 
 #include <math.h>
-#include "shc.h"
+#include "spherical_harmonics.h"
 #include "pymm_aux.h"
 
 /* Python function definition */

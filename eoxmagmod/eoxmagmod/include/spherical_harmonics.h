@@ -1,5 +1,5 @@
 /**
- * @file sph_harm.h
+ * @file spherical_harmonics.h
  * @author Martin Paces <martin.paces@eox.at>
  * @brief Spherical Harmonics
  *
@@ -26,8 +26,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef SHC_H
-#define SHC_H 1
+#ifndef SPHERICAL_HARMONICS_H
+#define SPHERICAL_HARMONICS_H 1
 
 #define SHC_LEG_HIGH_SCALE 1.0e+280
 #define FDIV(a,b) ((double)(a)/(double)(b))
@@ -499,4 +499,4 @@ static void shc_eval(
 }
 
 #undef FDIV
-#endif  /*SHC_H*/
+#endif  /*SPHERICAL_HARMONICS_H*/

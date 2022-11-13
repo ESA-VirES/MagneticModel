@@ -31,7 +31,7 @@
 #ifndef PYMM_RELRADPOW_H
 #define PYMM_RELRADPOW_H
 
-#include "shc.h"
+#include "spherical_harmonics.h"
 #include "pymm_aux.h"
 
 /* Earth radius in km */

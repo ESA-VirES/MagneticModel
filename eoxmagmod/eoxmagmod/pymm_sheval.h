@@ -35,8 +35,8 @@
 #include <stdlib.h>
 
 #include "math_aux.h"
-#include "geo_conv.h"
-#include "shc.h"
+#include "geo_conversion.h"
+#include "spherical_harmonics.h"
 #include "pymm_aux.h"
 #include "pymm_coord.h"
 #include "pymm_cconv.h"
