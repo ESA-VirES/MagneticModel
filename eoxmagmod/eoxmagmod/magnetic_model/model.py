@@ -83,7 +83,7 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
             return self._eval_interpolated
 
         if isinstance(coefficients, CombinedSHCoefficients):
-            if len(coefficients.time_scales) >= 1:
+            if len(coefficients.time_scales) > 1:
                 # mixed time-scales - falling back to the default
                 return self._eval_default
 
