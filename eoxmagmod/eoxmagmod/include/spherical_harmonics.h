@@ -59,6 +59,7 @@ static double * shc_presqrt(int degree)
     return psqrt;
 }
 
+
 /**
  * @brief Evaluate the associated Legendre functions
  *
@@ -256,6 +257,7 @@ static void shc_legendre(double *lp, double *ldp, int degree, double elv, const 
     free((void*)presqrt); // free allocated square roots
 }
 
+
 /**
  * @brief Evaluate the "internal" series of relative radius powers.
  *
@@ -278,6 +280,7 @@ static void shc_relradpow_internal(double *rrp, int degree, double relrad)
         rrp[i] = rrp_last;
     }
 }
+
 
 /**
  * @brief Evaluate the "external" series of relative radius powers.
@@ -306,6 +309,7 @@ static void shc_relradpow_external(double *rrp, int degree, double relrad)
         rrp[i] = rrp_val;
     }
 }
+
 
 /**
  * @brief Evaluate the series of azimuth angle (longitude) sines and cosines.
@@ -345,6 +349,7 @@ static void shc_azmsincos(double *lonsin, double *loncos, int degree, double lon
     }
 }
 
+
 /**
  * @brief Evaluate the series of azimuth angle (longitude) sines and cosines.
  *
@@ -369,6 +374,285 @@ static void shc_azmsincos_ref(double *lonsin, double *loncos, int degree, double
         loncos[i] = cos(ilon);
     }
 }
+
+
+/**
+ * @brief Evaluate the scalar potential
+ *
+ * Spherical harmonic evaluation of the scalar potential
+ *
+ *  outputs:
+ *    vpot - value of the scalar potential
+ *
+ *  inputs:
+ *    degree      - degree of the model
+ *    rad         - radius
+ *    cg, ch      - spherical harmonic coefficients [(degree+1)*(degree+2)/2]
+ *    lp          - Legendre associative function [(degree+1)*(degree+2)/2]
+ *    rrp         - relative radius power series [degree+1]
+ *    lsin, lcos  - series of azimuth angle sines and cosines [degree+1]
+ *    is_internal - boolean flag indicating type of the evaluated field
+                    set true for the internal or false for the external field.
+ */
+
+static void shc_eval_v(
+    double *vpot, int degree, double rad,
+    const double *cg, const double *ch, const double *lp,
+    const double *rrp, const double *lsin, const double *lcos, int is_internal
+)
+{
+    int i, j;
+    double _vpot;
+
+    // i = 0
+    _vpot = cg[0]*rrp[0];
+
+    for (i = 1; i <= degree; ++i)
+    {
+        double _vpot_i;
+        const int i_off = (i*(i+1))/2;
+
+        _vpot_i = cg[i_off] * lp[i_off];
+
+        for (j = 1; j <= i; ++j)
+        {
+            const int idx = i_off + j;
+
+            _vpot_i += (cg[idx]*lcos[j] + ch[idx]*lsin[j]) * lp[i_off+j];
+        }
+
+        _vpot += rrp[i] * _vpot_i;
+    }
+
+    *vpot = _vpot * rad;
+}
+
+
+/**
+ * @brief Evaluate the azimuth component of the gradient of potential near poles
+ *
+ * Spherical harmonic evaluation of the azimuth component of the gradient
+ * in the vicinity of the poles.
+ *
+ *  outputs:
+ *    dvaz - azimuth component of the gradient
+ *
+ *  inputs:
+ *    degree - degree of the model
+ *    elv - elevation angle in radians
+ *    cg, ch - spherical harmonic coefficients [(degree+1)*(degree+2)/2]
+ *    rrp - relative radius power series [degree+1]
+ *    lsin, lcos - series of azimuth angle sines and cosines [degree+1]
+ */
+
+static void shc_eval_dvaz_pole(
+    double *dvaz,
+    int degree, double elv,
+    const double *cg, const double *ch,
+    const double *rrp, const double *lsin, const double *lcos
+)
+{
+    int i;
+    const double sin_elv = sin(elv);
+
+    const double lsin1 = lsin[1], lcos1 = lcos[1];
+    double sqn3, sqn1 = 1.0;
+    double ps2, ps1 = 1.0, ps0 = 1.0,
+
+    // i = 1
+    _dvaz = (cg[2]*lsin1 - ch[2]*lcos1) * rrp[1];
+
+    for (i = 2; i <= degree; ++i)
+    {
+        const int idx = 1 + (i*(i+1))/2;
+        const double tmp = FDIV((i-1)*(i-1)-1, (2*i-1)*(2*i-3));
+
+        // evaluate ratio between the Gauss-normalised and Schmidt
+        // quasi-normalised associated Legendre functions.
+        //  Equivalent to: sqrt((j==0?1:2)*(i-j)!/(i+j!))*(2i-1)!!/(i-j)!
+        sqn1 = sqn1 * FDIV(2*i-1, i);
+        sqn3 = sqn1 * sqrt(FDIV(i*2, i+1));
+        ps2 = ps1;
+        ps1 = ps0;
+        ps0 = sin_elv*ps1 - tmp*ps2;
+
+        _dvaz += (cg[idx]*lsin1 - ch[idx]*lcos1) * rrp[i] * ps0 * sqn3;
+    }
+
+    *dvaz = -_dvaz;
+}
+
+
+/**
+ * @brief Evaluate the gradient of potential
+ *
+ * Spherical harmonic evaluation of the gradient in the spherical coordinates.
+ *
+ *  outputs:
+ *    dvel - elevation component of the gradient
+ *    dvaz - azimuth component of the gradient
+ *    dvrd - radial component of the gradient
+ *
+ *  inputs:
+ *    degree - degree of the model
+ *    elv - elevation angle in radians
+ *    cg, ch - spherical harmonic coefficients [(degree+1)*(degree+2)/2]
+ *    lp, ldp - Legendre associative function and their derivatives (with
+ *              respect to the elevation coordinate) [(degree+1)*(degree+2)/2]
+ *    rrp - relative radius power series [degree+1]
+ *    lsin, lcos - series of azimuth angle sines and cosines [degree+1]
+ *    is_internal - boolean flag indicating type of the evaluated field
+                    set true for the internal or false for the external field.
+ */
+
+static void shc_eval_dv(
+    double *dvel, double *dvaz, double *dvrd,
+    int degree, double elv,
+    const double *cg, const double *ch, const double *lp, const double *ldp,
+    const double *rrp, const double *lsin, const double *lcos, int is_internal
+)
+{
+    int i, j;
+    const double cos_elv = cos(elv);
+    double _dvrd, _dvel, _dvaz;
+    const int dr_scale = is_internal ? 1 : -1;
+    const int dr_offset = is_internal ? 1 : 0;
+
+    { // i = 0
+        const int i_dr = dr_scale*dr_offset;
+
+        _dvel = 0.0;                    // north-ward
+        _dvaz = 0.0;                    // east-ward
+        _dvrd = cg[0] * rrp[0] * i_dr ; // up-ward
+    }
+
+    for (i = 1; i <= degree; ++i)
+    {
+        double _dvel_i, _dvaz_i, _dvrd_i;
+        const int i_off = (i*(i+1))/2;
+        const int i_dr = dr_scale*(i + dr_offset);
+
+        _dvel_i = cg[i_off] * ldp[i_off];        // north-ward
+        _dvaz_i = 0.0;                           // east-ward
+        _dvrd_i = cg[i_off] * lp[i_off] * i_dr ; // up-ward
+
+        for (j = 1; j <= i; ++j)
+        {
+            const int idx = i_off + j;
+            const double tmp0 = cg[idx]*lcos[j] + ch[idx]*lsin[j];
+            const double tmp1 = cg[idx]*lsin[j] - ch[idx]*lcos[j];
+
+            _dvel_i += tmp0 * ldp[idx];         // north-ward
+            _dvaz_i += tmp1 * lp[idx] * j;      // east-ward
+            _dvrd_i += tmp0 * lp[idx] * i_dr ;  // up-ward
+        }
+
+        _dvel += rrp[i] * _dvel_i;
+        _dvaz -= rrp[i] * _dvaz_i;
+        _dvrd -= rrp[i] * _dvrd_i;
+    }
+
+    *dvel = _dvel;
+    *dvaz = _dvaz / cos_elv;
+    *dvrd = _dvrd;
+
+    // special handling of the azimuth component in the vicinity of the poles
+    if ((degree > 0) && (fabs(cos_elv) < 1e-10))
+    {
+        shc_eval_dvaz_pole(dvaz, degree, elv, cg, ch, rrp, lsin, lcos);
+    }
+}
+
+
+/**
+ * @brief Evaluate the scalar potential and its (spherical) gradient/
+ *
+ * Spherical harmonic evaluation of the scalar potential and
+ * the gradient in the spherical coordinates.
+ *
+ *  outputs:
+ *    vpot - value of the scalar potential
+ *    dvel - elevation component of the gradient
+ *    dvaz - azimuth component of the gradient
+ *    dvrd - radial component of the gradient
+ *
+ *  inputs:
+ *    degree - degree of the model
+ *    elv - elevation angle in radians
+ *    rad - radius
+ *    cg, ch - spherical harmonic coefficients [(degree+1)*(degree+2)/2]
+ *    lp, ldp - Legendre associative function and their derivatives (with
+ *              respect to the elevation coordinate) [(degree+1)*(degree+2)/2]
+ *    rrp - relative radius power series [degree+1]
+ *    lsin, lcos - series of azimuth angle sines and cosines [degree+1]
+ *    is_internal - boolean flag indicating type of the evaluated field
+                    set true for the internal or false for the external field.
+ */
+
+static void shc_eval_v_dv(
+    double *vpot, double *dvel, double *dvaz, double *dvrd,
+    int degree, double elv, double rad,
+    const double *cg, const double *ch, const double *lp, const double *ldp,
+    const double *rrp, const double *lsin, const double *lcos, int is_internal
+)
+{
+    int i, j;
+    const double cos_elv = cos(elv);
+    double _vpot, _dvrd, _dvel, _dvaz;
+    const int dr_scale = is_internal ? 1 : -1;
+    const int dr_offset = is_internal ? 1 : 0;
+
+    { // i = 0
+        const double tmp = cg[0]*rrp[0];
+        const int i_dr = dr_scale*dr_offset;
+
+        _vpot = tmp;
+        _dvel = 0.0; // north-ward
+        _dvaz = 0.0; // east-ward
+        _dvrd = -tmp * i_dr ; // up-ward
+    }
+
+    for (i = 1; i <= degree; ++i)
+    {
+        double _vpot_i, _dvel_i, _dvaz_i, _dvrd_i;
+        const int i_off = (i*(i+1))/2;
+        const int i_dr = dr_scale*(i + dr_offset);
+
+        _vpot_i = cg[i_off] * lp[i_off];
+        _dvel_i = cg[i_off] * ldp[i_off];        // north-ward
+        _dvaz_i = 0.0;                           // east-ward
+        _dvrd_i = cg[i_off] * lp[i_off] * i_dr ; // up-ward
+
+        for (j = 1; j <= i; ++j)
+        {
+            const int idx = i_off + j;
+            const double tmp0 = cg[idx]*lcos[j] + ch[idx]*lsin[j];
+            const double tmp1 = cg[idx]*lsin[j] - ch[idx]*lcos[j];
+
+            _vpot_i += tmp0 * lp[i_off+j];
+            _dvel_i += tmp0 * ldp[idx];         // north-ward
+            _dvaz_i += tmp1 * lp[idx] * j;      // east-ward
+            _dvrd_i += tmp0 * lp[idx] * i_dr ;  // up-ward
+        }
+
+        _vpot += rrp[i] * _vpot_i;
+        _dvel += rrp[i] * _dvel_i;
+        _dvaz -= rrp[i] * _dvaz_i;
+        _dvrd -= rrp[i] * _dvrd_i;
+    }
+
+    *vpot = _vpot * rad;
+    *dvel = _dvel;
+    *dvaz = _dvaz / cos_elv;
+    *dvrd = _dvrd;
+
+    // special handling of the azimuth component in the vicinity of the poles
+    if ((degree > 0) && (fabs(cos_elv) < 1e-10))
+    {
+        shc_eval_dvaz_pole(dvaz, degree, elv, cg, ch, rrp, lsin, lcos);
+    }
+}
+
 
 /**
  * @brief Evaluate the scalar potential and its (spherical) gradient/
@@ -406,95 +690,26 @@ static void shc_eval(
 )
 // the evaluation
 {
-    int i, j, dr_scale, dr_offset;
-    const double sin_elv = sin(elv);
-    const double cos_elv = cos(elv);
-    double _vpot, _dvrd, _dvel, _dvaz;
-
-    if (is_internal) {
-        dr_scale = 1;
-        dr_offset = 1;
-    } else {
-        dr_scale = -1;
-        dr_offset = 0;
-    }
-
-    { // i = 0
-        const double tmp = cg[0]*rrp[0];
-        const int i_dr = dr_scale*dr_offset;
-
-        _vpot = tmp;
-        _dvel = 0.0; // north-ward
-        _dvaz = 0.0; // east-ward
-        _dvrd = -tmp * i_dr ; // up-ward
-    }
-
-    for (i = 1; i <= degree; ++i)
+    switch (mode & 0x3)
     {
-        const int i_off = (i*(i+1))/2;
-        const int i_dr = dr_scale*(i + dr_offset);
-
-        {
-            const double tmp = cg[i_off]*rrp[i];
-
-            _vpot += tmp * lp[i_off];
-            _dvel += tmp * ldp[i_off]; // north-ward
-            _dvrd -= tmp * lp[i_off] * i_dr ; // up-ward
-        }
-
-        for (j = 1; j <= i; ++j)
-        {
-            const int idx = i_off + j;
-            const double tmp0 = (cg[idx]*lcos[j] + ch[idx]*lsin[j])*rrp[i];
-            const double tmp1 = (cg[idx]*lsin[j] - ch[idx]*lcos[j])*rrp[i];
-
-            _vpot += tmp0 * lp[idx];
-            _dvel += tmp0 * ldp[idx]; // north-ward
-            _dvaz -= tmp1 * lp[idx] * j; // east-ward
-            _dvrd -= tmp0 * lp[idx] * i_dr ; // up-ward
-        }
-    }
-
-    if (mode&0x1)
-    {
-        *vpot = _vpot * rad;
-    }
-
-    if (mode&0x2)
-    {
-        *dvel = _dvel;
-        *dvaz = _dvaz / cos_elv;
-        *dvrd = _dvrd;
-
-        // handling of the poles
-        if ((degree > 0) && (fabs(cos_elv) < 1e-10))
-        {
-            const double lsin1 = lsin[1], lcos1 = lcos[1];
-            double sqn3, sqn1 = 1.0;
-            double ps2, ps1 = 1.0, ps0 = 1.0,
-
-            // i = 1
-            _dvaz = -(cg[2]*lsin1 - ch[2]*lcos1) * rrp[1];
-
-            for (i = 2; i <= degree; ++i)
-            {
-                const int idx = 1 + (i*(i+1))/2;
-                const double tmp = FDIV((i-1)*(i-1)-1, (2*i-1)*(2*i-3));
-
-                // evaluate ratio between the Gauss-normalised and Schmidt
-                // quasi-normalised associated Legendre functions.
-                //  Equivalent to: sqrt((j==0?1:2)*(i-j)!/(i+j!))*(2i-1)!!/(i-j)!
-                sqn1 = sqn1 * FDIV(2*i-1, i);
-                sqn3 = sqn1 * sqrt(FDIV(i*2, i+1));
-                ps2 = ps1;
-                ps1 = ps0;
-                ps0 = sin_elv*ps1 - tmp*ps2;
-
-                _dvaz -= (cg[idx]*lsin1 - ch[idx]*lcos1) * rrp[i] * ps0 * sqn3;
-            }
-
-            *dvaz = _dvaz;
-        }
+        case 0x1:
+            shc_eval_v(
+                vpot, degree, rad,
+                cg, ch, lp, rrp, lsin, lcos, is_internal
+            );
+            break;
+        case 0x2:
+            shc_eval_dv(
+                dvel, dvaz, dvrd, degree, elv,
+                cg, ch, lp, ldp, rrp, lsin, lcos, is_internal
+            );
+            break;
+        case 0x3:
+            shc_eval_v_dv(
+                vpot, dvel, dvaz, dvrd, degree, elv, rad,
+                cg, ch, lp, ldp, rrp, lsin, lcos, is_internal
+            );
+            break;
     }
 }
 
