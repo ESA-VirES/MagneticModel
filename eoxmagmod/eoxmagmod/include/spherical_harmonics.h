@@ -245,16 +245,13 @@ static void shc_legendre(double *lp, double *ldp, int degree, double elv, const 
     const double sin_elv = sin(elv);
     //const double cos_elv = cos(elv);
     const double cos_elv = sqrt((1.0-sin_elv)*(1.0+sin_elv));
-    double *presqrt = shc_presqrt(degree);
 
     if ((degree <= 16)||(fabs(cos_elv) < 1e-10))
         // low degree model + poles
-        shc_legendre_low(lp, ldp, degree, sin_elv, cos_elv, presqrt);
+        shc_legendre_low(lp, ldp, degree, sin_elv, cos_elv, psqrt);
     else
         // high degree model
-        shc_legendre_high(lp, ldp, degree, sin_elv, cos_elv, presqrt);
-
-    free((void*)presqrt); // free allocated square roots
+        shc_legendre_high(lp, ldp, degree, sin_elv, cos_elv, psqrt);
 }
 
 
