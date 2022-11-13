@@ -61,6 +61,32 @@ static double * shc_presqrt(int degree)
 
 
 /**
+ * @brief Allocate and evaluate pre-calculated reciprocal square-root series
+ *
+ *   sqrt(i) for i = 0..(2*degree+1)
+ *
+ *   NOTE: The returned pointer *MUST* be passed to free().
+ */
+
+static double * shc_prersqrt(int degree)
+{
+    const int nval = 2*degree + 2;
+    int i;
+    double * prsqrt = malloc(nval*sizeof(double));
+
+    if (NULL == prsqrt)
+        return NULL;
+
+    for (i = 0; i < nval ; ++i)
+    {
+        prsqrt[i] = 1.0 / sqrt((double) i);
+    }
+
+    return prsqrt;
+}
+
+
+/**
  * @brief Evaluate the associated Legendre functions
  *
  * Evaluate the Schmidt semi-normalised associated Legendre functions.
@@ -69,7 +95,7 @@ static double * shc_presqrt(int degree)
  * especially close to the poles.
  */
 
-static void shc_legendre_low(double *lp, double *ldp, int degree, double sin_elv, double cos_elv, const double *psqrt)
+static void shc_legendre_low(double *lp, double *ldp, int degree, double sin_elv, double cos_elv, const double *psqrt, const double *prsqrt)
 {
     int i, j;
 
@@ -126,14 +152,14 @@ static void shc_legendre_low(double *lp, double *ldp, int degree, double sin_elv
             lp[i_off] *= sqn0;
             ldp[i_off] *= sqn0;
 
-            sqn1 = sqn0*psqrt[2*i]/psqrt[i+1];
+            sqn1 = sqn0*psqrt[2*i]*prsqrt[i+1];
 
             lp[i_off+1] *= sqn1;
             ldp[i_off+1] *= sqn1;
 
             for (j = 2; j <= i; ++j)
             {
-                sqn1 *= psqrt[i-j+1]/psqrt[i+j];
+                sqn1 *= psqrt[i-j+1]*prsqrt[i+j];
                 lp[i_off+j] *= sqn1;
                 ldp[i_off+j] *= sqn1;
             }
@@ -153,7 +179,7 @@ static void shc_legendre_low(double *lp, double *ldp, int degree, double sin_elv
  */
 
 
-static void shc_legendre_high(double *lp, double *ldp, int degree, double sin_elv, double cos_elv, const double *psqrt)
+static void shc_legendre_high(double *lp, double *ldp, int degree, double sin_elv, double cos_elv, const double *psqrt, const double *prsqrt)
 {
     int i, j, idx, idx0;
     const double scale = SHC_LEG_HIGH_SCALE;
@@ -190,8 +216,8 @@ static void shc_legendre_high(double *lp, double *ldp, int degree, double sin_el
         pow_cos_elv *= cos_elv;
 
         // i = j
-        pmm *= psqrt[2*j+1]/psqrt[2*j];
-        pm2 = pmm/psqrt[2*j+1];
+        pmm *= psqrt[2*j+1]*prsqrt[2*j];
+        pm2 = pmm*prsqrt[2*j+1];
         pm1 = sin_elv*pmm;
 
         lp[idx0] = pow_cos_elv*pm2;
@@ -205,9 +231,10 @@ static void shc_legendre_high(double *lp, double *ldp, int degree, double sin_el
         for(i = j + 2, idx += j + 2; i <= degree; idx += ++i)
         {
             const double f0 = psqrt[i+j]*psqrt[i-j];
+            const double rf0 = prsqrt[i+j]*prsqrt[i-j];
             const double f1 = (2*i-1);
             const double f2 = psqrt[i-j-1]*psqrt[i+j-1];
-            const double plm = (f1*sin_elv*pm1 - f2*pm2)/f0;
+            const double plm = (f1*sin_elv*pm1 - f2*pm2)*rf0;
 
             lp[idx] = pow_cos_elv*plm;
             ldp[idx] = -pow_cos_elv_last*(i*sin_elv*plm - f0*pm1);
@@ -218,7 +245,7 @@ static void shc_legendre_high(double *lp, double *ldp, int degree, double sin_el
     }
 
     // i = j = degree
-    pm2 = pmm/psqrt[2*j];
+    pm2 = pmm*prsqrt[2*j];
 
     lp[idx0] = pow_cos_elv*cos_elv*pm2;
     ldp[idx0] = -pow_cos_elv*(j*sin_elv*pm2);
@@ -240,7 +267,7 @@ static void shc_legendre_high(double *lp, double *ldp, int degree, double sin_el
  *      psqrt ... array of the pre-calculated square roots
  */
 
-static void shc_legendre(double *lp, double *ldp, int degree, double elv, const double *psqrt)
+static void shc_legendre(double *lp, double *ldp, int degree, double elv, const double *psqrt, const double *prsqrt)
 {
     const double sin_elv = sin(elv);
     //const double cos_elv = cos(elv);
@@ -248,10 +275,10 @@ static void shc_legendre(double *lp, double *ldp, int degree, double elv, const 
 
     if ((degree <= 16)||(fabs(cos_elv) < 1e-10))
         // low degree model + poles
-        shc_legendre_low(lp, ldp, degree, sin_elv, cos_elv, psqrt);
+        shc_legendre_low(lp, ldp, degree, sin_elv, cos_elv, psqrt, prsqrt);
     else
         // high degree model
-        shc_legendre_high(lp, ldp, degree, sin_elv, cos_elv, psqrt);
+        shc_legendre_high(lp, ldp, degree, sin_elv, cos_elv, psqrt, prsqrt);
 }
 
 

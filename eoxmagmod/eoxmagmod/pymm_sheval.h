@@ -91,6 +91,7 @@ typedef struct {
     double *lcos;
     double *rrp;
     double *psqrt;
+    double *prsqrt;
 } MODEL;
 
 static void _model_reset(MODEL *model);
@@ -389,7 +390,7 @@ static void _model_eval(MODEL *model, int mode, double *fpot,
 
     // associative Legendre functions
     if (model->clat_last != clat)
-        shc_legendre(model->lp, model->ldp, model->degree, clat, model->psqrt);
+        shc_legendre(model->lp, model->ldp, model->degree, clat, model->psqrt, model->prsqrt);
 
     // longitude sines/cosines series
     if (model->clon_last != clon)
@@ -472,6 +473,8 @@ static void _model_destroy(MODEL *model)
         free(model->rrp);
     if(NULL != model->psqrt)
         free(model->psqrt);
+    if(NULL != model->prsqrt)
+        free(model->prsqrt);
 
     _model_reset(model);
 }
@@ -538,6 +541,12 @@ static int _model_init(MODEL *model, int is_internal, int degree,
     if (NULL == (model->psqrt = shc_presqrt(degree)))
     {
         PyErr_Format(PyExc_MemoryError, "_model_ts_init: psqrt");
+        goto error;
+    }
+
+    if (NULL == (model->prsqrt = shc_prersqrt(degree)))
+    {
+        PyErr_Format(PyExc_MemoryError, "_model_ts_init: prsqrt");
         goto error;
     }
 
