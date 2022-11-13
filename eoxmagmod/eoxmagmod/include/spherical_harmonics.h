@@ -5,7 +5,7 @@
  *
  * Various utilities needed by the spherical harmonic model evaluation.
  *
- * Copyright (C) 2014 EOX IT Services GmbH
+ * Copyright (C) 2014-2022 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -543,11 +543,12 @@ static void shc_eval_dv(
     const int dr_offset = is_internal ? 1 : 0;
 
     { // i = 0
+        const double tmp = cg[0]*rrp[0];
         const int i_dr = dr_scale*dr_offset;
 
-        _dvel = 0.0;                    // north-ward
-        _dvaz = 0.0;                    // east-ward
-        _dvrd = cg[0] * rrp[0] * i_dr ; // up-ward
+        _dvel = 0.0;          // north-ward
+        _dvaz = 0.0;          // east-ward
+        _dvrd = tmp * -i_dr ; // up-ward
     }
 
     for (i = 1; i <= degree; ++i)
@@ -631,9 +632,9 @@ static void shc_eval_v_dv(
         const int i_dr = dr_scale*dr_offset;
 
         _vpot = tmp;
-        _dvel = 0.0; // north-ward
-        _dvaz = 0.0; // east-ward
-        _dvrd = -tmp * i_dr ; // up-ward
+        _dvel = 0.0;          // north-ward
+        _dvaz = 0.0;          // east-ward
+        _dvrd = tmp * -i_dr ; // up-ward
     }
 
     for (i = 1; i <= degree; ++i)
