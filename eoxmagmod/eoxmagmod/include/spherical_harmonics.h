@@ -361,15 +361,19 @@ static void shc_azmsincos(double *lonsin, double *loncos, int degree, double lon
 
     lonsin[0] = 0.0;
     loncos[0] = 1.0;
-    lonsin[1] = sl = sin_lon;
-    loncos[1] = cl = cos_lon;
 
-    for (i = 2; i <= degree; ++i)
+    if (degree > 0)
     {
-        sl_new = cl*sin_lon + sl*cos_lon;
-        cl_new = cl*cos_lon - sl*sin_lon;
-        lonsin[i] = sl = sl_new;
-        loncos[i] = cl = cl_new;
+        lonsin[1] = sl = sin_lon;
+        loncos[1] = cl = cos_lon;
+
+        for (i = 2; i <= degree; ++i)
+        {
+            sl_new = cl*sin_lon + sl*cos_lon;
+            cl_new = cl*cos_lon - sl*sin_lon;
+            lonsin[i] = sl = sl_new;
+            loncos[i] = cl = cl_new;
+        }
     }
 }
 
