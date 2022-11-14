@@ -70,6 +70,9 @@
 /* coefficients interpolation */
 #include "pymm_interp.h"
 
+/* 2D Fourier series coefficients evaluation */
+#include "pymm_fourier2d.h"
+
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
 
@@ -93,7 +96,8 @@ static PyMethodDef pymm_methods[] =
     {"convert", (PyCFunction)convert, METH_VARARGS|METH_KEYWORDS, DOC_CONVERT},
     {"bisect", (PyCFunction)bisect, METH_VARARGS|METH_KEYWORDS, DOC_BISECT},
     {"interp", (PyCFunction)interp, METH_VARARGS|METH_KEYWORDS, DOC_INTERP},
-    {NULL, NULL, 0, NULL} /* Sentinel - DO NOT REMOVE! */
+    {"fourier2d", (PyCFunction)fourier2d, METH_VARARGS|METH_KEYWORDS, DOC_FOURIER2D},
+    {NULL, NULL, 0, NULL} /* sentinel - DO NOT REMOVE! */
 } ;
 
 /*---------------------------------------------------------------------------*/

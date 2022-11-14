@@ -214,7 +214,8 @@ static void _interp(ARRAY_DATA *arrd_t, ARRAY_DATA *arrd_c,
     {
         npy_intp i, n = arrd_t->dim[0];
 
-        for(i = 0; i < n; ++i) {
+        for(i = 0; i < n; ++i)
+        {
 
             ARRAY_DATA arrd_t_item = _get_arrd_item_nocheck(arrd_t, i);
             ARRAY_DATA arrd_c_item = _get_arrd_item_nocheck(arrd_c, i);

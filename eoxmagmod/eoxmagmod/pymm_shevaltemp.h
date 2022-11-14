@@ -619,9 +619,10 @@ static int _model_ts_init(
 }
 
 
-/* coefficient set - auxiliary structure */
+/* coefficient set - reset */
 
-static void _coefset_reset(COEF_SET *coefset) {
+static void _coefset_reset(COEF_SET *coefset)
+{
     memset(coefset, 0, sizeof(COEF_SET));
 }
 

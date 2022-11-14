@@ -39,8 +39,7 @@ from eoxmagmod._pymm import (
     INTERP_C0, INTERP_C1,
     convert, interp, sheval, shevaltemp,
 )
-from eoxmagmod.tests.data import chaos_core
-from eoxmagmod.tests.data import chaos_mma
+from eoxmagmod.tests.data import chaos_core, chaos_mma
 
 
 # Coeficient set:
@@ -86,7 +85,7 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn:
         )
 
     @classmethod
-    def reference_shevaltemp(cls, times, coords):
+    def eval_reference_shevaltemp(cls, times, coords):
 
         def _reshape(data, shape):
             extra_shape = shape[len(data.shape):]
@@ -178,7 +177,7 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn:
         times = self.times(times_shape)
         coords = self.coordinates(coords_shape)
         potential, gradient = self.eval_shevaltemp(times, coords, POTENTIAL_AND_GRADIENT)
-        potential_ref, gradient_ref = self.reference_shevaltemp(times, coords)
+        potential_ref, gradient_ref = self.eval_reference_shevaltemp(times, coords)
         assert_allclose(potential, potential_ref, atol=1e-6)
         assert_allclose(gradient, gradient_ref, atol=1e-6)
 
@@ -186,14 +185,14 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn:
         times = self.times(times_shape)
         coords = self.coordinates(coords_shape)
         potential = self.eval_shevaltemp(times, coords, POTENTIAL)
-        potential_ref, _ = self.reference_shevaltemp(times, coords)
+        potential_ref, _ = self.eval_reference_shevaltemp(times, coords)
         assert_allclose(potential, potential_ref, atol=1e-6)
 
     def _test_shevaltemp_gradient(self, times_shape, coords_shape):
         times = self.times(times_shape)
         coords = self.coordinates(coords_shape)
         gradient = self.eval_shevaltemp(times, coords, GRADIENT)
-        _, gradient_ref = self.reference_shevaltemp(times, coords)
+        _, gradient_ref = self.eval_reference_shevaltemp(times, coords)
         assert_allclose(gradient, gradient_ref, atol=1e-6)
 
     def test_sheval_potential_and_gradient_T0X0(self):
