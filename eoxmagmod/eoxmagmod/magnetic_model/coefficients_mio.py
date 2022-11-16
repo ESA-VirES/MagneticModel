@@ -28,14 +28,18 @@
 #pylint: disable=no-name-in-module
 
 from math import pi
+from collections import namedtuple
 from numpy import asarray, zeros, arange, broadcast_to, sin, cos
 from .coefficients import SparseSHCoefficients, coeff_size
 from ..time_util import (
     mjd2000_to_year_fraction as mjd2000_to_year_fraction_default,
 )
+from .._pymm import fourier2d
 
-F_SEASONAL = 2*pi
-F_DIURNAL = 2*pi/24.
+SCALE_SEASONAL = 2*pi
+SCALE_DIURNAL = 2*pi/24.
+
+DegreeRanges = namedtuple("DegreeRanges", ["pmin", "pmax", "smin", "smax"])
 
 
 class SparseSHCoefficientsMIO(SparseSHCoefficients):
@@ -54,7 +58,7 @@ class SparseSHCoefficientsMIO(SparseSHCoefficients):
         pmin, pmax, smin, smax = ps_extent
         if pmin > pmax or smin > smax:
             raise Exception(f"Invalid ps_extent {ps_extent}!")
-        self.ps_extent = (pmin, pmax, smin, smax)
+        self.ps_extent = DegreeRanges(pmin, pmax, smin, smax)
         self.mjd2000_to_year_fraction = mjd2000_to_year_fraction
 
     def __call__(self, time, mut, **parameters):
@@ -63,36 +67,10 @@ class SparseSHCoefficientsMIO(SparseSHCoefficients):
         degree, coeff, _, index = self.subset_degree(
             parameters.get("min_degree", -1), parameters.get("max_degree", -1)
         )
-        coeff_full = self._eval_multi_time(time.ravel(), mut.ravel(), degree, coeff, index)
-        return coeff_full.reshape((*time.shape, *coeff_full.shape[-2:])), degree
-
-    def _eval_multi_time(self, time, mut, degree, coeff, index):
-        size = time.size
-        coeff_full = zeros((size, coeff_size(degree), 2))
-        for i in range(size):
-            coeff_full[i, index[:, 0], index[:, 1]] = (
-                self._eval_coeff_fourier2d(coeff, time[i], mut[i])
-            )
-        return coeff_full
-
-    def _eval_coeff_fourier2d(self, coeff, mjd2000, mut):
-        """ Evaluate model coefficients using the 2D Fourier series. """
-        sin_f, cos_f = self._get_sincos_matrices(coeff.shape[0], mjd2000, mut)
-        return (coeff[..., 0]*cos_f + coeff[..., 1]*sin_f).sum(axis=(1, 2))
-
-    def _get_sincos_matrices(self, n_coeff, mjd2000, mut):
-        """ Get sin/cos matrices used by the 2D Fourier transform. """
-        pmin, pmax, smin, smax = self.ps_extent
-        n_col = pmax - pmin + 1
-        n_row = smax - smin + 1
-        f0_seasonal = F_SEASONAL * self.mjd2000_to_year_fraction(mjd2000)
-        f0_diurnal = F_DIURNAL * mut
-        f_diurnal = f0_diurnal * arange(pmin, pmax + 1)
-        f_seasonal = f0_seasonal * arange(smin, smax + 1)
-        f_combined = (
-            broadcast_to(f_diurnal, (n_row, n_col)) +
-            broadcast_to(f_seasonal, (n_col, n_row)).transpose()
+        coeff_full = zeros((*time.shape, coeff_size(degree), 2))
+        coeff_full[..., index[:, 0], index[:, 1]] = fourier2d(
+            self.mjd2000_to_year_fraction(time), mut,
+            coeff, self.ps_extent.smin, self.ps_extent.pmin,
+            SCALE_SEASONAL, SCALE_DIURNAL
         )
-        sin_f = broadcast_to(sin(f_combined), (n_coeff, n_row, n_col))
-        cos_f = broadcast_to(cos(f_combined), (n_coeff, n_row, n_col))
-        return sin_f, cos_f
+        return coeff_full, degree

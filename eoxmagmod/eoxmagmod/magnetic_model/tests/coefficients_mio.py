@@ -67,9 +67,25 @@ class MIOSHCoeffMixIn:
             lat_sol=lat_sol, lon_sol=lon_sol,
         ), **options)
 
-    def eval_coeff_multitime_ref(self, times, **options):
+    def eval_coeff_multitime_ref(self, times, lat_sol=None, lon_sol=None, **options):
+
+        def _get_item(parameter, index):
+            if parameter is None:
+                return None
+            parameter = asarray(parameter)
+            if parameter.ndim == 0:
+                return parameter
+            return parameter.ravel()[index]
+
         times = asarray(times)
-        coeff = stack([self.eval_coeff(time, **options)[0] for time in times.ravel()], axis=0)
+        coeff = stack([
+            self.eval_coeff(
+                time,
+                lat_sol=_get_item(lat_sol, idx),
+                lon_sol=_get_item(lon_sol, idx),
+                **options
+            )[0] for idx, time in enumerate(times.ravel())
+        ], axis=0)
         return coeff.reshape((*times.shape, *coeff.shape[1:]))
 
     def _test_callable_multitime(self, times, expected_degree=None, **options):
