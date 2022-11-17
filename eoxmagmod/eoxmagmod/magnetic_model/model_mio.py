@@ -38,7 +38,7 @@ MIO_EARTH_RADIUS = 6371.2 # km
 MIO_WOLF_RATIO = 0.014850
 
 
-class DipoleMIOPrimaryGeomagneticModel(GeomagneticModel):
+class MIOPrimaryGeomagneticModel(GeomagneticModel):
     """ Composed model switching between MIO primary fields evaluation
     above and below the Ionosphere.
     """

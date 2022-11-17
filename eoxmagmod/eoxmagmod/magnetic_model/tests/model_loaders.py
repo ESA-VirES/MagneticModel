@@ -69,7 +69,7 @@ from eoxmagmod.magnetic_model.model import (
     DipoleSphericalHarmomicGeomagneticModel,
 )
 from eoxmagmod.magnetic_model.model_mio import (
-    DipoleMIOPrimaryGeomagneticModel,
+    MIOPrimaryGeomagneticModel,
     DipoleMIOGeomagneticModel,
 )
 from eoxmagmod.magnetic_model.model_composed import (
@@ -768,7 +768,7 @@ class TestMIOSecondary(TestCase, DipoleMIOSHModelTestMixIn):
 
 
 class TestMIOPrimary(TestCase, DipoleMIOSHModelTestMixIn):
-    model_class = DipoleMIOPrimaryGeomagneticModel
+    model_class = MIOPrimaryGeomagneticModel
     degree = 2
     min_degree = 1
     reference_values = (

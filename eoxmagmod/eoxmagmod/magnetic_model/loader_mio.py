@@ -28,7 +28,7 @@
 
 from numpy import arange
 from .model_mio import (
-    DipoleMIOPrimaryGeomagneticModel, DipoleMIOGeomagneticModel,
+    MIOPrimaryGeomagneticModel, DipoleMIOGeomagneticModel,
     MIO_EARTH_RADIUS,
 )
 from .coefficients_mio import SparseSHCoefficientsMIO
@@ -62,7 +62,7 @@ def load_model_swarm_mio_external(path, above_ionosphere=None):
 
 def _create_composed_mio_model(coefficients_below_ionosphere,
                                coefficients_above_ionosphere, params):
-    return DipoleMIOPrimaryGeomagneticModel(
+    return MIOPrimaryGeomagneticModel(
         _create_mio_model(coefficients_below_ionosphere, params),
         _create_mio_model(coefficients_above_ionosphere, params),
         height=params["height"],
