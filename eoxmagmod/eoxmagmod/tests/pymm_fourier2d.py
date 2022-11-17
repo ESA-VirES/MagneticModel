@@ -36,7 +36,7 @@ from eoxmagmod.tests.data import mio
 
 
 class Fourier2DTestMixIn:
-    coeff = mio.COEFF
+    coeff = mio.COEFF_I
     degrees = ((mio.PMIN, mio.PMAX), (mio.SMIN, mio.SMAX))
     scales = (1.0, 1.0)
     value_ranges = ((0.0, 2*pi), (0.0, 2*pi))

@@ -83,23 +83,23 @@ def reshape_times_and_coordinates(time, coords):
     return time, coords
 
 
-def reshape_variable(time, variable):
-    """ Reshape auxiliary variable to match the time. """
-    ndim_common = min(time.ndim, variable.ndim)
+def reshape_variable(source, variable):
+    """ Reshape auxiliary variable to match the source shape. """
+    ndim_common = min(source.ndim, variable.ndim)
 
     if (
-        time.shape[:ndim_common] != variable.shape[:ndim_common]
-        or time.ndim < variable.ndim
+        source.shape[:ndim_common] != variable.shape[:ndim_common]
+        or source.ndim < variable.ndim
     ):
         raise ValueError(
-            "Incompatible dimensions of the time and reshaped variable arrays."
+            "Incompatible dimensions of the source and reshaped variable arrays."
         )
 
-    if variable.ndim < time.ndim:
+    if variable.ndim < source.ndim:
         variable = as_strided(
             variable,
-            shape=time.shape,
-            strides=(*variable.strides, *((0,) * (time.ndim - variable.ndim)))
+            shape=source.shape,
+            strides=(*variable.strides, *((0,) * (source.ndim - variable.ndim)))
         )
 
     return variable

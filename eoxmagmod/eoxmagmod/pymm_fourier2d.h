@@ -43,8 +43,8 @@
 #endif
 
 
-/* coefficient set - auxiliary structure */
-typedef struct Fourier2DCoefSet {
+/* 2D Fourier series - auxiliary structure */
+typedef struct Fourier2D {
     ptrdiff_t min_degree1;
     ptrdiff_t max_degree1;
     ptrdiff_t min_degree2;
@@ -60,12 +60,12 @@ typedef struct Fourier2DCoefSet {
     double *sin2;
     double *cos12;
     double *sin12;
-} FOURIER_2D_COEF_SET;
+} FOURIER_2D;
 
-static void _f2d_coefset_reset(FOURIER_2D_COEF_SET *coefset);
-static void _f2d_coefset_destroy(FOURIER_2D_COEF_SET *coefset);
-static int _f2d_coefset_init(
-    FOURIER_2D_COEF_SET *coefset,
+static void _fourier2d_reset(FOURIER_2D *f2d);
+static void _fourier2d_destroy(FOURIER_2D *f2d);
+static int _fourier2d_init(
+    FOURIER_2D *f2d,
     const ptrdiff_t min_degree1,
     const ptrdiff_t size1,
     const ptrdiff_t min_degree2,
@@ -75,12 +75,12 @@ static int _f2d_coefset_init(
 );
 
 
-static void _fourier2d(
+static void _fourier2d_eval_coeff(
     ARRAY_DATA *arrd_t1,
     ARRAY_DATA *arrd_t2,
     ARRAY_DATA *arrd_c,
     ARRAY_DATA *arrd_c0,
-    FOURIER_2D_COEF_SET *coefset
+    FOURIER_2D *f2d
 );
 
 /* Python function definition */
@@ -91,18 +91,18 @@ static void _fourier2d(
 "     Interpolate time series of SH coefficients.\n"\
 "\n"\
 "     The input parameters are:\n"\
-"       time1 - diuarnal time variable\n"\
-"       time2 - seasonal time variable\n"\
-"       coeff0[...,n,m,2] - series of the 2D Fourier series coefficients\n"\
-"       min_degree1 - diuarnal time minimal Fourier series min. degree\n"\
-"               (max. degree is determined from the coeff0 dimension)\n"\
-"       min_degree2 - seasonal time minimal Fourier series min. degree\n"\
-"               (max. degree is determined from the coeff0 dimension)\n"\
-"       scale1 - diuarnal time scaling factor\n"\
-"       scale2 - seasonal time scaling factor\n"\
+"       time1 - seasonal time variable\n"\
+"       time2 - diurnal time variable\n"\
+"       coeff0[...,n1,n2,2] - series of the 2D Fourier series coefficients\n"\
+"       min_degree1 - seasonal time minimal Fourier series min. degree\n"\
+"               (max. degree is determined from the coeff0 dimension n1)\n"\
+"       min_degree2 - diurnal time minimal Fourier series min. degree\n"\
+"               (max. degree is determined from the coeff0 dimension n2)\n"\
+"       scale1 - seasonal time scaling factor\n"\
+"       scale2 - diurnal time scaling factor\n"\
 "\n"\
 "     Output:\n"\
-"       coeff[...] - coefficients at the given diuarnal and seasonal times\n"\
+"       coeff[...] - coefficients at the given diurnal and seasonal times\n"\
 "\n"
 
 static PyObject* fourier2d(PyObject *self, PyObject *args, PyObject *kwdict)
@@ -127,11 +127,11 @@ static PyObject* fourier2d(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *obj_c0 = NULL; // input object
     PyObject *retval = NULL; // output value
 
-    FOURIER_2D_COEF_SET coefset = {0};
+    FOURIER_2D f2d = {0};
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "OOO|iidd:interp", keywords,
+        args, kwdict, "OOO|iidd:fourier2d", keywords,
         &obj_t1, &obj_t2, &obj_c0, &min_degree1, &min_degree2, &scale1, &scale2
     ))
         goto exit;
@@ -143,7 +143,7 @@ static PyObject* fourier2d(PyObject *self, PyObject *args, PyObject *kwdict)
     if (NULL == (arr_t2 = _get_as_double_array(obj_t2, 0, 0, NPY_ARRAY_ALIGNED, keywords[1])))
         goto exit;
 
-    if (NULL == (arr_c0 = _get_as_double_array(obj_c0, 0, 0, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_ALIGNED, keywords[2])))
+    if (NULL == (arr_c0 = _get_as_double_array(obj_c0, 3, 0, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_ALIGNED, keywords[2])))
         goto exit;
 
     // check the array dimensions
@@ -164,11 +164,6 @@ static PyObject* fourier2d(PyObject *self, PyObject *args, PyObject *kwdict)
                 goto exit;
             }
         }
-    }
-
-    if (PyArray_NDIM(arr_c0) < 3) {
-        PyErr_Format(PyExc_ValueError, "Incorrect dimension of %s!", keywords[2]);
-        goto exit;
     }
 
     if (PyArray_DIMS(arr_c0)[PyArray_NDIM(arr_c0)-1] != 2) {
@@ -202,7 +197,7 @@ static PyObject* fourier2d(PyObject *self, PyObject *args, PyObject *kwdict)
         npy_intp size1 = PyArray_DIMS(arr_c0)[PyArray_NDIM(arr_c0)-3];
         npy_intp size2 = PyArray_DIMS(arr_c0)[PyArray_NDIM(arr_c0)-2];
 
-        if (_f2d_coefset_init(&coefset, min_degree1, size1, min_degree2, size2, scale1, scale2))
+        if (_fourier2d_init(&f2d, min_degree1, size1, min_degree2, size2, scale1, scale2))
             goto exit;
 
         ARRAY_DATA arrd_t1 = _array_to_arrd(arr_t1);
@@ -210,7 +205,7 @@ static PyObject* fourier2d(PyObject *self, PyObject *args, PyObject *kwdict)
         ARRAY_DATA arrd_c = _array_to_arrd(arr_c);
         ARRAY_DATA arrd_c0 = _array_to_arrd(arr_c0);
 
-        _fourier2d(&arrd_t1, &arrd_t2, &arrd_c, &arrd_c0, &coefset);
+        _fourier2d_eval_coeff(&arrd_t1, &arrd_t2, &arrd_c, &arrd_c0, &f2d);
     }
 
     // get return value
@@ -218,7 +213,7 @@ static PyObject* fourier2d(PyObject *self, PyObject *args, PyObject *kwdict)
 
   exit:
 
-    _f2d_coefset_destroy(&coefset);
+    _fourier2d_destroy(&f2d);
 
     // decrease reference counters to the arrays
     if (arr_t1) Py_DECREF(arr_t1);
@@ -233,20 +228,23 @@ static PyObject* fourier2d(PyObject *self, PyObject *args, PyObject *kwdict)
 /*
  * high level nD-array recursive coefficient 2D Fourier expansion
  */
-
-static void _fourier2d_eval(
+static void _fourier2d_sincos(FOURIER_2D *f2d, const double t1, const double t2);
+static double _fourier2d_eval(FOURIER_2D *f2d, const double *ab);
+static void _fourier2d_eval_coeff_single_time(
     ARRAY_DATA *arrd_c,
     ARRAY_DATA *arrd_c0,
-    FOURIER_2D_COEF_SET *coefset
+    FOURIER_2D *f2d
 );
 
-static void _fourier2d(
+
+static void _fourier2d_eval_coeff(
     ARRAY_DATA *arrd_t1,
     ARRAY_DATA *arrd_t2,
     ARRAY_DATA *arrd_c,
     ARRAY_DATA *arrd_c0,
-    FOURIER_2D_COEF_SET *coefset
-) {
+    FOURIER_2D *f2d
+)
+{
 
     if (arrd_t1->ndim > 0)
     {
@@ -258,58 +256,31 @@ static void _fourier2d(
             ARRAY_DATA arrd_t2_item = _get_arrd_item_nocheck(arrd_t2, i);
             ARRAY_DATA arrd_c_item = _get_arrd_item_nocheck(arrd_c, i);
 
-            _fourier2d(
+            _fourier2d_eval_coeff(
                 &arrd_t1_item,
                 &arrd_t2_item,
                 &arrd_c_item,
                 arrd_c0,
-                coefset
+                f2d
             );
         }
     }
     else
     {
-        const double t1 = *((double*)arrd_t1->data) * coefset->scale1;
-        const double t2 = *((double*)arrd_t2->data) * coefset->scale2;
+        const double t1 = *((double*)arrd_t1->data);
+        const double t2 = *((double*)arrd_t2->data);
 
-        fs_sincos(
-            coefset->sin_tmp, coefset->cos_tmp,
-            MAX(abs(coefset->min_degree1), abs(coefset->max_degree1)), t1
-        );
+        _fourier2d_sincos(f2d, t1, t2);
 
-        fs_sincos_neg(
-            coefset->sin1, coefset->cos1,
-            coefset->sin_tmp, coefset->cos_tmp,
-            coefset->min_degree1, coefset->max_degree1
-        );
-
-        fs_sincos(
-            coefset->sin_tmp, coefset->cos_tmp,
-            MAX(abs(coefset->min_degree2), abs(coefset->max_degree2)), t2
-        );
-
-        fs_sincos_neg(
-            coefset->sin2, coefset->cos2,
-            coefset->sin_tmp, coefset->cos_tmp,
-            coefset->min_degree2, coefset->max_degree2
-        );
-
-        fs_sincos_2d(
-            coefset->sin12, coefset->cos12,
-            coefset->sin1, coefset->cos1,
-            coefset->sin2, coefset->cos2,
-            coefset->max_degree1 - coefset->min_degree1 + 1, 
-            coefset->max_degree2 - coefset->min_degree2 + 1
-        );
-
-        _fourier2d_eval(arrd_c, arrd_c0, coefset);
+        _fourier2d_eval_coeff_single_time(arrd_c, arrd_c0, f2d);
     }
 }
 
-static void _fourier2d_eval(
+
+static void _fourier2d_eval_coeff_single_time(
     ARRAY_DATA *arrd_c,
     ARRAY_DATA *arrd_c0,
-    FOURIER_2D_COEF_SET *coefset
+    FOURIER_2D *f2d
 ) {
     if (arrd_c->ndim > 0)
     {
@@ -320,7 +291,7 @@ static void _fourier2d_eval(
             ARRAY_DATA arrd_c_item = _get_arrd_item_nocheck(arrd_c, i);
             ARRAY_DATA arrd_c0_item = _get_arrd_item_nocheck(arrd_c0, i);
 
-            _fourier2d_eval(&arrd_c_item, &arrd_c0_item, coefset);
+            _fourier2d_eval_coeff_single_time(&arrd_c_item, &arrd_c0_item, f2d);
         }
     }
     else
@@ -328,42 +299,38 @@ static void _fourier2d_eval(
         double *c = ((double*)arrd_c->data);
         const double *ab = ((double*)arrd_c0->data);
 
-        *c = fs_eval_2d(
-            ab, coefset->sin12, coefset->cos12,
-            coefset->max_degree1 - coefset->min_degree1 + 1, 
-            coefset->max_degree2 - coefset->min_degree2 + 1
-        );
+        *c = _fourier2d_eval(f2d, ab);
     }
 }
 
 
-/* coefficient set - reset */
+/* 2D Fourier series - reset */
 
-static void _f2d_coefset_reset(FOURIER_2D_COEF_SET *coefset)
+static void _fourier2d_reset(FOURIER_2D *f2d)
 {
-    memset(coefset, 0, sizeof(FOURIER_2D_COEF_SET));
+    memset(f2d, 0, sizeof(FOURIER_2D));
 }
 
-/* coefficient set - destruction */
+/* 2D Fourier series - destruction */
 
-static void _f2d_coefset_destroy(FOURIER_2D_COEF_SET *coefset)
+static void _fourier2d_destroy(FOURIER_2D *f2d)
 {
-    if(NULL != coefset->cos_tmp) free(coefset->cos_tmp);
-    if(NULL != coefset->sin_tmp) free(coefset->sin_tmp);
-    if(NULL != coefset->cos1) free(coefset->cos1);
-    if(NULL != coefset->sin1) free(coefset->sin1);
-    if(NULL != coefset->cos2) free(coefset->cos2);
-    if(NULL != coefset->sin2) free(coefset->sin2);
-    if(NULL != coefset->cos12) free(coefset->cos12);
-    if(NULL != coefset->sin12) free(coefset->sin12);
+    if(NULL != f2d->cos_tmp) free(f2d->cos_tmp);
+    if(NULL != f2d->sin_tmp) free(f2d->sin_tmp);
+    if(NULL != f2d->cos1) free(f2d->cos1);
+    if(NULL != f2d->sin1) free(f2d->sin1);
+    if(NULL != f2d->cos2) free(f2d->cos2);
+    if(NULL != f2d->sin2) free(f2d->sin2);
+    if(NULL != f2d->cos12) free(f2d->cos12);
+    if(NULL != f2d->sin12) free(f2d->sin12);
 
-    _f2d_coefset_reset(coefset);
+    _fourier2d_reset(f2d);
 }
 
-/* coefficient set - initialization */
+/* 2D Fourier series - initialization */
 
-static int _f2d_coefset_init(
-    FOURIER_2D_COEF_SET *coefset,
+static int _fourier2d_init(
+    FOURIER_2D *f2d,
     const ptrdiff_t min_degree1,
     const ptrdiff_t size1,
     const ptrdiff_t min_degree2,
@@ -372,79 +339,127 @@ static int _f2d_coefset_init(
     const double scale2
 )
 {
-    ptrdiff_t max_degree1 = min_degree1 + size1 - 1; 
-    ptrdiff_t max_degree2 = min_degree2 + size2 - 1; 
+    ptrdiff_t max_degree1 = min_degree1 + size1 - 1;
+    ptrdiff_t max_degree2 = min_degree2 + size2 - 1;
     ptrdiff_t max_abs_degree;
-    
-    _f2d_coefset_reset(coefset);
 
-    coefset->min_degree1 = min_degree1;
-    coefset->max_degree1 = max_degree1;
-    coefset->min_degree2 = min_degree2;
-    coefset->max_degree2 = max_degree2;
-    coefset->scale1 = scale1;
-    coefset->scale2 = scale2;
+    _fourier2d_reset(f2d);
+
+    f2d->min_degree1 = min_degree1;
+    f2d->max_degree1 = max_degree1;
+    f2d->min_degree2 = min_degree2;
+    f2d->max_degree2 = max_degree2;
+    f2d->scale1 = scale1;
+    f2d->scale2 = scale2;
 
     max_abs_degree = 1;
     max_abs_degree = MAX(max_abs_degree, abs(min_degree1));
     max_abs_degree = MAX(max_abs_degree, abs(max_degree1));
     max_abs_degree = MAX(max_abs_degree, abs(min_degree1));
     max_abs_degree = MAX(max_abs_degree, abs(max_degree2));
-    coefset->max_abs_degree = max_abs_degree;
-    
-    if (NULL == (coefset->cos_tmp = (double*)malloc((max_abs_degree+1)*sizeof(double))))
+    f2d->max_abs_degree = max_abs_degree;
+
+    if (NULL == (f2d->cos_tmp = (double*)malloc((max_abs_degree+1)*sizeof(double))))
     {
-        PyErr_Format(PyExc_MemoryError, "_f2d_coefset_reset: cos_tmp");
+        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: cos_tmp");
         goto error;
     }
 
-    if (NULL == (coefset->sin_tmp = (double*)malloc((max_abs_degree+1)*sizeof(double))))
+    if (NULL == (f2d->sin_tmp = (double*)malloc((max_abs_degree+1)*sizeof(double))))
     {
-        PyErr_Format(PyExc_MemoryError, "_f2d_coefset_reset: sin_tmp");
+        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: sin_tmp");
         goto error;
     }
 
-    if (NULL == (coefset->cos1 = (double*)malloc(size1*sizeof(double))))
+    if (NULL == (f2d->cos1 = (double*)malloc(size1*sizeof(double))))
     {
-        PyErr_Format(PyExc_MemoryError, "_f2d_coefset_reset: cos1");
+        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: cos1");
         goto error;
     }
 
-    if (NULL == (coefset->sin1 = (double*)malloc(size1*sizeof(double))))
+    if (NULL == (f2d->sin1 = (double*)malloc(size1*sizeof(double))))
     {
-        PyErr_Format(PyExc_MemoryError, "_f2d_coefset_reset: sin1");
+        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: sin1");
         goto error;
     }
 
-    if (NULL == (coefset->cos2 = (double*)malloc(size2*sizeof(double))))
+    if (NULL == (f2d->cos2 = (double*)malloc(size2*sizeof(double))))
     {
-        PyErr_Format(PyExc_MemoryError, "_f2d_coefset_reset: cos2");
+        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: cos2");
         goto error;
     }
 
-    if (NULL == (coefset->sin2 = (double*)malloc(size2*sizeof(double))))
+    if (NULL == (f2d->sin2 = (double*)malloc(size2*sizeof(double))))
     {
-        PyErr_Format(PyExc_MemoryError, "_f2d_coefset_reset: sin2");
+        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: sin2");
         goto error;
     }
 
-    if (NULL == (coefset->cos12 = (double*)malloc(size1*size2*sizeof(double))))
+    if (NULL == (f2d->cos12 = (double*)malloc(size1*size2*sizeof(double))))
     {
-        PyErr_Format(PyExc_MemoryError, "_f2d_coefset_reset: cos12");
+        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: cos12");
         goto error;
     }
 
-    if (NULL == (coefset->sin12 = (double*)malloc(size1*size2*sizeof(double))))
+    if (NULL == (f2d->sin12 = (double*)malloc(size1*size2*sizeof(double))))
     {
-        PyErr_Format(PyExc_MemoryError, "_f2d_coefset_reset: sin12");
+        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: sin12");
         goto error;
     }
 
     return 0;
 
   error:
-    _f2d_coefset_destroy(coefset);
+    _fourier2d_destroy(f2d);
     return 1;
+}
+
+/* 2D Fourier series - evaluate series from the coefficients and sin/cos matrix */
+
+static double _fourier2d_eval(FOURIER_2D *f2d, const double *ab)
+{
+    return fs_eval_2d(
+        ab, f2d->sin12, f2d->cos12,
+        f2d->max_degree1 - f2d->min_degree1 + 1,
+        f2d->max_degree2 - f2d->min_degree2 + 1
+    );
+}
+
+/* 2D Fourier series - evaluate sin/cos matrix for the given coordinates */
+
+static void _fourier2d_sincos(FOURIER_2D *f2d, double t1, double t2)
+{
+        fs_sincos(
+            f2d->sin_tmp, f2d->cos_tmp,
+            MAX(abs(f2d->min_degree1), abs(f2d->max_degree1)),
+            t1 * f2d->scale1
+        );
+
+        fs_sincos_neg(
+            f2d->sin1, f2d->cos1,
+            f2d->sin_tmp, f2d->cos_tmp,
+            f2d->min_degree1, f2d->max_degree1
+        );
+
+        fs_sincos(
+            f2d->sin_tmp, f2d->cos_tmp,
+            MAX(abs(f2d->min_degree2), abs(f2d->max_degree2)),
+            t2 * f2d->scale2
+        );
+
+        fs_sincos_neg(
+            f2d->sin2, f2d->cos2,
+            f2d->sin_tmp, f2d->cos_tmp,
+            f2d->min_degree2, f2d->max_degree2
+        );
+
+        fs_sincos_2d(
+            f2d->sin12, f2d->cos12,
+            f2d->sin1, f2d->cos1,
+            f2d->sin2, f2d->cos2,
+            f2d->max_degree1 - f2d->min_degree1 + 1,
+            f2d->max_degree2 - f2d->min_degree2 + 1
+        );
 }
 
 #endif /*PYMM_FOURIER2D_H*/

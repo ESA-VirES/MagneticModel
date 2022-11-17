@@ -27,9 +27,10 @@
 #-------------------------------------------------------------------------------
 # pylint: disable=too-many-arguments,too-many-locals
 
-from numpy import nan, asarray, empty, nditer, isnan, full, newaxis, ones
-from .._pymm import GEOCENTRIC_SPHERICAL, convert
+from numpy import nan, asarray, empty, isnan, full
+from .._pymm import GRADIENT, GEOCENTRIC_SPHERICAL, convert, sheval2dfs
 from ..magnetic_time import mjd2000_to_magnetic_universal_time
+from .coefficients_mio import SparseSHCoefficientsMIO
 from .model import GeomagneticModel, DipoleSphericalHarmomicGeomagneticModel
 from .util import reshape_times_and_coordinates, reshape_variable
 
@@ -137,6 +138,13 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
 
     def __init__(self, coefficients, north_pole, wolf_ratio=MIO_WOLF_RATIO,
                  height=MIO_HEIGHT, earth_radius=MIO_EARTH_RADIUS):
+
+        if not isinstance(coefficients, SparseSHCoefficientsMIO):
+            raise TypeError(
+                f"Invalid coefficients type {coefficients.__class__.__name__}! "
+                f"{SparseSHCoefficientsMIO.__name__} is expected."
+            )
+
         DipoleSphericalHarmomicGeomagneticModel.__init__(
             self, coefficients, north_pole
         )
@@ -147,79 +155,58 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
              output_coordinate_system=GEOCENTRIC_SPHERICAL,
              **options):
 
+        def _subset(data, mask):
+            if data is None:
+                return None
+            data = asarray(data)
+            if data.ndim > 0:
+                return data[mask]
+            return data
+
         # reshape time and location to a compatible shape
         time, location = reshape_times_and_coordinates(
             asarray(time), asarray(location)
         )
 
-        # magnetic universal time
-        lat_ngp, lon_ngp = self.north_pole
-        mut = mjd2000_to_magnetic_universal_time(
-            time, lat_ngp, lon_ngp,
+        # MIO scaling factor
+        mio_scale = 1.0 + self.wolf_ratio * asarray(options.pop('f107'))
+
+        start, end = self.validity
+        mask = (time >= start) & (time <= end) & ~isnan(mio_scale)
+        result = full(location.shape, nan)
+        result[mask, :] = self._eval(
+            self._eval_fourier2d, self.coefficients,
+            time[mask], location[mask, :],
+            input_coordinate_system, output_coordinate_system,
+            lat_sol=_subset(options.pop('lat_sol', None), mask),
+            lon_sol=_subset(options.pop('lon_sol', None), mask),
+            **options,
+        )
+        if mio_scale.ndim > 0:
+            mio_scale = reshape_variable(location, mio_scale)
+        result *= mio_scale
+
+        return result
+
+    def _eval_fourier2d(self, coefficients, time, location,
+                        input_coordinate_system, output_coordinate_system,
+                        **options):
+        """ Default SH expansion with MIO 2D Fourier series coefficients.  """
+
+        year_fraction = coefficients.mjd2000_to_year_fraction(time)
+
+        magnetic_universal_time = mjd2000_to_magnetic_universal_time(
+            time, *(self.north_pole),
             lat_sol=options.pop('lat_sol', None),
             lon_sol=options.pop('lon_sol', None),
         )
 
-        # MIO scaling factor
-        mio_scale = 1.0 + self.wolf_ratio * asarray(options.pop('f107'))
-        scale = asarray(options.pop('scale', 1.0))
-
-        def _is_valid(start, end):
-            return (time >= start) & (time <= end) & ~isnan(mio_scale)
-
-        def _call_eval(method, coefficients, time, mut, location):
-            scale_ = reshape_variable(time, mio_scale)[..., newaxis]
-            scale_ = (scale * ones(3)) * scale_
-            return self._eval(
-                method, coefficients, time, location,
-                input_coordinate_system, output_coordinate_system,
-                scale=scale_, mut=mut, **options
-            )
-
-        def _get_nans():
-            return full(location.shape, nan)
-
-        if time.ndim == 0:
-            # time is a scalar value
-            for (start, end), method, coefficients in self._components:
-                if _is_valid(start, end):
-                    return _call_eval(method, coefficients, time, mut, location)
-            return _get_nans()
-
-        # time is an array
-        result = _get_nans()
-        for (start, end), method, coefficients in self._components:
-            mask = _is_valid(start, end)
-            result[mask, :] = _call_eval(
-                method, coefficients, time[mask], mut[mask], location[mask, :]
-            )
-        return result
-
-    def _eval_multi_time(self, coefficients, time, coords,
-                         input_coordinate_system, output_coordinate_system,
-                         mut, **options):
-        result = empty(coords.shape)
-        if result.size > 0:
-            iterator = nditer(
-                [
-                    result[..., 0], result[..., 1], result[..., 2],
-                    time, coords[..., 0], coords[..., 1], coords[..., 2],
-                    mut,
-                ],
-                op_flags=[
-                    ['writeonly'], ['writeonly'], ['writeonly'],
-                    ['readonly'], ['readonly'], ['readonly'], ['readonly'],
-                    ['readonly'],
-                ],
-            )
-            for item in iterator:
-                (
-                    vect0, vect1, vect2,
-                    time_, coord0, coord1, coord2, mut_,
-                ) = item
-                vect0[...], vect1[...], vect2[...] = self._eval_single_time(
-                    coefficients, time_, [coord0, coord1, coord2],
-                    input_coordinate_system, output_coordinate_system,
-                    mut=mut_, **options
-                )
-        return result
+        return sheval2dfs(
+            year_fraction, magnetic_universal_time, location,
+            coef_set=coefficients.get_f2fs_coeff_set(**options),
+            coord_type_in=input_coordinate_system,
+            coord_type_out=output_coordinate_system,
+            mode=GRADIENT,
+            is_internal=coefficients.is_internal,
+            scale_gradient=-asarray(options.get("scale", 1.0)),
+        )

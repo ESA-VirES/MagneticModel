@@ -1,10 +1,10 @@
 /*-----------------------------------------------------------------------------
  *
  * Geomagnetic Model - C python bindings
- * - spherical harmonic model evaluation with temporal coefficient dependency
+ * - spherical harmonic model evaluation with time-dependent interpolated
+ *   coefficients
  *
  * Author: Martin Paces <martin.paces@eox.at>
- *
  *-----------------------------------------------------------------------------
  * Copyright (C) 2022 EOX IT Services GmbH
  *
@@ -32,6 +32,7 @@
 #define PYMM_SHEVALTEMP_H
 
 #include "interpolation.h"
+#include "pymm_aux.h"
 #include "pymm_sheval.h"
 
 #define SHEVALTEMP_MIN_SPLINE_ORDER 1
@@ -114,8 +115,7 @@ static void _shevaltemp3(ARRAY_DATA arrd_t, ARRAY_DATA arrd_x, ARRAY_DATA arrd_p
 
 #define DOC_SHEVALTEMP "\n"\
 "   arr_out = shevaltemp(\n"\
-"       arr_t, arr_x, degree,\n"\
-"       coef_set_list,\n"\
+"       arr_t, arr_x, coef_set_list,\n"\
 "       coord_type_in=GEODETIC_ABOVE_WGS84,\n"\
 "       coord_type_out=GEODETIC_ABOVE_WGS84,\n"\
 "       mode=GRADIENT, is_internal=True,\n"\
@@ -126,7 +126,7 @@ static void _shevaltemp3(ARRAY_DATA arrd_t, ARRAY_DATA arrd_x, ARRAY_DATA arrd_p
 "       arr_t  - array of times.\n"\
 "       arr_x  - array of 3D coordinates.\n"\
 "       coef_set_list = [(coef_t, coef_gh, coef_nm, spline_order), ...]\n"\
-"              - a list of sets of interpolated cooeficients. \n"\
+"              - a list of sets of interpolated coefficients. \n"\
 "       coef_t - times of spherical harmonic model coefficients.\n"\
 "       coef_gh - time-series of spherical harmonic model coefficients.\n"\
 "       coef_nm - N,M mapping of the spherical harmonic model coefficients.\n"\
@@ -145,7 +145,7 @@ static void _shevaltemp3(ARRAY_DATA arrd_t, ARRAY_DATA arrd_x, ARRAY_DATA arrd_p
 "                        gradient components.\n"\
 "\n"
 
-static int parse_coefset(COEF_SET *coefset, size_t idx, PyObject *obj_coef_list_item);
+static int parse_coefset(COEF_SET *coefset, const char *label, size_t idx, PyObject *obj_coef_list_item);
 
 static PyObject* shevaltemp(PyObject *self, PyObject *args, PyObject *kwdict)
 {
@@ -185,32 +185,32 @@ static PyObject* shevaltemp(PyObject *self, PyObject *args, PyObject *kwdict)
     is_internal = (obj_is_internal == NULL) || PyObject_IsTrue(obj_is_internal);
 
     // check the type of the coordinate transformation
-    if (CT_INVALID == _check_coord_type(ct_in, keywords[7]))
+    if (CT_INVALID == _check_coord_type(ct_in, keywords[3]))
         goto exit;
 
-    if (CT_INVALID == _check_coord_type(ct_out, keywords[8]))
+    if (CT_INVALID == _check_coord_type(ct_out, keywords[4]))
         goto exit;
 
     // check the operation mode
-    if (SM_INVALID == _check_sheval_mode(mode, keywords[9]))
+    if (SM_INVALID == _check_sheval_mode(mode, keywords[5]))
         goto exit;
 
     // check the coefficients list
     if (!PyList_Check(obj_coef_list))
     {
-        PyErr_Format(PyExc_ValueError, "The '%s' parameter is expected to be a list!", keywords[3]);
+        PyErr_Format(PyExc_ValueError, "The '%s' parameter is expected to be a list!", keywords[2]);
         goto exit;
     }
 
     if (PyList_Size(obj_coef_list) < 1)
     {
-        PyErr_Format(PyExc_ValueError, "The '%s' list is expected to have at least one item!", keywords[3]);
+        PyErr_Format(PyExc_ValueError, "The '%s' list is expected to have at least one item!", keywords[2]);
         goto exit;
     }
 
     if (PyList_Size(obj_coef_list) > SHEVALTEMP_MAX_COEF_LIST_SIZE)
     {
-        PyErr_Format(PyExc_ValueError, "The '%s' list cannot have more that %d iitems!", keywords[3], SHEVALTEMP_MAX_COEF_LIST_SIZE);
+        PyErr_Format(PyExc_ValueError, "The '%s' list cannot have more that %d iitems!", keywords[2], SHEVALTEMP_MAX_COEF_LIST_SIZE);
         goto exit;
     }
 
@@ -220,7 +220,7 @@ static PyObject* shevaltemp(PyObject *self, PyObject *args, PyObject *kwdict)
 
         for (i = 0; i < n; ++i)
         {
-            if(parse_coefset(&coefsets[i], i, PyList_GetItem(obj_coef_list, i)))
+            if(parse_coefset(&coefsets[i], keywords[3], i, PyList_GetItem(obj_coef_list, i)))
                 goto exit;
 
             ncoefset += 1;
@@ -243,7 +243,7 @@ static PyObject* shevaltemp(PyObject *self, PyObject *args, PyObject *kwdict)
     }
 
     // check the last dimension of the position array
-    if (_check_array_dim_eq(arr_x, -1, 3, keywords[0]))
+    if (_check_array_dim_eq(arr_x, -1, 3, keywords[1]))
         goto exit;
 
     // check that times match the spatial coordinates
@@ -261,10 +261,10 @@ static PyObject* shevaltemp(PyObject *self, PyObject *args, PyObject *kwdict)
     // handle the gradient scale factors
     if (NULL != obj_scale)
     {
-        if (NULL == (arr_scale = _get_as_double_array(obj_scale, 0, 1, NPY_ARRAY_IN_ARRAY, keywords[9])))
+        if (NULL == (arr_scale = _get_as_double_array(obj_scale, 0, 1, NPY_ARRAY_IN_ARRAY, keywords[8])))
             goto exit;
 
-        if (_extract_1d_double_array(scale_gradient, 3, arr_scale, keywords[9]))
+        if (_extract_1d_double_array(scale_gradient, 3, arr_scale, keywords[8]))
             goto exit;
     }
 
@@ -351,8 +351,8 @@ static PyObject* shevaltemp(PyObject *self, PyObject *args, PyObject *kwdict)
 }
 
 
-static int parse_coefset(COEF_SET *coefset, size_t idx, PyObject *obj_coef_list_item) {
-
+static int parse_coefset(COEF_SET *coefset, const char *label, size_t idx, PyObject *obj_coef_list_item)
+{
     static char *keywords[] = {
         "coef_t", "coef_gh", "coef_nm", "spline_order", NULL
     };
@@ -365,18 +365,20 @@ static int parse_coefset(COEF_SET *coefset, size_t idx, PyObject *obj_coef_list_
     PyArrayObject *arr_cv = NULL; // coef_gh array
     PyArrayObject *arr_cm = NULL; // coef_nm array
 
-    static char label[128];
+    const size_t buffer_size = 128;
+    char buffer[buffer_size];
+
 
     // check tuple item
     if (!PyTuple_Check(obj_coef_list_item))
     {
-        PyErr_Format(PyExc_ValueError, "The 'coef_set_list' item #%ld is expected to be a tuple!", idx);
+        PyErr_Format(PyExc_ValueError, "The '%s[%ld]' is expected to be a tuple!", label, idx);
         goto error;
     }
 
     if (PyTuple_Size(obj_coef_list_item) != 4)
     {
-        PyErr_Format(PyExc_ValueError, "The 'coef_set_list' item #%ld tuple is expected to have 4 items!", idx);
+        PyErr_Format(PyExc_ValueError, "The '%s[%ld]' tuple is expected to have 4 items!", label, idx);
         goto error;
     }
 
@@ -391,63 +393,45 @@ static int parse_coefset(COEF_SET *coefset, size_t idx, PyObject *obj_coef_list_
         goto error;
 
     // extract and parse spline order integer flag
+    snprintf(buffer, buffer_size, "%s[%ld].%s", label, idx, keywords[3]);
+    if (_parse_int_value(&spline_order, PyTuple_GetItem(obj_coef_list_item, 3), buffer))
+        goto error;
+
+    if ((spline_order < SHEVALTEMP_MIN_SPLINE_ORDER) || (spline_order > SHEVALTEMP_MAX_SPLINE_ORDER))
     {
-        long value = -1;
-        PyObject *obj = NULL;
-
-        if (NULL == (obj = PyTuple_GetItem(obj_coef_list_item, 3)))
-            goto error;
-
-        if (!PyLong_Check(obj))
-        {
-            PyErr_Format(PyExc_ValueError, "The spline order is expected to be an integer value! (#%ld)", idx);
-            goto error;
-        }
-
-        value = PyLong_AsLong(obj);
-        if (NULL != PyErr_Occurred())
-            goto error;
-
-        if ((value < SHEVALTEMP_MIN_SPLINE_ORDER) || (value > SHEVALTEMP_MAX_SPLINE_ORDER))
-        {
-            PyErr_Format(PyExc_ValueError, "Unsupported spline order %d! (#%ld)", spline_order, idx);
-            goto error;
-        }
-
-        spline_order = value;
+        PyErr_Format(PyExc_ValueError, "Unsupported %s value %d!", buffer, spline_order);
+        goto error;
     }
 
     // parse coefficients array
-    snprintf(label, 128, "%s#%ld", keywords[0], idx);
-    if (NULL == (arr_ct = _get_as_double_array(obj_ct, 1, 1, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_IN_ARRAY, label)))
+    snprintf(buffer, buffer_size, "%s[%ld].%s", label, idx, keywords[0]);
+    if (NULL == (arr_ct = _get_as_double_array(obj_ct, 1, 1, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_IN_ARRAY, buffer)))
         goto error;
 
-    snprintf(label, 128, "%s#%ld", keywords[1], idx);
-    if (NULL == (arr_cv = _get_as_double_array(obj_cv, 2, 2, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_IN_ARRAY, label)))
+    snprintf(buffer, buffer_size, "%s[%ld].%s", label, idx, keywords[1]);
+    if (NULL == (arr_cv = _get_as_double_array(obj_cv, 2, 2, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_IN_ARRAY, buffer)))
         goto error;
 
-    snprintf(label, 128, "%s#%ld", keywords[2], idx);
-    if (NULL == (arr_cm = _get_as_int_array(obj_cm, 2, 2, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_IN_ARRAY, label)))
+    snprintf(buffer, buffer_size, "%s[%ld].%s", label, idx, keywords[2]);
+    if (NULL == (arr_cm = _get_as_int_array(obj_cm, 2, 2, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_IN_ARRAY, buffer)))
         goto error;
 
     // check dimensions of the coefficient arrays
 
-    snprintf(label, 128, "%s#%ld", keywords[1], idx);
+    snprintf(buffer, buffer_size, "%s[%ld].%s", label, idx, keywords[1]);
 
-    if (_check_array_dim_eq(arr_cv, 0, PyArray_DIMS(arr_cm)[0], label))
+    if (_check_array_dim_eq(arr_cv, 0, PyArray_DIMS(arr_cm)[0], buffer))
         goto error;
 
-    if (_check_array_dim_eq(arr_cv, 1, PyArray_DIMS(arr_ct)[0], label))
+    if (_check_array_dim_eq(arr_cv, 1, PyArray_DIMS(arr_ct)[0], buffer))
         goto error;
 
-    snprintf(label, 128, "%s#%ld", keywords[2], idx);
+    snprintf(buffer, buffer_size, "%s[%ld].%s", label, idx, keywords[2]);
 
-    if (_check_array_dim_eq(arr_cm, 1, 2, label))
+    if (_check_array_dim_eq(arr_cm, 1, 2, buffer))
         goto error;
 
-    _coefset_init(coefset, arr_ct, arr_cv, arr_cm, spline_order);
-
-    return 0;
+    return _coefset_init(coefset, arr_ct, arr_cv, arr_cm, spline_order);
 
   error:
     if (arr_ct) Py_DECREF(arr_ct);
@@ -665,7 +649,7 @@ static int _coefset_init(
 
     if (NULL == (coefset->offset = (ptrdiff_t*)malloc(coefset->ncoef*sizeof(ptrdiff_t))))
     {
-        PyErr_Format(PyExc_MemoryError, "_coefset_init: coefset");
+        PyErr_Format(PyExc_MemoryError, "_coefset_init: offset");
         goto error;
     }
 
@@ -745,4 +729,4 @@ static void _coeff_set_interp1(double time, MODEL_TS *model, const COEF_SET *coe
     }
 }
 
-#endif  /* PYMM_SHEVAL_H */
+#endif  /* PYMM_SHEVALTEMP_H */

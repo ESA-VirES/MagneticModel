@@ -5062,3 +5062,5 @@ for n, m, coeff in DATA:
         COEF_G[(n*(n + 1))//2 + m] = coeff
     else:
         COEF_H[(n*(n + 1))//2 - m] = coeff
+
+del DATA, n, m, coeff, zeros

@@ -31,6 +31,70 @@
 #define PYMM_AUX_H
 
 /*
+ * parse signed long integer value
+ */
+static int _parse_long_value(long *target, PyObject *obj, const char *label)
+{
+    if (obj == NULL)
+        return 1;
+
+    if (!PyLong_Check(obj))
+    {
+        PyErr_Format(PyExc_ValueError, "The %s parameter is expected to be an integer value!", label);
+        return 1;
+    }
+
+    *target = PyLong_AsLong(obj);
+    if (NULL != PyErr_Occurred())
+        return 1;
+
+    return 0;
+}
+
+/*
+ * parse signed integer value
+ */
+
+static int _parse_int_value(int *target, PyObject *obj, const char *label)
+{
+    long value;
+
+    if (_parse_long_value(&value, obj, label))
+        return 1;
+
+    if ((long)((int)value) != value) {
+        PyErr_Format(PyExc_ValueError, "The %s parameter cannot be safely cast to the requested integer type!", label);
+        return 1;
+    }
+
+    *target = (int)value;
+
+    return 0;
+}
+
+
+/*
+ * parse double precision floating point value
+ */
+static int _parse_double_value(double *target, PyObject *obj, const char *label)
+{
+    if (obj == NULL)
+        return 1;
+
+    if (!PyFloat_Check(obj))
+    {
+        PyErr_Format(PyExc_ValueError, "The %s parameter is expected to be an float value!", label);
+        return 1;
+    }
+
+    *target = PyFloat_AsDouble(obj);
+    if (NULL != PyErr_Occurred())
+        return 1;
+
+    return 0;
+}
+
+/*
  * Check the input python object and convert it to a NumPy array of a speciefied
  * type, ensuring the native byte-order.Returns NULL if the conversion failed.
  */

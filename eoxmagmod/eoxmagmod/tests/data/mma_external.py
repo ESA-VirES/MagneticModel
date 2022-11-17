@@ -48,3 +48,5 @@ for n, m, coeff in DATA:
         COEF_Q[(n*(n + 1))//2 + m] = coeff
     else:
         COEF_S[(n*(n + 1))//2 - m] = coeff
+
+del DATA, n, m, coeff, zeros

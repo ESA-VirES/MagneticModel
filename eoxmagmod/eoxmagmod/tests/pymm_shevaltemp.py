@@ -128,10 +128,9 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn:
         coords = asarray(coords)
 
         # broadcast to a common shape
-        if len(times.shape) < len(coords.shape[:-1]):
+        if times.ndim < coords.ndim - 1:
             times = _reshape(times, coords.shape[:-1]).copy()
-
-        elif len(times.shape) > len(coords.shape[:-1]):
+        elif times.ndim > coords.ndim - 1:
             coords = stack((
                 _reshape(coords[..., 0], times.shape),
                 _reshape(coords[..., 1], times.shape),
@@ -147,7 +146,6 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn:
 
         result_pot = empty(times.shape)
         result_grad = empty(coords.shape)
-
 
         # single-time coefficient arrays
         degree = max(coef_set.coef_nm[:, 0].max() for coef_set in cls.coef_sets)
@@ -195,67 +193,67 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn:
         _, gradient_ref = self.eval_reference_shevaltemp(times, coords)
         assert_allclose(gradient, gradient_ref, atol=1e-6)
 
-    def test_sheval_potential_and_gradient_T0X0(self):
+    def test_shevaltemp_potential_and_gradient_T0X0(self):
         self._test_shevaltemp_potential_and_gradient((), ())
 
-    def test_sheval_potential_T0X0(self):
+    def test_shevaltemp_potential_T0X0(self):
         self._test_shevaltemp_potential((), ())
 
-    def test_sheval_gradient_T0X0(self):
+    def test_shevaltemp_gradient_T0X0(self):
         self._test_shevaltemp_gradient((), ())
 
-    def test_sheval_potential_and_gradient_T0X1(self):
+    def test_shevaltemp_potential_and_gradient_T0X1(self):
         self._test_shevaltemp_potential_and_gradient((), (10,))
 
-    def test_sheval_potential_T0X1(self):
+    def test_shevaltemp_potential_T0X1(self):
         self._test_shevaltemp_potential((), (10,))
 
-    def test_sheval_gradient_T0X1(self):
+    def test_shevaltemp_gradient_T0X1(self):
         self._test_shevaltemp_gradient((), (10,))
 
-    def test_sheval_potential_and_gradient_T0X2(self):
+    def test_shevaltemp_potential_and_gradient_T0X2(self):
         self._test_shevaltemp_potential_and_gradient((), (10, 5))
 
-    def test_sheval_potential_T0X2(self):
+    def test_shevaltemp_potential_T0X2(self):
         self._test_shevaltemp_potential((), (10, 5))
 
-    def test_sheval_gradient_T0X2(self):
+    def test_shevaltemp_gradient_T0X2(self):
         self._test_shevaltemp_gradient((), (10, 5))
 
-    def test_sheval_potential_and_gradient_T1X0(self):
+    def test_shevaltemp_potential_and_gradient_T1X0(self):
         self._test_shevaltemp_potential_and_gradient((10,), ())
 
-    def test_sheval_potential_T1X0(self):
+    def test_shevaltemp_potential_T1X0(self):
         self._test_shevaltemp_potential((10,), ())
 
-    def test_sheval_gradient_T1X0(self):
+    def test_shevaltemp_gradient_T1X0(self):
         self._test_shevaltemp_gradient((10,), ())
 
-    def test_sheval_potential_and_gradient_T1X1(self):
+    def test_shevaltemp_potential_and_gradient_T1X1(self):
         self._test_shevaltemp_potential_and_gradient((10,), (10,))
 
-    def test_sheval_potential_T1X1(self):
+    def test_shevaltemp_potential_T1X1(self):
         self._test_shevaltemp_potential((10,), (10,))
 
-    def test_sheval_gradient_T1X1(self):
+    def test_shevaltemp_gradient_T1X1(self):
         self._test_shevaltemp_gradient((10,), (10,))
 
-    def test_sheval_potential_and_gradient_T1X2(self):
+    def test_shevaltemp_potential_and_gradient_T1X2(self):
         self._test_shevaltemp_potential_and_gradient((10,), (10, 5))
 
-    def test_sheval_potential_T1X2(self):
+    def test_shevaltemp_potential_T1X2(self):
         self._test_shevaltemp_potential((10,), (10, 5))
 
-    def test_sheval_gradient_T1X2(self):
+    def test_shevaltemp_gradient_T1X2(self):
         self._test_shevaltemp_gradient((10,), (10, 5))
 
-    def test_sheval_potential_and_gradient_T2X1(self):
+    def test_shevaltemp_potential_and_gradient_T2X1(self):
         self._test_shevaltemp_potential_and_gradient((10, 5), (10,))
 
-    def test_sheval_potential_T2X1(self):
+    def test_shevaltemp_potential_T2X1(self):
         self._test_shevaltemp_potential((10, 5), (10,))
 
-    def test_sheval_gradient_T2X1(self):
+    def test_shevaltemp_gradient_T2X1(self):
         self._test_shevaltemp_gradient((10, 5), (10,))
 
 #-------------------------------------------------------------------------------

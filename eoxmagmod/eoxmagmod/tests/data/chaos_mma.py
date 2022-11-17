@@ -60,4 +60,4 @@ TIMES_I_2, COEFF_I_2, NMMAP_I_2 = _unpack_data(TIMES_I_2, DATA_I_2)
 TIMES_E_1, COEFF_E_1, NMMAP_E_1 = _unpack_data(TIMES_E_1, DATA_E_1)
 TIMES_E_2, COEFF_E_2, NMMAP_E_2 = _unpack_data(TIMES_E_2, DATA_E_2)
 
-del DATA_I_1, DATA_I_2, DATA_E_1, DATA_E_2
+del DATA_I_1, DATA_I_2, DATA_E_1, DATA_E_2, _unpack_data, asarray

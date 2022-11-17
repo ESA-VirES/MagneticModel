@@ -51,6 +51,18 @@ class SparseSHCoefficientsMIO(SparseSHCoefficients):
             is_internal - set False for an external model
     """
 
+    def get_f2fs_coeff_set(self, **parameters):
+        """ Return coefficient set which can be passed to sheval2dfs. """
+        _, coeff, nm_, _ = self.subset_degree(
+            parameters.get("min_degree", -1),
+            parameters.get("max_degree", -1),
+        )
+        return (
+            coeff, nm_,
+            self.ps_extent.smin, self.ps_extent.pmin,
+            SCALE_SEASONAL, SCALE_DIURNAL
+        )
+
     def __init__(self, indices, coefficients, ps_extent,
                  mjd2000_to_year_fraction=mjd2000_to_year_fraction_default,
                  **kwargs):

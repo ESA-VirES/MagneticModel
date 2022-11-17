@@ -465,8 +465,9 @@ COEFF = []
 for n, m, coeff in DATA:
     NMMAP.append((n, m))
     COEFF.append(coeff)
-del DATA
 
 TIMES = asarray(TIMES)
 COEFF = asarray(COEFF)
 NMMAP = asarray(NMMAP, 'int32')
+
+del DATA, n, m, coeff, asarray
