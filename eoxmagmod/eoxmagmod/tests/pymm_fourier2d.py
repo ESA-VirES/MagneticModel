@@ -30,7 +30,7 @@
 from unittest import TestCase, main
 from numpy import pi, empty, arange, broadcast_to, sin, cos
 from numpy.random import uniform
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_allclose
 from eoxmagmod._pymm import fourier2d
 from eoxmagmod.tests.data import mio
 
@@ -48,7 +48,7 @@ class Fourier2DTestMixIn:
     def _test_fourier2d(self, x, y):
         result = self.eval_fourier2d(x, y)
         result_ref = self.eval_reference_fourier2d(x, y)
-        assert_almost_equal(result, result_ref, decimal=14)
+        assert_allclose(result, result_ref, atol=1e-15, rtol=1e-15)
 
 
     @classmethod

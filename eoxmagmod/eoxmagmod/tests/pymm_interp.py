@@ -30,7 +30,7 @@
 from unittest import TestCase, main
 from numpy import nan, inf, linspace, asarray, prod, full, empty
 from numpy.random import random
-from numpy.testing import assert_equal
+from numpy.testing import assert_allclose
 from eoxmagmod._pymm import (
     bisect, BISECT_SIDE_RIGHT, interp, INTERP_C0, INTERP_C1, INTERP_C1D1,
 )
@@ -45,9 +45,10 @@ class InterpTestMixIn:
         raise NotImplementedError
 
     def _test_interp(self, time, time0, coeff0):
-        assert_equal(
+        assert_allclose(
             self.call_interp(time, time0, coeff0),
-            self.call_interp_ref(time, time0, coeff0)
+            self.call_interp_ref(time, time0, coeff0),
+            atol=1e-15, rtol=1e-15
         )
 
     def test_special_values(self):
