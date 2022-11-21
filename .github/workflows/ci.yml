@@ -26,7 +26,7 @@ jobs:
         run: |
           ( cd libcdf && make build && sudo make install )
           ( cd qdipole && ./configure && make build && sudo make install )
-          pip3 install 'setuptools<65.6.0' # https://github.com/pypa/setuptools/issues/3693
+          pip3 list
           pip3 install scipy
           pip3 install ./eoxmagmod/
       - name: Scripts
