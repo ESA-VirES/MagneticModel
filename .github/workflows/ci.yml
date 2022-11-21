@@ -30,7 +30,7 @@ jobs:
           pip3 install wheel
           pip3 install scipy
           export SETUPTOOLS_USE_DISTUTILS=stdlib # https://github.com/pypa/setuptools/issues/3693
-          pip3 install --no-build-isolation spacepy
+          pip3 install spacepy
           unset SETUPTOOLS_USE_DISTUTILS
           pip3 install ./eoxmagmod/
       - name: Scripts
