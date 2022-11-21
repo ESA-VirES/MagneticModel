@@ -151,7 +151,7 @@ static void fs_sincos_neg(
         const ptrdiff_t idx = i - i_min;
         const double tmp = sin_it_pos[abs(i)];
         sin_it[idx] = (i < 0 ? -tmp : tmp);
-        cos_it[idx] = cos_it_pos[abs(i)]; 
+        cos_it[idx] = cos_it_pos[abs(i)];
     }
 }
 
@@ -191,11 +191,11 @@ static void fs_sincos_2d(
 {
     ptrdiff_t i, j;
 
-    for (i = 0; i < i_size; ++i) 
+    for (i = 0; i < i_size; ++i)
     {
         const ptrdiff_t i_stride = i * j_size;
-        
-        for (j = 0; j < j_size; ++j) 
+
+        for (j = 0; j < j_size; ++j)
         {
             sin_it_js[i_stride + j] = cos_it[i]*sin_js[j] + sin_it[i]*cos_js[j];
             cos_it_js[i_stride + j] = cos_it[i]*cos_js[j] - sin_it[i]*sin_js[j];
@@ -223,22 +223,16 @@ static void fs_sincos_2d(
 
 static double fs_eval_2d(
     const double *ab, const double *sin_it_js, const double *cos_it_js,
-    ptrdiff_t size_i, ptrdiff_t j_size
+    ptrdiff_t i_size, ptrdiff_t j_size
 )
 {
     double f = 0.0;
-    ptrdiff_t i, j;
+    ptrdiff_t i;
+    ptrdiff_t size = i_size * j_size;
 
-    for (i = 0; i < size_i; ++i) 
+    for (i = 0; i < size; ++i)
     {
-        const ptrdiff_t i_stride = i * j_size;
-        
-        for (j = 0; j < j_size; ++j) 
-        {
-            const ptrdiff_t idx = i_stride + j;
-
-            f += ab[2*idx]*cos_it_js[idx] + ab[2*idx+1]*sin_it_js[idx];
-        }
+        f += ab[2*i]*cos_it_js[i] + ab[2*i+1]*sin_it_js[i];
     }
 
     return f;
