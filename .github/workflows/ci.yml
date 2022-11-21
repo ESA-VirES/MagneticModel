@@ -26,7 +26,12 @@ jobs:
         run: |
           ( cd libcdf && make build && sudo make install )
           ( cd qdipole && ./configure && make build && sudo make install )
+          pip3 install --upgrade pip
+          pip3 install wheel
           pip3 install scipy
+          export SETUPTOOLS_USE_DISTUTILS=stdlib # https://github.com/pypa/setuptools/issues/3693
+          pip3 install spacepy
+          unset SETUPTOOLS_USE_DISTUTILS
           pip3 install ./eoxmagmod/
       - name: Scripts
         run: |
