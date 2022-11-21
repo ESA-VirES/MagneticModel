@@ -31,7 +31,7 @@
 #ifndef PYMM_LEGENDRE_H
 #define PYMM_LEGENDRE_H
 
-#include "shc.h"
+#include "spherical_harmonics.h"
 #include "pymm_aux.h"
 #include "pymm_cconv.h"
 
@@ -94,17 +94,27 @@ static PyObject* legendre(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     {
-        // allocate and fill the pre-calculated square-roots
         double *psqrt = NULL;
+        double *prsqrt = NULL;
+
+        // allocate and fill the pre-calculated square-roots
         if (NULL == (psqrt = shc_presqrt(degree)))
         {
             PyErr_Format(PyExc_ValueError, "Memory allocation error!");
             goto exit;
         }
 
-        shc_legendre(PyArray_DATA(arr_p), PyArray_DATA(arr_dp), degree, DG2RAD*lat_sph, psqrt);
+        // allocate and fill the pre-calculated reciprocal square-roots
+        if (NULL == (prsqrt = shc_prersqrt(degree)))
+        {
+            PyErr_Format(PyExc_ValueError, "Memory allocation error!");
+            goto exit;
+        }
+
+        shc_legendre(PyArray_DATA(arr_p), PyArray_DATA(arr_dp), degree, DG2RAD*lat_sph, psqrt, prsqrt);
 
         // free the square root array
+        free(prsqrt);
         free(psqrt);
     }
 

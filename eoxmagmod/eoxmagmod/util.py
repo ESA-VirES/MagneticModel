@@ -57,15 +57,15 @@ def vrotate(arr, coord_in, coord_out, coord_type_in, coord_type_out):
     if coord_type_in == GEODETIC_ABOVE_WGS84:
         if coord_type_out == GEODETIC_ABOVE_WGS84:
             return arr
-        elif coord_type_out == GEOCENTRIC_SPHERICAL:
+        if coord_type_out == GEOCENTRIC_SPHERICAL:
             return vrot_sph2geod(arr, coord_out[..., 0] - coord_in[..., 0])
-        elif coord_type_out == GEOCENTRIC_CARTESIAN:
+        if coord_type_out == GEOCENTRIC_CARTESIAN:
             return vrot_sph2cart(arr, coord_in[..., 0], coord_in[..., 1])
 
     elif coord_type_in == GEOCENTRIC_SPHERICAL:
         if coord_type_out == GEODETIC_ABOVE_WGS84:
             return vrot_sph2geod(arr, coord_out[..., 0] - coord_in[..., 0])
-        elif coord_type_out == GEOCENTRIC_CARTESIAN:
+        if coord_type_out == GEOCENTRIC_CARTESIAN:
             return vrot_sph2cart(arr, coord_in[..., 0], coord_in[..., 1])
 
     elif coord_type_in == GEOCENTRIC_CARTESIAN:

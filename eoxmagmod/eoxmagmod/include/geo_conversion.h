@@ -1,5 +1,5 @@
 /**
- * @file geo_conv.h
+ * @file geo_conversion.h
  * @author Martin Paces <martin.paces@eox.at>
  * @brief Geo-coordinates conversions.
  *
@@ -26,8 +26,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef GEO_CONV_H
-#define GEO_CONV_H 1
+#ifndef GEO_CONVERSION_H
+#define GEO_CONVERSION_H 1
 
 #include <math.h>
 #include "math_aux.h"
@@ -309,4 +309,4 @@ static void geocentric_sph2geodetic(
     *lon = RAD2DG*ph;
 }
 
-#endif  /*GEO_CONV_H*/
+#endif  /*GEO_CONVERSION_H*/

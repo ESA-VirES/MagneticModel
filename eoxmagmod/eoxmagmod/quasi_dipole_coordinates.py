@@ -48,7 +48,7 @@ def eval_qdlatlon(gclat, gclon, gcrad, time, fname=APEX):
             qdlon - quasi-dipole longitude(s).
     """
     if not isfile(fname):
-        raise IOError("File not found! fname=%r" % fname)
+        raise IOError(f"File not found! fname={fname!r}")
     return _pyqd.eval_qdlatlon(gclat, gclon, gcrad, time, fname)
 
 
@@ -74,7 +74,7 @@ def eval_qdlatlon_with_base_vectors(gclat, gclon, gcrad, time, fname=APEX):
             f - | F1 x F2 | value
     """
     if not isfile(fname):
-        raise IOError("File not found! fname=%r" % fname)
+        raise IOError(f"File not found! fname={fname!r}")
     return _pyqd.eval_qdlatlon(gclat, gclon, gcrad, time, fname, True)
 
 
@@ -91,7 +91,7 @@ def eval_mlt(qdlon, time, fname=APEX):
             mlt - magnetic local time(s).
     """
     if not isfile(fname):
-        raise IOError("File not found! fname=%r" % fname)
+        raise IOError(f"File not found! fname={fname!r}")
     return _pyqd.eval_mlt(qdlon, time, fname)
 
 

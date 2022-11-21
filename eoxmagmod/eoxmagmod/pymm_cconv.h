@@ -30,7 +30,7 @@
 #ifndef PYMM_CCONV_H
 #define PYMM_CCONV_H
 
-#include "geo_conv.h"
+#include "geo_conversion.h"
 #include "pymm_aux.h"
 #include "pymm_coord.h"
 

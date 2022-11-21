@@ -162,10 +162,8 @@ class SphericalHarmonicsGradientTestMixIn(SphericalHarmonicsCommonMixIn):
                 )
             except AssertionError as exc:
                 raise AssertionError(
-                    "point coordinates: (%s, %s, %s)\n%s" % (
-                        latitude, longitude, radius, str(exc)
-                    )
-                )
+                    f"point coordinates: ({latitude}, {longitude}, {radius})\n{exc}"
+                ) from None
 
     def test_gradient_compared_with_finite_differences(self):
         # Compare gradient with the calculated finite differences.
@@ -201,10 +199,8 @@ class SphericalHarmonicsGradientTestMixIn(SphericalHarmonicsCommonMixIn):
             except AssertionError as exc:
                 latitude, longitude, radius = coord_centre
                 raise AssertionError(
-                    "point coordinates: (%s, %s, %s)\n%s" % (
-                        latitude, longitude, radius, str(exc)
-                    )
-                )
+                    f"point coordinates: ({latitude}, {longitude}, {radius})\n{exc}"
+                ) from None
 
         coords = list(product(range(-80, 81, 10), range(-180, 180, 20)))
         for latitude, longitude in coords:

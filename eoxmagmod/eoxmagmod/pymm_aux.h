@@ -31,7 +31,83 @@
 #define PYMM_AUX_H
 
 /*
- * Check the input python object and convert it to a double precision NumPy
+ * parse signed long integer value
+ */
+static int _parse_long_value(long *target, PyObject *obj, const char *label)
+{
+    if (obj == NULL)
+        return 1;
+
+    if (!PyLong_Check(obj))
+    {
+        PyErr_Format(PyExc_ValueError, "The %s parameter is expected to be an integer value!", label);
+        return 1;
+    }
+
+    *target = PyLong_AsLong(obj);
+    if (NULL != PyErr_Occurred())
+        return 1;
+
+    return 0;
+}
+
+/*
+ * parse signed integer value
+ */
+
+static int _parse_int_value(int *target, PyObject *obj, const char *label)
+{
+    long value;
+
+    if (_parse_long_value(&value, obj, label))
+        return 1;
+
+    if ((long)((int)value) != value) {
+        PyErr_Format(PyExc_ValueError, "The %s parameter cannot be safely cast to the requested integer type!", label);
+        return 1;
+    }
+
+    *target = (int)value;
+
+    return 0;
+}
+
+
+/*
+ * parse double precision floating point value
+ */
+static int _parse_double_value(double *target, PyObject *obj, const char *label)
+{
+    if (obj == NULL)
+        return 1;
+
+    if (!PyFloat_Check(obj))
+    {
+        PyErr_Format(PyExc_ValueError, "The %s parameter is expected to be an float value!", label);
+        return 1;
+    }
+
+    *target = PyFloat_AsDouble(obj);
+    if (NULL != PyErr_Occurred())
+        return 1;
+
+    return 0;
+}
+
+/*
+ * Check the input python object and convert it to a NumPy array of a speciefied
+ * type, ensuring the native byte-order.Returns NULL if the conversion failed.
+ */
+
+static PyArrayObject* _get_as_array(PyObject *data, int typenum,
+        int dmin, int dmax, int reqs, const char *label)
+{
+    PyArray_Descr *dtype = PyArray_DescrFromType(typenum);
+    return (PyArrayObject*) PyArray_FromAny(data, dtype, dmin, dmax, reqs, NULL);
+}
+
+/*
+ * Check the input python object and convert it to an integer NumPy
  * array ensuring the native byte-order.
  * Returns NULL if the conversion failed.
  */
@@ -39,8 +115,7 @@
 static PyArrayObject* _get_as_int_array(PyObject *data, int dmin, int dmax,
                 int reqs, const char *label)
 {
-    PyArray_Descr *dtype = PyArray_DescrFromType(NPY_INT32);
-    return (PyArrayObject*) PyArray_FromAny(data, dtype, dmin, dmax, reqs, NULL);
+    return _get_as_array(data, NPY_INT32, dmin, dmax, reqs, label);
 }
 
 
@@ -53,15 +128,25 @@ static PyArrayObject* _get_as_int_array(PyObject *data, int dmin, int dmax,
 static PyArrayObject* _get_as_double_array(PyObject *data, int dmin, int dmax,
                 int reqs, const char *label)
 {
+    return _get_as_array(data, NPY_FLOAT64, dmin, dmax, reqs, label);
     PyArray_Descr *dtype = PyArray_DescrFromType(NPY_FLOAT64);
     return (PyArrayObject*) PyArray_FromAny(data, dtype, dmin, dmax, reqs, NULL);
 }
 
 
 /*
- * Get new allocated NumPy array. The first (N-1) dimensions as read from
- * the array of dimensions (allowing easily set the same shape as the input
- * matrix). The last Nth dimension is overridden by the 'dim_last' value.
+ * Get new allocated NumPy array.
+ */
+static PyArrayObject* _get_new_array(npy_intp ndim, const npy_intp *dims, int typenum) {
+    return (PyArrayObject*) PyArray_EMPTY(ndim, dims, typenum, 0);
+}
+
+
+/*
+ * Get new allocated NumPy double precision float array. The first (N-1)
+ * dimensions as read from the array of dimensions (allowing easily set the
+ * same shape as the input matrix). The last Nth dimension is overridden by
+ * the 'dim_last' value.
  */
 
 static PyArrayObject* _get_new_double_array(npy_intp ndim, const npy_intp *dims, npy_intp dim_last)
@@ -81,7 +166,7 @@ static PyArrayObject* _get_new_double_array(npy_intp ndim, const npy_intp *dims,
     if (ndim >= 1)
         dims_new[ndim-1] = dim_last;
 
-    return (PyArrayObject*) PyArray_EMPTY(ndim, dims_new, NPY_DOUBLE, 0);
+    return _get_new_array(ndim, dims_new, NPY_DOUBLE);
 }
 
 
@@ -96,7 +181,7 @@ static int _check_array_dim_eq(PyArrayObject *arr, int dim, size_t size, const c
     int rv = PyArray_DIM(arr, dim) != size;
     if (rv)
         PyErr_Format(PyExc_ValueError, "The dimension #%d of '%s'"\
-            " %ld is not equal the allowed value %ld!", dim, label,
+            " %ld is not equal to the required value %ld!", dim, label,
             (size_t)PyArray_DIM(arr, dim), size);
     return rv;
 }
@@ -237,22 +322,38 @@ static ARRAY_DATA _array_to_arrd(PyArrayObject *arr)
     return arrd;
 }
 
+static ARRAY_DATA _get_arrd_item_nocheck(const ARRAY_DATA *arrd, npy_intp idx) {
+    // extract sub-dimension
+    ARRAY_DATA arrd_sub = {
+        arrd->data + idx*arrd->stride[0],
+        arrd->ndim - 1,
+        arrd->dim + 1,
+        arrd->stride + 1
+    };
+    return arrd_sub;
+}
+
+
 static ARRAY_DATA _get_arrd_item(const ARRAY_DATA *arrd, npy_intp idx)
 {
-    if (arrd->ndim > 0) // extract sub-dimension
+    if (arrd->ndim <= 0)
     {
-        ARRAY_DATA arrd_sub = {
-            arrd->data + idx*arrd->stride[0],
-            arrd->ndim - 1,
-            arrd->dim + 1,
-            arrd->stride + 1
-        };
-        return arrd_sub;
-    }
-    else // treat as scalar
-    {
+        // treat as scalar
         return *arrd;
     }
+
+    return _get_arrd_item_nocheck(arrd, idx);
+}
+
+static ARRAY_DATA _get_arrd_vector_item(const ARRAY_DATA *arrd, npy_intp idx)
+{
+    if (arrd->ndim <= 1)
+    {
+        // treat as non-iterable 1D vector
+        return *arrd;
+    }
+
+    return _get_arrd_item_nocheck(arrd, idx);
 }
 
 #endif  /* PYMM_AUX_H */

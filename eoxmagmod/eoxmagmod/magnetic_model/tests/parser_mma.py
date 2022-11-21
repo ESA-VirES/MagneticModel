@@ -41,7 +41,7 @@ from eoxmagmod.magnetic_model.parser_mma import (
 )
 
 
-class SwarmMMAParserMixIn(object):
+class SwarmMMAParserMixIn:
 
     @property
     def data(self):

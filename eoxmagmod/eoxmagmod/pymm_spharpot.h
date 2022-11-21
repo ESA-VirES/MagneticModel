@@ -31,7 +31,7 @@
 #ifndef PYMM_SPHARPOT_H
 #define PYMM_SPHARPOT_H
 
-#include "shc.h"
+#include "spherical_harmonics.h"
 #include "pymm_aux.h"
 #include "pymm_cconv.h"
 

@@ -43,10 +43,7 @@ END_TIME = 7305.0   # MJD2000 / 2020-01-01T00:00:00Z
 
 def generate_test_data(file_out):
     """ Generate test dataset. """
-    tmp = array([
-        (lat, lon) for lat, lon
-        in product(range(-90, 91, 5), range(-180, 181, 10))
-    ])
+    tmp = array(list(product(range(-90, 91, 5), range(-180, 181, 10))))
 
     lat, lon = tmp[..., 0], tmp[..., 1]
     rad = uniform(EARTH_RADIUS, 2*EARTH_RADIUS, lat.shape)
@@ -72,7 +69,7 @@ def generate_test_data(file_out):
 
     file_out.write("\t".join(header) + "\r\n")
     for record in records:
-        file_out.write("\t".join("%.14e" % value for value in record) + "\r\n")
+        file_out.write("\t".join(f"{value:.14e}" for value in record) + "\r\n")
 
 
 if __name__ == "__main__":

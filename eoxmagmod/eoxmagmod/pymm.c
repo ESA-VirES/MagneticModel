@@ -42,6 +42,8 @@
 
 /* spherical harmonic model evaluation */
 #include "pymm_sheval.h"
+#include "pymm_shevaltemp.h"
+#include "pymm_sheval2dfs.h"
 
 /* evaluation of the associative Legendre functions */
 #include "pymm_legendre.h"
@@ -63,6 +65,15 @@
 #include "pymm_vrot_sph2cart.h"
 #include "pymm_vrot_cart2sph.h"
 
+/* bisect interval search */
+#include "pymm_bisect.h"
+
+/* coefficients interpolation */
+#include "pymm_interp.h"
+
+/* 2D Fourier series coefficients evaluation */
+#include "pymm_fourier2d.h"
+
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
 
@@ -82,8 +93,13 @@ static PyMethodDef pymm_methods[] =
     {"relradpow", (PyCFunction)relradpow, METH_VARARGS|METH_KEYWORDS, DOC_RELRADPOW},
     {"legendre", (PyCFunction)legendre, METH_VARARGS|METH_KEYWORDS, DOC_LEGENDRE},
     {"sheval", (PyCFunction)sheval, METH_VARARGS|METH_KEYWORDS, DOC_SHEVAL},
+    {"shevaltemp", (PyCFunction)shevaltemp, METH_VARARGS|METH_KEYWORDS, DOC_SHEVALTEMP},
+    {"sheval2dfs", (PyCFunction)sheval2dfs, METH_VARARGS|METH_KEYWORDS, DOC_SHEVAL2DFS},
     {"convert", (PyCFunction)convert, METH_VARARGS|METH_KEYWORDS, DOC_CONVERT},
-    {NULL, NULL, 0, NULL} /* Sentinel - DO NOT REMOVE! */
+    {"bisect", (PyCFunction)bisect, METH_VARARGS|METH_KEYWORDS, DOC_BISECT},
+    {"interp", (PyCFunction)interp, METH_VARARGS|METH_KEYWORDS, DOC_INTERP},
+    {"fourier2d", (PyCFunction)fourier2d, METH_VARARGS|METH_KEYWORDS, DOC_FOURIER2D},
+    {NULL, NULL, 0, NULL} /* sentinel - DO NOT REMOVE! */
 } ;
 
 /*---------------------------------------------------------------------------*/
@@ -110,6 +126,11 @@ static PyObject* init_module(void)
     set_dict_item_str_long(dict, "GRADIENT", SM_GRADIENT);
     set_dict_item_str_long(dict, "POTENTIAL_AND_GRADIENT", SM_POTENTIAL_AND_GRADIENT);
     set_dict_item_str_double(dict, "EARTH_RADIUS", RADIUS);
+    set_dict_item_str_long(dict, "BISECT_SIDE_LEFT", BISECT_SIDE_LEFT);
+    set_dict_item_str_long(dict, "BISECT_SIDE_RIGHT", BISECT_SIDE_RIGHT);
+    set_dict_item_str_long(dict, "INTERP_C0", INTERP_C0);
+    set_dict_item_str_long(dict, "INTERP_C1", INTERP_C1);
+    set_dict_item_str_long(dict, "INTERP_C1D1", INTERP_C1D1);
 
     /* module metadata */
     set_dict_item_str_str(dict, "__author__", "Martin Paces (martin.paces@eox.at)");

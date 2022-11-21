@@ -32,7 +32,7 @@
 #define PYMM_VROT_SPH2GEOD_H
 
 #include "math_aux.h"
-#include "geo_conv.h"
+#include "geo_conversion.h"
 #include "pymm_aux.h"
 #include "pymm_vrot_common.h"
 

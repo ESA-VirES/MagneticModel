@@ -78,11 +78,11 @@ def update_test_data(file_out, time_mjd2000, lat, lon, rad):
 
     file_out.write("\t".join(header) + "\n")
     for record in records:
-        file_out.write("\t".join("%.14e" % value for value in record) + "\n")
+        file_out.write("\t".join(f"{value:.14e}" for value in record) + "\n")
 
 
 def main(filename):
-    with open(filename) as file_in:
+    with open(filename, encoding="ascii") as file_in:
         time, lat, lon, rad = load_coordinates(file_in)
     update_test_data(sys.stdout, time, lat, lon, rad)
 

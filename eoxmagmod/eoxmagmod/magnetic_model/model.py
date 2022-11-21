@@ -5,7 +5,7 @@
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
-# Copyright (C) 2018 EOX IT Services GmbH
+# Copyright (C) 2018-2022 EOX IT Services GmbH
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -25,14 +25,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
+# pylint: disable=too-many-locals, too-many-arguments, no-self-use
 
-from numpy import asarray, empty, full, nan, nditer, ndim
-from .._pymm import GRADIENT, GEOCENTRIC_SPHERICAL, sheval
+
+from numpy import asarray, empty, full, nan, nditer
+from .._pymm import GRADIENT, GEOCENTRIC_SPHERICAL, sheval, shevaltemp
 from ..sheval_dipole import rotate_vectors_from_dipole
 from ..dipole_coords import convert_to_dipole
+from .util import reshape_times_and_coordinates
+from .coefficients import (
+    SparseSHCoefficientsTimeDependent,
+    CombinedSHCoefficients,
+)
 
 
-class GeomagneticModel(object):
+class GeomagneticModel:
     """ Abstract base class of the Earth magnetic field model. """
     # list of the required model parameters
     parameters = ("time", "location")
@@ -61,6 +68,35 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
 
     def __init__(self, coefficients):
         self.coefficients = coefficients
+        self._components = self._decompose_coefficients(coefficients)
+
+    def _decompose_coefficients(self, coefficients):
+        components = []
+        for validity, item in coefficients.decompose():
+            method = self._select_evaluation_method(item)
+            components.append((validity, method, item))
+        return components
+
+    def _select_evaluation_method(self, coefficients):
+        """ Choose the best evaluation method. """
+        if isinstance(coefficients, SparseSHCoefficientsTimeDependent):
+            return self._eval_interpolated
+
+        if isinstance(coefficients, CombinedSHCoefficients):
+            if len(coefficients.time_scales) > 1:
+                # mixed time-scales - falling back to the default
+                return self._eval_default
+
+            try:
+                coefficients.get_coefficient_sets()
+            except AttributeError:
+                # coefficient cannot be extracted - falling back to the default
+                return self._eval_default
+
+            return self._eval_interpolated
+
+        # default evaluation method
+        return self._eval_default
 
     @property
     def validity(self):
@@ -80,34 +116,83 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
              input_coordinate_system=GEOCENTRIC_SPHERICAL,
              output_coordinate_system=GEOCENTRIC_SPHERICAL,
              **options):
-        time = asarray(time)
-        location = asarray(location)
 
-        mask = self.coefficients.is_valid(time)
-
-        return self._eval_masked(
-            mask, time, location, input_coordinate_system,
-            output_coordinate_system, **options
+        # reshape time and location to a compatible shape
+        time, location = reshape_times_and_coordinates(
+            asarray(time), asarray(location)
         )
 
-    def _eval_masked(self, mask, time, location, input_coordinate_system,
-                     output_coordinate_system, **options):
-        if ndim(time):
-            eval_model = self._eval_multi_time
-            time = time[mask]
-        else:
-            eval_model = self._eval_single_time
+        def _is_valid(start, end):
+            return (time >= start) & (time <= end)
 
-        result = full(location.shape, nan)
-        result[mask] = eval_model(
-            time, location[mask], input_coordinate_system,
-            output_coordinate_system, **options
-        )
+        def _call_eval(method, coefficients, time, location):
+            return self._eval(
+                method, coefficients, time, location,
+                input_coordinate_system, output_coordinate_system, **options
+            )
+
+        def _get_nans():
+            return full(location.shape, nan)
+
+        if time.ndim == 0:
+            # time is a scalar value
+            for (start, end), method, coefficients in self._components:
+                if _is_valid(start, end):
+                    return _call_eval(method, coefficients, time, location)
+            return _get_nans()
+
+        # time is an array
+        result = _get_nans()
+        for (start, end), method, coefficients in self._components:
+            mask = _is_valid(start, end)
+            result[mask, :] = _call_eval(
+                method, coefficients, time[mask], location[mask, :]
+            )
         return result
 
-    def _eval_multi_time(self, time, coords, input_coordinate_system,
-                         output_coordinate_system, **options):
-        """ Evaluate spherical harmonic for multiple times. """
+    def _eval(self, method, coefficients, time, location,
+              input_coordinate_system, output_coordinate_system, **options):
+        return method(
+            coefficients, time, location,
+            input_coordinate_system, output_coordinate_system, **options
+        )
+
+    def _eval_interpolated(self, coefficients, time, location,
+                           input_coordinate_system, output_coordinate_system,
+                           **options):
+        """ Optimized SH expansion with time-series interpolation. """
+        convert_time = getattr(coefficients, "convert_time", None)
+        if convert_time:
+            time = convert_time(time)
+        return shevaltemp(
+            time,
+            location,
+            coef_set_list=coefficients.get_coefficient_sets(**options),
+            coord_type_in=input_coordinate_system,
+            coord_type_out=output_coordinate_system,
+            mode=GRADIENT,
+            is_internal=coefficients.is_internal,
+            scale_gradient=-asarray(options.get("scale", 1.0)),
+        )
+
+    def _eval_default(self, coefficients, time, location,
+                      input_coordinate_system, output_coordinate_system,
+                      **options):
+        """ Default iterated single-time interpolation. """
+
+        eval_model = (
+            self._eval_multi_time if time.ndim > 0 else self._eval_single_time
+        )
+
+        return eval_model(
+            coefficients, time, location,
+            input_coordinate_system, output_coordinate_system, **options
+        )
+
+    def _eval_multi_time(self, coefficients, time, coords,
+                         input_coordinate_system, output_coordinate_system,
+                         **options):
+        """ Evaluate spherical harmonic model for multiple times. """
         result = empty(coords.shape)
         if result.size > 0:
             iterator = nditer(
@@ -122,15 +207,16 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
             )
             for time_, coord0, coord1, coord2, vect0, vect1, vect2 in iterator:
                 vect0[...], vect1[...], vect2[...] = self._eval_single_time(
-                    time_, [coord0, coord1, coord2], input_coordinate_system,
-                    output_coordinate_system, **options
+                    coefficients, time_, [coord0, coord1, coord2],
+                    input_coordinate_system, output_coordinate_system,
+                    **options
                 )
         return result
 
-    def _eval_single_time(self, time, coords, input_coordinate_system,
-                          output_coordinate_system, **options):
+    def _eval_single_time(self, coefficients, time, coords,
+                          input_coordinate_system, output_coordinate_system,
+                          **options):
         """ Evaluate spherical harmonic for a single time."""
-        coefficients = self.coefficients
         coeff, degree = coefficients(time, **options)
         return sheval(
             coords, degree, coeff[..., 0], coeff[..., 1],
@@ -149,38 +235,31 @@ class DipoleSphericalHarmomicGeomagneticModel(SphericalHarmomicGeomagneticModel)
     """
 
     def __init__(self, coefficients, north_pole):
-        SphericalHarmomicGeomagneticModel.__init__(self, coefficients)
+        super().__init__(coefficients)
         self.north_pole = north_pole
 
-    def _eval_masked(self, mask, time, location, input_coordinate_system,
-                     output_coordinate_system, **options):
+    def _eval(self, method, coefficients, time, location,
+              input_coordinate_system, output_coordinate_system, **options):
+
         lat_ngp, lon_ngp = self.north_pole
         scale = options.pop('scale', None)
 
-        result = full(location.shape, nan)
-
-        if ndim(time):
-            eval_model = self._eval_multi_time
-            time = time[mask]
-        else:
-            eval_model = self._eval_single_time
-
-        location = location[mask]
         location_dipole = convert_to_dipole(
             location, lat_ngp, lon_ngp, input_coordinate_system
         )
 
-        result[mask] = rotate_vectors_from_dipole(
-            eval_model(
-                time, location_dipole,
-                GEOCENTRIC_SPHERICAL, GEOCENTRIC_SPHERICAL,
-                **options
-            ),
-            lat_ngp, lon_ngp, location_dipole, location,
+        result = super()._eval(
+            method, coefficients, time, location_dipole,
+            GEOCENTRIC_SPHERICAL, GEOCENTRIC_SPHERICAL,
+            **options
+        )
+
+        result = rotate_vectors_from_dipole(
+            result, lat_ngp, lon_ngp, location_dipole, location,
             input_coordinate_system, output_coordinate_system
         )
 
         if scale is not None:
-            result[mask] *= scale
+            result *= scale
 
         return result

@@ -27,11 +27,11 @@
 #-------------------------------------------------------------------------------
 # pylint: disable=missing-docstring, invalid-name, too-few-public-methods
 
+from unittest import TestCase, main
 from math import modf, floor
-from numpy import array, vectorize, inf, nan
+from numpy import vectorize, inf, nan
 from numpy.random import uniform
 from numpy.testing import assert_allclose
-from unittest import TestCase, main
 from eoxmagmod._pytimeconv import (
     decimal_year_to_mjd2000, mjd2000_to_decimal_year,
     mjd2000_to_year_fraction,
@@ -162,8 +162,7 @@ def is_leap_year(year):
     """
     if year > 1582:
         return year % 4 == 0 and year % 100 != 0 or year % 400 == 0
-    else:
-        return year % 4 == 0
+    return year % 4 == 0
 
 
 def year_to_day2k(year):

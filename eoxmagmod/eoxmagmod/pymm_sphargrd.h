@@ -31,7 +31,7 @@
 #ifndef PYMM_SPHARGRD_H
 #define PYMM_SPHARGRD_H
 
-#include "shc.h"
+#include "spherical_harmonics.h"
 #include "pymm_aux.h"
 #include "pymm_cconv.h"
 

@@ -25,7 +25,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
-# pylint: disable=missing-docstring
+# pylint: disable=missing-docstring,attribute-defined-outside-init
 
 from unittest import TestCase, main
 from numpy import inf
@@ -69,7 +69,7 @@ from eoxmagmod.magnetic_model.loader_mio import (
 )
 
 
-class CoefficietLoaderTestMixIn(object):
+class CoefficietLoaderTestMixIn:
     is_internal = True
     class_ = None
     validity = None

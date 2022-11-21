@@ -26,10 +26,11 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 # pylint: disable=missing-docstring,no-self-use,invalid-name,too-many-public-methods
+# pylint: disable=attribute-defined-outside-init
 
 from unittest import TestCase, main
 from itertools import product
-from numpy import nan, inf, isinf, array, empty, full, nditer, asarray
+from numpy import nan, inf, isinf, array, empty, full, nditer, asarray, zeros
 from numpy.random import uniform
 from numpy.testing import assert_allclose
 from eoxmagmod.magnetic_time import mjd2000_to_magnetic_universal_time
@@ -68,7 +69,7 @@ from eoxmagmod.magnetic_model.model import (
     DipoleSphericalHarmomicGeomagneticModel,
 )
 from eoxmagmod.magnetic_model.model_mio import (
-    DipoleMIOPrimaryGeomagneticModel,
+    MIOPrimaryGeomagneticModel,
     DipoleMIOGeomagneticModel,
 )
 from eoxmagmod.magnetic_model.model_composed import (
@@ -81,7 +82,7 @@ from eoxmagmod._pymm import (
 from eoxmagmod.sheval_dipole import sheval_dipole
 
 
-class SHModelTestMixIn(object):
+class SHModelTestMixIn:
     coord_type_in = GEOCENTRIC_SPHERICAL
     coord_type_out = GEOCENTRIC_SPHERICAL
     parameters = ("time", "location")
@@ -324,7 +325,11 @@ class ComposedModelTestMixIn(SHModelTestMixIn):
         return composed_model
 
     def _eval_reference(self, time, coords):
-        result = 0
+        time = asarray(time)
+        coords = asarray(coords)
+        result = zeros(
+            (*time.shape, 3) if time.ndim > (coords.ndim -1) else coords.shape
+        )
         for model, scale, parameters in self.components:
             kwargs = {}
             kwargs.update(getattr(self, 'options', {}))
@@ -337,6 +342,16 @@ class ComposedModelTestMixIn(SHModelTestMixIn):
         return result
 
 #-------------------------------------------------------------------------------
+
+class TestComposedModelEmpty(TestCase, ComposedModelTestMixIn):
+    parameters = ("time", "location")
+    options = {"f107": 70, "scale": [1, 1, -1]}
+    components = []
+    reference_values = (
+        6201.125, (30.0, 40.0, 6400.0), (0., 0., 0.),
+    )
+    validity = (-inf, +inf)
+
 
 class TestComposedModelFull(TestCase, ComposedModelTestMixIn):
     parameters = ("time", "location", "f107", "subsolar_point")
@@ -578,7 +593,7 @@ class TestCHAOSCoreWithOverridenValidity(TestCHAOSCore):
         )
 
 
-class TestCHAOSComposedMixIn(object):
+class TestCHAOSComposedMixIn:
     validity = decimal_year_to_mjd2000((1997.10198494, 2022.49691992))
 
     def load(self):
@@ -753,7 +768,7 @@ class TestMIOSecondary(TestCase, DipoleMIOSHModelTestMixIn):
 
 
 class TestMIOPrimary(TestCase, DipoleMIOSHModelTestMixIn):
-    model_class = DipoleMIOPrimaryGeomagneticModel
+    model_class = MIOPrimaryGeomagneticModel
     degree = 2
     min_degree = 1
     reference_values = (
