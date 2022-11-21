@@ -27,7 +27,7 @@ jobs:
           ( cd libcdf && make build && sudo make install )
           ( cd qdipole && ./configure && make build && sudo make install )
           pip3 install --upgrade pip
-          pip2 install wheel
+          pip3 install wheel
           pip3 install scipy
           export SETUPTOOLS_USE_DISTUTILS=stdlib # https://github.com/pypa/setuptools/issues/3693
           pip3 install --no-build-isolation spacepy
