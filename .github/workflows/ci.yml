@@ -28,8 +28,9 @@ jobs:
           ( cd qdipole && ./configure && make build && sudo make install )
           pip3 install --upgrade pip
           pip3 install --upgrade 'setuptools<65.6.0' # https://github.com/pypa/setuptools/issues/3693
-          pip3 list
           pip3 install scipy
+          pip3 list
+          pip3 install --no-build-isolation spacepy
           pip3 install ./eoxmagmod/
       - name: Scripts
         run: |
