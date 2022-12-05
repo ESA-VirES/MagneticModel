@@ -93,6 +93,8 @@ static int _coefset_init(
 /* time-series magnetic model - auxiliary structure */
 typedef struct ModelTS {
     MODEL sh_model;
+    double *cg;
+    double *ch;
     const COEF_SET *coefsets;
     double time_last;
     size_t ncoefset;
@@ -106,9 +108,25 @@ static int _model_ts_init(
     const COEF_SET *coefsets, size_t ncoefset,
     const double scale_potential, const double *scale_gradient);
 
-static void _shevaltemp1(ARRAY_DATA arrd_t, ARRAY_DATA arrd_x, ARRAY_DATA arrd_pot, MODEL_TS *model);
-static void _shevaltemp2(ARRAY_DATA arrd_t, ARRAY_DATA arrd_x, ARRAY_DATA arrd_grd, MODEL_TS *model);
-static void _shevaltemp3(ARRAY_DATA arrd_t, ARRAY_DATA arrd_x, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_grd, MODEL_TS *model);
+static void _shevaltemp_pot(
+    ARRAY_DATA arrd_pot,
+    ARRAY_DATA arrd_t,
+    ARRAY_DATA arrd_x,
+    MODEL_TS *model
+);
+static void _shevaltemp_grd(
+    ARRAY_DATA arrd_grd,
+    ARRAY_DATA arrd_t,
+    ARRAY_DATA arrd_x,
+    MODEL_TS *model
+);
+static void _shevaltemp_pot_and_grd(
+    ARRAY_DATA arrd_pot,
+    ARRAY_DATA arrd_grd,
+    ARRAY_DATA arrd_t,
+    ARRAY_DATA arrd_x,
+    MODEL_TS *model
+);
 
 
 /* Python function definition */
@@ -298,31 +316,31 @@ static PyObject* shevaltemp(PyObject *self, PyObject *args, PyObject *kwdict)
     switch(mode)
     {
         case SM_POTENTIAL:
-            _shevaltemp1(
+            _shevaltemp_pot(
+                _array_to_arrd(arr_pot),
                 _array_to_arrd(arr_t),
                 _array_to_arrd(arr_x),
-                _array_to_arrd(arr_pot),
                  &model
             );
             retval = (PyObject*) arr_pot;
             break;
 
         case SM_GRADIENT:
-            _shevaltemp2(
+            _shevaltemp_grd(
+                _array_to_arrd(arr_grd),
                 _array_to_arrd(arr_t),
                 _array_to_arrd(arr_x),
-                _array_to_arrd(arr_grd),
                  &model
             );
             retval = (PyObject*) arr_grd;
             break;
 
         case SM_POTENTIAL_AND_GRADIENT:
-            _shevaltemp3(
-                _array_to_arrd(arr_t),
-                _array_to_arrd(arr_x),
+            _shevaltemp_pot_and_grd(
                 _array_to_arrd(arr_pot),
                 _array_to_arrd(arr_grd),
+                _array_to_arrd(arr_t),
+                _array_to_arrd(arr_x),
                  &model
             );
             if (NULL == (retval = Py_BuildValue("NN", (PyObject*) arr_pot, (PyObject*) arr_grd)))
@@ -459,17 +477,22 @@ static void _coeff_interp(double time, MODEL_TS *model) {
 
 /* high-level nD-array recursive batch model_evaluation */
 
-static void _shevaltemp1(ARRAY_DATA arrd_t, ARRAY_DATA arrd_x, ARRAY_DATA arrd_pot, MODEL_TS *model)
+static void _shevaltemp_pot(
+    ARRAY_DATA arrd_pot,
+    ARRAY_DATA arrd_t,
+    ARRAY_DATA arrd_x,
+    MODEL_TS *model
+)
 {
     if (arrd_t.ndim > 0)
     {
         npy_intp i, n = arrd_t.dim[0];
         for(i = 0; i < n; ++i)
         {
-            _shevaltemp1(
+            _shevaltemp_pot(
+                _get_arrd_item(&arrd_pot, i),
                 _get_arrd_item(&arrd_t, i),
                 _get_arrd_vector_item(&arrd_x, i),
-                _get_arrd_item(&arrd_pot, i),
                 model
             );
         }
@@ -478,23 +501,32 @@ static void _shevaltemp1(ARRAY_DATA arrd_t, ARRAY_DATA arrd_x, ARRAY_DATA arrd_p
     else
     {
         const double time = *((double*)arrd_t.data);
+        ARRAY_DATA arrd_cg = {.data=model->cg, .ndim=0, .dim=NULL, .stride=NULL};
+        ARRAY_DATA arrd_ch = {.data=model->ch, .ndim=0, .dim=NULL, .stride=NULL};
+
         if (time != model->time_last)
             _coeff_interp(time, model);
-        _sheval1(arrd_x, arrd_pot, &(model->sh_model));
+
+        _sheval_pot(arrd_pot, arrd_x, arrd_cg, arrd_ch, &(model->sh_model));
     }
 }
 
-static void _shevaltemp2(ARRAY_DATA arrd_t, ARRAY_DATA arrd_x, ARRAY_DATA arrd_grd, MODEL_TS *model)
+static void _shevaltemp_grd(
+    ARRAY_DATA arrd_grd,
+    ARRAY_DATA arrd_t,
+    ARRAY_DATA arrd_x,
+    MODEL_TS *model
+)
 {
     if (arrd_t.ndim > 0)
     {
         npy_intp i, n = arrd_t.dim[0];
         for(i = 0; i < n; ++i)
         {
-            _shevaltemp2(
+            _shevaltemp_grd(
+                _get_arrd_item(&arrd_grd, i),
                 _get_arrd_item(&arrd_t, i),
                 _get_arrd_vector_item(&arrd_x, i),
-                _get_arrd_item(&arrd_grd, i),
                 model
             );
         }
@@ -503,25 +535,35 @@ static void _shevaltemp2(ARRAY_DATA arrd_t, ARRAY_DATA arrd_x, ARRAY_DATA arrd_g
     else
     {
         const double time = *((double*)arrd_t.data);
+        ARRAY_DATA arrd_cg = {.data=model->cg, .ndim=0, .dim=NULL, .stride=NULL};
+        ARRAY_DATA arrd_ch = {.data=model->ch, .ndim=0, .dim=NULL, .stride=NULL};
+
         if (time != model->time_last)
             _coeff_interp(time, model);
-        _sheval2(arrd_x, arrd_grd, &(model->sh_model));
+
+        _sheval_grd(arrd_grd, arrd_x, arrd_cg, arrd_ch, &(model->sh_model));
     }
 }
 
 
-static void _shevaltemp3(ARRAY_DATA arrd_t, ARRAY_DATA arrd_x, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_grd, MODEL_TS *model)
+static void _shevaltemp_pot_and_grd(
+    ARRAY_DATA arrd_pot,
+    ARRAY_DATA arrd_grd,
+    ARRAY_DATA arrd_t,
+    ARRAY_DATA arrd_x,
+    MODEL_TS *model
+)
 {
     if (arrd_t.ndim > 0)
     {
         npy_intp i, n = arrd_t.dim[0];
         for(i = 0; i < n; ++i)
         {
-            _shevaltemp3(
-                _get_arrd_item(&arrd_t, i),
-                _get_arrd_vector_item(&arrd_x, i),
+            _shevaltemp_pot_and_grd(
                 _get_arrd_item(&arrd_pot, i),
                 _get_arrd_item(&arrd_grd, i),
+                _get_arrd_item(&arrd_t, i),
+                _get_arrd_vector_item(&arrd_x, i),
                 model
             );
         }
@@ -530,9 +572,13 @@ static void _shevaltemp3(ARRAY_DATA arrd_t, ARRAY_DATA arrd_x, ARRAY_DATA arrd_p
     else
     {
         const double time = *((double*)arrd_t.data);
+        ARRAY_DATA arrd_cg = {.data=model->cg, .ndim=0, .dim=NULL, .stride=NULL};
+        ARRAY_DATA arrd_ch = {.data=model->ch, .ndim=0, .dim=NULL, .stride=NULL};
+
         if (time != model->time_last)
             _coeff_interp(time, model);
-        _sheval3(arrd_x, arrd_pot, arrd_grd, &(model->sh_model));
+
+        _sheval_pot_and_grd(arrd_pot, arrd_grd, arrd_x, arrd_cg, arrd_ch, &(model->sh_model));
     }
 }
 
@@ -548,11 +594,11 @@ static void _model_ts_reset(MODEL_TS *model) {
 
 static void _model_ts_destroy(MODEL_TS *model)
 {
-    if(NULL != model->sh_model.cg)
-        free((double*)model->sh_model.cg);
+    if(NULL != model->cg)
+        free((double*)model->cg);
 
-    if(NULL != model->sh_model.ch)
-        free((double*)model->sh_model.ch);
+    if(NULL != model->ch)
+        free((double*)model->ch);
 
     _model_destroy(&(model->sh_model));
 
@@ -573,18 +619,18 @@ static int _model_ts_init(
     // initialize nested single-time model
     if (_model_init(
         &(model->sh_model), is_internal, degree, coord_in, coord_out,
-        NULL, NULL, scale_potential, scale_gradient
+        scale_potential, scale_gradient
     ))
         goto error;
 
     // allocate memory for the single time coefficients
-    if (NULL == (model->sh_model.cg = (double*)calloc(model->sh_model.nterm, sizeof(double))))
+    if (NULL == (model->cg = (double*)calloc(model->sh_model.nterm, sizeof(double))))
     {
         PyErr_Format(PyExc_MemoryError, "_model_ts_init: cg");
         goto error;
     }
 
-    if (NULL == (model->sh_model.ch = (double*)calloc(model->sh_model.nterm, sizeof(double))))
+    if (NULL == (model->ch = (double*)calloc(model->sh_model.nterm, sizeof(double))))
     {
         PyErr_Format(PyExc_MemoryError, "_model_ts_init: ch");
         goto error;
@@ -695,8 +741,8 @@ static void _coeff_set_interp0(double time, MODEL_TS *model, const COEF_SET *coe
         return;
     }
 
-    double *cg = (double*)model->sh_model.cg;
-    double *ch = (double*)model->sh_model.ch;
+    double *cg = (double*)model->cg;
+    double *ch = (double*)model->ch;
 
     size_t i, n = coefset->ncoef;
 
@@ -716,8 +762,8 @@ static void _coeff_set_interp0(double time, MODEL_TS *model, const COEF_SET *coe
 static void _coeff_set_interp1(double time, MODEL_TS *model, const COEF_SET *coefset) {
     INTERP_BASIS basis = get_interp1_basis(time, coefset->ct, coefset->ntime);
 
-    double *cg = (double*)model->sh_model.cg;
-    double *ch = (double*)model->sh_model.ch;
+    double *cg = (double*)model->cg;
+    double *ch = (double*)model->ch;
 
     size_t i, n = coefset->ncoef;
 

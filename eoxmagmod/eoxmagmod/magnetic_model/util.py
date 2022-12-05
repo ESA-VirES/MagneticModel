@@ -83,26 +83,33 @@ def reshape_times_and_coordinates(time, coords):
     return time, coords
 
 
-def reshape_variable(source, variable):
-    """ Reshape auxiliary variable to match the source shape. """
-    ndim_common = min(source.ndim, variable.ndim)
+def mask_array(data, mask, min_ndim=0):
+    """ Apply mask if data is a muti-value array or pass through
+    a single value.
+    """
+    return data[mask] if data.ndim > min_ndim else data
+
+
+def reshape_array(shape, array):
+    """ Reshape array to match the given shape. """
+    ndim_common = min(len(shape), array.ndim)
 
     if (
-        source.shape[:ndim_common] != variable.shape[:ndim_common]
-        or source.ndim < variable.ndim
+        shape[:ndim_common] != array.shape[:ndim_common]
+        or len(shape) < array.ndim
     ):
         raise ValueError(
-            "Incompatible dimensions of the source and reshaped variable arrays."
+            "Incompatible dimensions of the source and reshaped array arrays."
         )
 
-    if variable.ndim < source.ndim:
-        variable = as_strided(
-            variable,
-            shape=source.shape,
-            strides=(*variable.strides, *((0,) * (source.ndim - variable.ndim)))
+    if array.ndim < len(shape):
+        array = as_strided(
+            array,
+            shape=shape,
+            strides=(*array.strides, *((0,) * (len(shape) - array.ndim)))
         )
 
-    return variable
+    return array
 
 
 def get_nonoverlapping_intervals(intervals):

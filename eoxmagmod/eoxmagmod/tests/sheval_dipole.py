@@ -35,14 +35,11 @@ from numpy.testing import assert_allclose
 from eoxmagmod._pymm import (
     POTENTIAL, GRADIENT, POTENTIAL_AND_GRADIENT,
     GEODETIC_ABOVE_WGS84, GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
-    convert,
-    relradpow, lonsincos, legendre,
-    spharpot, sphargrd,
+    convert, relradpow, lonsincos, legendre, spharpot, sphargrd,
 )
 from eoxmagmod.dipole_coords import convert_to_dipole, vrot_from_dipole
 from eoxmagmod.sheval_dipole import sheval_dipole
-from eoxmagmod.tests.data import mma_external
-from eoxmagmod.tests.data import mma_internal
+from eoxmagmod.tests.data import mma_external, mma_internal
 
 
 class DipoleSphericalHarmonicsMixIn:
@@ -55,6 +52,37 @@ class DipoleSphericalHarmonicsMixIn:
     degree = None
     coef_g = None
     coef_h = None
+
+    @classmethod
+    def eval_sheval(cls, coords, mode):
+        return sheval_dipole(
+            coords, mode=mode, is_internal=cls.is_internal,
+            degree=cls.degree, coef_g=cls.coef_g, coef_h=cls.coef_h,
+            lat_ngp=cls.lat_ngp, lon_ngp=cls.lon_ngp,
+            coord_type_in=cls.source_coordinate_system,
+            coord_type_out=cls.target_coordinate_system,
+            **cls.options
+        )
+
+    @classmethod
+    def reference_sheval(cls, coords):
+
+        coords_dipole = convert_to_dipole(
+            coords, cls.lat_ngp, cls.lon_ngp, cls.source_coordinate_system
+        )
+
+        potential, gradient = cls._spherical_harmonics(
+            coords_dipole[..., 0],
+            coords_dipole[..., 1],
+            coords_dipole[..., 2],
+        )
+
+        gradient = cls._rotate_gradient(gradient, coords_dipole, coords)
+
+        potential *= cls.scale_potential
+        gradient *= cls.scale_gradient
+
+        return potential, gradient
 
     @classmethod
     def get_series(cls, degree, latitude, longitude, radius):
@@ -72,14 +100,15 @@ class DipoleSphericalHarmonicsMixIn:
             degree, latitude, longitude, radius
         )
         potential = spharpot(
-            radius, degree, coef_g, coef_h, p_series, rad_series,
-            sin_series, cos_series,
+            radius, coef_g, coef_h, p_series, rad_series,
+            sin_series, cos_series, degree=degree
         )
         gradient = sphargrd(
-            latitude, degree, coef_g, coef_h, p_series, dp_series, rad_series,
-            sin_series, cos_series, is_internal=cls.is_internal
+            latitude, coef_g, coef_h, p_series, dp_series, rad_series,
+            sin_series, cos_series,
+            is_internal=cls.is_internal, degree=degree
         )
-        return potential, gradient[0], gradient[1], gradient[2]
+        return potential, gradient
 
     @classmethod
     def _rotate_gradient(cls, vectors, coords_dipole, coords_in):
@@ -96,54 +125,6 @@ class DipoleSphericalHarmonicsMixIn:
         return vrot_from_dipole(
             vectors, cls.lat_ngp, cls.lon_ngp, lat_dipole, lon_dipole,
             lat_out, lon_out, cls.target_coordinate_system
-        )
-
-    @classmethod
-    def reference_sheval(cls, coords):
-        coords_dipole = convert_to_dipole(
-            coords, cls.lat_ngp, cls.lon_ngp, cls.source_coordinate_system
-        )
-        potential = empty(coords_dipole.shape[:-1])
-        gradient = empty(coords_dipole.shape)
-
-        iterator = nditer(
-            [
-                potential,
-                gradient[..., 0],
-                gradient[..., 1],
-                gradient[..., 2],
-                coords_dipole[..., 0],
-                coords_dipole[..., 1],
-                coords_dipole[..., 2],
-            ],
-            op_flags=[
-                ['writeonly'], ['writeonly'], ['writeonly'], ['writeonly'],
-                ['readonly'], ['readonly'], ['readonly'],
-            ],
-        )
-
-        for pot, grd_n, grd_e, grd_r, lat, lon, rad in iterator:
-            pot[...], grd_n[...], grd_e[...], grd_r[...] = (
-                cls._spherical_harmonics(lat, lon, rad)
-            )
-
-        gradient = cls._rotate_gradient(gradient, coords_dipole, coords)
-
-        potential *= cls.scale_potential
-        for idx, scale in enumerate(cls.scale_gradient):
-            gradient[..., idx] *= scale
-
-        return potential, gradient
-
-    @classmethod
-    def eval_sheval(cls, coords, mode):
-        return sheval_dipole(
-            coords, mode=mode, is_internal=cls.is_internal,
-            degree=cls.degree, coef_g=cls.coef_g, coef_h=cls.coef_h,
-            lat_ngp=cls.lat_ngp, lon_ngp=cls.lon_ngp,
-            coord_type_in=cls.source_coordinate_system,
-            coord_type_out=cls.target_coordinate_system,
-            **cls.options
         )
 
     def test_sheval_potential_and_gradient(self):

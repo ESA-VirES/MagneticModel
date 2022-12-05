@@ -419,14 +419,12 @@ static void shc_azmsincos_ref(double *lonsin, double *loncos, int degree, double
  *    lp          - Legendre associative function [(degree+1)*(degree+2)/2]
  *    rrp         - relative radius power series [degree+1]
  *    lsin, lcos  - series of azimuth angle sines and cosines [degree+1]
- *    is_internal - boolean flag indicating type of the evaluated field
-                    set true for the internal or false for the external field.
  */
 
 static void shc_eval_v(
     double *vpot, int degree, double rad,
     const double *cg, const double *ch, const double *lp,
-    const double *rrp, const double *lsin, const double *lcos, int is_internal
+    const double *rrp, const double *lsin, const double *lcos
 )
 {
     int i, j;
@@ -724,7 +722,7 @@ static void shc_eval(
         case 0x1:
             shc_eval_v(
                 vpot, degree, rad,
-                cg, ch, lp, rrp, lsin, lcos, is_internal
+                cg, ch, lp, rrp, lsin, lcos
             );
             break;
         case 0x2:

@@ -28,7 +28,7 @@
 # pylint: disable=missing-docstring, line-too-long, too-few-public-methods
 
 from unittest import TestCase, main
-from numpy import nan, inf, isinf, array, dot, ravel, stack, asarray
+from numpy import nan, inf, isinf, array, dot, stack, asarray
 from numpy.testing import assert_allclose
 from eoxmagmod import decimal_year_to_mjd2000
 from eoxmagmod.magnetic_model.coefficients import (
@@ -92,7 +92,7 @@ class SHCoefficinetTestMixIn:
     def get_multitime_coefficients_ref(self, times, **options):
         times = asarray(times)
         coeff_obj = self.coefficients
-        coeff = stack([coeff_obj(time, **options)[0] for time in ravel(times)], axis=0)
+        coeff = stack([coeff_obj(time, **options)[0] for time in times.ravel()], axis=0)
         return coeff.reshape((*times.shape, *coeff.shape[1:]))
 
 #-------------------------------------------------------------------------------

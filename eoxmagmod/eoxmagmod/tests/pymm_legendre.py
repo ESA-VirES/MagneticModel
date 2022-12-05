@@ -5,7 +5,7 @@
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
-# Copyright (C) 2018 EOX IT Services GmbH
+# Copyright (C) 2018-2022 EOX IT Services GmbH
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -28,8 +28,7 @@
 # pylint: disable=missing-docstring
 
 from unittest import TestCase, main
-from math import pi, sin, sqrt
-from numpy import array
+from numpy import pi, sin, sqrt, asarray, empty, linspace
 from numpy.testing import assert_allclose
 from scipy.special import legendre as legendre_polynomial
 from eoxmagmod._pymm import legendre
@@ -48,14 +47,36 @@ class TestLegendreFunctions(TestCase):
     def reference(cls, latitude, degree):
         return cls.schmidt_norm_legendre(sin(latitude * pi / 180.0), degree)
 
-    @staticmethod
-    def schmidt_norm_legendre(x, degree):
+    @classmethod
+    def schmidt_norm_legendre(cls, lats, degree):
+        """ Evaluate Schmidt semi-normalised Legendre functions and their
+        derivatives.
+        """
+        lats = asarray(lats)
+        size = lats.size
+        shape = lats.shape
+
+        nterms = ((degree+2)*(degree+1))//2
+
+        lats = lats.ravel()
+        p_series = empty((size, nterms))
+        dp_series = empty((size, nterms))
+
+        for i in range(size):
+            p_series[i, :], dp_series[i, :] = cls.schmidt_norm_legendre_scalar(lats[i], degree)
+
+        return (
+            p_series.reshape((*shape, nterms)),
+            dp_series.reshape((*shape, nterms)),
+        )
+
+    @classmethod
+    def schmidt_norm_legendre_scalar(cls, x, degree):
         """ Evaluate Schmidt semi-normalised Legendre functions and their
         derivatives.
         """
         # pylint: disable=invalid-name
 
-        # TODO: Get more robust algorithm.
         # NOTE: This simple reference implementation is prone to truncation
         # errors and overflows for higher degrees.
 
@@ -92,15 +113,22 @@ class TestLegendreFunctions(TestCase):
         p_series = list(_eval_functions())
         dp_series = list(_eval_derivatives())
 
-        return array(p_series), array(dp_series)
+        return asarray(p_series), asarray(dp_series)
 
-    def test_legendre_functions(self):
+    def test_legendre_functions_scalar_input(self):
         degree = 20
         latitudes = [float(v) for v in range(-90, 91, 5)]
         for latitude in latitudes:
             self._assert_allclose(
                 legendre(latitude, degree), self.reference(latitude, degree)
             )
+
+    def test_legendre_functions_array_input(self):
+        degree = 20
+        latitudes = linspace(-90, 90, 91).reshape((13, 7))
+        self._assert_allclose(
+            legendre(latitudes, degree), self.reference(latitudes, degree)
+        )
 
     def test_legendre_functions_zero_degree(self):
         self._assert_allclose(legendre(0, 0), ([1.0], [0.0]))
@@ -109,10 +137,6 @@ class TestLegendreFunctions(TestCase):
 
     def test_invalid_degree(self):
         self.assertRaises(ValueError, legendre, 0.0, -1)
-
-    def test_invalid_latitude(self):
-        self.assertRaises(ValueError, legendre, -91.0, 1)
-        self.assertRaises(ValueError, legendre, +91.0, 1)
 
 
 if __name__ == "__main__":

@@ -87,17 +87,18 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn:
     @classmethod
     def eval_reference_shevaltemp(cls, times, coords):
 
-        def _reshape(data, shape):
-            extra_shape = shape[len(data.shape):]
-            extra_strides = tuple(0 for _ in extra_shape)
-            return as_strided(
-                data,
-                shape=(*data.shape, *extra_shape),
-                strides=(*data.strides, *extra_strides)
-            )
+        # make sure the time is an array
+        times = asarray(times)
 
-        def _interp_coef_set(time, coef_set):
+        # allocate multi-time coefficient arrays
+        degree = max(coef_set.coef_nm[:, 0].max() for coef_set in cls.coef_sets)
+        coef_size = (degree+2)*(degree+1)//2
+        coef_g = zeros((*times.shape, coef_size))
+        coef_h = zeros((*times.shape, coef_size))
 
+        # interpolate coefficient sets
+
+        def _interp_coef_set(times, coef_set):
             options = {
                 1: {"kind":INTERP_C0,"extrapolate":True},
                 2: {"kind":INTERP_C1},
@@ -114,62 +115,30 @@ class SphericalHarmonicsWithCoeffInterpolationMixIn:
             coef_h_idx = idx[coef_h_sel]
 
             coef = interp(
-                time,
+                times,
                 coef_set.coef_times,
                 coef_set.coef_coef,
                 **options,
             )
 
-            coef_g[coef_g_idx] = coef[coef_g_sel]
-            coef_h[coef_h_idx] = coef[coef_h_sel]
+            coef_g[..., coef_g_idx] = coef[..., coef_g_sel]
+            coef_h[..., coef_h_idx] = coef[..., coef_h_sel]
 
-        # assure NumPy arrays
-        times = asarray(times)
-        coords = asarray(coords)
+        for coef_set in cls.coef_sets:
+            _interp_coef_set(times, coef_set)
 
-        # broadcast to a common shape
-        if times.ndim < coords.ndim - 1:
-            times = _reshape(times, coords.shape[:-1]).copy()
-        elif times.ndim > coords.ndim - 1:
-            coords = stack((
-                _reshape(coords[..., 0], times.shape),
-                _reshape(coords[..., 1], times.shape),
-                _reshape(coords[..., 2], times.shape),
-            ), axis=-1)
-
-        # reshape to 1D
-        shape = times.shape
-        size = prod(shape) if shape else 1
-
-        times = times.reshape((size,))
-        coords = coords.reshape((size, 3))
-
-        result_pot = empty(times.shape)
-        result_grad = empty(coords.shape)
-
-        # single-time coefficient arrays
-        degree = max(coef_set.coef_nm[:, 0].max() for coef_set in cls.coef_sets)
-        coef_g = zeros((degree+2)*(degree+1)//2)
-        coef_h = zeros((degree+2)*(degree+1)//2)
-
-        for i in range(size):
-
-            for coef_set in cls.coef_sets:
-                _interp_coef_set(times[i], coef_set)
-
-            result_pot[i], result_grad[i, :] = sheval(
-                coords[i, :],
-                mode=POTENTIAL_AND_GRADIENT,
-                is_internal=cls.is_internal,
-                degree=degree,
-                coef_g=coef_g,
-                coef_h=coef_h,
-                coord_type_in=cls.source_coordinate_system,
-                coord_type_out=cls.target_coordinate_system,
-                **cls.options
-            )
-
-        return result_pot.reshape(shape), result_grad.reshape((*shape, 3))
+        # evaluate the spherical harmonics
+        return sheval(
+            coords,
+            mode=POTENTIAL_AND_GRADIENT,
+            is_internal=cls.is_internal,
+            degree=degree,
+            coef_g=coef_g,
+            coef_h=coef_h,
+            coord_type_in=cls.source_coordinate_system,
+            coord_type_out=cls.target_coordinate_system,
+            **cls.options
+        )
 
     def _test_shevaltemp_potential_and_gradient(self, times_shape, coords_shape):
         times = self.times(times_shape)

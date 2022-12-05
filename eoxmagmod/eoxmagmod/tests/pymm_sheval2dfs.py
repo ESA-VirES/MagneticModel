@@ -83,16 +83,20 @@ class SphericalHarmonicsWithFourier2DCoeffMixIn:
     @classmethod
     def eval_reference_sheval2dfs(cls, times1, times2, coords):
 
-        def _reshape(data, shape):
-            extra_shape = shape[len(data.shape):]
-            extra_strides = tuple(0 for _ in extra_shape)
-            return as_strided(
-                data,
-                shape=(*data.shape, *extra_shape),
-                strides=(*data.strides, *extra_strides)
-            )
+        # make sure the times are arrays
+        times1 = asarray(times1)
+        times2 = asarray(times2)
+        assert times1.shape == times2.shape
 
-        def _eval_fourier2d_coeff(time1, time2, coef_set):
+        # allocate multi-time coefficient arrays
+        degree = cls.coef_set.coef_nm[:, 0].max()
+        coef_size = (degree+2)*(degree+1)//2
+        coef_g = zeros((*times1.shape, coef_size))
+        coef_h = zeros((*times1.shape, coef_size))
+
+        # evaluate coefficients from the 2D Fourier series
+
+        def _eval_fourier2d_coeff(times1, times2, coef_set):
 
             # mapping raw coefficients to G/H arrays
             degree = coef_set.coef_nm[:, 0]
@@ -105,7 +109,7 @@ class SphericalHarmonicsWithFourier2DCoeffMixIn:
             coef_h_idx = idx[coef_h_sel]
 
             coef = fourier2d(
-                time1, time2,
+                times1, times2,
                 coef_set.coef_ab,
                 coef_set.min_degree1,
                 coef_set.min_degree2,
@@ -113,66 +117,23 @@ class SphericalHarmonicsWithFourier2DCoeffMixIn:
                 coef_set.scale2
             )
 
-            coef_g[coef_g_idx] = coef[coef_g_sel]
-            coef_h[coef_h_idx] = coef[coef_h_sel]
+            coef_g[..., coef_g_idx] = coef[..., coef_g_sel]
+            coef_h[..., coef_h_idx] = coef[..., coef_h_sel]
 
-        # assure NumPy arrays
-        times1 = asarray(times1)
-        times2 = asarray(times2)
-        coords = asarray(coords)
+        _eval_fourier2d_coeff(times1, times2, cls.coef_set)
 
-        # broadcast to a common shape
-        ndim = max(times1.ndim, times2.ndim, coords.ndim - 1)
-        if times1.ndim == ndim:
-            shape = times1.shape
-        elif times2.ndim == ndim:
-            shape = times2.shape
-        else:
-            shape = coords.shape[:-1]
-
-        if times1.ndim < ndim:
-            times1 = _reshape(times1, shape).copy()
-        if times2.ndim < ndim:
-            times2 = _reshape(times2, shape).copy()
-        if coords.ndim - 1 < ndim:
-            coords = stack((
-                _reshape(coords[..., 0], shape),
-                _reshape(coords[..., 1], shape),
-                _reshape(coords[..., 2], shape),
-            ), axis=-1)
-
-        # reshape to 1D
-        size = prod(shape) if shape else 1
-
-        times1 = times1.reshape((size,))
-        times2 = times2.reshape((size,))
-        coords = coords.reshape((size, 3))
-
-        result_pot = empty(times1.shape)
-        result_grad = empty(coords.shape)
-
-        # single-time coefficient arrays
-        degree = cls.coef_set.coef_nm[:, 0].max()
-        coef_g = zeros((degree+2)*(degree+1)//2)
-        coef_h = zeros((degree+2)*(degree+1)//2)
-
-        for i in range(size):
-
-            _eval_fourier2d_coeff(times1[i], times2[i], cls.coef_set)
-
-            result_pot[i], result_grad[i, :] = sheval(
-                coords[i, :],
-                mode=POTENTIAL_AND_GRADIENT,
-                is_internal=cls.is_internal,
-                degree=degree,
-                coef_g=coef_g,
-                coef_h=coef_h,
-                coord_type_in=cls.source_coordinate_system,
-                coord_type_out=cls.target_coordinate_system,
-                **cls.options
-            )
-
-        return result_pot.reshape(shape), result_grad.reshape((*shape, 3))
+        # evaluate the spherical harmonics
+        return sheval(
+            coords,
+            mode=POTENTIAL_AND_GRADIENT,
+            is_internal=cls.is_internal,
+            degree=degree,
+            coef_g=coef_g,
+            coef_h=coef_h,
+            coord_type_in=cls.source_coordinate_system,
+            coord_type_out=cls.target_coordinate_system,
+            **cls.options
+        )
 
     def _test_sheval2dfs_potential_and_gradient(self, times_shape, coords_shape):
         times1, times2 = self.times(times_shape)

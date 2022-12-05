@@ -32,7 +32,7 @@ from .._pymm import GRADIENT, GEOCENTRIC_SPHERICAL, convert, sheval2dfs
 from ..magnetic_time import mjd2000_to_magnetic_universal_time
 from .coefficients_mio import SparseSHCoefficientsMIO
 from .model import GeomagneticModel, DipoleSphericalHarmomicGeomagneticModel
-from .util import reshape_times_and_coordinates, reshape_variable
+from .util import reshape_times_and_coordinates, reshape_array, mask_array
 
 MIO_HEIGHT = 110.0 # km
 MIO_EARTH_RADIUS = 6371.2 # km
@@ -85,20 +85,17 @@ class MIOPrimaryGeomagneticModel(GeomagneticModel):
 
         def _eval_model(model, mask, **options):
 
-            def _mask_array(data):
-                return data[mask] if data.ndim else data
-
             def _mask_option(key):
                 data = options.get(key)
                 if data is not None:
-                    options[key] = _mask_array(asarray(data))
+                    options[key] = mask_array(asarray(data), mask)
 
             _mask_option('f107')
             _mask_option('lat_sol')
             _mask_option('lon_sol')
 
             result[mask] = model.eval(
-                _mask_array(time), location[mask], GEOCENTRIC_SPHERICAL,
+                mask_array(time, mask), location[mask], GEOCENTRIC_SPHERICAL,
                 output_coordinate_system, **options
             )
 
@@ -183,7 +180,7 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
             **options,
         )
         if mio_scale.ndim > 0:
-            mio_scale = reshape_variable(location, mio_scale)
+            mio_scale = reshape_array(location.shape, mio_scale)
         result *= mio_scale
 
         return result

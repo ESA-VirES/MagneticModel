@@ -30,7 +30,7 @@
 
 from unittest import TestCase, main
 from itertools import product
-from numpy import nan, inf, isinf, array, empty, full, nditer, asarray, zeros
+from numpy import nan, inf, isinf, array, empty, full, asarray, zeros
 from numpy.random import uniform
 from numpy.testing import assert_allclose
 from eoxmagmod.magnetic_time import mjd2000_to_magnetic_universal_time
@@ -53,6 +53,7 @@ from eoxmagmod.magnetic_model.loader_mio import (
     load_model_swarm_mio_internal,
     load_model_swarm_mio_external,
 )
+from eoxmagmod.magnetic_model.util import mask_array
 from eoxmagmod.data import (
     EMM_2010_STATIC, EMM_2010_SECVAR, WMM_2015,
     CHAOS_CORE_LATEST, CHAOS_CORE_PREDICTION_LATEST, CHAOS_STATIC_LATEST,
@@ -141,36 +142,22 @@ class SHModelTestMixIn:
         )
 
     def eval_reference(self, times, coords):
-        result = empty(coords.shape)
-        iterator = nditer(
-            [
-                times, coords[..., 0], coords[..., 1], coords[..., 2],
-                result[..., 0], result[..., 1], result[..., 2],
-            ],
-            op_flags=[
-                ['readonly'], ['readonly'], ['readonly'], ['readonly'],
-                ['writeonly'], ['writeonly'], ['writeonly'],
-            ],
-        )
-        for time, coord0, coord1, coord2, vect0, vect1, vect2 in iterator:
-            if self._is_valid_time(time):
-                vect0[...], vect1[...], vect2[...] = self._eval_reference(
-                    time, [coord0, coord1, coord2]
-                )
-            else:
-                vect0[...], vect1[...], vect2[...] = nan, nan, nan
+        times = asarray(times)
+        result = full(coords.shape, nan)
+        mask = self._is_valid_time(times)
+        result[mask, :] = self._eval_reference(mask_array(times, mask), coords[mask])
         return result
 
     def _is_valid_time(self, time):
         validity_start, validity_end = self.model.validity
-        return validity_start <= time <= validity_end
+        return (validity_start <= time) & (time <= validity_end)
 
     def _eval_reference(self, time, coords):
         is_internal = self.model.coefficients.is_internal
         coeff, degree = self.model.coefficients(time, **self.options)
         return sheval(
-            coords, degree, coeff[..., 0], coeff[..., 1],
-            is_internal=is_internal, mode=GRADIENT,
+            coords, coeff[..., 0], coeff[..., 1],
+            degree=degree, is_internal=is_internal, mode=GRADIENT,
             coord_type_in=self.coord_type_in,
             coord_type_out=self.coord_type_out,
             scale_gradient=-asarray(self.scale),
@@ -274,8 +261,8 @@ class DipoleSHModelTestMixIn(SHModelTestMixIn):
         lat_ngp, lon_ngp = self.model.north_pole #(time)
         coeff, degree = self.model.coefficients(time)
         return sheval_dipole(
-            coords, degree, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
-            is_internal=is_internal, mode=GRADIENT,
+            coords, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
+            degree=degree, is_internal=is_internal, mode=GRADIENT,
             coord_type_in=self.coord_type_in,
             coord_type_out=self.coord_type_out,
             scale_gradient=-asarray(self.scale),
@@ -307,8 +294,8 @@ class DipoleMIOSHModelTestMixIn(SHModelTestMixIn):
             time, mjd2000_to_magnetic_universal_time(time, lat_ngp, lon_ngp)
         )
         return sheval_dipole(
-            coords, degree, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
-            is_internal=is_internal, mode=GRADIENT,
+            coords, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
+            degree=degree, is_internal=is_internal, mode=GRADIENT,
             coord_type_in=self.coord_type_in,
             coord_type_out=self.coord_type_out,
             scale_gradient=scale
@@ -789,13 +776,18 @@ class TestMIOPrimary(TestCase, DipoleMIOSHModelTestMixIn):
 
     def _eval_reference(self, time, coords):
         height_radius = self.model.earth_radius + self.model.height
-
-        if coords[2] <= height_radius:
-            model = self.model.model_below_ionosphere
-        else:
-            model = self.model.model_above_ionosphere
-
-        return self._eval_reference_mio(model, time, coords)
+        result = empty(coords.shape)
+        # below ionosphere
+        mask = coords[..., 2] <= height_radius
+        result[mask] = self._eval_reference_mio(
+            self.model.model_below_ionosphere, mask_array(time, mask), coords[mask]
+        )
+        # above ionosphere
+        mask = ~mask
+        result[mask] = self._eval_reference_mio(
+            self.model.model_above_ionosphere, mask_array(time, mask), coords[mask]
+        )
+        return result
 
     def test_eval_single_reference_value_below_ionosphere(self):
         times, coords, results = self.reference_values

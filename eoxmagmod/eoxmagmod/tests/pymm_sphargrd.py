@@ -31,7 +31,7 @@ from unittest import TestCase, main
 from itertools import chain, product
 from random import random
 from math import pi, cos, sin, sqrt
-from numpy import array, zeros
+from numpy import asarray, zeros, empty
 from numpy.testing import assert_allclose
 from eoxmagmod._pymm import sphargrd
 from eoxmagmod.tests.pymm_spharpot import SphericalHarmonicsCommonMixIn
@@ -43,13 +43,29 @@ class SphericalHarmonicsGradientTestMixIn(SphericalHarmonicsCommonMixIn):
 
     @classmethod
     def reference_gradient(cls, degree, coef_g, coef_h, latitude, longitude, radius):
+        (
+            shape, size, coef_g, coef_h, latitude, longitude, radius,
+        ) = cls._ravel_inputs(degree, coef_g, coef_h, latitude, longitude, radius)
+
+        result = empty((size, 3))
+
+        for i in range(size):
+            result[i] = cls.reference_gradient_scalar(
+                degree, coef_g[i], coef_h[i],
+                latitude[i], longitude[i], radius[i]
+            )
+
+        return result.reshape((*shape, 3))
+
+    @classmethod
+    def reference_gradient_scalar(cls, degree, coef_g, coef_h, latitude, longitude, radius):
         rad_series, sin_series, cos_series, p_series, dp_series = cls.get_series(
             degree, latitude, longitude, radius
         )
-        m_idx = array(list(chain.from_iterable(
+        m_idx = asarray(list(chain.from_iterable(
             range(n + 1) for n in range(degree + 1)
         )))
-        n_idx = array(list(chain.from_iterable(
+        n_idx = asarray(list(chain.from_iterable(
             [n]*(n+1)  for n in range(degree + 1)
         )))
 
@@ -77,8 +93,8 @@ class SphericalHarmonicsGradientTestMixIn(SphericalHarmonicsCommonMixIn):
                 ps1, ps0 = ps0, ps0*sin_lat - ps1*tmp
                 sqn1 *= (2*n-1)/n
                 scale.append(ps0 * sqn1 * sqrt((n*2)/(n+1)))
-            scale = array(scale[:(degree + 1)])
-            idx = array([
+            scale = asarray(scale[:(degree + 1)])
+            idx = asarray([
                 1 + (n*(n + 1))//2 for n in range(1, degree + 1)
             ], dtype="int")
             grad_lon = -(scale * rad_series[1:] * (
@@ -90,7 +106,7 @@ class SphericalHarmonicsGradientTestMixIn(SphericalHarmonicsCommonMixIn):
             coef_g * cos_series[m_idx] + coef_h * sin_series[m_idx]
         )).sum()
 
-        return array([grad_lat, grad_lon, grad_rad])
+        return asarray([grad_lat, grad_lon, grad_rad])
 
     @classmethod
     def eval_gradient(cls, degree, coef_g, coef_h, latitude, longitude, radius):
@@ -98,8 +114,9 @@ class SphericalHarmonicsGradientTestMixIn(SphericalHarmonicsCommonMixIn):
             degree, latitude, longitude, radius
         )
         return sphargrd(
-            latitude, degree, coef_g, coef_h, p_series, dp_series, rad_series,
-            sin_series, cos_series, is_internal=cls.is_internal
+            latitude, coef_g, coef_h, p_series, dp_series, rad_series,
+            sin_series, cos_series, is_internal=cls.is_internal,
+            degree=degree
         )
 
     def test_coefficients(self):
@@ -141,14 +158,13 @@ class SphericalHarmonicsGradientTestMixIn(SphericalHarmonicsCommonMixIn):
                         atol=1e-14
                     )
 
-
     def test_gradient(self):
         coords = [
             (lat, lon, 6371.2*(1.0 + random())) for lat, lon
             in product(range(-90, 91, 5), range(-180, 181, 10))
         ]
 
-        for latitude, longitude, radius in coords:
+        for latitude, longitude, radius in coords[:1]:
             try:
                 assert_allclose(
                     self.eval_gradient(
@@ -164,6 +180,28 @@ class SphericalHarmonicsGradientTestMixIn(SphericalHarmonicsCommonMixIn):
                 raise AssertionError(
                     f"point coordinates: ({latitude}, {longitude}, {radius})\n{exc}"
                 ) from None
+            break
+
+    def test_gradient_array_input(self):
+        coords = asarray([
+            (lat, lon, 6371.2*(1.0 + random())) for lat, lon
+            in product(range(-90, 91, 5), range(-180, 181, 10))
+        ]).reshape((37, 37, 3))
+
+        latitude = coords[..., 0]
+        longitude = coords[..., 1]
+        radius = coords[..., 2]
+
+        assert_allclose(
+            self.eval_gradient(
+                self.degree, self.coef_g, self.coef_h,
+                latitude, longitude, radius
+            ),
+            self.reference_gradient(
+                self.degree, self.coef_g, self.coef_h,
+                latitude, longitude, radius
+            ),
+        )
 
     def test_gradient_compared_with_finite_differences(self):
         # Compare gradient with the calculated finite differences.
@@ -187,7 +225,7 @@ class SphericalHarmonicsGradientTestMixIn(SphericalHarmonicsCommonMixIn):
                 self.degree, self.coef_g, self.coef_h, *coord_rad
             )
 
-            grad_approx = array([
+            grad_approx = asarray([
                 (pot_lat - pot0)/eps, (pot_lon - pot0)/eps, (pot_rad - pot0)/eps
             ])
             grad_spharm = self.eval_gradient(

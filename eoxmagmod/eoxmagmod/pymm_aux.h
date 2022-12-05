@@ -333,27 +333,23 @@ static ARRAY_DATA _get_arrd_item_nocheck(const ARRAY_DATA *arrd, npy_intp idx) {
     return arrd_sub;
 }
 
-
-static ARRAY_DATA _get_arrd_item(const ARRAY_DATA *arrd, npy_intp idx)
+static ARRAY_DATA _get_arrd_item_with_guard(const ARRAY_DATA *arrd, npy_intp idx, npy_intp guard)
 {
-    if (arrd->ndim <= 0)
-    {
-        // treat as scalar
+    if (arrd->ndim <= guard)
         return *arrd;
-    }
 
     return _get_arrd_item_nocheck(arrd, idx);
 }
 
+
+static ARRAY_DATA _get_arrd_item(const ARRAY_DATA *arrd, npy_intp idx)
+{
+    return _get_arrd_item_with_guard(arrd, idx, 0);
+}
+
 static ARRAY_DATA _get_arrd_vector_item(const ARRAY_DATA *arrd, npy_intp idx)
 {
-    if (arrd->ndim <= 1)
-    {
-        // treat as non-iterable 1D vector
-        return *arrd;
-    }
-
-    return _get_arrd_item_nocheck(arrd, idx);
+    return _get_arrd_item_with_guard(arrd, idx, 1);
 }
 
 #endif  /* PYMM_AUX_H */

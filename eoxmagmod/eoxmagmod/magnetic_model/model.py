@@ -219,8 +219,8 @@ class SphericalHarmomicGeomagneticModel(GeomagneticModel):
         """ Evaluate spherical harmonic for a single time."""
         coeff, degree = coefficients(time, **options)
         return sheval(
-            coords, degree, coeff[..., 0], coeff[..., 1],
-            is_internal=coefficients.is_internal, mode=GRADIENT,
+            coords, coeff[..., 0], coeff[..., 1],
+            degree=degree, is_internal=coefficients.is_internal, mode=GRADIENT,
             coord_type_in=input_coordinate_system,
             coord_type_out=output_coordinate_system,
             scale_gradient=-asarray(options.get("scale", 1.0))

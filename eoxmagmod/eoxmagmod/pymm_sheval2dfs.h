@@ -69,6 +69,8 @@ static void _f2d_coefset_reset(FOURIER_2D_COEF_SET *coefset);
 /* 2D Fourier series magnetic model - auxiliary structure */
 typedef struct Model2DFS {
     MODEL sh_model;
+    double *cg;
+    double *ch;
     FOURIER_2D_COEF_SET *coefset;
     double time1_last;
     double time2_last;
@@ -83,9 +85,28 @@ static int _model_2dfs_init(
     const double scale_potential, const double *scale_gradient
 );
 
-static void _sheval2dfs1(ARRAY_DATA arrd_t1, ARRAY_DATA arrd_t2, ARRAY_DATA arrd_x, ARRAY_DATA arrd_pot, MODEL_2DFS *model);
-static void _sheval2dfs2(ARRAY_DATA arrd_t1, ARRAY_DATA arrd_t2, ARRAY_DATA arrd_x, ARRAY_DATA arrd_grd, MODEL_2DFS *model);
-static void _sheval2dfs3(ARRAY_DATA arrd_t1, ARRAY_DATA arrd_t2, ARRAY_DATA arrd_x, ARRAY_DATA arrd_pot, ARRAY_DATA arrd_grd, MODEL_2DFS *model);
+static void _sheval2dfs_pot(
+    ARRAY_DATA arrd_pot,
+    ARRAY_DATA arrd_t1,
+    ARRAY_DATA arrd_t2,
+    ARRAY_DATA arrd_x,
+    MODEL_2DFS *model
+);
+static void _sheval2dfs_grd(
+    ARRAY_DATA arrd_grd,
+    ARRAY_DATA arrd_t1,
+    ARRAY_DATA arrd_t2,
+    ARRAY_DATA arrd_x,
+    MODEL_2DFS *model
+);
+static void _sheval2dfs_pot_and_grd(
+    ARRAY_DATA arrd_pot,
+    ARRAY_DATA arrd_grd,
+    ARRAY_DATA arrd_t1,
+    ARRAY_DATA arrd_t2,
+    ARRAY_DATA arrd_x,
+    MODEL_2DFS *model
+);
 
 
 /* Python function definition */
@@ -291,34 +312,34 @@ static PyObject* sheval2dfs(PyObject *self, PyObject *args, PyObject *kwdict)
     switch(mode)
     {
         case SM_POTENTIAL:
-            _sheval2dfs1(
+            _sheval2dfs_pot(
+                _array_to_arrd(arr_pot),
                 _array_to_arrd(arr_t1),
                 _array_to_arrd(arr_t2),
                 _array_to_arrd(arr_x),
-                _array_to_arrd(arr_pot),
                 &model
             );
             retval = (PyObject*) arr_pot;
             break;
 
         case SM_GRADIENT:
-            _sheval2dfs2(
+            _sheval2dfs_grd(
+                _array_to_arrd(arr_grd),
                 _array_to_arrd(arr_t1),
                 _array_to_arrd(arr_t2),
                 _array_to_arrd(arr_x),
-                _array_to_arrd(arr_grd),
                  &model
             );
             retval = (PyObject*) arr_grd;
             break;
 
         case SM_POTENTIAL_AND_GRADIENT:
-            _sheval2dfs3(
+            _sheval2dfs_pot_and_grd(
+                _array_to_arrd(arr_pot),
+                _array_to_arrd(arr_grd),
                 _array_to_arrd(arr_t1),
                 _array_to_arrd(arr_t2),
                 _array_to_arrd(arr_x),
-                _array_to_arrd(arr_pot),
-                _array_to_arrd(arr_grd),
                  &model
             );
             if (NULL == (retval = Py_BuildValue("NN", (PyObject*) arr_pot, (PyObject*) arr_grd)))
@@ -351,11 +372,11 @@ static void _sheval2dfs_eval_coeff(
     MODEL_2DFS *model
 );
 
-static void _sheval2dfs1(
+static void _sheval2dfs_pot(
+    ARRAY_DATA arrd_pot,
     ARRAY_DATA arrd_t1,
     ARRAY_DATA arrd_t2,
     ARRAY_DATA arrd_x,
-    ARRAY_DATA arrd_pot,
     MODEL_2DFS *model
 )
 {
@@ -364,11 +385,11 @@ static void _sheval2dfs1(
         npy_intp i, n = arrd_t1.ndim > 0 ? arrd_t1.dim[0] : arrd_t2.dim[0];
         for(i = 0; i < n; ++i)
         {
-            _sheval2dfs1(
+            _sheval2dfs_pot(
+                _get_arrd_item(&arrd_pot, i),
                 _get_arrd_item(&arrd_t1, i),
                 _get_arrd_item(&arrd_t2, i),
                 _get_arrd_vector_item(&arrd_x, i),
-                _get_arrd_item(&arrd_pot, i),
                 model
             );
         }
@@ -378,19 +399,21 @@ static void _sheval2dfs1(
     {
         const double time1 = *((double*)arrd_t1.data);
         const double time2 = *((double*)arrd_t2.data);
+        ARRAY_DATA arrd_cg = {.data=model->cg, .ndim=0, .dim=NULL, .stride=NULL};
+        ARRAY_DATA arrd_ch = {.data=model->ch, .ndim=0, .dim=NULL, .stride=NULL};
 
         if ((time1 != model->time1_last)||(time2 != model->time2_last))
             _sheval2dfs_eval_coeff(time1, time2, model);
 
-        _sheval1(arrd_x, arrd_pot, &(model->sh_model));
+        _sheval_pot(arrd_pot, arrd_x, arrd_cg, arrd_ch, &(model->sh_model));
     }
 }
 
-static void _sheval2dfs2(
+static void _sheval2dfs_grd(
+    ARRAY_DATA arrd_grd,
     ARRAY_DATA arrd_t1,
     ARRAY_DATA arrd_t2,
     ARRAY_DATA arrd_x,
-    ARRAY_DATA arrd_grd,
     MODEL_2DFS *model
 )
 {
@@ -399,11 +422,11 @@ static void _sheval2dfs2(
         npy_intp i, n = arrd_t1.ndim > 0 ? arrd_t1.dim[0] : arrd_t2.dim[0];
         for(i = 0; i < n; ++i)
         {
-            _sheval2dfs2(
+            _sheval2dfs_grd(
+                _get_arrd_item(&arrd_grd, i),
                 _get_arrd_item(&arrd_t1, i),
                 _get_arrd_item(&arrd_t2, i),
                 _get_arrd_vector_item(&arrd_x, i),
-                _get_arrd_item(&arrd_grd, i),
                 model
             );
         }
@@ -413,20 +436,22 @@ static void _sheval2dfs2(
     {
         const double time1 = *((double*)arrd_t1.data);
         const double time2 = *((double*)arrd_t2.data);
+        ARRAY_DATA arrd_cg = {.data=model->cg, .ndim=0, .dim=NULL, .stride=NULL};
+        ARRAY_DATA arrd_ch = {.data=model->ch, .ndim=0, .dim=NULL, .stride=NULL};
 
         if ((time1 != model->time1_last)||(time2 != model->time2_last))
             _sheval2dfs_eval_coeff(time1, time2, model);
 
-        _sheval2(arrd_x, arrd_grd, &(model->sh_model));
+        _sheval_grd(arrd_grd, arrd_x, arrd_cg, arrd_ch, &(model->sh_model));
     }
 }
 
-static void _sheval2dfs3(
+static void _sheval2dfs_pot_and_grd(
+    ARRAY_DATA arrd_pot,
+    ARRAY_DATA arrd_grd,
     ARRAY_DATA arrd_t1,
     ARRAY_DATA arrd_t2,
     ARRAY_DATA arrd_x,
-    ARRAY_DATA arrd_pot,
-    ARRAY_DATA arrd_grd,
     MODEL_2DFS *model
 )
 {
@@ -435,12 +460,12 @@ static void _sheval2dfs3(
         npy_intp i, n = arrd_t1.ndim > 0 ? arrd_t1.dim[0] : arrd_t2.dim[0];
         for(i = 0; i < n; ++i)
         {
-            _sheval2dfs3(
+            _sheval2dfs_pot_and_grd(
+                _get_arrd_item(&arrd_pot, i),
+                _get_arrd_item(&arrd_grd, i),
                 _get_arrd_item(&arrd_t1, i),
                 _get_arrd_item(&arrd_t2, i),
                 _get_arrd_vector_item(&arrd_x, i),
-                _get_arrd_item(&arrd_pot, i),
-                _get_arrd_item(&arrd_grd, i),
                 model
             );
         }
@@ -450,11 +475,13 @@ static void _sheval2dfs3(
     {
         const double time1 = *((double*)arrd_t1.data);
         const double time2 = *((double*)arrd_t2.data);
+        ARRAY_DATA arrd_cg = {.data=model->cg, .ndim=0, .dim=NULL, .stride=NULL};
+        ARRAY_DATA arrd_ch = {.data=model->ch, .ndim=0, .dim=NULL, .stride=NULL};
 
         if ((time1 != model->time1_last)||(time2 != model->time2_last))
             _sheval2dfs_eval_coeff(time1, time2, model);
 
-        _sheval3(arrd_x, arrd_pot, arrd_grd, &(model->sh_model));
+        _sheval_pot_and_grd(arrd_pot, arrd_grd, arrd_x, arrd_cg, arrd_ch, &(model->sh_model));
     }
 }
 
@@ -467,8 +494,8 @@ static void _sheval2dfs_eval_coeff(
     FOURIER_2D_COEF_SET *coefset = model->coefset;
     FOURIER_2D *f2d = &coefset->f2d;
 
-    double *cg = (double*)model->sh_model.cg;
-    double *ch = (double*)model->sh_model.ch;
+    double *cg = (double*)model->cg;
+    double *ch = (double*)model->ch;
 
     const ptrdiff_t size1 = f2d->max_degree1 - f2d->min_degree1 + 1;
     const ptrdiff_t size2 = f2d->max_degree2 - f2d->min_degree2 + 1;
@@ -503,11 +530,11 @@ static void _model_2dfs_reset(MODEL_2DFS *model) {
 
 static void _model_2dfs_destroy(MODEL_2DFS *model)
 {
-    if(NULL != model->sh_model.cg)
-        free((double*)model->sh_model.cg);
+    if(NULL != model->cg)
+        free((double*)model->cg);
 
-    if(NULL != model->sh_model.ch)
-        free((double*)model->sh_model.ch);
+    if(NULL != model->ch)
+        free((double*)model->ch);
 
     _model_destroy(&(model->sh_model));
 
@@ -529,18 +556,18 @@ static int _model_2dfs_init(
     // initialize nested single-time model
     if (_model_init(
         &(model->sh_model), is_internal, degree, coord_in, coord_out,
-        NULL, NULL, scale_potential, scale_gradient
+        scale_potential, scale_gradient
     ))
         goto error;
 
     // allocate memory for the single time coefficients
-    if (NULL == (model->sh_model.cg = (double*)calloc(model->sh_model.nterm, sizeof(double))))
+    if (NULL == (model->cg = (double*)calloc(model->sh_model.nterm, sizeof(double))))
     {
         PyErr_Format(PyExc_MemoryError, "_model_2dfs_init: cg");
         goto error;
     }
 
-    if (NULL == (model->sh_model.ch = (double*)calloc(model->sh_model.nterm, sizeof(double))))
+    if (NULL == (model->ch = (double*)calloc(model->sh_model.nterm, sizeof(double))))
     {
         PyErr_Format(PyExc_MemoryError, "_model_2dfs_init: ch");
         goto error;

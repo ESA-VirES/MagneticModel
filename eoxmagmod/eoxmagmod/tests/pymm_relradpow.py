@@ -5,7 +5,7 @@
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
-# Copyright (C) 2018 EOX IT Services GmbH
+# Copyright (C) 2018-2022 EOX IT Services GmbH
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -28,28 +28,50 @@
 # pylint: disable=missing-docstring
 
 from unittest import TestCase, main
-from numpy import array
+from numpy import asarray, empty, linspace
 from numpy.testing import assert_allclose
 from eoxmagmod._pymm import relradpow
 
 
 class TestRadialPowerSeries(TestCase):
 
-    @staticmethod
-    def reference_internal(value, degree):
-        """ Reference implementation - internal field. """
-        return array([value ** (-i - 2) for i in range(degree + 1)])
+    @classmethod
+    def reference_internal(cls, rads, degree):
+        return cls._reference(rads, degree, cls.reference_internal_scalar)
+
+    @classmethod
+    def reference_external(cls, rads, degree):
+        return cls._reference(rads, degree, cls.reference_external_scalar)
 
     @staticmethod
-    def reference_external(value, degree):
+    def _reference(rads, degree, method):
+        """ Evaluate relative-radius power series. """
+        rads = asarray(rads)
+        size = rads.size
+        shape = rads.shape
+
+        nterms = degree + 1
+
+        rads = rads.ravel()
+        rrp = empty((size, nterms))
+
+        for i in range(size):
+            rrp[i, :] = method(rads[i], degree)
+
+        return rrp.reshape((*shape, nterms))
+
+    @staticmethod
+    def reference_internal_scalar(value, degree):
+        """ Reference implementation - internal field. """
+        return asarray([value ** (-i - 2) for i in range(degree + 1)])
+
+    @staticmethod
+    def reference_external_scalar(value, degree):
         """ Reference implementation - external field. """
-        return array([value ** (i - 1) for i in range(degree + 1)])
+        return asarray([value ** (i - 1) for i in range(degree + 1)])
 
     def test_invalid_degree(self):
         self.assertRaises(ValueError, relradpow, 1.0, -1, 1.0)
-
-    def test_invalid_radius(self):
-        self.assertRaises(ValueError, relradpow, -1.0, 0, 1.0)
 
     def test_invalid_reference_radius(self):
         self.assertRaises(ValueError, relradpow, 1.0, 0, -1.0)
@@ -108,6 +130,20 @@ class TestRadialPowerSeries(TestCase):
         assert_allclose(
             relradpow(1.1, 256, reference_radius=1.0, is_internal=True),
             self.reference_internal(1.1, 256)
+        )
+
+    def test_relradpow_internal_array_input(self):
+        rads = linspace(1.0, 2.4, 15)
+        assert_allclose(
+            relradpow(rads, 256, reference_radius=1.0, is_internal=True),
+            self.reference_internal(rads, 256)
+        )
+
+    def test_relradpow_external_array_input(self):
+        rads = linspace(1.0, 2.4, 15)
+        assert_allclose(
+            relradpow(rads, 256, reference_radius=1.0, is_internal=False),
+            self.reference_external(rads, 256)
         )
 
 
