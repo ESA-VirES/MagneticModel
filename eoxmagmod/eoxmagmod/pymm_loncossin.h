@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
  * Geomagnetic Model - C python bindings
- * - longitude sin/cos spherical terms' evaluation
+ * - longitude cos/sin spherical terms' evaluation
  *
  * Author: Martin Paces <martin.paces@eox.at>
  *
@@ -28,46 +28,44 @@
  *-----------------------------------------------------------------------------
  */
 
-#ifndef PYMM_LONSINCOS_H
-#define PYMM_LONSINCOS_H
+#ifndef PYMM_LONCOSSIN_H
+#define PYMM_LONCOSSIN_H
 
 #include <math.h>
-#include "spherical_harmonics.h"
+#include "fourier_series.h"
 #include "pymm_aux.h"
 
-static void _lonsincos(
-    ARRAY_DATA *arrd_lon, ARRAY_DATA *arrd_sin, ARRAY_DATA *arrd_cos,
+static void _loncossin(
+    ARRAY_DATA *arrd_lon, ARRAY_DATA *arrd_cos_sin,
     const int degree, const int fast_alg
 );
 
 /* Python function definition */
 
-#define DOC_LONSINCOS "\n"\
-"  lonsin, loncos = lonsincos(longitude, degree, fast_alg=True)\n"\
+#define DOC_LONCOSSIN "\n"\
+"  loncossin = loncossin(longitude, degree, fast_alg=True)\n"\
 "\n"\
 "     For given longitude and degree, evaluate\n"\
 "     the cosine and sine series: \n"\
-"        cos(i*longitude) for i in range(0, degree+1)\n"\
-"        sin(i*longitude) for i in range(0, degree+1)\n"\
-"     The longitude has to be entered in dg. Array input is accepted.\n"\
+"        [cos(i*longitude), sin(i*longitude)] for i in range(0, degree+1)\n"\
+"     The longitude has to be entered in degrees. Array input is accepted.\n"\
 "     The 'fast_alg' boolean options forces the subroutine to use a faster\n"\
 "     but slightly less precise evaluation algorithm.\n"
 
-static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
+static PyObject* loncossin(PyObject *self, PyObject *args, PyObject *kwdict)
 {
     static char *keywords[] = {"longitude", "degree", "fast_alg", NULL};
 
     int degree;
     int fast_alg = 1;
     PyArrayObject *arr_lon = NULL; // input array of longitudes
-    PyArrayObject *arr_cos = NULL; // cos array
-    PyArrayObject *arr_sin = NULL; // sin array
+    PyArrayObject *arr_cos_sin = NULL; // cos/sin array
     PyObject *obj_lon = NULL; // input object
     PyObject *retval = NULL; // output tuple
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "Oi|i:lonsincos", keywords, &obj_lon, &degree, &fast_alg
+        args, kwdict, "Oi|i:loncossin", keywords, &obj_lon, &degree, &fast_alg
     ))
         goto exit;
 
@@ -84,37 +82,32 @@ static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // create the output arrays
     {
-        npy_intp ndim = PyArray_NDIM(arr_lon) + 1;
+        const npy_intp ndim = PyArray_NDIM(arr_lon) + 2;
         npy_intp dims[ndim];
         npy_intp i;
 
-        for (i = 0; i < ndim - 1; ++i)
+        for (i = 0; i < ndim - 2; ++i)
         {
             dims[i] = PyArray_DIMS(arr_lon)[i];
         }
 
-        dims[ndim-1] = (npy_intp)degree + 1;
+        dims[ndim-2] = (npy_intp)degree + 1;
+        dims[ndim-1] = 2;
 
-        if (NULL == (arr_sin = _get_new_array(ndim, dims, NPY_DOUBLE)))
-            goto exit;
-
-        if (NULL == (arr_cos = _get_new_array(ndim, dims, NPY_DOUBLE)))
+        if (NULL == (arr_cos_sin = _get_new_array(ndim, dims, NPY_DOUBLE)))
             goto exit;
     }
 
-    if (NULL == (retval = Py_BuildValue("NN", (PyObject*) arr_sin, (PyObject*) arr_cos)))
-        goto exit;
+    retval = (PyObject*) arr_cos_sin;
 
     // evaluate sin/cos series
     {
         ARRAY_DATA arrd_lon = _array_to_arrd(arr_lon);
-        ARRAY_DATA arrd_sin = _array_to_arrd(arr_sin);
-        ARRAY_DATA arrd_cos = _array_to_arrd(arr_cos);
+        ARRAY_DATA arrd_cos_sin = _array_to_arrd(arr_cos_sin);
 
-        _lonsincos(
+        _loncossin(
             &arrd_lon,
-            &arrd_sin,
-            &arrd_cos,
+            &arrd_cos_sin,
             degree,
             fast_alg
         );
@@ -124,8 +117,7 @@ static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // decrease reference counters to the arrays
     if (arr_lon) Py_DECREF(arr_lon);
-    if (!retval && arr_cos) Py_DECREF(arr_cos);
-    if (!retval && arr_sin) Py_DECREF(arr_sin);
+    if (!retval && arr_cos_sin) Py_DECREF(arr_cos_sin);
 
     return retval;
 }
@@ -136,8 +128,8 @@ static PyObject* lonsincos(PyObject *self, PyObject *args, PyObject *kwdict)
  * series.
  */
 
-static void _lonsincos(
-    ARRAY_DATA *arrd_lon, ARRAY_DATA *arrd_sin, ARRAY_DATA *arrd_cos,
+static void _loncossin(
+    ARRAY_DATA *arrd_lon, ARRAY_DATA *arrd_cos_sin,
     const int degree, const int fast_alg
 )
 {
@@ -148,13 +140,11 @@ static void _lonsincos(
         for(i = 0; i < n; ++i)
         {
             ARRAY_DATA arrd_lon_item = _get_arrd_item_nocheck(arrd_lon, i);
-            ARRAY_DATA arrd_sin_item = _get_arrd_item_nocheck(arrd_sin, i);
-            ARRAY_DATA arrd_cos_item = _get_arrd_item_nocheck(arrd_cos, i);
+            ARRAY_DATA arrd_cos_sin_item = _get_arrd_item_nocheck(arrd_cos_sin, i);
 
-            _lonsincos(
+            _loncossin(
                 &arrd_lon_item,
-                &arrd_sin_item,
-                &arrd_cos_item,
+                &arrd_cos_sin_item,
                 degree,
                 fast_alg
             );
@@ -163,11 +153,10 @@ static void _lonsincos(
     else
     {
         const double lon = *((double*)arrd_lon->data) * DG2RAD;
-        double *sin = ((double*)arrd_sin->data);
-        double *cos = ((double*)arrd_cos->data);
+        double (*cos_sin)[2] = ((double(*)[2])arrd_cos_sin->data);
 
-        (fast_alg ? shc_azmsincos : shc_azmsincos_ref)(sin, cos, degree, lon);
+        (fast_alg ? fs_cos_sin: fs_cos_sin_ref)(cos_sin, degree, lon);
     }
 }
 
-#endif  /* PYMM_LONSINCOS_H */
+#endif  /* PYMM_LONCOSSIN_H */

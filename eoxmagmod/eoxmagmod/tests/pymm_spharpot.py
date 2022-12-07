@@ -35,7 +35,7 @@ from random import random
 from numpy import asarray, zeros, empty
 from numpy.lib.stride_tricks import as_strided
 from numpy.testing import assert_allclose
-from eoxmagmod._pymm import legendre, lonsincos, relradpow, spharpot
+from eoxmagmod._pymm import legendre, loncossin, relradpow, spharpot
 from eoxmagmod.tests.data import sifm
 from eoxmagmod.tests.data import mma_external
 
@@ -80,7 +80,7 @@ class SphericalHarmonicsCommonMixIn:
 
     @classmethod
     def reference_potential_scalar(cls, degree, coef_g, coef_h, latitude, longitude, radius):
-        rad_series, sin_series, cos_series, p_series, _ = cls.get_series(
+        rad_series, cos_sin_series, p_series, _ = cls.get_series(
             degree, latitude, longitude, radius,
         )
         m_idx = asarray(list(chain.from_iterable(
@@ -90,26 +90,26 @@ class SphericalHarmonicsCommonMixIn:
             [n]*(n+1)  for n in range(degree + 1)
         )))
         return (radius * rad_series[n_idx] * p_series * (
-            coef_g * cos_series[m_idx] + coef_h * sin_series[m_idx]
+            coef_g * cos_sin_series[m_idx, 0] + coef_h * cos_sin_series[m_idx, 1]
         )).sum()
 
 
     @classmethod
     def eval_potential(cls, degree, coef_g, coef_h, latitude, longitude, radius):
-        rad_series, sin_series, cos_series, p_series, _ = cls.get_series(
+        rad_series, cos_sin_series, p_series, _ = cls.get_series(
             degree, latitude, longitude, radius
         )
         return spharpot(
-            radius, coef_g, coef_h, p_series, rad_series,
-            sin_series, cos_series, degree=degree
+            radius, coef_g, coef_h, p_series, rad_series, cos_sin_series,
+            degree=degree,
         )
 
     @classmethod
     def get_series(cls, degree, latitude, longitude, radius):
         rad_series = relradpow(radius, degree, is_internal=cls.is_internal)
-        sin_series, cos_series = lonsincos(longitude, degree)
+        cos_sin_series = loncossin(longitude, degree)
         p_series, dp_series = legendre(latitude, degree)
-        return rad_series, sin_series, cos_series, p_series, dp_series
+        return rad_series, cos_sin_series, p_series, dp_series
 
     @classmethod
     def _ravel_inputs(cls, degree, coef_g, coef_h, latitude, longitude, radius):

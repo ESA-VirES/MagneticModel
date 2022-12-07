@@ -684,9 +684,9 @@ static int _coefset_init(
     coefset->arr_ct = arr_ct;
     coefset->arr_cv = arr_cv;
     coefset->arr_cm = arr_cm;
-    coefset->ct = PyArray_DATA(arr_ct),
-    coefset->cv = PyArray_DATA(arr_cv),
-    coefset->cm = PyArray_DATA(arr_cm),
+    coefset->ct = (double*) PyArray_DATA(arr_ct),
+    coefset->cv = (double*) PyArray_DATA(arr_cv),
+    coefset->cm = (int*) PyArray_DATA(arr_cm),
     coefset->ntime = PyArray_DIMS(arr_ct)[0];
     coefset->ncoef = PyArray_DIMS(arr_cm)[0];
     coefset->spline_order = spline_order;

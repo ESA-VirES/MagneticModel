@@ -39,14 +39,14 @@
 void _sphargrd(
     ARRAY_DATA *arrd_grd, ARRAY_DATA *arrd_lat, ARRAY_DATA *arrd_cg,
     ARRAY_DATA *arrd_ch, ARRAY_DATA *arrd_lp, ARRAY_DATA *arrd_ldp,
-    ARRAY_DATA *arrd_rrp, ARRAY_DATA *arrd_lsin, ARRAY_DATA *arrd_lcos,
+    ARRAY_DATA *arrd_rrp, ARRAY_DATA *arrd_lcs,
     const int degree, const int is_internal
 );
 
 /* Python function definition */
 
 #define DOC_SPHARGRD "\n"\
-"  v_grad = sphargrd(latitude, coef_g, coef_h, leg_p, leg_dp, rrp, lonsin, loncos, is_internal=True, degree=-1)\n"\
+"  v_grad = sphargrd(latitude, coef_g, coef_h, leg_p, leg_dp, rrp, lcs, is_internal=True, degree=-1)\n"\
 "\n"\
 "     Spherical harmonic evaluation of the gradient of the potential\n"\
 "     (scalar) field in the geocentric spherical coordinates (latitude,\n"\
@@ -55,13 +55,12 @@ void _sphargrd(
 "     The input parameters are:\n"\
 "       latitude - spherical (or geodetic) latitude in degrees at the evaluated\n"\
 "                  location.\n"\
-"       coef_g - vector of spherical harmonic model coefficients.\n"\
-"       coef_h - vector of spherical harmonic model coefficients.\n"\
-"       leg_p - vector the Legendre polynomials.\n"\
-"       leg_dp - vector the Legendre polynomials' derivations.\n"\
-"       rrp - vector the relative radius powers.\n"\
-"       lonsin - vector of the longitude cosines.\n"\
-"       lonsin - vector of the longitude sines.\n"\
+"       coef_g - array of spherical harmonic model coefficients.\n"\
+"       coef_h - array of spherical harmonic model coefficients.\n"\
+"       leg_p - array of Legendre polynomials.\n"\
+"       leg_dp - array of Legendre polynomials' derivations.\n"\
+"       rrp - array of relative radius powers.\n"\
+"       lcs - array of longitude cosines and sines.\n"\
 "       is_internal - boolean flag set to True by default. When set to False\n"\
 "                     external field evaluation is used.\n"\
 "       degree - degree of the spherical harmonic model. If not provided or \n"\
@@ -73,7 +72,7 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
 {
     static char *keywords[] = {
         "latitude", "coef_g", "coef_h", "leg_p", "leg_dp",
-        "rrp", "lonsin", "loncos", "is_internal", "degree", NULL
+        "rrp", "lcs", "is_internal", "degree", NULL
     };
 
     int degree = -1, is_internal;
@@ -85,8 +84,7 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *obj_lp = NULL; // P object
     PyObject *obj_ldp = NULL; // dP object
     PyObject *obj_rrp = NULL; // RRP object
-    PyObject *obj_lsin = NULL; // lon-sin object
-    PyObject *obj_lcos = NULL; // lon-cos object
+    PyObject *obj_lcs = NULL; // lon cos/sin object
     PyObject *retval = NULL; // output
 
     PyArrayObject *arr_grd = NULL; // output array
@@ -96,14 +94,13 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     PyArrayObject *arr_lp = NULL; // P array
     PyArrayObject *arr_ldp = NULL; // dP array
     PyArrayObject *arr_rrp = NULL; // RRP array
-    PyArrayObject *arr_lsin = NULL; // lon-sin array
-    PyArrayObject *arr_lcos = NULL; // lon-cos array
+    PyArrayObject *arr_lcs = NULL; // lon cos/sin array
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "OOOOOOOO|Oi:sphargrd", keywords,
-        &obj_lat, &obj_cg, &obj_ch, &obj_lp, &obj_ldp, &obj_rrp,
-        &obj_lsin, &obj_lcos, &obj_is_internal, &degree
+        args, kwdict, "OOOOOOO|Oi:sphargrd", keywords,
+        &obj_lat, &obj_cg, &obj_ch, &obj_lp, &obj_ldp, &obj_rrp, &obj_lcs,
+        &obj_is_internal, &degree
     ))
         goto exit;
 
@@ -128,23 +125,19 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     if (NULL == (arr_rrp = _get_as_double_array(obj_rrp, 1, 0, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_ALIGNED, keywords[5])))
         goto exit;
 
-    if (NULL == (arr_lsin = _get_as_double_array(obj_lsin, 1, 0, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_ALIGNED, keywords[6])))
-        goto exit;
-
-    if (NULL == (arr_lcos = _get_as_double_array(obj_lcos, 1, 0, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_ALIGNED, keywords[7])))
+    if (NULL == (arr_lcs = _get_as_double_array(obj_lcs, 2, 0, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_ALIGNED, keywords[6])))
         goto exit;
 
     // extract degree from the array dimensions
     { 
-        const int ndegrees = 7;
+        const int ndegrees = 6;
         npy_intp degrees[] = {
             _size_to_degree(PyArray_DIMS(arr_cg)[PyArray_NDIM(arr_cg)-1]),
             _size_to_degree(PyArray_DIMS(arr_ch)[PyArray_NDIM(arr_ch)-1]),
             _size_to_degree(PyArray_DIMS(arr_lp)[PyArray_NDIM(arr_lp)-1]),
             _size_to_degree(PyArray_DIMS(arr_ldp)[PyArray_NDIM(arr_ldp)-1]),
             PyArray_DIMS(arr_rrp)[PyArray_NDIM(arr_rrp)-1] - 1,
-            PyArray_DIMS(arr_lsin)[PyArray_NDIM(arr_lsin)-1] - 1,
-            PyArray_DIMS(arr_lcos)[PyArray_NDIM(arr_lcos)-1] - 1
+            PyArray_DIMS(arr_lcs)[PyArray_NDIM(arr_lcs)-2] - 1,
         };
 
         npy_intp max_degree;
@@ -175,17 +168,17 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // check array dimensions and allocate the output array
     {
-        const int narr = 8;
+        const int narr = 7;
         PyArrayObject *arr[] = {
-            arr_lat, arr_cg, arr_ch, arr_lp, arr_ldp, arr_rrp, arr_lsin, arr_lcos,
+            arr_lat, arr_cg, arr_ch, arr_lp, arr_ldp, arr_rrp, arr_lcs,
         };
-        npy_intp arr_ndim[] = {0, 1, 1, 1, 1, 1, 1, 1};
+        npy_intp arr_ndim[] = {0, 1, 1, 1, 1, 1, 2};
 
         int arg_idx;
         npy_intp ndim, *dims;
 
         // extract maximum common shape
-        _extract_common_shape(&arg_idx, &ndim, &dims, arr, arr_ndim, 8);
+        _extract_common_shape(&arg_idx, &ndim, &dims, arr, arr_ndim, narr);
 
         // check if arrays match the common shape
         {
@@ -234,8 +227,7 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
         ARRAY_DATA arrd_lp = _array_to_arrd(arr_lp);
         ARRAY_DATA arrd_ldp = _array_to_arrd(arr_ldp);
         ARRAY_DATA arrd_rrp = _array_to_arrd(arr_rrp);
-        ARRAY_DATA arrd_lsin = _array_to_arrd(arr_lsin);
-        ARRAY_DATA arrd_lcos = _array_to_arrd(arr_lcos);
+        ARRAY_DATA arrd_lcs = _array_to_arrd(arr_lcs);
 
         _sphargrd(
             &arrd_grd,
@@ -245,8 +237,7 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
             &arrd_lp,
             &arrd_ldp,
             &arrd_rrp,
-            &arrd_lsin,
-            &arrd_lcos,
+            &arrd_lcs,
             degree,
             is_internal
         );
@@ -261,8 +252,7 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
     if (arr_lp) {Py_DECREF(arr_lp);}
     if (arr_ldp) {Py_DECREF(arr_ldp);}
     if (arr_rrp) {Py_DECREF(arr_rrp);}
-    if (arr_lsin) {Py_DECREF(arr_lsin);}
-    if (arr_lcos) {Py_DECREF(arr_lcos);}
+    if (arr_lcs) {Py_DECREF(arr_lcs);}
     if (!retval && arr_grd) {Py_DECREF(arr_grd);}
 
     return retval;
@@ -276,7 +266,7 @@ static PyObject* sphargrd(PyObject *self, PyObject *args, PyObject *kwdict)
 void _sphargrd(
     ARRAY_DATA *arrd_grd, ARRAY_DATA *arrd_lat, ARRAY_DATA *arrd_cg,
     ARRAY_DATA *arrd_ch, ARRAY_DATA *arrd_lp, ARRAY_DATA *arrd_ldp,
-    ARRAY_DATA *arrd_rrp, ARRAY_DATA *arrd_lsin, ARRAY_DATA *arrd_lcos,
+    ARRAY_DATA *arrd_rrp, ARRAY_DATA *arrd_lcs,
     const int degree, const int is_internal
 )
 {
@@ -293,8 +283,7 @@ void _sphargrd(
             ARRAY_DATA arrd_lp_item = _get_arrd_item_with_guard(arrd_lp, i, 1);
             ARRAY_DATA arrd_ldp_item = _get_arrd_item_with_guard(arrd_ldp, i, 1);
             ARRAY_DATA arrd_rrp_item = _get_arrd_item_with_guard(arrd_rrp, i, 1);
-            ARRAY_DATA arrd_lsin_item = _get_arrd_item_with_guard(arrd_lsin, i, 1);
-            ARRAY_DATA arrd_lcos_item = _get_arrd_item_with_guard(arrd_lcos, i, 1);
+            ARRAY_DATA arrd_lcs_item = _get_arrd_item_with_guard(arrd_lcs, i, 2);
 
             _sphargrd(
                 &arrd_grd_item,
@@ -304,8 +293,7 @@ void _sphargrd(
                 &arrd_lp_item,
                 &arrd_ldp_item,
                 &arrd_rrp_item,
-                &arrd_lsin_item,
-                &arrd_lcos_item,
+                &arrd_lcs_item,
                 degree,
                 is_internal
             );
@@ -320,12 +308,11 @@ void _sphargrd(
         const double *lp = ((double*)arrd_lp->data);
         const double *ldp = ((double*)arrd_ldp->data);
         const double *rrp = ((double*)arrd_rrp->data);
-        const double *lsin = ((double*)arrd_lsin->data);
-        const double *lcos = ((double*)arrd_lcos->data);
+        const double (*lcs)[2] = ((double(*)[2])arrd_lcs->data);
 
         shc_eval_dv(
             grd+0, grd+1, grd+2, degree, lat,
-            cg, ch, lp, ldp, rrp, lsin, lcos, is_internal
+            cg, ch, lp, ldp, rrp, lcs, is_internal
         );
     }
 }

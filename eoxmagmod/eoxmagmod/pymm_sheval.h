@@ -36,6 +36,7 @@
 
 #include "math_aux.h"
 #include "geo_conversion.h"
+#include "fourier_series.h"
 #include "spherical_harmonics.h"
 #include "pymm_aux.h"
 #include "pymm_coord.h"
@@ -86,8 +87,7 @@ typedef struct {
     double scale_gradient2;
     double *lp;
     double *ldp;
-    double *lsin;
-    double *lcos;
+    double (*lcs)[2];
     double *rrp;
     double *psqrt;
     double *prsqrt;
@@ -558,7 +558,7 @@ static void _model_eval(
 
     // longitude sines/cosines series
     if (model->clon_last != clon)
-        shc_azmsincos(model->lsin, model->lcos, model->degree, clon);
+        fs_cos_sin(model->lcs, model->degree, clon);
 
     // relative radial powers
     if (model->crad_last != crad)
@@ -573,7 +573,7 @@ static void _model_eval(
     shc_eval(
         fpot, &flat, &flon, &frad, model->degree, mode,
         clat, crad, coeff_g, coeff_h, model->lp, model->ldp,
-        model->rrp, model->lsin, model->lcos, model->is_internal
+        model->rrp, model->lcs, model->is_internal
     );
 
     if (mode & SM_GRADIENT)
@@ -625,20 +625,12 @@ static void _model_reset(MODEL *model)
 
 static void _model_destroy(MODEL *model)
 {
-    if(NULL != model->lp)
-        free(model->lp);
-    if(NULL != model->ldp)
-        free(model->ldp);
-    if(NULL != model->lsin)
-        free(model->lsin);
-    if(NULL != model->lcos)
-        free(model->lcos);
-    if(NULL != model->rrp)
-        free(model->rrp);
-    if(NULL != model->psqrt)
-        free(model->psqrt);
-    if(NULL != model->prsqrt)
-        free(model->prsqrt);
+    if(model->lp) free(model->lp);
+    if(model->ldp) free(model->ldp);
+    if(model->lcs) free(model->lcs);
+    if(model->rrp) free(model->rrp);
+    if(model->psqrt) free(model->psqrt);
+    if(model->prsqrt) free(model->prsqrt);
 
     _model_reset(model);
 }
@@ -682,15 +674,9 @@ static int _model_init(
         goto error;
     }
 
-    if (NULL == (model->lsin = (double*)malloc((degree+1)*sizeof(double))))
+    if (NULL == (model->lcs = (double(*)[2])malloc((degree+1)*sizeof(double[2]))))
     {
-        PyErr_Format(PyExc_MemoryError, "_model_ts_init: lsin");
-        goto error;
-    }
-
-    if (NULL == (model->lcos = (double*)malloc((degree+1)*sizeof(double))))
-    {
-        PyErr_Format(PyExc_MemoryError, "_model_ts_init: lcos");
+        PyErr_Format(PyExc_MemoryError, "_model_ts_init: lcs");
         goto error;
     }
 

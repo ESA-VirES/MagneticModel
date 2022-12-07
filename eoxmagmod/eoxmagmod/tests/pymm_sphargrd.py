@@ -59,7 +59,7 @@ class SphericalHarmonicsGradientTestMixIn(SphericalHarmonicsCommonMixIn):
 
     @classmethod
     def reference_gradient_scalar(cls, degree, coef_g, coef_h, latitude, longitude, radius):
-        rad_series, sin_series, cos_series, p_series, dp_series = cls.get_series(
+        rad_series, cos_sin_series, p_series, dp_series = cls.get_series(
             degree, latitude, longitude, radius
         )
         m_idx = asarray(list(chain.from_iterable(
@@ -70,13 +70,15 @@ class SphericalHarmonicsGradientTestMixIn(SphericalHarmonicsCommonMixIn):
         )))
 
         grad_lat = (rad_series[n_idx] * dp_series * (
-            coef_g * cos_series[m_idx] + coef_h * sin_series[m_idx]
+            coef_g * cos_sin_series[m_idx, 0] +
+            coef_h * cos_sin_series[m_idx, 1]
         )).sum()
 
         cos_lat = cos(latitude * pi / 180.0)
         if cos_lat > 1e-10:
             grad_lon = -(m_idx * rad_series[n_idx] * p_series * (
-                coef_g * sin_series[m_idx] - coef_h * cos_series[m_idx]
+                coef_g * cos_sin_series[m_idx, 1] -
+                coef_h * cos_sin_series[m_idx, 0]
             )).sum() / cos_lat
         else:
             sin_lat = sin(latitude * pi / 180.0)
@@ -103,19 +105,20 @@ class SphericalHarmonicsGradientTestMixIn(SphericalHarmonicsCommonMixIn):
 
         rad_scale = n_idx + 1 if cls.is_internal else -n_idx
         grad_rad = -(rad_scale * rad_series[n_idx] * p_series * (
-            coef_g * cos_series[m_idx] + coef_h * sin_series[m_idx]
+            coef_g * cos_sin_series[m_idx, 0] +
+            coef_h * cos_sin_series[m_idx, 1]
         )).sum()
 
         return asarray([grad_lat, grad_lon, grad_rad])
 
     @classmethod
     def eval_gradient(cls, degree, coef_g, coef_h, latitude, longitude, radius):
-        rad_series, sin_series, cos_series, p_series, dp_series = cls.get_series(
+        rad_series, cos_sin_series, p_series, dp_series = cls.get_series(
             degree, latitude, longitude, radius
         )
         return sphargrd(
             latitude, coef_g, coef_h, p_series, dp_series, rad_series,
-            sin_series, cos_series, is_internal=cls.is_internal,
+            cos_sin_series, is_internal=cls.is_internal,
             degree=degree
         )
 

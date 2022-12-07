@@ -51,8 +51,8 @@
 /* evaluation of the relative radius powers */
 #include "pymm_relradpow.h"
 
-/* evaluation of the series of longitude sine and cosine values */
-#include "pymm_lonsincos.h"
+/* evaluation of the series of longitude cosine and sine values */
+#include "pymm_loncossin.h"
 
 /* final spherical-harmonic gradient evaluation */
 #include "pymm_sphargrd.h"
@@ -89,7 +89,7 @@ static PyMethodDef pymm_methods[] =
     {"vrot_sph2geod", (PyCFunction)vrot_sph2geod, METH_VARARGS|METH_KEYWORDS, DOC_VROT_SPH2GEOD},
     {"spharpot", (PyCFunction)spharpot, METH_VARARGS|METH_KEYWORDS, DOC_SPHARPOT},
     {"sphargrd", (PyCFunction)sphargrd, METH_VARARGS|METH_KEYWORDS, DOC_SPHARGRD},
-    {"lonsincos", (PyCFunction)lonsincos, METH_VARARGS|METH_KEYWORDS, DOC_LONSINCOS},
+    {"loncossin", (PyCFunction)loncossin, METH_VARARGS|METH_KEYWORDS, DOC_LONCOSSIN},
     {"relradpow", (PyCFunction)relradpow, METH_VARARGS|METH_KEYWORDS, DOC_RELRADPOW},
     {"legendre", (PyCFunction)legendre, METH_VARARGS|METH_KEYWORDS, DOC_LEGENDRE},
     {"sheval", (PyCFunction)sheval, METH_VARARGS|METH_KEYWORDS, DOC_SHEVAL},

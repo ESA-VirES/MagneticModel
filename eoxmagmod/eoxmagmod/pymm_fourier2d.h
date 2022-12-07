@@ -52,14 +52,10 @@ typedef struct Fourier2D {
     ptrdiff_t max_abs_degree;
     double scale1;
     double scale2;
-    double *cos_tmp;
-    double *sin_tmp;
-    double *cos1;
-    double *sin1;
-    double *cos2;
-    double *sin2;
-    double *cos12;
-    double *sin12;
+    double (*cos_sin_tmp)[2];
+    double (*cos_sin_1)[2];
+    double (*cos_sin_2)[2];
+    double (*cos_sin_12)[2];
 } FOURIER_2D;
 
 static void _fourier2d_reset(FOURIER_2D *f2d);
@@ -228,8 +224,8 @@ static PyObject* fourier2d(PyObject *self, PyObject *args, PyObject *kwdict)
 /*
  * high level nD-array recursive coefficient 2D Fourier expansion
  */
-static void _fourier2d_sincos(FOURIER_2D *f2d, const double t1, const double t2);
-static double _fourier2d_eval(FOURIER_2D *f2d, const double *ab);
+static void _fourier2d_cossin(FOURIER_2D *f2d, const double t1, const double t2);
+static double _fourier2d_eval(FOURIER_2D *f2d, const double (*ab)[2]);
 static void _fourier2d_eval_coeff_single_time(
     ARRAY_DATA *arrd_c,
     ARRAY_DATA *arrd_c0,
@@ -270,7 +266,7 @@ static void _fourier2d_eval_coeff(
         const double t1 = *((double*)arrd_t1->data);
         const double t2 = *((double*)arrd_t2->data);
 
-        _fourier2d_sincos(f2d, t1, t2);
+        _fourier2d_cossin(f2d, t1, t2);
 
         _fourier2d_eval_coeff_single_time(arrd_c, arrd_c0, f2d);
     }
@@ -297,7 +293,7 @@ static void _fourier2d_eval_coeff_single_time(
     else
     {
         double *c = ((double*)arrd_c->data);
-        const double *ab = ((double*)arrd_c0->data);
+        const double (*ab)[2] = ((double(*)[2])arrd_c0->data);
 
         *c = _fourier2d_eval(f2d, ab);
     }
@@ -315,14 +311,10 @@ static void _fourier2d_reset(FOURIER_2D *f2d)
 
 static void _fourier2d_destroy(FOURIER_2D *f2d)
 {
-    if(NULL != f2d->cos_tmp) free(f2d->cos_tmp);
-    if(NULL != f2d->sin_tmp) free(f2d->sin_tmp);
-    if(NULL != f2d->cos1) free(f2d->cos1);
-    if(NULL != f2d->sin1) free(f2d->sin1);
-    if(NULL != f2d->cos2) free(f2d->cos2);
-    if(NULL != f2d->sin2) free(f2d->sin2);
-    if(NULL != f2d->cos12) free(f2d->cos12);
-    if(NULL != f2d->sin12) free(f2d->sin12);
+    if(NULL != f2d->cos_sin_tmp) free(f2d->cos_sin_tmp);
+    if(NULL != f2d->cos_sin_1) free(f2d->cos_sin_1);
+    if(NULL != f2d->cos_sin_2) free(f2d->cos_sin_2);
+    if(NULL != f2d->cos_sin_12) free(f2d->cos_sin_12);
 
     _fourier2d_reset(f2d);
 }
@@ -359,51 +351,27 @@ static int _fourier2d_init(
     max_abs_degree = MAX(max_abs_degree, abs(max_degree2));
     f2d->max_abs_degree = max_abs_degree;
 
-    if (NULL == (f2d->cos_tmp = (double*)malloc((max_abs_degree+1)*sizeof(double))))
+    if (NULL == (f2d->cos_sin_tmp = (double(*)[2])malloc((max_abs_degree+1)*sizeof(double[2]))))
     {
-        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: cos_tmp");
+        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: cos_sin_tmp");
         goto error;
     }
 
-    if (NULL == (f2d->sin_tmp = (double*)malloc((max_abs_degree+1)*sizeof(double))))
+    if (NULL == (f2d->cos_sin_1 = (double(*)[2])malloc(size1*sizeof(double[2]))))
     {
-        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: sin_tmp");
+        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: cos_sin_1");
         goto error;
     }
 
-    if (NULL == (f2d->cos1 = (double*)malloc(size1*sizeof(double))))
+    if (NULL == (f2d->cos_sin_2 = (double(*)[2])malloc(size2*sizeof(double[2]))))
     {
-        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: cos1");
+        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: cos_sin_2");
         goto error;
     }
 
-    if (NULL == (f2d->sin1 = (double*)malloc(size1*sizeof(double))))
+    if (NULL == (f2d->cos_sin_12 = (double(*)[2])malloc(size1*size2*sizeof(double[2]))))
     {
-        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: sin1");
-        goto error;
-    }
-
-    if (NULL == (f2d->cos2 = (double*)malloc(size2*sizeof(double))))
-    {
-        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: cos2");
-        goto error;
-    }
-
-    if (NULL == (f2d->sin2 = (double*)malloc(size2*sizeof(double))))
-    {
-        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: sin2");
-        goto error;
-    }
-
-    if (NULL == (f2d->cos12 = (double*)malloc(size1*size2*sizeof(double))))
-    {
-        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: cos12");
-        goto error;
-    }
-
-    if (NULL == (f2d->sin12 = (double*)malloc(size1*size2*sizeof(double))))
-    {
-        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: sin12");
+        PyErr_Format(PyExc_MemoryError, "_fourier2d_reset: cos_sin_12");
         goto error;
     }
 
@@ -416,10 +384,10 @@ static int _fourier2d_init(
 
 /* 2D Fourier series - evaluate series from the coefficients and sin/cos matrix */
 
-static double _fourier2d_eval(FOURIER_2D *f2d, const double *ab)
+static double _fourier2d_eval(FOURIER_2D *f2d, const double (*ab)[2])
 {
     return fs_eval_2d(
-        ab, f2d->sin12, f2d->cos12,
+        ab, f2d->cos_sin_12,
         f2d->max_degree1 - f2d->min_degree1 + 1,
         f2d->max_degree2 - f2d->min_degree2 + 1
     );
@@ -427,36 +395,32 @@ static double _fourier2d_eval(FOURIER_2D *f2d, const double *ab)
 
 /* 2D Fourier series - evaluate sin/cos matrix for the given coordinates */
 
-static void _fourier2d_sincos(FOURIER_2D *f2d, double t1, double t2)
+static void _fourier2d_cossin(FOURIER_2D *f2d, double t1, double t2)
 {
-        fs_sincos(
-            f2d->sin_tmp, f2d->cos_tmp,
+        fs_cos_sin(
+            f2d->cos_sin_tmp,
             MAX(abs(f2d->min_degree1), abs(f2d->max_degree1)),
             t1 * f2d->scale1
         );
 
-        fs_sincos_neg(
-            f2d->sin1, f2d->cos1,
-            f2d->sin_tmp, f2d->cos_tmp,
+        fs_cos_sin_neg(
+            f2d->cos_sin_1, f2d->cos_sin_tmp,
             f2d->min_degree1, f2d->max_degree1
         );
 
-        fs_sincos(
-            f2d->sin_tmp, f2d->cos_tmp,
+        fs_cos_sin(
+            f2d->cos_sin_tmp,
             MAX(abs(f2d->min_degree2), abs(f2d->max_degree2)),
             t2 * f2d->scale2
         );
 
-        fs_sincos_neg(
-            f2d->sin2, f2d->cos2,
-            f2d->sin_tmp, f2d->cos_tmp,
+        fs_cos_sin_neg(
+            f2d->cos_sin_2, f2d->cos_sin_tmp,
             f2d->min_degree2, f2d->max_degree2
         );
 
-        fs_sincos_2d(
-            f2d->sin12, f2d->cos12,
-            f2d->sin1, f2d->cos1,
-            f2d->sin2, f2d->cos2,
+        fs_cos_sin_2d(
+            f2d->cos_sin_12, f2d->cos_sin_1, f2d->cos_sin_2,
             f2d->max_degree1 - f2d->min_degree1 + 1,
             f2d->max_degree2 - f2d->min_degree2 + 1
         );

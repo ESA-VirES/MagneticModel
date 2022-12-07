@@ -36,7 +36,7 @@ from eoxmagmod._pymm import (
     POTENTIAL, GRADIENT, POTENTIAL_AND_GRADIENT,
     GEODETIC_ABOVE_WGS84, GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
     convert, vrot_sph2geod, vrot_sph2cart,
-    relradpow, lonsincos, legendre,
+    relradpow, loncossin, legendre,
     spharpot, sphargrd, sheval,
 )
 from eoxmagmod.tests.data import sifm, mma_external
@@ -86,26 +86,25 @@ class SphericalHarmonicsMixIn:
     @classmethod
     def get_series(cls, degree, latitude, longitude, radius):
         rad_series = relradpow(radius, degree, is_internal=cls.is_internal)
-        sin_series, cos_series = lonsincos(longitude, degree)
+        cos_sin_series = loncossin(longitude, degree)
         p_series, dp_series = legendre(latitude, degree)
-        return rad_series, sin_series, cos_series, p_series, dp_series
+        return rad_series, cos_sin_series, p_series, dp_series
 
     @classmethod
     def _spherical_harmonics(cls, latitude, longitude, radius):
         degree = cls.degree
         coef_g = cls.coef_g
         coef_h = cls.coef_h
-        rad_series, sin_series, cos_series, p_series, dp_series = cls.get_series(
+        rad_series, cos_sin_series, p_series, dp_series = cls.get_series(
             degree, latitude, longitude, radius
         )
         potential = spharpot(
             radius, coef_g, coef_h, p_series, rad_series,
-            sin_series, cos_series, degree=degree
+            cos_sin_series, degree=degree
         )
         gradient = sphargrd(
             latitude, coef_g, coef_h, p_series, dp_series, rad_series,
-            sin_series, cos_series,
-            is_internal=cls.is_internal, degree=degree
+            cos_sin_series, is_internal=cls.is_internal, degree=degree
         )
         return potential, gradient
 

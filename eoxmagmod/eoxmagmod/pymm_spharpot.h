@@ -39,13 +39,13 @@
 void _spharpot(
     ARRAY_DATA *arrd_pot, ARRAY_DATA *arrd_rad, ARRAY_DATA *arrd_cg,
     ARRAY_DATA *arrd_ch, ARRAY_DATA *arrd_lp, ARRAY_DATA *arrd_rrp,
-    ARRAY_DATA *arrd_lsin, ARRAY_DATA *arrd_lcos, const int degree
+    ARRAY_DATA *arrd_lcs, const int degree
 );
 
 /* Python function definition */
 
 #define DOC_SPHARPOT "\n"\
-"  v = spharpot(radius, coef_g, coef_h, leg_p, rrp, lonsin, loncos, degree=-1)\n"\
+"  v = spharpot(radius, coef_g, coef_h, leg_p, rrp, lcs, degree=-1)\n"\
 "\n"\
 "     Spherical harmonic evaluation of the scalar potential field\n"\
 "     in the (geocentric) spherical coordinates (latitude, longitude, radius).\n"\
@@ -53,12 +53,11 @@ void _spharpot(
 "     The input parameters are:\n"\
 "       radius - radius, i.e., distance from the earth centre, at the\n"\
 "                evaluated location.\n"\
-"       coef_g - vector of spherical harmonic model coefficients.\n"\
-"       coef_h - vector of spherical harmonic model coefficients.\n"\
-"       leg_p - vector the Legendre polynomials.\n"\
-"       rrp - vector the relative radius powers.\n"\
-"       lonsin - vector of the longitude cosines.\n"\
-"       lonsin - vector of the longitude sines.\n"\
+"       coef_g - array of spherical harmonic model coefficients.\n"\
+"       coef_h - array of spherical harmonic model coefficients.\n"\
+"       leg_p - array of Legendre polynomials.\n"\
+"       rrp - array of relative radius powers.\n"\
+"       lcs - array of longitude cosines and sines.\n"\
 "       degree - degree of the spherical harmonic model. If not provided or \n"\
 "                set to a negative number, then it is derived from the array \n"\
 "                sizes.\n"\
@@ -67,8 +66,7 @@ void _spharpot(
 static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
 {
     static char *keywords[] = {
-        "radius", "coef_g", "coef_h", "leg_p", "rpp", "lonsin", "loncos",
-        "degree", NULL
+        "radius", "coef_g", "coef_h", "leg_p", "rpp", "lcs", "degree", NULL
     };
 
     int degree = -1;
@@ -78,8 +76,7 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     PyObject *obj_ch = NULL; // coef_h object
     PyObject *obj_lp = NULL; // P object
     PyObject *obj_rrp = NULL; // RRP object
-    PyObject *obj_lsin = NULL; // lon-sin object
-    PyObject *obj_lcos = NULL; // lon-cos object
+    PyObject *obj_lcs = NULL; // lon cos/sin object
     PyObject *retval = NULL; // output
 
     PyArrayObject *arr_pot = NULL; // output array
@@ -88,14 +85,12 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     PyArrayObject *arr_ch = NULL; // coef_h array
     PyArrayObject *arr_lp = NULL; // P array
     PyArrayObject *arr_rrp = NULL; // RRP array
-    PyArrayObject *arr_lsin = NULL; // lon-sin array
-    PyArrayObject *arr_lcos = NULL; // lon-cos array
+    PyArrayObject *arr_lcs = NULL; // lon cos/sin array
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "OOOOOOO|i:spharpot", keywords,
-        &obj_rad, &obj_cg, &obj_ch, &obj_lp, &obj_rrp, &obj_lsin, &obj_lcos,
-        &degree
+        args, kwdict, "OOOOOO|i:spharpot", keywords,
+        &obj_rad, &obj_cg, &obj_ch, &obj_lp, &obj_rrp, &obj_lcs, &degree
     ))
         goto exit;
 
@@ -115,29 +110,25 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     if (NULL == (arr_rrp = _get_as_double_array(obj_rrp, 1, 0, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_ALIGNED, keywords[5])))
         goto exit;
 
-    if (NULL == (arr_lsin = _get_as_double_array(obj_lsin, 1, 0, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_ALIGNED, keywords[6])))
-        goto exit;
-
-    if (NULL == (arr_lcos = _get_as_double_array(obj_lcos, 1, 0, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_ALIGNED, keywords[7])))
+    if (NULL == (arr_lcs = _get_as_double_array(obj_lcs, 2, 0, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_ALIGNED, keywords[6])))
         goto exit;
 
     // extract degree from the array dimensions
-    { 
-        const int ndegrees = 6;
+    {
+        const int ndegrees = 5;
         npy_intp degrees[] = {
             _size_to_degree(PyArray_DIMS(arr_cg)[PyArray_NDIM(arr_cg)-1]),
             _size_to_degree(PyArray_DIMS(arr_ch)[PyArray_NDIM(arr_ch)-1]),
             _size_to_degree(PyArray_DIMS(arr_lp)[PyArray_NDIM(arr_lp)-1]),
             PyArray_DIMS(arr_rrp)[PyArray_NDIM(arr_rrp)-1] - 1,
-            PyArray_DIMS(arr_lsin)[PyArray_NDIM(arr_lsin)-1] - 1,
-            PyArray_DIMS(arr_lcos)[PyArray_NDIM(arr_lcos)-1] - 1
+            PyArray_DIMS(arr_lcs)[PyArray_NDIM(arr_lcs)-2] - 1,
         };
 
         npy_intp max_degree;
         int arg_idx;
 
          _get_max_degree(&arg_idx, &max_degree, degrees, ndegrees);
-    
+
         if (max_degree < 0)
         {
             PyErr_Format(
@@ -161,11 +152,11 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // check array dimensions and allocate the output array
     {
-        const int narr = 7;
+        const int narr = 6;
         PyArrayObject *arr[] = {
-            arr_rad, arr_cg, arr_ch, arr_lp, arr_rrp, arr_lsin, arr_lcos,
+            arr_rad, arr_cg, arr_ch, arr_lp, arr_rrp, arr_lcs,
         };
-        npy_intp arr_ndim[] = {0, 1, 1, 1, 1, 1, 1};
+        npy_intp arr_ndim[] = {0, 1, 1, 1, 1, 2};
 
         int arg_idx;
         npy_intp ndim, *dims;
@@ -177,7 +168,7 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
         {
             int i;
 
-            for (i = 0; i < 7; ++i)
+            for (i = 0; i < narr; ++i)
             {
                 if (i != arg_idx)
                 {
@@ -208,8 +199,7 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
         ARRAY_DATA arrd_ch = _array_to_arrd(arr_ch);
         ARRAY_DATA arrd_lp = _array_to_arrd(arr_lp);
         ARRAY_DATA arrd_rrp = _array_to_arrd(arr_rrp);
-        ARRAY_DATA arrd_lsin = _array_to_arrd(arr_lsin);
-        ARRAY_DATA arrd_lcos = _array_to_arrd(arr_lcos);
+        ARRAY_DATA arrd_lcs = _array_to_arrd(arr_lcs);
 
         _spharpot(
             &arrd_pot,
@@ -218,8 +208,7 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
             &arrd_ch,
             &arrd_lp,
             &arrd_rrp,
-            &arrd_lsin,
-            &arrd_lcos,
+            &arrd_lcs,
             degree
         );
     }
@@ -232,8 +221,7 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
     if (arr_ch) {Py_DECREF(arr_ch);}
     if (arr_lp) {Py_DECREF(arr_lp);}
     if (arr_rrp) {Py_DECREF(arr_rrp);}
-    if (arr_lsin) {Py_DECREF(arr_lsin);}
-    if (arr_lcos) {Py_DECREF(arr_lcos);}
+    if (arr_lcs) {Py_DECREF(arr_lcs);}
     if (!retval && arr_pot) {Py_DECREF(arr_pot);}
 
     return retval;
@@ -246,7 +234,7 @@ static PyObject* spharpot(PyObject *self, PyObject *args, PyObject *kwdict)
 void _spharpot(
     ARRAY_DATA *arrd_pot, ARRAY_DATA *arrd_rad, ARRAY_DATA *arrd_cg,
     ARRAY_DATA *arrd_ch, ARRAY_DATA *arrd_lp, ARRAY_DATA *arrd_rrp,
-    ARRAY_DATA *arrd_lsin, ARRAY_DATA *arrd_lcos, const int degree
+    ARRAY_DATA *arrd_lcs, const int degree
 )
 {
     if (arrd_pot->ndim > 0)
@@ -261,8 +249,7 @@ void _spharpot(
             ARRAY_DATA arrd_ch_item = _get_arrd_item_with_guard(arrd_ch, i, 1);
             ARRAY_DATA arrd_lp_item = _get_arrd_item_with_guard(arrd_lp, i, 1);
             ARRAY_DATA arrd_rrp_item = _get_arrd_item_with_guard(arrd_rrp, i, 1);
-            ARRAY_DATA arrd_lsin_item = _get_arrd_item_with_guard(arrd_lsin, i, 1);
-            ARRAY_DATA arrd_lcos_item = _get_arrd_item_with_guard(arrd_lcos, i, 1);
+            ARRAY_DATA arrd_lcs_item = _get_arrd_item_with_guard(arrd_lcs, i, 2);
 
             _spharpot(
                 &arrd_pot_item,
@@ -271,8 +258,7 @@ void _spharpot(
                 &arrd_ch_item,
                 &arrd_lp_item,
                 &arrd_rrp_item,
-                &arrd_lsin_item,
-                &arrd_lcos_item,
+                &arrd_lcs_item,
                 degree
             );
         }
@@ -285,10 +271,9 @@ void _spharpot(
         const double *ch = ((double*)arrd_ch->data);
         const double *lp = ((double*)arrd_lp->data);
         const double *rrp = ((double*)arrd_rrp->data);
-        const double *lsin = ((double*)arrd_lsin->data);
-        const double *lcos = ((double*)arrd_lcos->data);
+        const double (*lcs)[2] = ((double(*)[2])arrd_lcs->data);
 
-        shc_eval_v(pot, degree, rad, cg, ch, lp, rrp, lsin, lcos);
+        shc_eval_v(pot, degree, rad, cg, ch, lp, rrp, lcs);
     }
 }
 #endif  /* PYMM_SPHARPOT_H */

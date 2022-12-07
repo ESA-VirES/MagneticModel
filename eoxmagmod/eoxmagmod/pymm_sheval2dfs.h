@@ -40,7 +40,7 @@
 typedef struct Fourier2DCoefSet {
     PyArrayObject *arr_ab;
     PyArrayObject *arr_cm;
-    const double *ab;
+    const double (*ab)[2];
     const int *cm;
     ptrdiff_t *offset;
     size_t ncoef;
@@ -499,18 +499,18 @@ static void _sheval2dfs_eval_coeff(
 
     const ptrdiff_t size1 = f2d->max_degree1 - f2d->min_degree1 + 1;
     const ptrdiff_t size2 = f2d->max_degree2 - f2d->min_degree2 + 1;
-    const ptrdiff_t ab_stride = 2 * size1 * size2;
+    const ptrdiff_t ab_stride = size1 * size2;
 
     const ptrdiff_t n = coefset->ncoef;
     ptrdiff_t i;
 
-    _fourier2d_sincos(f2d, time1, time2);
+    _fourier2d_cossin(f2d, time1, time2);
 
     for (i = 0; i < n; ++i)
     {
         double *target = (coefset->offset[i] >= 0 ? cg : ch);
         const ptrdiff_t offset = abs(coefset->offset[i]);
-        const double *ab = coefset->ab + i*ab_stride ;
+        const double (*ab)[2] = coefset->ab + i*ab_stride ;
 
         target[offset] = _fourier2d_eval(f2d, ab);
     }
@@ -627,8 +627,8 @@ static int _f2d_coefset_init(
     coefset->arr_ab = arr_ab;
     coefset->arr_cm = arr_cm;
 
-    coefset->ab = PyArray_DATA(arr_ab),
-    coefset->cm = PyArray_DATA(arr_cm),
+    coefset->ab = (double(*)[2])PyArray_DATA(arr_ab),
+    coefset->cm = (int*) PyArray_DATA(arr_cm),
     coefset->ncoef = PyArray_DIMS(arr_cm)[0];
 
     if (NULL == (coefset->offset = (ptrdiff_t*)malloc(coefset->ncoef*sizeof(ptrdiff_t))))
