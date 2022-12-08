@@ -102,29 +102,28 @@ static int _model_init(
 
 static void _sheval_pot(
     ARRAY_DATA arrd_pot,
-    ARRAY_DATA arrd_x, ARRAY_DATA arrd_cg, ARRAY_DATA arrd_ch, MODEL *model
+    ARRAY_DATA arrd_x, ARRAY_DATA arrd_coef, MODEL *model
 );
 static void _sheval_grd(
     ARRAY_DATA arrd_grd,
-    ARRAY_DATA arrd_x, ARRAY_DATA arrd_cg, ARRAY_DATA arrd_ch, MODEL *model
+    ARRAY_DATA arrd_x, ARRAY_DATA arrd_coef, MODEL *model
 );
 static void _sheval_pot_and_grd(
     ARRAY_DATA arrd_pot, ARRAY_DATA arrd_grd,
-    ARRAY_DATA arrd_x, ARRAY_DATA arrd_cg, ARRAY_DATA arrd_ch, MODEL *model
+    ARRAY_DATA arrd_x, ARRAY_DATA arrd_coef, MODEL *model
 );
 
 /* Python function definition */
 
 #define DOC_SHEVAL "\n"\
-"   arr_out = sheval(arr_x, coef_g, coef_h, coord_type_in=GEODETIC_ABOVE_WGS84,\n"\
+"   arr_out = sheval(arr_x, coef, coord_type_in=GEODETIC_ABOVE_WGS84,\n"\
 "                    coord_type_out=GEODETIC_ABOVE_WGS84, mode=GRADIENT,\n"\
 "                    is_internal=True, degree=-1,\n"\
 "                    scale_potential=1.0, scale_gradient=1.0)\n"\
 "\n"\
 "     Parameters:\n"\
 "       arr_x  - array of 3D coordinates.\n"\
-"       coef_g - array of spherical harmonic model coefficients.\n"\
-"       coef_h - array of spherical harmonic model coefficients.\n"\
+"       coef - array of spherical harmonic model coefficients.\n"\
 "       coord_type_in - type of the input coordinates.\n"\
 "       coord_type_out - type of the output coordinates frame.\n"\
 "       mode - quantity to be evaluated:\n"\
@@ -145,7 +144,7 @@ static void _sheval_pot_and_grd(
 static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
 {
     static char *keywords[] = {
-        "arr_x", "coef_g", "coef_h", "coord_type_in", "coord_type_out",
+        "arr_x", "coef", "coord_type_in", "coord_type_out",
         "mode", "is_internal", "degree", "scale_potential", "scale_gradient",
         NULL
     };
@@ -158,12 +157,10 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
     double scale_gradient[3] = {1.0, 1.0, 1.0};
     PyObject *obj_is_internal = NULL; // boolean flag
     PyObject *obj_x = NULL; // input object
-    PyObject *obj_cg = NULL; // coef_g object
-    PyObject *obj_ch = NULL; // coef_h object
+    PyObject *obj_coef = NULL; // coefficients object
     PyObject *obj_scale = NULL; // gradient scale object
     PyArrayObject *arr_x = NULL; // coordinates array
-    PyArrayObject *arr_cg = NULL; // coef_g array
-    PyArrayObject *arr_ch = NULL; // coef_h array
+    PyArrayObject *arr_coef = NULL; // coefficients array
     PyArrayObject *arr_pot = NULL; // output array
     PyArrayObject *arr_grd = NULL; // output array
     PyArrayObject *arr_scale = NULL; // gradient scale array
@@ -172,8 +169,8 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "OOO|iiiOidO:sheval", keywords,
-        &obj_x, &obj_cg, &obj_ch, &ct_in, &ct_out, &mode,
+        args, kwdict, "OO|iiiOidO:sheval", keywords,
+        &obj_x, &obj_coef, &ct_in, &ct_out, &mode,
         &obj_is_internal, &degree, &scale_potential, &obj_scale
     ))
         goto exit;
@@ -195,19 +192,14 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
     if (NULL == (arr_x = _get_as_double_array(obj_x, 1, 0, NPY_ARRAY_ALIGNED, keywords[0])))
         goto exit;
 
-    if (NULL == (arr_cg = _get_as_double_array(obj_cg, 1, 0, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_IN_ARRAY, keywords[2])))
+    if (NULL == (arr_coef = _get_as_double_array(obj_coef, 2, 0, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_IN_ARRAY, keywords[2])))
         goto exit;
-
-    if (NULL == (arr_ch = _get_as_double_array(obj_ch, 1, 0, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_IN_ARRAY, keywords[3])))
-        goto exit;
-
 
     // extract degree from the array dimensions
     { 
-        const int ndegrees = 2;
+        const int ndegrees = 1;
         npy_intp degrees[] = {
-            _size_to_degree(PyArray_DIMS(arr_cg)[PyArray_NDIM(arr_cg)-1]),
-            _size_to_degree(PyArray_DIMS(arr_ch)[PyArray_NDIM(arr_ch)-1]),
+            _size_to_degree(PyArray_DIMS(arr_coef)[PyArray_NDIM(arr_coef)-2]),
         };
 
         npy_intp max_degree;
@@ -238,9 +230,9 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // check array dimensions and allocate the output array
     {
-        const int narr = 3;
-        PyArrayObject *arr[] = {arr_x, arr_cg, arr_ch};
-        npy_intp arr_ndim[] = {1, 1, 1};
+        const int narr = 2;
+        PyArrayObject *arr[] = {arr_x, arr_coef};
+        npy_intp arr_ndim[] = {1, 2};
 
         int arg_idx;
         npy_intp ndim, *dims;
@@ -265,6 +257,13 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
                         );
                         goto exit;
                     }
+                }
+
+                // check last dimension of the pair-arrays
+                if ((arr_ndim[i] == 2)&&(PyArray_DIMS(arr[i])[PyArray_NDIM(arr[i])-1] != 2))
+                {
+                    PyErr_Format(PyExc_ValueError, "Invalid shape of %s array!", keywords[i]);
+                    goto exit;
                 }
             }
         }
@@ -317,8 +316,7 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
             _sheval_pot(
                 _array_to_arrd(arr_pot),
                 _array_to_arrd(arr_x),
-                _array_to_arrd(arr_cg),
-                _array_to_arrd(arr_ch),
+                _array_to_arrd(arr_coef),
                 &model
             );
             retval = (PyObject*) arr_pot;
@@ -328,8 +326,7 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
             _sheval_grd(
                 _array_to_arrd(arr_grd),
                 _array_to_arrd(arr_x),
-                _array_to_arrd(arr_cg),
-                _array_to_arrd(arr_ch),
+                _array_to_arrd(arr_coef),
                 &model
             );
             retval = (PyObject*) arr_grd;
@@ -340,8 +337,7 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
                 _array_to_arrd(arr_pot),
                 _array_to_arrd(arr_grd),
                 _array_to_arrd(arr_x),
-                _array_to_arrd(arr_cg),
-                _array_to_arrd(arr_ch),
+                _array_to_arrd(arr_coef),
                 &model
             );
             if (NULL == (retval = Py_BuildValue("NN", (PyObject*) arr_pot, (PyObject*) arr_grd)))
@@ -355,8 +351,7 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // decrease reference counters to the arrays
     if (arr_x) Py_DECREF(arr_x);
-    if (arr_cg) Py_DECREF(arr_cg);
-    if (arr_ch) Py_DECREF(arr_ch);
+    if (arr_coef) Py_DECREF(arr_coef);
     if (arr_scale) Py_DECREF(arr_scale);
     if (!retval && arr_grd) Py_DECREF(arr_grd);
     if (!retval && arr_pot) Py_DECREF(arr_pot);
@@ -389,16 +384,14 @@ static SHEVAL_MODE _check_sheval_mode(int mode, const char *label)
 static void _model_eval(
     double *fpot, double *fx, double *fy, double *fz,
     const double x, const double y, const double z,
-    const double *coeff_g, const double *coeff_h,
-    MODEL *model, const int mode
+    const double (*coeff)[2], MODEL *model, const int mode
 );
 
 
 static void _sheval_pot(
     ARRAY_DATA arrd_pot,
     ARRAY_DATA arrd_x,
-    ARRAY_DATA arrd_cg,
-    ARRAY_DATA arrd_ch,
+    ARRAY_DATA arrd_coef,
     MODEL *model
 )
 {
@@ -410,8 +403,7 @@ static void _sheval_pot(
             _sheval_pot(
                 _get_arrd_item_nocheck(&arrd_pot, i),
                 _get_arrd_item_with_guard(&arrd_x, i, 1),
-                _get_arrd_item_with_guard(&arrd_cg, i, 1),
-                _get_arrd_item_with_guard(&arrd_ch, i, 1),
+                _get_arrd_item_with_guard(&arrd_coef, i, 2),
                 model
             );
         }
@@ -420,13 +412,12 @@ static void _sheval_pot(
     else
     {
         double *pot = ((double*)arrd_pot.data);
-        const double *cg = ((double*)arrd_cg.data);
-        const double *ch = ((double*)arrd_ch.data);
+        const double (*coeff)[2] = ((double(*)[2])arrd_coef.data);
         const double *x = ((double*)arrd_x.data);
 
         _model_eval(
             pot, NULL, NULL, NULL, x[0], x[1], x[2],
-            cg, ch, model, SM_POTENTIAL
+            coeff, model, SM_POTENTIAL
         );
     }
 }
@@ -435,8 +426,7 @@ static void _sheval_pot(
 static void _sheval_grd(
     ARRAY_DATA arrd_grd,
     ARRAY_DATA arrd_x,
-    ARRAY_DATA arrd_cg,
-    ARRAY_DATA arrd_ch,
+    ARRAY_DATA arrd_coef,
     MODEL *model
 )
 {
@@ -448,8 +438,7 @@ static void _sheval_grd(
             _sheval_grd(
                 _get_arrd_item_nocheck(&arrd_grd, i),
                 _get_arrd_item_with_guard(&arrd_x, i, 1),
-                _get_arrd_item_with_guard(&arrd_cg, i, 1),
-                _get_arrd_item_with_guard(&arrd_ch, i, 1),
+                _get_arrd_item_with_guard(&arrd_coef, i, 2),
                 model
             );
         }
@@ -459,12 +448,11 @@ static void _sheval_grd(
     {
         double *grd = ((double*)arrd_grd.data);
         const double *x = ((double*)arrd_x.data);
-        const double *cg = ((double*)arrd_cg.data);
-        const double *ch = ((double*)arrd_ch.data);
+        const double (*coeff)[2] = ((double(*)[2])arrd_coef.data);
 
         _model_eval(
             NULL, grd+0, grd+1, grd+2, x[0], x[1], x[2],
-            cg, ch, model, SM_GRADIENT
+            coeff, model, SM_GRADIENT
         );
     }
 }
@@ -474,8 +462,7 @@ static void _sheval_pot_and_grd(
     ARRAY_DATA arrd_pot,
     ARRAY_DATA arrd_grd,
     ARRAY_DATA arrd_x,
-    ARRAY_DATA arrd_cg,
-    ARRAY_DATA arrd_ch,
+    ARRAY_DATA arrd_coef,
     MODEL *model
 )
 {
@@ -488,8 +475,7 @@ static void _sheval_pot_and_grd(
                 _get_arrd_item_nocheck(&arrd_pot, i),
                 _get_arrd_item_nocheck(&arrd_grd, i),
                 _get_arrd_item_with_guard(&arrd_x, i, 1),
-                _get_arrd_item_with_guard(&arrd_cg, i, 1),
-                _get_arrd_item_with_guard(&arrd_ch, i, 1),
+                _get_arrd_item_with_guard(&arrd_coef, i, 2),
                 model
             );
         }
@@ -500,12 +486,11 @@ static void _sheval_pot_and_grd(
         double *pot = ((double*)arrd_pot.data);
         double *grd = ((double*)arrd_grd.data);
         const double *x = ((double*)arrd_x.data);
-        const double *cg = ((double*)arrd_cg.data);
-        const double *ch = ((double*)arrd_ch.data);
+        const double (*coeff)[2] = ((double(*)[2])arrd_coef.data);
 
         _model_eval(
             pot, grd+0, grd+1, grd+2, x[0], x[1], x[2],
-            cg, ch, model, SM_POTENTIAL_AND_GRADIENT
+            coeff, model, SM_POTENTIAL_AND_GRADIENT
         );
     }
 
@@ -516,8 +501,7 @@ static void _sheval_pot_and_grd(
 static void _model_eval(
     double *fpot, double *fx, double *fy, double *fz,
     const double x, const double y, const double z,
-    const double *coeff_g, const double *coeff_h,
-    MODEL *model, const int mode
+    const double (*coeff)[2], MODEL *model, const int mode
 )
 {
     double glat, glon, ghgt;
@@ -572,8 +556,8 @@ static void _model_eval(
     // evaluate the model
     shc_eval(
         fpot, &flat, &flon, &frad, model->degree, mode,
-        clat, crad, coeff_g, coeff_h, model->lp, model->ldp,
-        model->rrp, model->lcs, model->is_internal
+        clat, crad, coeff, model->lcs, model->lp, model->ldp,
+        model->rrp, model->is_internal
     );
 
     if (mode & SM_GRADIENT)

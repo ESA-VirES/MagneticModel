@@ -32,7 +32,7 @@ import operator
 from itertools import chain, product
 from functools import reduce
 from random import random
-from numpy import asarray, zeros, empty
+from numpy import asarray, zeros, empty, stack
 from numpy.lib.stride_tricks import as_strided
 from numpy.testing import assert_allclose
 from eoxmagmod._pymm import legendre, loncossin, relradpow, spharpot
@@ -58,28 +58,36 @@ def _reshape_variable(shape, variable, preserved_dimensions=0):
 class SphericalHarmonicsCommonMixIn:
     is_internal = True
     degree = None
-    coef_g = None
-    coef_h = None
+    coeff = None
 
     @classmethod
-    def reference_potential(cls, degree, coef_g, coef_h, latitude, longitude, radius):
+    def eval_potential(cls, degree, coeff, latitude, longitude, radius):
+        rad_series, cos_sin_series, p_series, _ = cls.get_series(
+            degree, latitude, longitude, radius
+        )
+        return spharpot(
+            radius, coeff, p_series, rad_series, cos_sin_series,
+            degree=degree,
+        )
+
+    @classmethod
+    def reference_potential(cls, degree, coeff, latitude, longitude, radius):
 
         (
-            shape, size, coef_g, coef_h, latitude, longitude, radius,
-        ) = cls._ravel_inputs(degree, coef_g, coef_h, latitude, longitude, radius)
+            shape, size, coeff, latitude, longitude, radius,
+        ) = cls._ravel_inputs(degree, coeff, latitude, longitude, radius)
 
         result = empty(size)
 
         for i in range(size):
             result[i] = cls.reference_potential_scalar(
-                degree, coef_g[i], coef_h[i],
-                latitude[i], longitude[i], radius[i]
+                degree, coeff[i], latitude[i], longitude[i], radius[i]
             )
 
         return result.reshape(shape)
 
     @classmethod
-    def reference_potential_scalar(cls, degree, coef_g, coef_h, latitude, longitude, radius):
+    def reference_potential_scalar(cls, degree, coeff, latitude, longitude, radius):
         rad_series, cos_sin_series, p_series, _ = cls.get_series(
             degree, latitude, longitude, radius,
         )
@@ -90,19 +98,9 @@ class SphericalHarmonicsCommonMixIn:
             [n]*(n+1)  for n in range(degree + 1)
         )))
         return (radius * rad_series[n_idx] * p_series * (
-            coef_g * cos_sin_series[m_idx, 0] + coef_h * cos_sin_series[m_idx, 1]
+            coeff[:, 0] * cos_sin_series[m_idx, 0] +
+            coeff[:, 1] * cos_sin_series[m_idx, 1]
         )).sum()
-
-
-    @classmethod
-    def eval_potential(cls, degree, coef_g, coef_h, latitude, longitude, radius):
-        rad_series, cos_sin_series, p_series, _ = cls.get_series(
-            degree, latitude, longitude, radius
-        )
-        return spharpot(
-            radius, coef_g, coef_h, p_series, rad_series, cos_sin_series,
-            degree=degree,
-        )
 
     @classmethod
     def get_series(cls, degree, latitude, longitude, radius):
@@ -112,20 +110,16 @@ class SphericalHarmonicsCommonMixIn:
         return rad_series, cos_sin_series, p_series, dp_series
 
     @classmethod
-    def _ravel_inputs(cls, degree, coef_g, coef_h, latitude, longitude, radius):
+    def _ravel_inputs(cls, degree, coeff, latitude, longitude, radius):
         def _prod(values):
             return reduce(operator.mul, values, 1)
 
-        coef_g = asarray(coef_g)
-        coef_h = asarray(coef_h)
+        coeff = asarray(coeff)
         latitude = asarray(latitude)
         longitude = asarray(longitude)
         radius = asarray(radius)
 
-        shape = ()
-        for array in [coef_g, coef_h]:
-            if len(array.shape[:-1]) > len(shape):
-                shape = array.shape[:-1]
+        shape = coeff.shape[:-2]
 
         for array in [latitude, longitude, radius]:
             if len(array.shape) > len(shape):
@@ -136,8 +130,7 @@ class SphericalHarmonicsCommonMixIn:
         return (
             shape,
             size,
-            _reshape_variable(shape, coef_g, 1).copy().reshape((size, coef_g.shape[-1])),
-            _reshape_variable(shape, coef_h, 1).copy().reshape((size, coef_h.shape[-1])),
+            _reshape_variable(shape, coeff, 2).copy().reshape((size, *coeff.shape[-2:])),
             _reshape_variable(shape, latitude).ravel(),
             _reshape_variable(shape, longitude).ravel(),
             _reshape_variable(shape, radius).ravel(),
@@ -160,29 +153,29 @@ class SphericalHarmonicsPotentialTestMixIn(SphericalHarmonicsCommonMixIn):
             offset = (degree*(degree + 1))//2
 
             for order in range(0, degree + 1):
-                coef_g, coef_h = zeros(size), zeros(size)
-                coef_g[order + offset] = 1.0
+                coeff = zeros((size, 2))
+                coeff[order + offset, 0] = 1.0
 
                 for latitude, longitude, radius in coords:
                     assert_allclose(
                         self.eval_potential(
-                            degree, coef_g, coef_h, latitude, longitude, radius
+                            degree, coeff, latitude, longitude, radius
                         ),
                         self.reference_potential(
-                            degree, coef_g, coef_h, latitude, longitude, radius
+                            degree, coeff, latitude, longitude, radius
                         )
                     )
 
-                coef_g, coef_h = zeros(size), zeros(size)
-                coef_h[order + offset] = 1.0
+                coeff = zeros((size, 2))
+                coeff[order + offset, 1] = 1.0
 
                 for latitude, longitude, radius in coords:
                     assert_allclose(
                         self.eval_potential(
-                            degree, coef_g, coef_h, latitude, longitude, radius
+                            degree, coeff, latitude, longitude, radius
                         ),
                         self.reference_potential(
-                            degree, coef_g, coef_h, latitude, longitude, radius
+                            degree, coeff, latitude, longitude, radius
                         )
                     )
 
@@ -195,12 +188,10 @@ class SphericalHarmonicsPotentialTestMixIn(SphericalHarmonicsCommonMixIn):
         for latitude, longitude, radius in coords:
             assert_allclose(
                 self.eval_potential(
-                    self.degree, self.coef_g, self.coef_h, latitude, longitude,
-                    radius
+                    self.degree, self.coeff, latitude, longitude, radius
                 ),
                 self.reference_potential(
-                    self.degree, self.coef_g, self.coef_h, latitude, longitude,
-                    radius
+                    self.degree, self.coeff, latitude, longitude, radius
                 ),
             )
 
@@ -216,12 +207,10 @@ class SphericalHarmonicsPotentialTestMixIn(SphericalHarmonicsCommonMixIn):
 
         assert_allclose(
             self.eval_potential(
-                self.degree, self.coef_g, self.coef_h, latitude, longitude,
-                radius
+                self.degree, self.coeff, latitude, longitude, radius
             ),
             self.reference_potential(
-                self.degree, self.coef_g, self.coef_h, latitude, longitude,
-                radius
+                self.degree, self.coeff, latitude, longitude, radius
             ),
         )
 
@@ -229,15 +218,13 @@ class SphericalHarmonicsPotentialTestMixIn(SphericalHarmonicsCommonMixIn):
 class TestSphericalHarmonicsPotentialInternal(TestCase, SphericalHarmonicsPotentialTestMixIn):
     is_internal = True
     degree = sifm.DEGREE
-    coef_g = sifm.COEF_G
-    coef_h = sifm.COEF_H
+    coeff = stack((sifm.COEF_G, sifm.COEF_H), axis=-1)
 
 
 class TestSphericalHarmonicsPotentialExternal(TestCase, SphericalHarmonicsPotentialTestMixIn):
     is_internal = False
     degree = mma_external.DEGREE
-    coef_g = mma_external.COEF_Q
-    coef_h = mma_external.COEF_S
+    coeff = stack((mma_external.COEF_Q, mma_external.COEF_S), axis=-1)
 
 
 if __name__ == "__main__":

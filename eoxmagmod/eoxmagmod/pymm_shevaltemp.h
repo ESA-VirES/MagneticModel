@@ -93,8 +93,7 @@ static int _coefset_init(
 /* time-series magnetic model - auxiliary structure */
 typedef struct ModelTS {
     MODEL sh_model;
-    double *cg;
-    double *ch;
+    double (*coef)[2];
     const COEF_SET *coefsets;
     double time_last;
     size_t ncoefset;
@@ -501,13 +500,14 @@ static void _shevaltemp_pot(
     else
     {
         const double time = *((double*)arrd_t.data);
-        ARRAY_DATA arrd_cg = {.data=model->cg, .ndim=0, .dim=NULL, .stride=NULL};
-        ARRAY_DATA arrd_ch = {.data=model->ch, .ndim=0, .dim=NULL, .stride=NULL};
+        ARRAY_DATA arrd_coef = {
+            .data=model->coef, .ndim=0, .dim=NULL, .stride=NULL
+        };
 
         if (time != model->time_last)
             _coeff_interp(time, model);
 
-        _sheval_pot(arrd_pot, arrd_x, arrd_cg, arrd_ch, &(model->sh_model));
+        _sheval_pot(arrd_pot, arrd_x, arrd_coef, &(model->sh_model));
     }
 }
 
@@ -535,13 +535,14 @@ static void _shevaltemp_grd(
     else
     {
         const double time = *((double*)arrd_t.data);
-        ARRAY_DATA arrd_cg = {.data=model->cg, .ndim=0, .dim=NULL, .stride=NULL};
-        ARRAY_DATA arrd_ch = {.data=model->ch, .ndim=0, .dim=NULL, .stride=NULL};
+        ARRAY_DATA arrd_coef = {
+            .data=model->coef, .ndim=0, .dim=NULL, .stride=NULL
+        };
 
         if (time != model->time_last)
             _coeff_interp(time, model);
 
-        _sheval_grd(arrd_grd, arrd_x, arrd_cg, arrd_ch, &(model->sh_model));
+        _sheval_grd(arrd_grd, arrd_x, arrd_coef, &(model->sh_model));
     }
 }
 
@@ -572,13 +573,14 @@ static void _shevaltemp_pot_and_grd(
     else
     {
         const double time = *((double*)arrd_t.data);
-        ARRAY_DATA arrd_cg = {.data=model->cg, .ndim=0, .dim=NULL, .stride=NULL};
-        ARRAY_DATA arrd_ch = {.data=model->ch, .ndim=0, .dim=NULL, .stride=NULL};
+        ARRAY_DATA arrd_coef = {
+            .data=model->coef, .ndim=0, .dim=NULL, .stride=NULL
+        };
 
         if (time != model->time_last)
             _coeff_interp(time, model);
 
-        _sheval_pot_and_grd(arrd_pot, arrd_grd, arrd_x, arrd_cg, arrd_ch, &(model->sh_model));
+        _sheval_pot_and_grd(arrd_pot, arrd_grd, arrd_x, arrd_coef, &(model->sh_model));
     }
 }
 
@@ -594,11 +596,7 @@ static void _model_ts_reset(MODEL_TS *model) {
 
 static void _model_ts_destroy(MODEL_TS *model)
 {
-    if(NULL != model->cg)
-        free((double*)model->cg);
-
-    if(NULL != model->ch)
-        free((double*)model->ch);
+    if(model->coef) free((double*)model->coef);
 
     _model_destroy(&(model->sh_model));
 
@@ -624,15 +622,9 @@ static int _model_ts_init(
         goto error;
 
     // allocate memory for the single time coefficients
-    if (NULL == (model->cg = (double*)calloc(model->sh_model.nterm, sizeof(double))))
+    if (NULL == (model->coef = (double(*)[2])calloc(model->sh_model.nterm, sizeof(double[2]))))
     {
-        PyErr_Format(PyExc_MemoryError, "_model_ts_init: cg");
-        goto error;
-    }
-
-    if (NULL == (model->ch = (double*)calloc(model->sh_model.nterm, sizeof(double))))
-    {
-        PyErr_Format(PyExc_MemoryError, "_model_ts_init: ch");
+        PyErr_Format(PyExc_MemoryError, "_model_ts_init: coef");
         goto error;
     }
 
@@ -741,16 +733,15 @@ static void _coeff_set_interp0(double time, MODEL_TS *model, const COEF_SET *coe
         return;
     }
 
-    double *cg = (double*)model->cg;
-    double *ch = (double*)model->ch;
+    double (*coef)[2] = model->coef;
 
     size_t i, n = coefset->ncoef;
 
     for (i = 0; i < n; ++i)
     {
-        double *target = (coefset->offset[i] >= 0 ? cg : ch);
-        ptrdiff_t offset = abs(coefset->offset[i]);
-        target[offset] = interp0_eval(&basis, coefset->cv + i*coefset->ntime);
+        size_t offset = abs(coefset->offset[i]);
+        size_t kind = coefset->offset[i] < 0;
+        coef[offset][kind] = interp0_eval(&basis, coefset->cv + i*coefset->ntime);
     }
 
      ((COEF_SET*)coefset)->idx_last = basis.i;
@@ -762,16 +753,15 @@ static void _coeff_set_interp0(double time, MODEL_TS *model, const COEF_SET *coe
 static void _coeff_set_interp1(double time, MODEL_TS *model, const COEF_SET *coefset) {
     INTERP_BASIS basis = get_interp1_basis(time, coefset->ct, coefset->ntime);
 
-    double *cg = (double*)model->cg;
-    double *ch = (double*)model->ch;
+    double (*coef)[2] = model->coef;
 
     size_t i, n = coefset->ncoef;
 
     for (i = 0; i < n; ++i)
     {
-        double *target = (coefset->offset[i] >= 0 ? cg : ch);
-        ptrdiff_t offset = abs(coefset->offset[i]);
-        target[offset] = interp1_eval(&basis, coefset->cv + i*coefset->ntime);
+        size_t offset = abs(coefset->offset[i]);
+        size_t kind = coefset->offset[i] < 0;
+        coef[offset][kind] = interp1_eval(&basis, coefset->cv + i*coefset->ntime);
     }
 }
 

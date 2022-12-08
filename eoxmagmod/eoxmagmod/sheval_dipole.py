@@ -34,7 +34,7 @@ from ._pymm import (
 from .dipole_coords import convert_to_dipole, vrot_from_dipole
 
 
-def sheval_dipole(arr_in, coef_g, coef_h, lat_ngp, lon_ngp,
+def sheval_dipole(arr_in, coef, lat_ngp, lon_ngp,
                   coord_type_in=GEODETIC_ABOVE_WGS84,
                   coord_type_out=GEODETIC_ABOVE_WGS84,
                   mode=GRADIENT, is_internal=True, degree=-1,
@@ -45,8 +45,7 @@ def sheval_dipole(arr_in, coef_g, coef_h, lat_ngp, lon_ngp,
 
     Parameters:
        arr_in - array of 3D coordinates (up to 16 dimensions).
-       coef_g - vector of spherical harmonic model coefficients.
-       coef_h - vector of spherical harmonic model coefficients.
+       coef - array of spherical harmonic model coefficients.
        lat_ngp - North Geomagnetic Pole latitude.
        lon_ngp - North Geomagnetic Pole longitude.
        coord_type_in - type of the input coordinates.
@@ -67,7 +66,7 @@ def sheval_dipole(arr_in, coef_g, coef_h, lat_ngp, lon_ngp,
     arr_in_dipole = convert_to_dipole(arr_in, lat_ngp, lon_ngp, coord_type_in)
     result = sheval(
         arr_in_dipole, mode=mode, is_internal=is_internal, degree=degree,
-        coef_g=coef_g, coef_h=coef_h,
+        coef=coef,
         coord_type_in=GEOCENTRIC_SPHERICAL,
         coord_type_out=GEOCENTRIC_SPHERICAL,
         scale_potential=scale_potential,

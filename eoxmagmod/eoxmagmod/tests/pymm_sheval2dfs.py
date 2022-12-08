@@ -90,9 +90,8 @@ class SphericalHarmonicsWithFourier2DCoeffMixIn:
 
         # allocate multi-time coefficient arrays
         degree = cls.coef_set.coef_nm[:, 0].max()
-        coef_size = (degree+2)*(degree+1)//2
-        coef_g = zeros((*times1.shape, coef_size))
-        coef_h = zeros((*times1.shape, coef_size))
+        coeff_size = (degree+2)*(degree+1)//2
+        coeff = zeros((*times1.shape, coeff_size, 2))
 
         # evaluate coefficients from the 2D Fourier series
 
@@ -108,7 +107,7 @@ class SphericalHarmonicsWithFourier2DCoeffMixIn:
             coef_g_idx = idx[coef_g_sel]
             coef_h_idx = idx[coef_h_sel]
 
-            coef = fourier2d(
+            coeff_sparse = fourier2d(
                 times1, times2,
                 coef_set.coef_ab,
                 coef_set.min_degree1,
@@ -117,8 +116,8 @@ class SphericalHarmonicsWithFourier2DCoeffMixIn:
                 coef_set.scale2
             )
 
-            coef_g[..., coef_g_idx] = coef[..., coef_g_sel]
-            coef_h[..., coef_h_idx] = coef[..., coef_h_sel]
+            coeff[..., coef_g_idx, 0] = coeff_sparse[..., coef_g_sel]
+            coeff[..., coef_h_idx, 1] = coeff_sparse[..., coef_h_sel]
 
         _eval_fourier2d_coeff(times1, times2, cls.coef_set)
 
@@ -128,8 +127,7 @@ class SphericalHarmonicsWithFourier2DCoeffMixIn:
             mode=POTENTIAL_AND_GRADIENT,
             is_internal=cls.is_internal,
             degree=degree,
-            coef_g=coef_g,
-            coef_h=coef_h,
+            coef=coeff,
             coord_type_in=cls.source_coordinate_system,
             coord_type_out=cls.target_coordinate_system,
             **cls.options

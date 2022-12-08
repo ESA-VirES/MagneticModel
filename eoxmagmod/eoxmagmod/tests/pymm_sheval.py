@@ -30,7 +30,7 @@
 from unittest import TestCase, main
 from itertools import product
 from random import random
-from numpy import array, empty, nditer
+from numpy import asarray, stack
 from numpy.testing import assert_allclose
 from eoxmagmod._pymm import (
     POTENTIAL, GRADIENT, POTENTIAL_AND_GRADIENT,
@@ -50,14 +50,13 @@ class SphericalHarmonicsMixIn:
     target_coordinate_system = None
     is_internal = True
     degree = None
-    coef_g = None
-    coef_h = None
+    coeff = None
 
     @classmethod
     def eval_sheval(cls, coords, mode):
         return sheval(
             coords, mode=mode, is_internal=cls.is_internal,
-            degree=cls.degree, coef_g=cls.coef_g, coef_h=cls.coef_h,
+            degree=cls.degree, coef=cls.coeff,
             coord_type_in=cls.source_coordinate_system,
             coord_type_out=cls.target_coordinate_system,
             **cls.options
@@ -92,19 +91,16 @@ class SphericalHarmonicsMixIn:
 
     @classmethod
     def _spherical_harmonics(cls, latitude, longitude, radius):
-        degree = cls.degree
-        coef_g = cls.coef_g
-        coef_h = cls.coef_h
         rad_series, cos_sin_series, p_series, dp_series = cls.get_series(
-            degree, latitude, longitude, radius
+            cls.degree, latitude, longitude, radius
         )
         potential = spharpot(
-            radius, coef_g, coef_h, p_series, rad_series,
-            cos_sin_series, degree=degree
+            radius, cls.coeff, p_series, rad_series,
+            cos_sin_series, degree=cls.degree
         )
         gradient = sphargrd(
-            latitude, coef_g, coef_h, p_series, dp_series, rad_series,
-            cos_sin_series, is_internal=cls.is_internal, degree=degree
+            latitude, cls.coeff, p_series, dp_series, rad_series,
+            cos_sin_series, is_internal=cls.is_internal, degree=cls.degree
         )
         return potential, gradient
 
@@ -150,7 +146,7 @@ class SourceSpherical:
 
     @property
     def coordinates(self):
-        return array([
+        return asarray([
             (lat, lon, 6371.2*(1.0 + random())) for lat, lon
             in product(range(-90, 91, 5), range(-180, 181, 10))
         ])
@@ -161,7 +157,7 @@ class SourceGeodetic:
 
     @property
     def coordinates(self):
-        return array([
+        return asarray([
             (lat, lon, -50. + 200.0 * random()) for lat, lon
             in product(range(-90, 91, 5), range(-180, 181, 10))
         ])
@@ -172,7 +168,7 @@ class SourceCartesian:
 
     @property
     def coordinates(self):
-        return convert(array([
+        return convert(asarray([
             (lat, lon, 6371.2*(1.0 + random())) for lat, lon
             in product(range(-90, 91, 5), range(-180, 181, 10))
         ]), GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN)
@@ -182,15 +178,13 @@ class SourceCartesian:
 class SHTypeInternal:
     is_internal = True
     degree = sifm.DEGREE
-    coef_g = sifm.COEF_G
-    coef_h = sifm.COEF_H
+    coeff = stack((sifm.COEF_G, sifm.COEF_H), axis=-1)
 
 
 class SHTypeExternal:
     is_internal = False
     degree = mma_external.DEGREE
-    coef_g = mma_external.COEF_Q
-    coef_h = mma_external.COEF_S
+    coeff = stack((mma_external.COEF_Q, mma_external.COEF_S), axis=-1)
 
 #-------------------------------------------------------------------------------
 

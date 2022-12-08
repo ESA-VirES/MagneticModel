@@ -156,8 +156,8 @@ class SHModelTestMixIn:
         is_internal = self.model.coefficients.is_internal
         coeff, degree = self.model.coefficients(time, **self.options)
         return sheval(
-            coords, coeff[..., 0], coeff[..., 1],
-            degree=degree, is_internal=is_internal, mode=GRADIENT,
+            coords, coeff,
+            mode=GRADIENT, degree=degree, is_internal=is_internal,
             coord_type_in=self.coord_type_in,
             coord_type_out=self.coord_type_out,
             scale_gradient=-asarray(self.scale),
@@ -261,8 +261,8 @@ class DipoleSHModelTestMixIn(SHModelTestMixIn):
         lat_ngp, lon_ngp = self.model.north_pole #(time)
         coeff, degree = self.model.coefficients(time)
         return sheval_dipole(
-            coords, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
-            degree=degree, is_internal=is_internal, mode=GRADIENT,
+            coords, coeff, lat_ngp, lon_ngp,
+            mode=GRADIENT, degree=degree, is_internal=is_internal,
             coord_type_in=self.coord_type_in,
             coord_type_out=self.coord_type_out,
             scale_gradient=-asarray(self.scale),
@@ -294,11 +294,11 @@ class DipoleMIOSHModelTestMixIn(SHModelTestMixIn):
             time, mjd2000_to_magnetic_universal_time(time, lat_ngp, lon_ngp)
         )
         return sheval_dipole(
-            coords, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
-            degree=degree, is_internal=is_internal, mode=GRADIENT,
+            coords, coeff, lat_ngp, lon_ngp,
+            mode=GRADIENT, degree=degree, is_internal=is_internal,
             coord_type_in=self.coord_type_in,
             coord_type_out=self.coord_type_out,
-            scale_gradient=scale
+            scale_gradient=scale,
         )
 
 class ComposedModelTestMixIn(SHModelTestMixIn):
@@ -648,7 +648,7 @@ class TestMMA2CPrimary(TestCase, DipoleSHModelTestMixIn):
         return load_model_swarm_mma_2c_external(SWARM_MMA_SHA_2C_TEST_DATA)
 
 
-class estChaosMMASecondary(TestCase, DipoleSHModelTestMixIn):
+class TestChaosMMASecondary(TestCase, DipoleSHModelTestMixIn):
     reference_values = (
         6194.5, (30.0, 40.0, 8000.0),
         (1.8492638163980442, 0.5125018012040559, 1.0821299594918217)

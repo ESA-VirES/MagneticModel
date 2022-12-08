@@ -69,8 +69,7 @@ static void _f2d_coefset_reset(FOURIER_2D_COEF_SET *coefset);
 /* 2D Fourier series magnetic model - auxiliary structure */
 typedef struct Model2DFS {
     MODEL sh_model;
-    double *cg;
-    double *ch;
+    double (*coef)[2];
     FOURIER_2D_COEF_SET *coefset;
     double time1_last;
     double time2_last;
@@ -399,13 +398,14 @@ static void _sheval2dfs_pot(
     {
         const double time1 = *((double*)arrd_t1.data);
         const double time2 = *((double*)arrd_t2.data);
-        ARRAY_DATA arrd_cg = {.data=model->cg, .ndim=0, .dim=NULL, .stride=NULL};
-        ARRAY_DATA arrd_ch = {.data=model->ch, .ndim=0, .dim=NULL, .stride=NULL};
+        ARRAY_DATA arrd_coef = {
+            .data=model->coef, .ndim=0, .dim=NULL, .stride=NULL
+        };
 
         if ((time1 != model->time1_last)||(time2 != model->time2_last))
             _sheval2dfs_eval_coeff(time1, time2, model);
 
-        _sheval_pot(arrd_pot, arrd_x, arrd_cg, arrd_ch, &(model->sh_model));
+        _sheval_pot(arrd_pot, arrd_x, arrd_coef, &(model->sh_model));
     }
 }
 
@@ -436,13 +436,14 @@ static void _sheval2dfs_grd(
     {
         const double time1 = *((double*)arrd_t1.data);
         const double time2 = *((double*)arrd_t2.data);
-        ARRAY_DATA arrd_cg = {.data=model->cg, .ndim=0, .dim=NULL, .stride=NULL};
-        ARRAY_DATA arrd_ch = {.data=model->ch, .ndim=0, .dim=NULL, .stride=NULL};
+        ARRAY_DATA arrd_coef = {
+            .data=model->coef, .ndim=0, .dim=NULL, .stride=NULL
+        };
 
         if ((time1 != model->time1_last)||(time2 != model->time2_last))
             _sheval2dfs_eval_coeff(time1, time2, model);
 
-        _sheval_grd(arrd_grd, arrd_x, arrd_cg, arrd_ch, &(model->sh_model));
+        _sheval_grd(arrd_grd, arrd_x, arrd_coef, &(model->sh_model));
     }
 }
 
@@ -475,13 +476,14 @@ static void _sheval2dfs_pot_and_grd(
     {
         const double time1 = *((double*)arrd_t1.data);
         const double time2 = *((double*)arrd_t2.data);
-        ARRAY_DATA arrd_cg = {.data=model->cg, .ndim=0, .dim=NULL, .stride=NULL};
-        ARRAY_DATA arrd_ch = {.data=model->ch, .ndim=0, .dim=NULL, .stride=NULL};
+        ARRAY_DATA arrd_coef = {
+            .data=model->coef, .ndim=0, .dim=NULL, .stride=NULL
+        };
 
         if ((time1 != model->time1_last)||(time2 != model->time2_last))
             _sheval2dfs_eval_coeff(time1, time2, model);
 
-        _sheval_pot_and_grd(arrd_pot, arrd_grd, arrd_x, arrd_cg, arrd_ch, &(model->sh_model));
+        _sheval_pot_and_grd(arrd_pot, arrd_grd, arrd_x, arrd_coef, &(model->sh_model));
     }
 }
 
@@ -494,8 +496,7 @@ static void _sheval2dfs_eval_coeff(
     FOURIER_2D_COEF_SET *coefset = model->coefset;
     FOURIER_2D *f2d = &coefset->f2d;
 
-    double *cg = (double*)model->cg;
-    double *ch = (double*)model->ch;
+    double (*coef)[2] = model->coef;
 
     const ptrdiff_t size1 = f2d->max_degree1 - f2d->min_degree1 + 1;
     const ptrdiff_t size2 = f2d->max_degree2 - f2d->min_degree2 + 1;
@@ -508,11 +509,11 @@ static void _sheval2dfs_eval_coeff(
 
     for (i = 0; i < n; ++i)
     {
-        double *target = (coefset->offset[i] >= 0 ? cg : ch);
-        const ptrdiff_t offset = abs(coefset->offset[i]);
+        size_t offset = abs(coefset->offset[i]);
+        size_t kind = coefset->offset[i] < 0;
         const double (*ab)[2] = coefset->ab + i*ab_stride ;
 
-        target[offset] = _fourier2d_eval(f2d, ab);
+        coef[offset][kind] =_fourier2d_eval(f2d, ab);
     }
 
     model->time1_last = time1;
@@ -530,11 +531,7 @@ static void _model_2dfs_reset(MODEL_2DFS *model) {
 
 static void _model_2dfs_destroy(MODEL_2DFS *model)
 {
-    if(NULL != model->cg)
-        free((double*)model->cg);
-
-    if(NULL != model->ch)
-        free((double*)model->ch);
+    if (model->coef) free((double*)model->coef);
 
     _model_destroy(&(model->sh_model));
 
@@ -561,15 +558,9 @@ static int _model_2dfs_init(
         goto error;
 
     // allocate memory for the single time coefficients
-    if (NULL == (model->cg = (double*)calloc(model->sh_model.nterm, sizeof(double))))
+    if (NULL == (model->coef = (double(*)[2])calloc(model->sh_model.nterm, sizeof(double[2]))))
     {
-        PyErr_Format(PyExc_MemoryError, "_model_2dfs_init: cg");
-        goto error;
-    }
-
-    if (NULL == (model->ch = (double*)calloc(model->sh_model.nterm, sizeof(double))))
-    {
-        PyErr_Format(PyExc_MemoryError, "_model_2dfs_init: ch");
+        PyErr_Format(PyExc_MemoryError, "_model_2dfs_init: coef");
         goto error;
     }
 
