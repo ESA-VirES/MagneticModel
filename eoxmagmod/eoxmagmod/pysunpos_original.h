@@ -31,7 +31,7 @@
 #define PYSUNPOS_ORIGINAL_H
 
 #include "pymm_aux.h"
-#include "sunpos.h"
+#include "sun_ephemeris.h"
 #include <math.h>
 
 /*

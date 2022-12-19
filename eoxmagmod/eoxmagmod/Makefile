@@ -22,10 +22,12 @@ CCFLAGS= -c -O2 -Wall -Wno-unused-function -fPIC $(INCS)
 #CCFLAGS= -c -O2 -g -DDEBUG=1 -Wall -fPIC $(INCS)
 #CCFLAGS= -c -O2 -Wall -fPIC $(INC)
 
-HDR_MM=pymm_aux.h pymm_sheval.h pymm_sphargrd.h pymm_spharpot.h\
-    pymm_legendre.h pymm_lonsincos.h pymm_relradpow.h\
+HDR_MM=pymm_aux.h pymm_shevaltemp.h pymm_sheval2dfs.h pymm_sheval.h \
+    pymm_sphar_common.h pymm_sphargrd.h pymm_spharpot.h \
+    pymm_legendre.h pymm_loncossin.h pymm_relradpow.h\
     pymm_vrot_common.h pymm_vrot_sph2cart.h pymm_vrot_sph2geod.h\
-    pymm_vrot_cart2sph.h pymm_cconv.h pymm_coord.h
+    pymm_vrot_cart2sph.h pymm_cconv.h pymm_coord.h pymm_bisect.h\
+    pymm_interp.h pymm_fourier2d.h
 OBJ_MM=pymm.o
 DST_MM=_pymm.so
 

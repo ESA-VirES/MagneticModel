@@ -34,10 +34,10 @@ from ._pymm import (
 from .dipole_coords import convert_to_dipole, vrot_from_dipole
 
 
-def sheval_dipole(arr_in, degree, coef_g, coef_h, lat_ngp, lon_ngp,
+def sheval_dipole(arr_in, coef, lat_ngp, lon_ngp,
                   coord_type_in=GEODETIC_ABOVE_WGS84,
                   coord_type_out=GEODETIC_ABOVE_WGS84,
-                  mode=GRADIENT, is_internal=True,
+                  mode=GRADIENT, is_internal=True, degree=-1,
                   scale_potential=1.0, scale_gradient=1.0):
     """
     Evaluate spherical harmonic model in the dipole coordinate frame given
@@ -45,9 +45,7 @@ def sheval_dipole(arr_in, degree, coef_g, coef_h, lat_ngp, lon_ngp,
 
     Parameters:
        arr_in - array of 3D coordinates (up to 16 dimensions).
-       degree - degree of the spherical harmonic model.
-       coef_g - vector of spherical harmonic model coefficients.
-       coef_h - vector of spherical harmonic model coefficients.
+       coef - array of spherical harmonic model coefficients.
        lat_ngp - North Geomagnetic Pole latitude.
        lon_ngp - North Geomagnetic Pole longitude.
        coord_type_in - type of the input coordinates.
@@ -58,14 +56,17 @@ def sheval_dipole(arr_in, degree, coef_g, coef_h, lat_ngp, lon_ngp,
        rad_ref - reference (Earth) radius
        is_internal - boolean flag set to True by default. When set to False
                      external field evaluation is used.
-       scale_potential - scalar value multiplied with the result potentials.
-       scale_gradient - scalar or 3 element array multiplied with the result
-                        gradient components.
+       degree - degree of the spherical harmonic model. If not provided or
+                set to a negative number, then it is derived from the array
+                sizes.
+       scale_potential - optional scalar multiplied with the result potentials.
+       scale_gradient - optional scalar or 3 element array multiplied with
+                        the result gradient components.
     """
     arr_in_dipole = convert_to_dipole(arr_in, lat_ngp, lon_ngp, coord_type_in)
     result = sheval(
-        arr_in_dipole, mode=mode, is_internal=is_internal,
-        degree=degree, coef_g=coef_g, coef_h=coef_h,
+        arr_in_dipole, mode=mode, is_internal=is_internal, degree=degree,
+        coef=coef,
         coord_type_in=GEOCENTRIC_SPHERICAL,
         coord_type_out=GEOCENTRIC_SPHERICAL,
         scale_potential=scale_potential,
@@ -76,14 +77,14 @@ def sheval_dipole(arr_in, degree, coef_g, coef_h, lat_ngp, lon_ngp,
             result, lat_ngp, lon_ngp, arr_in_dipole, arr_in,
             coord_type_in, coord_type_out,
         ) * scale_gradient
-    elif mode == POTENTIAL:
+    if mode == POTENTIAL:
         return result
-    else: #mode == POTENTIAL_AND_GRADIENT
-        potential, gradient = result
-        return potential, rotate_vectors_from_dipole(
-            gradient, lat_ngp, lon_ngp, arr_in_dipole, arr_in,
-            coord_type_in, coord_type_out,
-        ) * scale_gradient
+    # mode == POTENTIAL_AND_GRADIENT
+    potential, gradient = result
+    return potential, rotate_vectors_from_dipole(
+        gradient, lat_ngp, lon_ngp, arr_in_dipole, arr_in,
+        coord_type_in, coord_type_out,
+    ) * scale_gradient
 
 
 def rotate_vectors_from_dipole(vectors, lat_ngp, lon_ngp,

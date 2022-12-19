@@ -40,7 +40,7 @@ from eoxmagmod._pymm import (
 DEG2RAD = pi/180.0
 
 
-class VectorRotationMixIn(object):
+class VectorRotationMixIn:
     shape = (19, 19)
 
     @property

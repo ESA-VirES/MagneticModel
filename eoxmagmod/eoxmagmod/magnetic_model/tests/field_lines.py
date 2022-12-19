@@ -25,9 +25,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
+# pylint: disable=missing-docstring,disable=attribute-defined-outside-init
 
 from unittest import TestCase, main
-from numpy import array
 from numpy.testing import assert_allclose
 from eoxmagmod import (
     decimal_year_to_mjd2000,

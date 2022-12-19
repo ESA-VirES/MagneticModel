@@ -31,7 +31,7 @@
 #ifndef PYMM_RELRADPOW_H
 #define PYMM_RELRADPOW_H
 
-#include "shc.h"
+#include "spherical_harmonics.h"
 #include "pymm_aux.h"
 
 /* Earth radius in km */
@@ -42,22 +42,29 @@
 #define STR(x) SRINGIFY(x)
 #endif
 
+static void _relradpow(
+    ARRAY_DATA *arrd_rad, ARRAY_DATA *arrd_rrp,
+    const int degree, const int is_internal, const double reference_radius
+);
+
 /* Python function definition */
 
 #define DOC_RELRADPOW "\n"\
 "   rrp = relradpow(radius, degree, reference_radius="STR(RADIUS)", is_internal=True)\n"\
 "\n"\
-"     By default when the 'is_internal' flag is set to True, evaluate\n"\
-"     for the given 'radius' and 'reference_radius' relative radius power\n"\
-"     series:\n"\
-"       (reference_radius/radius)**(i+2) for i in range(0, degree+1) .\n"\
+"    Calculate relative radius series for the given radius or array\n"\
+"    of radii.\n"\
 "\n"\
-"     When the 'is_internal' flag is set to False, evaluate\n"\
-"     for the given 'radius' and 'reference_radius' relative radius power\n"\
-"     series:\n"\
-"       (radius/reference_radius)**(i+1) for i in range(0, degree+1) .\n"\
+"    By default when the 'is_internal' flag is set to True, evaluate\n"\
+"    for the given 'radius' and 'reference_radius' relative radius power\n"\
+"    series:\n"\
+"      (reference_radius/radius)**(i+2) for i in range(0, degree+1) .\n"\
+"\n"\
+"    When the 'is_internal' flag is set to False, evaluate\n"\
+"    for the given 'radius' and 'reference_radius' relative radius power\n"\
+"    series:\n"\
+"      (radius/reference_radius)**(i+1) for i in range(0, degree+1) .\n"\
 "\n"
-
 
 static PyObject* relradpow(PyObject *self, PyObject *args, PyObject *kwdict)
 {
@@ -67,15 +74,17 @@ static PyObject* relradpow(PyObject *self, PyObject *args, PyObject *kwdict)
 
     int degree;
     int is_internal;
-    double rad, rad0 = RADIUS; // radius and reference radius
+    double reference_radius = RADIUS; // reference radius
+    PyArrayObject *arr_rad = NULL; // input array of radii
+    PyArrayObject *arr_rrp = NULL; // radial series array
     PyObject *obj_is_internal = NULL; // boolean flag
-    PyArrayObject *arr_rrp = NULL; // P array
+    PyObject *obj_rad = NULL; // input object
     PyObject *retval = NULL; // output tuple
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "di|dO:relradpow", keywords,
-        &rad, &degree, &rad0, &obj_is_internal
+        args, kwdict, "Oi|dO:relradpow", keywords,
+        &obj_rad, &degree, &reference_radius, &obj_is_internal
     ))
         goto exit;
 
@@ -87,36 +96,94 @@ static PyObject* relradpow(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
     }
 
-    if (rad < 0.0)
-    {
-        PyErr_Format(PyExc_ValueError, "%s < 0", keywords[0]);
-        goto exit;
-    }
-
-    if (rad0 <= 0.0)
+    if (reference_radius <= 0.0)
     {
         PyErr_Format(PyExc_ValueError, "%s <= 0", keywords[2]);
         goto exit;
     }
 
-    // create a new output array
-    if (NULL == (arr_rrp = _get_new_double_array(1, NULL, degree+1)))
+    // cast the input object to an array
+    if (NULL == (arr_rad = _get_as_double_array(obj_rad, 0, 0, NPY_ARRAY_ALIGNED, keywords[0])))
         goto exit;
 
-    // evaluate the relative radius power series
-    if (is_internal)
-        shc_relradpow_internal(PyArray_DATA(arr_rrp), degree, rad/rad0);
-    else
-        shc_relradpow_external(PyArray_DATA(arr_rrp), degree, rad/rad0);
+    // create the output array
+    {
+        npy_intp ndim = PyArray_NDIM(arr_rad) + 1;
+        npy_intp dims[ndim];
+        npy_intp i;
+
+        for (i = 0; i < ndim - 1; ++i)
+        {
+            dims[i] = PyArray_DIMS(arr_rad)[i];
+        }
+
+        dims[ndim-1] = (npy_intp)degree + 1;
+
+        if (NULL == (arr_rrp = _get_new_array(ndim, dims, NPY_DOUBLE)))
+            goto exit;
+    }
 
     retval = (PyObject*) arr_rrp;
+
+    // evaluate relative radial power series
+    {
+        ARRAY_DATA arrd_rad = _array_to_arrd(arr_rad);
+        ARRAY_DATA arrd_rrp = _array_to_arrd(arr_rrp);
+
+        _relradpow(
+            &arrd_rad,
+            &arrd_rrp,
+            degree,
+            is_internal,
+            reference_radius
+        );
+    }
 
   exit:
 
     // decrease reference counters to the arrays
+    if (arr_rad) Py_DECREF(arr_rad);
     if (!retval && arr_rrp) Py_DECREF(arr_rrp);
 
     return retval;
+}
+
+
+/*
+ * Recursively iterate over the radius array values and evaluate the radial
+ * functions for each of them.
+ */
+
+static void _relradpow(
+    ARRAY_DATA *arrd_rad, ARRAY_DATA *arrd_rrp,
+    const int degree, const int is_internal, const double reference_radius
+)
+{
+    if (arrd_rad->ndim > 0)
+    {
+        npy_intp i, n = arrd_rad->dim[0];
+
+        for(i = 0; i < n; ++i)
+        {
+            ARRAY_DATA arrd_rad_item = _get_arrd_item_nocheck(arrd_rad, i);
+            ARRAY_DATA arrd_rrp_item = _get_arrd_item_nocheck(arrd_rrp, i);
+
+            _relradpow(
+                &arrd_rad_item,
+                &arrd_rrp_item,
+                degree,
+                is_internal,
+                reference_radius
+            );
+        }
+    }
+    else
+    {
+        const double rel_rad = *((double*)arrd_rad->data) / reference_radius;
+        double *rrp = ((double*)arrd_rrp->data);
+
+        (is_internal ? shc_relradpow_internal : shc_relradpow_external)(rrp, degree, rel_rad);
+    }
 }
 
 #endif  /* PYMM_RELRADPOW_H */

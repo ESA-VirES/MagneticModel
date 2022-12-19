@@ -5,7 +5,7 @@
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
-# Copyright (C) 2018 EOX IT Services GmbH
+# Copyright (C) 2018-2022 EOX IT Services GmbH
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@
 #-------------------------------------------------------------------------------
 
 from collections import namedtuple
-from numpy import inf, zeros, asarray
+from numpy import inf, nan, isnan, zeros, asarray
 from .._pymm import (
     GEOCENTRIC_SPHERICAL, GEODETIC_ABOVE_WGS84, GEOCENTRIC_CARTESIAN,
     convert, vrot_sph2geod, vrot_sph2cart,
@@ -54,7 +54,7 @@ class ComposedGeomagneticModel(GeomagneticModel):
     """
 
     def __init__(self, *models):
-        self._parameters = set()
+        self._parameters = set(["time", "location"])
         self._components = []
         self._validity = (-inf, inf)
         for model in models:
@@ -80,25 +80,32 @@ class ComposedGeomagneticModel(GeomagneticModel):
              output_coordinate_system=GEOCENTRIC_SPHERICAL,
              **options):
 
+        time = asarray(time)
+        location = asarray(location)
+
         # convert input coordinates to spherical coordinates
         coord_sph = convert(
             location, input_coordinate_system, GEOCENTRIC_SPHERICAL
         )
 
-        # get output dimension
-        time = asarray(time)
-        location = asarray(location)
-        if time.ndim > (location.ndim - 1):
-            shape = time.shape
-        else:
-            shape = location.shape[:-1]
-
-        result = zeros(shape + (3,))
         final_scale = options.pop("scale", None)
-        for model, scale, params in self._components:
+
+        # evaluate models
+        if self._components:
+            model, scale, params = self._components[0]
             args = options.copy()
             args.update(params)
-            result += model.eval(time, coord_sph, scale=scale, **args)
+            result = model.eval(time, coord_sph, scale=scale, **args)
+            for model, scale, params in self._components[1:]:
+                args = options.copy()
+                args.update(params)
+                result += model.eval(time, coord_sph, scale=scale, **args)
+        else:
+            result = zeros(
+                (*time.shape, 3) if time.ndim > (location.ndim - 1) else
+                location.shape
+            )
+            result[isnan(time), :] = nan
 
         # rotate result to the desired coordinate frame
         if output_coordinate_system == GEODETIC_ABOVE_WGS84:

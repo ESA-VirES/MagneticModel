@@ -47,7 +47,7 @@ class TestWMMParser(TestCase):
 
     @staticmethod
     def parse(filename):
-        with open(filename) as file_in:
+        with open(filename, encoding="utf8") as file_in:
             return parse_wmm_file(file_in)
 
     def _assert_valid(self, data, expected_data):

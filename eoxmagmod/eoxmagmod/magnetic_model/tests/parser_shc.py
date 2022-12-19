@@ -41,12 +41,12 @@ class TestSHCParser(TestCase):
 
     @staticmethod
     def parse(filename):
-        with open(filename) as file_in:
+        with open(filename, encoding="utf8") as file_in:
             return parse_shc_file(file_in)
 
     @staticmethod
     def parse_header(filename):
-        with open(filename) as file_in:
+        with open(filename, encoding="utf8") as file_in:
             return parse_shc_header(file_in)
 
     def _assert_valid(self, data, expected_data):

@@ -1,7 +1,7 @@
 name: CI
 on: push
 jobs:
-  run:
+  testing:
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
@@ -26,7 +26,12 @@ jobs:
         run: |
           ( cd libcdf && make build && sudo make install )
           ( cd qdipole && ./configure && make build && sudo make install )
+          pip3 install --upgrade pip
+          pip3 install wheel
           pip3 install scipy
+          export SETUPTOOLS_USE_DISTUTILS=stdlib # https://github.com/pypa/setuptools/issues/3693
+          pip3 install spacepy
+          unset SETUPTOOLS_USE_DISTUTILS
           pip3 install ./eoxmagmod/
       - name: Scripts
         run: |
@@ -34,3 +39,17 @@ jobs:
           mkdir -p ./test && cd ./test
           pip3 show -f eoxmagmod
           python3 -c 'import eoxmagmod' && python3 -m unittest discover -p '[a-z]*.py' -v eoxmagmod
+  notification:
+    runs-on: ubuntu-20.04
+    if: ${{ always() }}
+    needs: testing
+    steps:
+      # send Slack notifications to the eox organization
+      - name: action-slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ needs.testing.result }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()

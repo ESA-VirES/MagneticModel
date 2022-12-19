@@ -26,10 +26,11 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 # pylint: disable=missing-docstring,no-self-use,invalid-name,too-many-public-methods
+# pylint: disable=attribute-defined-outside-init
 
 from unittest import TestCase, main
 from itertools import product
-from numpy import nan, inf, isinf, array, empty, full, nditer, asarray
+from numpy import nan, inf, isinf, array, empty, full, asarray, zeros
 from numpy.random import uniform
 from numpy.testing import assert_allclose
 from eoxmagmod.magnetic_time import mjd2000_to_magnetic_universal_time
@@ -52,6 +53,7 @@ from eoxmagmod.magnetic_model.loader_mio import (
     load_model_swarm_mio_internal,
     load_model_swarm_mio_external,
 )
+from eoxmagmod.magnetic_model.util import mask_array
 from eoxmagmod.data import (
     EMM_2010_STATIC, EMM_2010_SECVAR, WMM_2015,
     CHAOS_CORE_LATEST, CHAOS_CORE_PREDICTION_LATEST, CHAOS_STATIC_LATEST,
@@ -68,7 +70,7 @@ from eoxmagmod.magnetic_model.model import (
     DipoleSphericalHarmomicGeomagneticModel,
 )
 from eoxmagmod.magnetic_model.model_mio import (
-    DipoleMIOPrimaryGeomagneticModel,
+    MIOPrimaryGeomagneticModel,
     DipoleMIOGeomagneticModel,
 )
 from eoxmagmod.magnetic_model.model_composed import (
@@ -81,7 +83,7 @@ from eoxmagmod._pymm import (
 from eoxmagmod.sheval_dipole import sheval_dipole
 
 
-class SHModelTestMixIn(object):
+class SHModelTestMixIn:
     coord_type_in = GEOCENTRIC_SPHERICAL
     coord_type_out = GEOCENTRIC_SPHERICAL
     parameters = ("time", "location")
@@ -140,36 +142,22 @@ class SHModelTestMixIn(object):
         )
 
     def eval_reference(self, times, coords):
-        result = empty(coords.shape)
-        iterator = nditer(
-            [
-                times, coords[..., 0], coords[..., 1], coords[..., 2],
-                result[..., 0], result[..., 1], result[..., 2],
-            ],
-            op_flags=[
-                ['readonly'], ['readonly'], ['readonly'], ['readonly'],
-                ['writeonly'], ['writeonly'], ['writeonly'],
-            ],
-        )
-        for time, coord0, coord1, coord2, vect0, vect1, vect2 in iterator:
-            if self._is_valid_time(time):
-                vect0[...], vect1[...], vect2[...] = self._eval_reference(
-                    time, [coord0, coord1, coord2]
-                )
-            else:
-                vect0[...], vect1[...], vect2[...] = nan, nan, nan
+        times = asarray(times)
+        result = full(coords.shape, nan)
+        mask = self._is_valid_time(times)
+        result[mask, :] = self._eval_reference(mask_array(times, mask), coords[mask])
         return result
 
     def _is_valid_time(self, time):
         validity_start, validity_end = self.model.validity
-        return validity_start <= time <= validity_end
+        return (validity_start <= time) & (time <= validity_end)
 
     def _eval_reference(self, time, coords):
         is_internal = self.model.coefficients.is_internal
         coeff, degree = self.model.coefficients(time, **self.options)
         return sheval(
-            coords, degree, coeff[..., 0], coeff[..., 1],
-            is_internal=is_internal, mode=GRADIENT,
+            coords, coeff,
+            mode=GRADIENT, degree=degree, is_internal=is_internal,
             coord_type_in=self.coord_type_in,
             coord_type_out=self.coord_type_out,
             scale_gradient=-asarray(self.scale),
@@ -273,8 +261,8 @@ class DipoleSHModelTestMixIn(SHModelTestMixIn):
         lat_ngp, lon_ngp = self.model.north_pole #(time)
         coeff, degree = self.model.coefficients(time)
         return sheval_dipole(
-            coords, degree, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
-            is_internal=is_internal, mode=GRADIENT,
+            coords, coeff, lat_ngp, lon_ngp,
+            mode=GRADIENT, degree=degree, is_internal=is_internal,
             coord_type_in=self.coord_type_in,
             coord_type_out=self.coord_type_out,
             scale_gradient=-asarray(self.scale),
@@ -306,11 +294,11 @@ class DipoleMIOSHModelTestMixIn(SHModelTestMixIn):
             time, mjd2000_to_magnetic_universal_time(time, lat_ngp, lon_ngp)
         )
         return sheval_dipole(
-            coords, degree, coeff[..., 0], coeff[..., 1], lat_ngp, lon_ngp,
-            is_internal=is_internal, mode=GRADIENT,
+            coords, coeff, lat_ngp, lon_ngp,
+            mode=GRADIENT, degree=degree, is_internal=is_internal,
             coord_type_in=self.coord_type_in,
             coord_type_out=self.coord_type_out,
-            scale_gradient=scale
+            scale_gradient=scale,
         )
 
 class ComposedModelTestMixIn(SHModelTestMixIn):
@@ -324,7 +312,11 @@ class ComposedModelTestMixIn(SHModelTestMixIn):
         return composed_model
 
     def _eval_reference(self, time, coords):
-        result = 0
+        time = asarray(time)
+        coords = asarray(coords)
+        result = zeros(
+            (*time.shape, 3) if time.ndim > (coords.ndim -1) else coords.shape
+        )
         for model, scale, parameters in self.components:
             kwargs = {}
             kwargs.update(getattr(self, 'options', {}))
@@ -337,6 +329,16 @@ class ComposedModelTestMixIn(SHModelTestMixIn):
         return result
 
 #-------------------------------------------------------------------------------
+
+class TestComposedModelEmpty(TestCase, ComposedModelTestMixIn):
+    parameters = ("time", "location")
+    options = {"f107": 70, "scale": [1, 1, -1]}
+    components = []
+    reference_values = (
+        6201.125, (30.0, 40.0, 6400.0), (0., 0., 0.),
+    )
+    validity = (-inf, +inf)
+
 
 class TestComposedModelFull(TestCase, ComposedModelTestMixIn):
     parameters = ("time", "location", "f107", "subsolar_point")
@@ -578,7 +580,7 @@ class TestCHAOSCoreWithOverridenValidity(TestCHAOSCore):
         )
 
 
-class TestCHAOSComposedMixIn(object):
+class TestCHAOSComposedMixIn:
     validity = decimal_year_to_mjd2000((1997.10198494, 2022.49691992))
 
     def load(self):
@@ -646,7 +648,7 @@ class TestMMA2CPrimary(TestCase, DipoleSHModelTestMixIn):
         return load_model_swarm_mma_2c_external(SWARM_MMA_SHA_2C_TEST_DATA)
 
 
-class estChaosMMASecondary(TestCase, DipoleSHModelTestMixIn):
+class TestChaosMMASecondary(TestCase, DipoleSHModelTestMixIn):
     reference_values = (
         6194.5, (30.0, 40.0, 8000.0),
         (1.8492638163980442, 0.5125018012040559, 1.0821299594918217)
@@ -753,7 +755,7 @@ class TestMIOSecondary(TestCase, DipoleMIOSHModelTestMixIn):
 
 
 class TestMIOPrimary(TestCase, DipoleMIOSHModelTestMixIn):
-    model_class = DipoleMIOPrimaryGeomagneticModel
+    model_class = MIOPrimaryGeomagneticModel
     degree = 2
     min_degree = 1
     reference_values = (
@@ -774,13 +776,18 @@ class TestMIOPrimary(TestCase, DipoleMIOSHModelTestMixIn):
 
     def _eval_reference(self, time, coords):
         height_radius = self.model.earth_radius + self.model.height
-
-        if coords[2] <= height_radius:
-            model = self.model.model_below_ionosphere
-        else:
-            model = self.model.model_above_ionosphere
-
-        return self._eval_reference_mio(model, time, coords)
+        result = empty(coords.shape)
+        # below ionosphere
+        mask = coords[..., 2] <= height_radius
+        result[mask] = self._eval_reference_mio(
+            self.model.model_below_ionosphere, mask_array(time, mask), coords[mask]
+        )
+        # above ionosphere
+        mask = ~mask
+        result[mask] = self._eval_reference_mio(
+            self.model.model_above_ionosphere, mask_array(time, mask), coords[mask]
+        )
+        return result
 
     def test_eval_single_reference_value_below_ionosphere(self):
         times, coords, results = self.reference_values

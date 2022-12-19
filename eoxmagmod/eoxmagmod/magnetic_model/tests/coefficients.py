@@ -5,7 +5,7 @@
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
-# Copyright (C) 2018 EOX IT Services GmbH
+# Copyright (C) 2018-2022 EOX IT Services GmbH
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@
 # pylint: disable=missing-docstring, line-too-long, too-few-public-methods
 
 from unittest import TestCase, main
-from numpy import nan, inf, isinf, array, dot
+from numpy import nan, inf, isinf, array, dot, stack, asarray
 from numpy.testing import assert_allclose
 from eoxmagmod import decimal_year_to_mjd2000
 from eoxmagmod.magnetic_model.coefficients import (
@@ -40,7 +40,7 @@ from eoxmagmod.magnetic_model.coefficients import (
 )
 
 
-class SHCoefficinetTestMixIn(object):
+class SHCoefficinetTestMixIn:
 
     def test_min_degree(self):
         self.assertEqual(self.coefficients.min_degree, self.min_degree)
@@ -81,9 +81,23 @@ class SHCoefficinetTestMixIn(object):
     def test_is_valid_fail_nan(self):
         self.assertFalse(self.coefficients.is_valid(nan))
 
+    def _test_multitime_callable(self, times, expected_degree=None, **options):
+        if expected_degree is None:
+            expected_degree = self.degree
+        coeff, degree = self.coefficients(times, **options)
+        coeff_ref = self.get_multitime_coefficients_ref(times, **options)
+        assert_allclose(coeff, coeff_ref)
+        self.assertEqual(degree, expected_degree)
+
+    def get_multitime_coefficients_ref(self, times, **options):
+        times = asarray(times)
+        coeff_obj = self.coefficients
+        coeff = stack([coeff_obj(time, **options)[0] for time in times.ravel()], axis=0)
+        return coeff.reshape((*times.shape, *coeff.shape[1:]))
+
 #-------------------------------------------------------------------------------
 
-class ComposedSHCoefficientsMixIn(object):
+class ComposedSHCoefficientsMixIn:
     is_internal = True
     options = [{}, {}]
     indices = array([(1, 0), (1, 1), (1, -1)])
@@ -120,12 +134,18 @@ class TestComposedSHCoefficientsDefault1(TestCase, SHCoefficinetTestMixIn, Compo
         assert_allclose(coeff, [[0., 0.], [1.5, 0], [7.5, 15.0]])
         self.assertEqual(degree, self.degree)
 
+    def test_multitime_callable(self):
+        self._test_multitime_callable([2011.0, 2012.0, 2013.0, 2014.0, 2015.0])
+
 
 class TestComposedSHCoefficientsDefault2(TestCase, SHCoefficinetTestMixIn, ComposedSHCoefficientsMixIn):
     def test_callable(self):
         coeff, degree = self.coefficients(2015.0)
         assert_allclose(coeff, [[0., 0.], [2.5, 0], [12.5, 25.0]])
         self.assertEqual(degree, self.degree)
+
+    def test_multitime_callable(self):
+        self._test_multitime_callable([2011.0, 2012.0, 2013.0, 2014.0, 2015.0])
 
 
 class TestComposedSHCoefficientsInternal(TestComposedSHCoefficientsDefault1):
@@ -147,7 +167,7 @@ class TestComposedSHCoefficientsMixed(TestCase, ComposedSHCoefficientsMixIn):
 
 #-------------------------------------------------------------------------------
 
-class CombinedSHCoefficientsMixIn(object):
+class CombinedSHCoefficientsMixIn:
     is_internal = True
     times0 = array([2012.0, 2016.0, 2014.0])
     indices0 = array([(1, 0), (1, 1), (1, -1)])
@@ -183,6 +203,9 @@ class TestCombinedSHCoefficientsDefault(TestCase, SHCoefficinetTestMixIn, Combin
             [0., 0.], [1.5, 0], [7.5, 15.0], [1, 0], [5, 10.0], [8., 12.],
         ])
         self.assertEqual(degree, self.degree)
+
+    def test_multitime_callable(self):
+        self._test_multitime_callable([2011.0, 2012.0, 2013.0, 2014.0, 2015.0, 2016.0, 2017.0])
 
 
 class TestCombinedSHCoefficientsMinDegree(TestCase, SHCoefficinetTestMixIn, CombinedSHCoefficientsMixIn):
@@ -250,6 +273,9 @@ class TestSparseSHCoefficientsConstantDefault(TestCase, SHCoefficinetTestMixIn):
         assert_allclose(coeff, [[0., 0.], [1, 0], [5, 10.0]])
         self.assertEqual(degree, self.degree)
 
+    def test_multitime_callable(self):
+        self._test_multitime_callable([2005.0, 2010.0, 2015.0, 2018.0, 2020.0])
+
 
 class TestSparseSHCoefficientsConstantInternal(TestSparseSHCoefficientsConstantDefault):
     is_internal = True
@@ -296,6 +322,9 @@ class TestSparseSHCoefficientsTimeDependentDefault(TestCase, SHCoefficinetTestMi
         coeff, degree = self.coefficients(2011.0)
         assert_allclose(coeff, [[0., 0.], [0.5, 0], [2.5, 5.0]])
         self.assertEqual(degree, self.degree)
+
+    def test_multitime_callable(self):
+        self._test_multitime_callable([2005.0, 2010.0, 2012.0, 2015.0, 2016.0, 2018.0, 2020.0])
 
 
 class TestSparseSHCoefficientsTimeDependentInternal(TestSparseSHCoefficientsTimeDependentDefault):
@@ -350,6 +379,11 @@ class TestSparseSHCoefficientsTimeDependentConvertedDefault(TestCase, SHCoeffici
         assert_allclose(coeff, [[0., 0.], [0.5, 0], [2.5, 5.0]])
         self.assertEqual(degree, self.degree)
 
+    def test_multitime_callable(self):
+        self._test_multitime_callable(
+            decimal_year_to_mjd2000([2005.0, 2010.0, 2012.0, 2015.0, 2016.0, 2018.0, 2020.0])
+        )
+
 
 class TestSparseSHCoefficientsTimeDependentConvertedInternal(TestSparseSHCoefficientsTimeDependentConvertedDefault):
     is_internal = True
@@ -396,6 +430,11 @@ class TestSparseSHCoefficientsTimeDependentDecimalYearDefault(TestCase, SHCoeffi
         coeff, degree = self.coefficients(decimal_year_to_mjd2000(2011.0))
         assert_allclose(coeff, [[0., 0.], [0.5, 0], [2.5, 5.0]])
         self.assertEqual(degree, self.degree)
+
+    def test_multitime_callable(self):
+        self._test_multitime_callable(
+            decimal_year_to_mjd2000([2005.0, 2010.0, 2012.0, 2015.0, 2016.0, 2018.0, 2020.0])
+        )
 
 
 class TestSparseSHCoefficientsTimeDependentDecimalYearInternal(TestSparseSHCoefficientsTimeDependentDecimalYearDefault):
@@ -474,6 +513,12 @@ class TestSparseSHCoefficientsConstantSubset(TestCase, SHCoefficinetTestMixIn):
         ])
         self.assertEqual(degree, 0)
 
+    def test_multitime_callable(self):
+        self._test_multitime_callable(
+            [2005.0, 2010.0, 2012.0, 2015.0, 2016.0, 2018.0, 2020.0],
+            expected_degree=2, min_degree=2, max_degree=2,
+        )
+
 
 class TestSparseSHCoefficientsTimeDependentSubset(TestCase, SHCoefficinetTestMixIn):
     times = array([2012.0, 2014.0])
@@ -539,6 +584,18 @@ class TestSparseSHCoefficientsTimeDependentSubset(TestCase, SHCoefficinetTestMix
             [0, 0],
         ])
         self.assertEqual(degree, 0)
+
+    def test_multitime_callable(self):
+        self._test_multitime_callable(
+            [2005.0, 2010.0, 2012.0, 2015.0, 2016.0, 2018.0, 2020.0],
+            expected_degree=2, min_degree=2, max_degree=2
+        )
+
+    def test_multitime_callable_allzero(self):
+        self._test_multitime_callable(
+            [2005.0, 2010.0, 2012.0, 2015.0, 2016.0, 2018.0, 2020.0],
+            expected_degree=0, min_degree=4,
+        )
 
 #-------------------------------------------------------------------------------
 

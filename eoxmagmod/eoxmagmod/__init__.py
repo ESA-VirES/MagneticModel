@@ -51,7 +51,7 @@ try:
         vrot_sph2cart,
         vrot_cart2sph,
         legendre,
-        lonsincos,
+        loncossin,
         relradpow,
         spharpot,
         sphargrd,
@@ -95,7 +95,7 @@ try:
         'vrot_cart2sph',
         'convert',
         'legendre',
-        'lonsincos',
+        'loncossin',
         'relradpow',
         'spharpot',
         'sphargrd',
@@ -140,7 +140,7 @@ try:
 except ImportError:
     pass
 
-__version__ = '0.10.0'
+__version__ = '0.12.0'
 __author__ = 'Martin Paces (martin.paces@eox.at)'
 __copyright__ = 'Copyright (C) 2014-2022 EOX IT Services GmbH'
 __licence__ = 'EOX licence (MIT style)'

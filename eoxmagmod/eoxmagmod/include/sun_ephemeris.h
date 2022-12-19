@@ -1,9 +1,9 @@
 /**
- * @file sunpos.h
+ * @file sun_ephemeris.h
  * @author Martin Paces <martin.paces@eox.at>
  * @brief Sun Position
  *
- * Calculation of the Solar position.
+ * Calculation of the Sun ephemeris
  *
  * This code is derived from the code kindly provided by Stephan Buchert.
  *
@@ -36,8 +36,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef SUNPOS_H
-#define SUNPOS_H
+#ifndef SUN_EPHEMERIS_H
+#define SUN_EPHEMERIS_H
 
 #include "time_conversion.h"
 #include <math.h>
@@ -56,6 +56,7 @@
 #ifndef FMOD_FLOOR
 #define FMOD_FLOOR(a,b) ((a)-(b)*floor((a)/(b)))
 #endif
+
 
 /**
  * @brief Convert year, month, day and number of decimal hours to MJD2000
@@ -80,6 +81,7 @@ void date_to_sunposmjd2k(double *sunpos_mjd2k, int year, int month, int day, dou
         day
     ) + (1.0/24.0)*hours - 43.0;
 }
+
 
 /**
  * @brief Evaluate solar position in equatorial coordinate system.
@@ -184,6 +186,7 @@ void sunpos5original(
     *azimuth = FMOD_FLOOR(*azimuth, PI2) - PI;
 }
 
+
 /**
  * @brief Evaluate solar position in equatorial coordinate system.
  *
@@ -256,6 +259,7 @@ void sunpos5equat(
     *hang = _hang;
 }
 
+
 /**
  * @brief Convert solar equatorial to horizontal coordinates.
  *
@@ -309,4 +313,4 @@ void sunpos5eq2hor(
     *azimuth = FMOD_FLOOR(*azimuth, PI2) - PI;
 }
 
-#endif /* SUNPOS_H */
+#endif /* SUN_EPHEMERIS_H */

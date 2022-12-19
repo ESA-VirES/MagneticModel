@@ -5,7 +5,7 @@
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
-# Copyright (C) 2018 EOX IT Services GmbH
+# Copyright (C) 2018-2022 EOX IT Services GmbH
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -87,9 +87,12 @@ def load_coeff_shc(path, interpolate_in_decimal_years=False, **kwargs):
     """
     data = parse_file(parse_shc_file, path)
 
+
+    keys = ["validity_start", "validity_end"]
+
     options = {
         key: data[key]
-        for key in ("validity_start", "validity_end") if key in data
+        for key in keys if key in data
     }
     options.update(kwargs) # extend or override the default model options
 
@@ -97,16 +100,19 @@ def load_coeff_shc(path, interpolate_in_decimal_years=False, **kwargs):
         options["to_mjd2000"] = decimal_year_to_mjd2000
 
     times = data["t"]
+
+    kwargs["spline_oder"] = kwargs.get("spline_oder", min(data["spline_order"], 2))
+
     if len(times) == 1:
         return SparseSHCoefficientsConstant(
             data["nm"], data["gh"][:, 0], **options
         )
-    else:
-        if interpolate_in_decimal_years:
-            coeff_class = SparseSHCoefficientsTimeDependentDecimalYear
-        else:
-            coeff_class = SparseSHCoefficientsTimeDependent
 
-        return coeff_class(
-            data["nm"], data["gh"], times, **options
-        )
+    if interpolate_in_decimal_years:
+        coeff_class = SparseSHCoefficientsTimeDependentDecimalYear
+    else:
+        coeff_class = SparseSHCoefficientsTimeDependent
+
+    return coeff_class(
+        data["nm"], data["gh"], times, **options
+    )

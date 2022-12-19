@@ -28,56 +28,83 @@
 # pylint: disable=missing-docstring
 
 from unittest import TestCase, main
-from math import pi, sin, cos
-from numpy import array
+from numpy import empty, asarray, linspace, pi, sin, cos
 from numpy.testing import assert_allclose
-from eoxmagmod._pymm import lonsincos
+from eoxmagmod._pymm import loncossin
 
 
 class TestLongitudialSinCosSeries(TestCase):
 
+    @classmethod
+    def reference(cls, lons, degree):
+        """ Evaluate sin/cos series. """
+        lons = asarray(lons)
+        size = lons.size
+        shape = lons.shape
+
+        nterms = degree + 1
+
+        lons = lons.ravel()
+        cossins = empty((size, nterms, 2))
+
+        for i in range(size):
+            cossins[i, :, :] = cls.reference_scalar(lons[i], degree)
+
+        return cossins.reshape((*shape, nterms, 2))
+
     @staticmethod
-    def reference(value, degree):
+    def reference_scalar(value, degree):
         """ Reference implementation. """
         value *= pi / 180.0
-        return (
-            array([sin(i*value) for i in range(degree + 1)]),
-            array([cos(i*value) for i in range(degree + 1)])
-        )
+        return asarray([[cos(i*value), sin(i*value)] for i in range(degree + 1)])
 
     @staticmethod
     def _assert_allclose(result0, result1):
-        sin_series0, cos_series0 = result0
-        sin_series1, cos_series1 = result1
-        assert_allclose(cos_series0, cos_series1, atol=1e-14)
-        assert_allclose(sin_series0, sin_series1, atol=1e-14)
+        assert_allclose(result0, result1, atol=1e-14)
 
-    def _test_lonsincos(self, *args, **kwargs):
+    def _test_loncossin_scalar(self, *args, **kwargs):
         degree = 6
         longitudes = [float(v) for v in range(-180, 180, 30)]
 
         for longitude in longitudes:
             self._assert_allclose(
-                lonsincos(longitude, degree, *args, **kwargs),
+                loncossin(longitude, degree, *args, **kwargs),
                 self.reference(longitude, degree)
             )
 
+    def _test_loncossin_array(self, *args, **kwargs):
+        degree = 6
+        longitudes = linspace(-180, 180, 91).reshape((13, 7))
+        self._assert_allclose(
+            loncossin(longitudes, degree, *args, **kwargs),
+            self.reference(longitudes, degree)
+        )
+
     def test_invalid_degree(self):
-        self.assertRaises(ValueError, lonsincos, 0.0, -1)
+        self.assertRaises(ValueError, loncossin, 0.0, -1)
 
-    def test_lonsincos_zero_degree(self):
-        self._assert_allclose(lonsincos(0, 0), ([0.0], [1.0]))
-        self._assert_allclose(lonsincos(90, 0, False), ([0.0], [1.0]))
-        self._assert_allclose(lonsincos(-90, 0, True), ([0.0], [1.0]))
+    def test_loncossin_zero_degree(self):
+        self._assert_allclose(loncossin(0, 0), [[1.0, 0.0]])
+        self._assert_allclose(loncossin(90, 0, False), [[1.0, 0.0]])
+        self._assert_allclose(loncossin(-90, 0, True), [[1.0, 0.0]])
 
-    def test_lonsincos_default(self):
-        self._test_lonsincos()
+    def test_loncossin_default(self):
+        self._test_loncossin_scalar()
 
-    def test_lonsincos_fast(self):
-        self._test_lonsincos(True)
+    def test_loncossin_fast(self):
+        self._test_loncossin_scalar(True)
 
-    def test_lonsincos_slow(self):
-        self._test_lonsincos(False)
+    def test_loncossin_slow(self):
+        self._test_loncossin_scalar(False)
+
+    def test_loncossin_array_default(self):
+        self._test_loncossin_array()
+
+    def test_loncossin_array_fast(self):
+        self._test_loncossin_array(True)
+
+    def test_loncossin_array_slow(self):
+        self._test_loncossin_array(False)
 
 
 if __name__ == "__main__":

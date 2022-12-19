@@ -73,12 +73,7 @@ class TestDipoleRotationMatrix(TestCase):
         return get_dipole_rotation_matrix(latitude, longitude)
 
     def test_rotation_matrix(self):
-        coords = [
-            (lat, lon) for lat, lon
-            in product(range(-90, 91, 5), range(-180, 181, 10))
-        ]
-
-        for lat, lon in coords:
+        for lat, lon in list(product(range(-90, 91, 5), range(-180, 181, 10))):
             matrix = self.eval_rotation_matrix(lat, lon)
             assert_allclose(
                 matrix,
@@ -118,11 +113,7 @@ class TestConvertToDipoleCoordinates(TestCase):
 
 
     def test_convert_to_dipole(self):
-        north_pole_coords = [
-            (lat, lon) for lat, lon
-            in product(range(-90, 91, 10), range(-180, 181, 20))
-        ]
-        for lat, lon in north_pole_coords:
+        for lat, lon in list(product(range(-90, 91, 10), range(-180, 181, 20))):
             coords = self.coordinates
             assert_allclose(
                 self.eval_convert_to_dipole(coords, lat, lon),
@@ -152,7 +143,7 @@ class TestConvertToDipoleCoordinates(TestCase):
         )
 
 
-class VRotFromDipoleMixIn(object):
+class VRotFromDipoleMixIn:
     target_coords_type = None
     shape = (37, 37)
 
@@ -210,11 +201,7 @@ class VRotFromDipoleMixIn(object):
         )
 
     def test_vrot_dipole2spherical(self):
-        north_pole_coords = [
-            (lat, lon) for lat, lon
-            in product(range(-90, 91, 10), range(-180, 181, 20))
-        ]
-        for lat, lon in north_pole_coords:
+        for lat, lon in list(product(range(-90, 91, 10), range(-180, 181, 20))):
             coords = self.coords
             vects = self.vectors
             assert_allclose(
@@ -276,7 +263,7 @@ class TestVRotDipoleToCartesian(TestCase, VRotFromDipoleMixIn):
             )
 
 
-class VRotFromDipoleToSphericalMixIn(object):
+class VRotFromDipoleToSphericalMixIn:
     target_coords_type = GEOCENTRIC_SPHERICAL
 
     def test_vrot_dipole_to_spherical_sanity_check(self):
