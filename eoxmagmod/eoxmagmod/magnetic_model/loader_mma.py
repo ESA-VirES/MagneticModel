@@ -42,6 +42,21 @@ from .parser_mma import (
     read_swarm_mma_2f_sm_internal, read_swarm_mma_2f_sm_external,
 )
 
+__all__ = [
+    "load_model_swarm_mma_2c_internal",
+    "load_model_swarm_mma_2c_external",
+    "load_model_swarm_mma_2f_geo_internal",
+    "load_model_swarm_mma_2f_geo_external",
+    "load_model_swarm_mma_2f_sm_internal",
+    "load_model_swarm_mma_2f_sm_external",
+    "load_coeff_swarm_mma_2c_internal",
+    "load_coeff_swarm_mma_2c_external",
+    "load_coeff_swarm_mma_2f_geo_internal",
+    "load_coeff_swarm_mma_2f_geo_external",
+    "load_coeff_swarm_mma_2f_sm_internal",
+    "load_coeff_swarm_mma_2f_sm_external",
+]
+
 # North geomagnetic coordinates used by the MMA products (IGRF-11, 2010.0)
 MMA2C_NGP_LATITUDE = 90 - 9.92   # deg.
 MMA2C_NGP_LONGITUDE = 287.78 - 360.0  # deg.

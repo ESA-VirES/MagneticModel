@@ -25,7 +25,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
-# pylint: disable=too-many-arguments,too-many-locals
+# pylint: disable=too-many-arguments
 
 from numpy import nan, asarray, empty, isnan, full
 from .._pymm import GRADIENT, GEOCENTRIC_SPHERICAL, convert, sheval2dfs
@@ -33,6 +33,8 @@ from ..magnetic_time import mjd2000_to_magnetic_universal_time
 from .coefficients_mio import SparseSHCoefficientsMIO
 from .model import GeomagneticModel, DipoleSphericalHarmomicGeomagneticModel
 from .util import reshape_times_and_coordinates, reshape_array, mask_array
+
+__all__ = ["DipoleMIOGeomagneticModel", "MIOPrimaryGeomagneticModel"]
 
 MIO_HEIGHT = 110.0 # km
 MIO_EARTH_RADIUS = 6371.2 # km
@@ -135,6 +137,7 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
 
     def __init__(self, coefficients, north_pole, wolf_ratio=MIO_WOLF_RATIO,
                  height=MIO_HEIGHT, earth_radius=MIO_EARTH_RADIUS):
+        del height, earth_radius
 
         if not isinstance(coefficients, SparseSHCoefficientsMIO):
             raise TypeError(

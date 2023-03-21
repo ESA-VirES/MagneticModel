@@ -29,6 +29,8 @@
 from numpy import array
 from .parser_shc import _strip_shc_comments
 
+__all__ = ["parse_swarm_mio_file"]
+
 
 def parse_swarm_mio_file(file_in):
     """ Parse Swarm MIO_SHA_2* product file format and return a dictionary
@@ -40,6 +42,7 @@ def parse_swarm_mio_file(file_in):
     data["degree_min"] = data["nm"][:, 0].min()
     data["degree_max"] = data["nm"][:, 0].max()
     return data
+
 
 def parse_swarm_mio_coefficients(lines, data):
     """ Parse the Swarm MIO_SHA_2* coefficients. """

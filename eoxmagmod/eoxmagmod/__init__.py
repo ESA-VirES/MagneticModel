@@ -65,7 +65,7 @@ try:
     from .dipole_coords import (
         get_dipole_rotation_matrix, convert_to_dipole, vrot_from_dipole,
     )
-    from .sheval_dipole import sheval_dipole
+    from .dipole import sheval_dipole
     from .magnetic_time import mjd2000_to_magnetic_universal_time
     from .magnetic_model.loader_shc import load_model_shc, load_model_shc_combined
     from .magnetic_model.loader_igrf import load_model_igrf

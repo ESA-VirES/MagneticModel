@@ -30,6 +30,8 @@ from .model import SphericalHarmomicGeomagneticModel
 from .coefficients import SparseSHCoefficientsTimeDependentDecimalYear
 from .parser_igrf import parse_igrf_file
 
+__all__ = ["load_model_igrf", "load_coeff_igrf"]
+
 
 def load_model_igrf(path):
     """ Load model from an IGRF coefficient file.

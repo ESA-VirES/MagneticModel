@@ -28,14 +28,37 @@
 # pylint: disable=missing-docstring, invalid-name, too-few-public-methods
 
 from unittest import TestCase, main
+from datetime import date, datetime
 from numpy import vectorize, inf, nan
 from numpy.random import uniform
 from numpy.testing import assert_allclose
+from eoxmagmod.tests.util import FunctionTestMixIn
 from eoxmagmod.time_util import (
     decimal_year_to_mjd2000_simple,
     mjd2000_to_decimal_year_simple,
     mjd2000_to_year_fraction_simple,
+    datetime_to_decimal_year,
 )
+
+
+class TestDatetimeToDecimalYear(FunctionTestMixIn, TestCase):
+    NAME = "datetime_to_decimal_year"
+
+    @staticmethod
+    def eval(input_):
+        return datetime_to_decimal_year(input_)
+
+    ACCEPTED = [
+        (datetime(2001, 1, 12), 2001.0301369863014),
+        (datetime(2012, 8, 31), 2012.6639344262296),
+        (datetime(2014, 8, 31), 2014.66301369863),
+        (datetime(2024, 12, 31, 23, 59, 59, 999), 2024.9999999684085),
+    ]
+
+    REJECTED = [
+        (None, TypeError),
+        (date(2001, 1, 12), TypeError),
+    ]
 
 
 class TestMjd2000ToYearFractionSimple(TestCase):

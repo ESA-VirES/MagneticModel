@@ -29,6 +29,8 @@
 import re
 from numpy import array
 
+__all__ = ["parse_wmm_file"]
+
 RE_TERMINATING_LINE = re.compile(r'^9+$')
 WMM_VALIDITY_PERIOD = 5.0 # years
 

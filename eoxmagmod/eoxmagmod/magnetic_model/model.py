@@ -30,13 +30,19 @@
 
 from numpy import asarray, empty, full, nan, nditer
 from .._pymm import GRADIENT, GEOCENTRIC_SPHERICAL, sheval, shevaltemp
-from ..sheval_dipole import rotate_vectors_from_dipole
+from ..dipole import rotate_vectors_from_dipole
 from ..dipole_coords import convert_to_dipole
 from .util import reshape_times_and_coordinates
 from .coefficients import (
     SparseSHCoefficientsTimeDependent,
     CombinedSHCoefficients,
 )
+
+__all__ = [
+    "GeomagneticModel",
+    "SphericalHarmomicGeomagneticModel",
+    "DipoleSphericalHarmomicGeomagneticModel",
+]
 
 
 class GeomagneticModel:

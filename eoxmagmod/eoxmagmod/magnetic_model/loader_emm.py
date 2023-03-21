@@ -34,6 +34,8 @@ from .coefficients import (
 )
 from .parser_emm import combine_emm_coefficients, parse_emm_file
 
+__all__ = ["load_model_emm", "load_coeff_emm"]
+
 
 def load_model_emm(path_static, path_secvar):
     """ Load model from a EMM coefficient files. """

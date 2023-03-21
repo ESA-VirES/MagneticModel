@@ -29,6 +29,15 @@
 from numpy import array
 from spacepy import pycdf
 
+__all__ = [
+    "read_swarm_mma_2c_internal",
+    "read_swarm_mma_2c_external",
+    "read_swarm_mma_2f_geo_internal",
+    "read_swarm_mma_2f_geo_external",
+    "read_swarm_mma_2f_sm_internal",
+    "read_swarm_mma_2f_sm_external",
+]
+
 CDF_EPOCH_TYPE = pycdf.const.CDF_EPOCH.value
 CDF_EPOCH_2000 = 63113904000000.0
 CDF_EPOCH_TO_DAYS = 1.0/86400000.0

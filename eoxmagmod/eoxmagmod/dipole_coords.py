@@ -33,6 +33,12 @@ from eoxmagmod._pymm import (
     GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
 )
 
+__all__ = [
+    "get_dipole_rotation_matrix",
+    "convert_to_dipole",
+    "vrot_from_dipole",
+]
+
 DEG2RAD = pi / 180.0
 
 

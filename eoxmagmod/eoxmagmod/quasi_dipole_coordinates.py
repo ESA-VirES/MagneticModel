@@ -30,6 +30,13 @@ from os.path import isfile
 from . import _pyqd
 from .data import APEX
 
+__all__ = [
+    "eval_qdlatlon",
+    "eval_qdlatlon_with_base_vectors",
+    "eval_mlt",
+    "eval_subsol",
+]
+
 
 def eval_qdlatlon(gclat, gclon, gcrad, time, fname=APEX):
     """

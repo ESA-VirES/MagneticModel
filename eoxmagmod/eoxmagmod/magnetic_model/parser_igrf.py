@@ -29,6 +29,8 @@
 
 from numpy import array
 
+__all__ = ["parse_igrf_file"]
+
 IGRF_EXTRAPOLATION_PERIOD = 5.0 # years
 
 

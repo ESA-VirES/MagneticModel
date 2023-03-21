@@ -27,7 +27,6 @@
 #-------------------------------------------------------------------------------
 # pylint: disable=no-name-in-module
 
-from datetime import datetime
 from numpy import sqrt, asarray
 from ._pymm import (
     GEODETIC_ABOVE_WGS84, GEOCENTRIC_SPHERICAL, GEOCENTRIC_CARTESIAN,
@@ -35,6 +34,13 @@ from ._pymm import (
 )
 
 SPHERICAL_COORD_TYPES = (GEODETIC_ABOVE_WGS84, GEOCENTRIC_SPHERICAL)
+
+__all__ = [
+    "vrotate",
+    "vnorm",
+    "vincdecnorm",
+]
+
 
 def vrotate(arr, coord_in, coord_out, coord_type_in, coord_type_out):
     """ Rotate vectors from one coordinate system to another.
@@ -96,19 +102,3 @@ def vincdecnorm(arr):
     """
     tmp = convert(arr, GEOCENTRIC_CARTESIAN, GEOCENTRIC_SPHERICAL)
     return -tmp[..., 0], tmp[..., 1], tmp[..., 2]
-
-
-def datetime_to_decimal_year(time):
-    """ Convert time given by a `datetime.datetime` object to a decimal year
-    value.
-    """
-    if not isinstance(time, datetime):
-        raise TypeError("The input must be a datetime object.")
-
-    year_start = datetime(year=time.year, month=1, day=1)
-    next_year_start = datetime(year=time.year+1, month=1, day=1)
-
-    year_elapsed = (time - year_start).total_seconds()
-    year_total = (next_year_start - year_start).total_seconds()
-
-    return time.year + year_elapsed / year_total

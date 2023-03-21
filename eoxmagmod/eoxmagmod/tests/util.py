@@ -28,10 +28,9 @@
 # pylint: disable=missing-docstring
 
 from unittest import main, TestCase
-from datetime import date, datetime
 from numpy import array
 from numpy.testing import assert_allclose
-from eoxmagmod.util import vnorm, vincdecnorm, datetime_to_decimal_year
+from eoxmagmod.util import vnorm, vincdecnorm
 
 
 class FunctionTestMixIn:
@@ -60,26 +59,6 @@ class FunctionTestMixIn:
                 self.assertRaises(expected_exception, self.eval, input_)
             except AssertionError as exc:
                 raise AssertionError(f"\nInput: {input_}\n{exc}") from None
-
-
-class TestDatetimeToDecimalYear(FunctionTestMixIn, TestCase):
-    NAME = "datetime_to_decimal_year"
-
-    @staticmethod
-    def eval(input_):
-        return datetime_to_decimal_year(input_)
-
-    ACCEPTED = [
-        (datetime(2001, 1, 12), 2001.0301369863014),
-        (datetime(2012, 8, 31), 2012.6639344262296),
-        (datetime(2014, 8, 31), 2014.66301369863),
-        (datetime(2024, 12, 31, 23, 59, 59, 999), 2024.9999999684085),
-    ]
-
-    REJECTED = [
-        (None, TypeError),
-        (date(2001, 1, 12), TypeError),
-    ]
 
 
 class TestVnorm(FunctionTestMixIn, TestCase):

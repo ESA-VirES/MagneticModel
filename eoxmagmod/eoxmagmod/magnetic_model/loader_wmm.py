@@ -30,6 +30,8 @@ from .model import SphericalHarmomicGeomagneticModel
 from .coefficients import SparseSHCoefficientsTimeDependentDecimalYear
 from .parser_wmm import parse_wmm_file
 
+__all__ = ["load_model_wmm", "load_coeff_wmm"]
+
 
 def load_model_wmm(path):
     """ Load model from a WMM COF file. """

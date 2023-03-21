@@ -30,6 +30,8 @@ from numpy import asarray, copy
 from .._pymm import GEOCENTRIC_CARTESIAN, GEOCENTRIC_SPHERICAL, convert
 from ..util import vnorm, vrotate
 
+__all__ = ["trace_field_line"]
+
 EARTH_RADIUS = 6371.2
 DEFAULT_MIN_RADIUS = 0.9977 * EARTH_RADIUS
 DEFAULT_MAX_RADIUS = 1e6 * EARTH_RADIUS

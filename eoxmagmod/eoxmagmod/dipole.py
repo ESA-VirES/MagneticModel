@@ -33,6 +33,8 @@ from ._pymm import (
 )
 from .dipole_coords import convert_to_dipole, vrot_from_dipole
 
+__all__ = ["sheval_dipole", "rotate_vectors_from_dipole"]
+
 
 def sheval_dipole(arr_in, coef, lat_ngp, lon_ngp,
                   coord_type_in=GEODETIC_ABOVE_WGS84,

@@ -28,12 +28,23 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
+from datetime import datetime
 from numpy import asarray, floor
 from ._pytimeconv import (
     decimal_year_to_mjd2000,
     mjd2000_to_decimal_year,
     mjd2000_to_year_fraction,
 )
+
+__all__ = [
+    "decimal_year_to_mjd2000",
+    "mjd2000_to_decimal_year",
+    "mjd2000_to_year_fraction",
+    "mjd2000_to_decimal_year_simple",
+    "mjd2000_to_year_fraction_simple",
+    "decimal_year_to_mjd2000_simple",
+    "datetime_to_decimal_year",
+]
 
 
 def mjd2000_to_decimal_year_simple(mjd2000):
@@ -59,3 +70,19 @@ def decimal_year_to_mjd2000_simple(decimal_year):
         mjd2000 = (decimal_year - 2000.0) * 365.25
     """
     return (asarray(decimal_year) - 2000.0) * 365.25
+
+
+def datetime_to_decimal_year(time):
+    """ Convert time given by a `datetime.datetime` object to a decimal year
+    value.
+    """
+    if not isinstance(time, datetime):
+        raise TypeError("The input must be a datetime object.")
+
+    year_start = datetime(year=time.year, month=1, day=1)
+    next_year_start = datetime(year=time.year+1, month=1, day=1)
+
+    year_elapsed = (time - year_start).total_seconds()
+    year_total = (next_year_start - year_start).total_seconds()
+
+    return time.year + year_elapsed / year_total
