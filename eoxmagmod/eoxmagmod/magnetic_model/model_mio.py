@@ -169,10 +169,14 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
         )
 
         # MIO scaling factor
-        mio_scale = 1.0 + self.wolf_ratio * asarray(options.pop('f107'))
+        mask = True
+        mio_scale = options.pop('f107', None)
+        if mio_scale is not None:
+            mio_scale = 1.0 + self.wolf_ratio * asarray(mio_scale)
+            mask = ~isnan(mio_scale)
 
         start, end = self.validity
-        mask = (time >= start) & (time <= end) & ~isnan(mio_scale)
+        mask = (time >= start) & (time <= end) & mask
         result = full(location.shape, nan)
         result[mask, :] = self._eval(
             self._eval_fourier2d, self.coefficients,
@@ -182,9 +186,11 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
             lon_sol=_subset(options.pop('lon_sol', None), mask),
             **options,
         )
-        if mio_scale.ndim > 0:
-            mio_scale = reshape_array(location.shape, mio_scale)
-        result *= mio_scale
+
+        if mio_scale is not None:
+            if mio_scale.ndim > 0:
+                mio_scale = reshape_array(location.shape, mio_scale)
+            result *= mio_scale
 
         return result
 
