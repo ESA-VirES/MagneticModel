@@ -25,7 +25,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
-# pylint: disable=too-many-arguments,too-many-locals
+# pylint: disable=too-many-arguments
 
 from numpy import nan, asarray, empty, isnan, full
 from .._pymm import GRADIENT, GEOCENTRIC_SPHERICAL, convert, sheval2dfs
@@ -33,6 +33,8 @@ from ..magnetic_time import mjd2000_to_magnetic_universal_time
 from .coefficients_mio import SparseSHCoefficientsMIO
 from .model import GeomagneticModel, DipoleSphericalHarmomicGeomagneticModel
 from .util import reshape_times_and_coordinates, reshape_array, mask_array
+
+__all__ = ["DipoleMIOGeomagneticModel", "MIOPrimaryGeomagneticModel"]
 
 MIO_HEIGHT = 110.0 # km
 MIO_EARTH_RADIUS = 6371.2 # km
@@ -135,6 +137,7 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
 
     def __init__(self, coefficients, north_pole, wolf_ratio=MIO_WOLF_RATIO,
                  height=MIO_HEIGHT, earth_radius=MIO_EARTH_RADIUS):
+        del height, earth_radius
 
         if not isinstance(coefficients, SparseSHCoefficientsMIO):
             raise TypeError(
@@ -166,10 +169,14 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
         )
 
         # MIO scaling factor
-        mio_scale = 1.0 + self.wolf_ratio * asarray(options.pop('f107'))
+        mask = True
+        mio_scale = options.pop('f107', None)
+        if mio_scale is not None:
+            mio_scale = 1.0 + self.wolf_ratio * asarray(mio_scale)
+            mask = ~isnan(mio_scale)
 
         start, end = self.validity
-        mask = (time >= start) & (time <= end) & ~isnan(mio_scale)
+        mask = (time >= start) & (time <= end) & mask
         result = full(location.shape, nan)
         result[mask, :] = self._eval(
             self._eval_fourier2d, self.coefficients,
@@ -179,9 +186,11 @@ class DipoleMIOGeomagneticModel(DipoleSphericalHarmomicGeomagneticModel):
             lon_sol=_subset(options.pop('lon_sol', None), mask),
             **options,
         )
-        if mio_scale.ndim > 0:
-            mio_scale = reshape_array(location.shape, mio_scale)
-        result *= mio_scale
+
+        if mio_scale is not None:
+            if mio_scale.ndim > 0:
+                mio_scale = reshape_array(location.shape, mio_scale)
+            result *= mio_scale
 
         return result
 

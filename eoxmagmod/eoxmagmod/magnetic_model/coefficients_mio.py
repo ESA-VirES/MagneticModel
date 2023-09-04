@@ -25,16 +25,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
-#pylint: disable=no-name-in-module
 
 from math import pi
 from collections import namedtuple
-from numpy import asarray, zeros, arange, broadcast_to, sin, cos
+from numpy import asarray, zeros
 from .coefficients import SparseSHCoefficients, coeff_size
 from ..time_util import (
     mjd2000_to_year_fraction as mjd2000_to_year_fraction_default,
 )
 from .._pymm import fourier2d
+
+__all__ = [
+    "SparseSHCoefficientsMIO",
+]
 
 SCALE_SEASONAL = 2*pi
 SCALE_DIURNAL = 2*pi/24.

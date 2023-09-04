@@ -30,6 +30,8 @@ from math import pi
 from numpy import sin, cos, arctan2
 from .solar_position import sunpos
 
+__all__ = ["mjd2000_to_magnetic_universal_time"]
+
 DEG2RAD = pi/180.0
 RAD2HOUR = 12.0/pi
 

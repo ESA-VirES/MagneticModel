@@ -38,7 +38,7 @@ from eoxmagmod._pymm import (
     convert, relradpow, loncossin, legendre, spharpot, sphargrd,
 )
 from eoxmagmod.dipole_coords import convert_to_dipole, vrot_from_dipole
-from eoxmagmod.sheval_dipole import sheval_dipole
+from eoxmagmod.dipole import sheval_dipole
 from eoxmagmod.tests.data import mma_external, mma_internal
 
 

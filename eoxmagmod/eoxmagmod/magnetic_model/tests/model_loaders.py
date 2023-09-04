@@ -80,7 +80,7 @@ from eoxmagmod._pymm import (
     GEOCENTRIC_CARTESIAN, GEODETIC_ABOVE_WGS84, GEOCENTRIC_SPHERICAL, convert,
     GRADIENT, sheval,
 )
-from eoxmagmod.sheval_dipole import sheval_dipole
+from eoxmagmod.dipole import sheval_dipole
 
 
 class SHModelTestMixIn:

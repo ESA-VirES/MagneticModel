@@ -37,6 +37,16 @@ from .util import (
     coeff_size, convert_value,
 )
 
+__all__ = [
+    "SHCoefficients",
+    "ComposedSHCoefficients",
+    "CombinedSHCoefficients",
+    "SparseSHCoefficients",
+    "SparseSHCoefficientsTimeDependent",
+    "SparseSHCoefficientsConstant",
+    "SparseSHCoefficientsTimeDependentDecimalYear",
+]
+
 
 class SHCoefficients:
     """ Abstract base class for all spherical harmonic coefficients. """

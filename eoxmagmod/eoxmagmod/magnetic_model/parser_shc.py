@@ -28,6 +28,8 @@
 
 from numpy import inf, array
 
+__all__ = ["parse_shc_file", "parse_shc_header"]
+
 
 def parse_shc_file(file_in):
     """ Parse SHC file and return a dictionary containing the parsed model data.

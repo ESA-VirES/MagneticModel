@@ -32,6 +32,8 @@
 
 from . import _pysunpos
 
+__all__ = ["sunpos"]
+
 
 def sunpos(time_mjd2k, lat, lon, rad=6371.2, dtt=0):
     """ Calculate solar equatorial and horizontal coordinates

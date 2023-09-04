@@ -34,6 +34,7 @@ from .._pymm import (
 )
 from .model import GeomagneticModel
 
+__all__ = ["ComposedGeomagneticModel"]
 
 Component = namedtuple("_Component", ["model", "scale", "parameters"])
 

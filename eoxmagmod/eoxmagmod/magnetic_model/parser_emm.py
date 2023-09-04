@@ -29,6 +29,10 @@
 import re
 from numpy import array, stack
 
+__all__ = [
+    "combine_emm_coefficients",
+    "parse_emm_file",
+]
 
 RE_HEADER_LINE = re.compile(r'^-+$')
 EMM_VALIDITY_PERIOD = 5.0 # years

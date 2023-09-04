@@ -39,16 +39,28 @@ from .coefficients import (
 )
 from .parser_shc import parse_shc_file
 
+__all__ = [
+    "load_model_shc_combined",
+    "load_model_shc",
+    "load_coeff_shc_combined",
+    "load_coeff_shc_composed",
+    "load_coeff_shc",
+]
+
 
 def load_model_shc_combined(*paths, **kwargs):
-    """ Load model with coefficients combined from multiple SHC files. """
+    """ Load model with coefficients combined from multiple SHC files.
+    E.g., combining core and lithospheric models.
+    """
     return SphericalHarmomicGeomagneticModel(
         load_coeff_shc_combined(*paths, **kwargs)
     )
 
 
 def load_model_shc(*paths, **kwargs):
-    """ Load model from an SHC file. """
+    """ Load composed model from one or more SHC files.
+    E.g., composing multiple core models, each with a different time extent.
+    """
     return SphericalHarmomicGeomagneticModel(
         load_coeff_shc_composed(*paths, **kwargs)
     )

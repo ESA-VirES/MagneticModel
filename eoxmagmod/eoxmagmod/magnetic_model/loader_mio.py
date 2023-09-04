@@ -34,6 +34,13 @@ from .model_mio import (
 from .coefficients_mio import SparseSHCoefficientsMIO
 from .parser_mio import parse_swarm_mio_file
 
+__all__ = [
+    "load_model_swarm_mio_internal",
+    "load_model_swarm_mio_external",
+    "load_coeff_swarm_mio_internal",
+    "load_coeff_swarm_mio_external",
+    "convert_external_mio_coeff",
+]
 
 def load_model_swarm_mio_internal(path):
     """ Load internal (secondary field) model from a Swarm MIO_SHA_2* product.
