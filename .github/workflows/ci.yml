@@ -7,11 +7,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - python: '3.6'
-        - python: '3.7'
-        - python: '3.8'
-        - python: '3.9'
-        - python: '3.10'
+          - python: '3.6'
+          - python: '3.7'
+          - python: '3.8'
+          - python: '3.9'
+          - python: '3.10'
+          - python: '3.11'
+          #- python: '3.12' # broken - no distutils - test again with SpacePy >= 0.5.0
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -29,9 +31,7 @@ jobs:
           pip3 install --upgrade pip
           pip3 install wheel
           pip3 install scipy
-          export SETUPTOOLS_USE_DISTUTILS=stdlib # https://github.com/pypa/setuptools/issues/3693
-          pip3 install spacepy
-          unset SETUPTOOLS_USE_DISTUTILS
+          pip3 install spacepy --no-build-isolation
           pip3 install ./eoxmagmod/
       - name: Scripts
         run: |
