@@ -129,8 +129,6 @@ static PyArrayObject* _get_as_double_array(PyObject *data, int dmin, int dmax,
                 int reqs, const char *label)
 {
     return _get_as_array(data, NPY_FLOAT64, dmin, dmax, reqs, label);
-    PyArray_Descr *dtype = PyArray_DescrFromType(NPY_FLOAT64);
-    return (PyArrayObject*) PyArray_FromAny(data, dtype, dmin, dmax, reqs, NULL);
 }
 
 
