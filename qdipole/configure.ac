@@ -1,4 +1,4 @@
-AC_INIT(qdipole, version-0.3.0)
+AC_INIT([qdipole],[version-0.4.0])
 
 # get the C compiler
 AC_PROG_CC
@@ -12,4 +12,5 @@ if test -z "`${CC-cc} $CFLAGS -fPIC -c conftest.c 2>&1`"; then
   CFLAGS="$CFLAGS -fPIC"
 fi
 
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT

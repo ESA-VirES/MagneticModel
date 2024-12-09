@@ -22,11 +22,11 @@ Using: apexsh_1980-2020.txt
 #6
     time:  5923.25
     qdlon: 0
-    mlt:   1.04835
+    mlt:   1.04839
 #7
     time:  5923.5
     qdlon: 0
-    mlt:   7.02046
+    mlt:   7.02049
 #8
     time:  5923.75
     qdlon: 0
@@ -35,3 +35,15 @@ Using: apexsh_1980-2020.txt
     time:  5924
     qdlon: 0
     mlt:   19.0276
+#10
+    time:  7122.5
+    qdlon: 0
+    mlt:   6.81346
+#11
+    time:  8949
+    qdlon: 0
+    mlt:   19.3137
+#12
+    time:  10775.5
+    qdlon: 0
+    mlt:   6.80662

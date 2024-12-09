@@ -7,7 +7,7 @@
 #       conda is not able to resolve version conflicts if the scipy and qdipole
 #       are compiled with different versions of the GFortran compiler.
 
-{% set version = "0.3.0.b" %}
+{% set version = "0.4.0" %}
 
 package:
   name: "qdipole"
@@ -31,12 +31,15 @@ test:
     - qdipole_test apexsh_1995-2015.txt | diff - test_result.apexsh_1995-2015.txt
     - qdipole_test apexsh_1980-2020.txt | diff - test_result.apexsh_1980-2020.txt
     - qdipole_test apexsh_1980-2025.txt | diff - test_result.apexsh_1980-2025.txt
+    - qdipole_test apexsh_1980-2030.txt | diff - test_result.apexsh_1980-2030.txt
     - qdlatlon_test apexsh_1995-2015.txt | diff - test_result.qdlatlon.apexsh_1995-2015.txt
     - qdlatlon_test apexsh_1980-2020.txt | diff - test_result.qdlatlon.apexsh_1980-2020.txt
     - qdlatlon_test apexsh_1980-2025.txt | diff - test_result.qdlatlon.apexsh_1980-2025.txt
+    - qdlatlon_test apexsh_1980-2030.txt | diff - test_result.qdlatlon.apexsh_1980-2030.txt
     - mlt_test apexsh_1995-2015.txt | diff - test_result.mlt.apexsh_1995-2015.txt
     - mlt_test apexsh_1980-2020.txt | diff - test_result.mlt.apexsh_1980-2020.txt
     - mlt_test apexsh_1980-2025.txt | diff - test_result.mlt.apexsh_1980-2025.txt
+    - mlt_test apexsh_1980-2030.txt | diff - test_result.mlt.apexsh_1980-2030.txt
     - subsol_test | diff - test_result.subsol.txt
 
 about:

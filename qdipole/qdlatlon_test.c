@@ -30,20 +30,20 @@
 #include <stdio.h>
 #include "cqdipole.h"
 
-#define N 3
+#define N 6
 
 int main(int argc, char* argv[])
 {
     int i;
     int n_data = N;
-    double time[N] = { 2012.5, 2013.5, 2014.5 };
-    double gclat[N] = { 0.0, 30.0, 75.0 };
-    double gclon[N] = { 0.0, 45.0, -90.0 };
-    double gcrad[N] = { 7000.0, 6371.0, 6371.0 };
+    double time[N] = { 2012.5, 2013.5, 2014.5, 2019.5, 2024.5, 2029.5 };
+    double gclat[N] = { 0.0, 30.0, 75.0, -70.0, -30.0, 80.0 };
+    double gclon[N] = { 0.0, 45.0, -90.0, 90.0, -45.0, 120.0 };
+    double gcrad[N] = { 7000.0, 6371.0, 6371.0, 6371.0, 6371.0, 7371.0 };
     double qdlon1[N], qdlat1[N];
     double qdlon2[N], qdlat2[N];
     double f11[N], f12[N], f21[N], f22[N], f[N];
-    const char *fname = "apexsh_1980-2025.txt";
+    const char *fname = "apexsh_1980-2030.txt";
 
     if (argc > 1)
     {

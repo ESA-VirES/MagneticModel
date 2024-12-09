@@ -25,13 +25,19 @@ INC=
 HDR=cqdipole.h
 OBJ=cqdipole.o qdipole.o apex.o apexsh.o makeapexsh.o eval_subsol.o eval_qdlatlon.o eval_mlt.o
 DOC=README
-DATA=apexsh_1980-2025.txt apexsh_1980-2020.txt apexsh_1995-2015.txt \
+DATA=apexsh_1980-2030.txt \
+ apexsh_1980-2025.txt \
+ apexsh_1980-2020.txt \
+ apexsh_1995-2015.txt \
+ test_result.apexsh_1980-2030.txt \
  test_result.apexsh_1980-2025.txt \
  test_result.apexsh_1980-2020.txt \
  test_result.apexsh_1995-2015.txt \
+ test_result.qdlatlon.apexsh_1980-2030.txt \
  test_result.qdlatlon.apexsh_1980-2025.txt \
  test_result.qdlatlon.apexsh_1980-2020.txt \
  test_result.qdlatlon.apexsh_1995-2015.txt \
+ test_result.mlt.apexsh_1980-2030.txt \
  test_result.mlt.apexsh_1980-2025.txt \
  test_result.mlt.apexsh_1980-2020.txt \
  test_result.mlt.apexsh_1995-2015.txt \

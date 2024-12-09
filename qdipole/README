@@ -12,6 +12,9 @@ EOX IT Services GmbH, Vienna, Austria
 CHANGE LOG
 ----------
 
+2024-12-09 - 0.4.0 Update
+ - update of the IGRF coefficients
+
 2020-01-17 - 0.3.0 Update
  - update of the IGRF coefficients
 
@@ -56,10 +59,25 @@ TESTING
   $ ./qdipole_test apexsh_1995-2015.txt | diff - test_result.apexsh_1995-2015.txt
   $ ./qdipole_test apexsh_1980-2020.txt | diff - test_result.apexsh_1980-2020.txt
   $ ./qdipole_test apexsh_1980-2025.txt | diff - test_result.apexsh_1980-2025.txt
+  $ ./qdipole_test apexsh_1980-2030.txt | diff - test_result.apexsh_1980-2030.txt
   $ ./qdlatlon_test apexsh_1995-2015.txt | diff - test_result.qdlatlon.apexsh_1995-2015.txt
   $ ./qdlatlon_test apexsh_1980-2020.txt | diff - test_result.qdlatlon.apexsh_1980-2020.txt
   $ ./qdlatlon_test apexsh_1980-2025.txt | diff - test_result.qdlatlon.apexsh_1980-2025.txt
+  $ ./qdlatlon_test apexsh_1980-2030.txt | diff - test_result.qdlatlon.apexsh_1980-2030.txt
   $ ./mlt_test apexsh_1995-2015.txt | diff - test_result.mlt.apexsh_1995-2015.txt
   $ ./mlt_test apexsh_1980-2020.txt | diff - test_result.mlt.apexsh_1980-2020.txt
   $ ./mlt_test apexsh_1980-2025.txt | diff - test_result.mlt.apexsh_1980-2025.txt
+  $ ./mlt_test apexsh_1980-2030.txt | diff - test_result.mlt.apexsh_1980-2030.txt
   $ ./subsol_test | diff - test_result.subsol.txt
+
+
+RELEASE VERSION UPDATE
+----------------------
+
+Change version in the configure.ac file.
+
+Make sure the autoconf  and automake are installed and run
+
+  $ autoreconf -i
+
+and commit the new generated configuration script.

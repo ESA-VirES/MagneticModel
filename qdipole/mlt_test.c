@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include "cqdipole.h"
 
-#define N 9
+#define N 12
 
 int main(int argc, char* argv[])
 {
@@ -40,13 +40,15 @@ int main(int argc, char* argv[])
     double time[N] = {
         0.0, 0.0, 0.0, 0.0, // MJD200 origin 2000-01-01T00:00:00
         5923.00, 5923.25, 5923.50, 5923.75, 5924.00, // spring equinox 2016
+        7122.50,  8949.00 , 10775.50 // decimal years 2019.5, 2024.5, 2029.5
     };
     double qdlon[N] = {
         0.0, 90.0, 180.0, -90.0,
-        0.0, 0.0, 0.0, 0.0, 0.0
+        0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0
     };
     double mlt[N];
-    const char *fname = "apexsh_1980-2025.txt";
+    const char *fname = "apexsh_1980-2030.txt";
 
     if (argc > 1)
     {
