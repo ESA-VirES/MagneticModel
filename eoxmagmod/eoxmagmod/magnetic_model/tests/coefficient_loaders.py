@@ -33,7 +33,7 @@ from numpy.testing import assert_allclose
 from eoxmagmod.time_util import decimal_year_to_mjd2000
 from eoxmagmod.data import (
     CHAOS_CORE_LATEST, CHAOS_CORE_PREDICTION_LATEST, CHAOS_STATIC_LATEST,
-    IGRF11, IGRF12, IGRF13, SIFM, WMM_2015,
+    IGRF11, IGRF12, IGRF13, IGRF14, IGRF_LAST, SIFM, WMM_2015,
     EMM_2010_STATIC, EMM_2010_SECVAR,
     LCS1, MF7,
 )
@@ -182,6 +182,21 @@ class TestCoeffSIFM(TestCase, ShcTestMixIn):
         "interpolate_in_decimal_years": True,
     }
     validity = decimal_year_to_mjd2000((2013.4976, 2015.4962))
+
+
+class TestCoeffIGRF14(TestCase, ShcTestMixIn):
+    class_ = SparseSHCoefficientsTimeDependentDecimalYear
+    path = IGRF14
+    degree = 13
+    min_degree = 1
+    kwargs = {
+        "interpolate_in_decimal_years": True,
+    }
+    validity = decimal_year_to_mjd2000((1900.0, 2030.0))
+
+
+class TestCoeffIGRFLast(TestCoeffIGRF14):
+    path = IGRF_LAST
 
 
 class TestCoeffIGRF13(TestCase, ShcTestMixIn):
