@@ -53,4 +53,5 @@ MF7 = join(_DIRNAME, 'MF7.shc')
 APEX_2015 = join(_DIRNAME, 'apexsh_1995-2015.txt')
 APEX_2020 = join(_DIRNAME, 'apexsh_1980-2020.txt')
 APEX_2025 = join(_DIRNAME, 'apexsh_1980-2025.txt')
-APEX = APEX_2025
+APEX_2030 = join(_DIRNAME, 'apexsh_1980-2030.txt')
+APEX_LAST = APEX_2030

@@ -34,10 +34,6 @@ from eoxmagmod.quasi_dipole_coordinates import (
     eval_mlt, eval_subsol, eval_qdlatlon_with_base_vectors,
 )
 
-EARTH_RADIUS = 6371.2 # km
-START_TIME = 0.0    # MJD2000 / 2000-01-01T00:00:00Z
-END_TIME = 7305.0   # MJD2000 / 2020-01-01T00:00:00Z
-
 
 def load_coordinates(file_in):
 
