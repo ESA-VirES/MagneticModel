@@ -132,7 +132,7 @@ class TestSHCParser(TestCase):
             "degree_min": 1,
             "degree_max": 20,
             "spline_order": 6,
-            "ntime": 276,
+            "ntime": 281,
             "nstep": 5,
         })
 
@@ -159,7 +159,7 @@ class TestSHCParser(TestCase):
             "degree_max": 185,
             "spline_order": 1,
             "ntime": 1,
-            "nstep": 1,
+            "nstep": 0,
         })
 
     def test_parse_shc_header_chaos_static(self):
