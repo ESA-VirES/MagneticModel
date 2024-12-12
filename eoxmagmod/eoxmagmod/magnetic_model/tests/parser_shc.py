@@ -132,7 +132,7 @@ class TestSHCParser(TestCase):
             "degree_min": 1,
             "degree_max": 20,
             "spline_order": 6,
-            "ntime": 251,
+            "ntime": 276,
             "nstep": 5,
         })
 

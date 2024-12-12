@@ -254,7 +254,7 @@ class TestCoeffCHAOSCore(TestCase, ShcTestMixIn):
     path = CHAOS_CORE_LATEST
     degree = 20
     min_degree = 1
-    validity = decimal_year_to_mjd2000((1997.10198494, 2022.10130048))
+    validity = decimal_year_to_mjd2000((1997.10198494, 2024.60232717))
 
 
 class TestCoeffCHAOSCorePrediction(TestCase, ShcTestMixIn):
@@ -262,7 +262,7 @@ class TestCoeffCHAOSCorePrediction(TestCase, ShcTestMixIn):
     path = CHAOS_CORE_PREDICTION_LATEST
     degree = 20
     min_degree = 1
-    validity = decimal_year_to_mjd2000((2022.10130048, 2022.49691992))
+    validity = decimal_year_to_mjd2000((2024.60232717, 2025.08692676))
 
 
 class TestCoeffCHAOSStatic(TestCase, ShcTestMixIn):
@@ -278,14 +278,14 @@ class TestCoeffCHAOSCombined(TestCase, CombinedShcTestMixIn):
     path_static = CHAOS_STATIC_LATEST
     degree = 185
     min_degree = 1
-    validity = decimal_year_to_mjd2000((1997.10198494, 2022.10130048))
+    validity = decimal_year_to_mjd2000((1997.10198494, 2024.60232717))
 
 
 class TestCoeffCHAOSComposed(TestCase, CoefficietLoaderTestMixIn):
     class_ = ComposedSHCoefficients
     degree = 20
     min_degree = 1
-    validity = decimal_year_to_mjd2000((1997.10198494, 2022.49691992))
+    validity = decimal_year_to_mjd2000((1997.10198494, 2025.08692676))
 
     @classmethod
     def load(cls):
@@ -299,7 +299,7 @@ class TestCoeffCHAOSComposedCombined(TestCase, CoefficietLoaderTestMixIn):
     class_ = CombinedSHCoefficients
     degree = 185
     min_degree = 1
-    validity = decimal_year_to_mjd2000((1997.10198494, 2022.49691992))
+    validity = decimal_year_to_mjd2000((1997.10198494, 2025.08692676))
 
     @classmethod
     def load(cls):
