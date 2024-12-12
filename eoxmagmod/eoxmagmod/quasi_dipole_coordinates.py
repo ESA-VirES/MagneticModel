@@ -28,7 +28,7 @@
 
 from os.path import isfile
 from . import _pyqd
-from .data import APEX_LAST
+from .data import APEX_LATEST
 
 __all__ = [
     "eval_qdlatlon",
@@ -38,7 +38,7 @@ __all__ = [
 ]
 
 
-def eval_qdlatlon(gclat, gclon, gcrad, time, fname=APEX_LAST):
+def eval_qdlatlon(gclat, gclon, gcrad, time, fname=APEX_LATEST):
     """
           Evaluate magnetic quasi-dipole coordinates a single or multiple input
           points.
@@ -59,7 +59,7 @@ def eval_qdlatlon(gclat, gclon, gcrad, time, fname=APEX_LAST):
     return _pyqd.eval_qdlatlon(gclat, gclon, gcrad, time, fname)
 
 
-def eval_qdlatlon_with_base_vectors(gclat, gclon, gcrad, time, fname=APEX_LAST):
+def eval_qdlatlon_with_base_vectors(gclat, gclon, gcrad, time, fname=APEX_LATEST):
     """
           Evaluate magnetic quasi-dipole coordinates a single or multiple input
           coordinates.
@@ -85,7 +85,7 @@ def eval_qdlatlon_with_base_vectors(gclat, gclon, gcrad, time, fname=APEX_LAST):
     return _pyqd.eval_qdlatlon(gclat, gclon, gcrad, time, fname, True)
 
 
-def eval_mlt(qdlon, time, fname=APEX_LAST):
+def eval_mlt(qdlon, time, fname=APEX_LATEST):
     """
           Evaluate magnetic local time for given quasi dipole longitudes.
 

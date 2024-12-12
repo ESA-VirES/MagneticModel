@@ -33,7 +33,7 @@ from numpy.testing import assert_equal
 from eoxmagmod.magnetic_model.parser_shc import parse_shc_file, parse_shc_header
 from eoxmagmod.data import (
     CHAOS_CORE_LATEST, CHAOS_CORE_PREDICTION_LATEST, CHAOS_STATIC_LATEST,
-    IGRF12, IGRF13, IGRF14, IGRF_LAST, SIFM, LCS1, MF7,
+    IGRF12, IGRF13, IGRF14, IGRF_LATEST, SIFM, LCS1, MF7,
 )
 
 
@@ -114,7 +114,7 @@ class TestSHCParser(TestCase):
         })
 
     def test_parse_shc_file_igrf_last(self):
-        data = self.parse(IGRF_LAST)
+        data = self.parse(IGRF_LATEST)
         self._assert_valid(data, {
             "degree_min": 1,
             "degree_max": 13,

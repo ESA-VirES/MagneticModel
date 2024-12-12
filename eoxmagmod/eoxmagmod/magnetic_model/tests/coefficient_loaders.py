@@ -33,7 +33,7 @@ from numpy.testing import assert_allclose
 from eoxmagmod.time_util import decimal_year_to_mjd2000
 from eoxmagmod.data import (
     CHAOS_CORE_LATEST, CHAOS_CORE_PREDICTION_LATEST, CHAOS_STATIC_LATEST,
-    IGRF11, IGRF12, IGRF13, IGRF14, IGRF_LAST, SIFM, WMM_2015,
+    IGRF11, IGRF12, IGRF13, IGRF14, IGRF_LATEST, SIFM, WMM_2015,
     EMM_2010_STATIC, EMM_2010_SECVAR,
     LCS1, MF7,
 )
@@ -196,7 +196,7 @@ class TestCoeffIGRF14(TestCase, ShcTestMixIn):
 
 
 class TestCoeffIGRFLast(TestCoeffIGRF14):
-    path = IGRF_LAST
+    path = IGRF_LATEST
 
 
 class TestCoeffIGRF13(TestCase, ShcTestMixIn):

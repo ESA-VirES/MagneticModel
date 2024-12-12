@@ -57,7 +57,7 @@ from eoxmagmod.magnetic_model.util import mask_array
 from eoxmagmod.data import (
     EMM_2010_STATIC, EMM_2010_SECVAR, WMM_2015,
     CHAOS_CORE_LATEST, CHAOS_CORE_PREDICTION_LATEST, CHAOS_STATIC_LATEST,
-    IGRF11, IGRF12, IGRF13, IGRF14, IGRF_LAST, SIFM, LCS1, MF7,
+    IGRF11, IGRF12, IGRF13, IGRF14, IGRF_LATEST, SIFM, LCS1, MF7,
 )
 from eoxmagmod.magnetic_model.tests.data import (
     SWARM_MMA_SHA_2C_TEST_DATA,
@@ -507,7 +507,7 @@ class TestIGRF14(TestCase, SHModelTestMixIn):
 
 class TestIGRFLast(TestIGRF14):
     def load(self):
-        return load_model_shc(IGRF_LAST, interpolate_in_decimal_years=True)
+        return load_model_shc(IGRF_LATEST, interpolate_in_decimal_years=True)
 
 
 class TestSIFM(TestCase, SHModelTestMixIn):
