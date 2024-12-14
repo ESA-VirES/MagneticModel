@@ -3,7 +3,7 @@
 !  File Name: eval_qdlatlon.f90
 !  Authors: Martin Paces <martin.paces@eox.at>
 !
-!  Date: 13-05-2016
+!  Date: 14-12-2024
 !  Version: 1.0
 !  Description:
 !      Evaluate apex magnetic field coordinates.
@@ -12,6 +12,7 @@
 !
 ! Latest changes:
 ! 13-05-2016: First version of the subroutine.
+! 14-12-2024: Correcting documentation.
 !
 !***********************************************************************
 !
@@ -28,7 +29,7 @@
 !    gclat    vector of geocentric latitudes (degrees)
 !    gdlon    vector of geocentric longitudes (degrees)
 !    n_data   number of points, i.e., vector size
-!    coeff_file  path to the coefficients (string up to 128 characters)
+!    coeff_file  path to the coefficients (string up to 256 characters)
 !
 !  OUTPUT ARGUMENTS
 !    qdlat     array of Quasi-Dipole latitudes
@@ -49,7 +50,7 @@
 !    gclat    vector of geocentric latitudes (degrees)
 !    gdlon    vector of geocentric longitudes (degrees)
 !    n_data   number of points, i.e., vector size
-!    coeff_file  path to the coefficients (string up to 128 characters)
+!    coeff_file  path to the coefficients (string up to 256 characters)
 !
 !  OUTPUT ARGUMENTS
 !    qdlat     array of Quasi-Dipole latitudes
@@ -77,16 +78,16 @@
       epoch_old = -9999.9
 
       do i = 1, n_data
-!        reload coefficients if time has changed by more than epoch_limit
+!        Reload coefficients if time has changed by more than epoch_limit
          epoch = t_dy(i)
          if (abs(epoch - epoch_old) .gt. epoch_limit) then
             call loadapxsh(coeff_file, epoch)
             epoch_old = epoch
          endif
-!        convert geocentric coordinates to geodetic coordinates
+!        Convert geocentric coordinates to geodetic coordinates
          call convrt(4, gdlat, gdalt, sngl(gclat(i)), sngl(gcrad(i)))
          gdlon = gclon(i)
-!        calculate QD-latitude and QD-longitude
+!        Calculate QD-latitude and QD-longitude
          call apxg2q(gdlat, gdlon, gdalt, vecflag, xqdlat, xqdlon, &
                      xf1, xf2, xf)
          qdlat(i) = xqdlat
@@ -113,16 +114,16 @@
       epoch_old = -9999.9
 
       do i = 1, n_data
-!        reload coefficients if time has changed by more than epoch_limit
+!        Reload coefficients if time has changed by more than epoch_limit
          epoch = t_dy(i)
          if (abs(epoch - epoch_old) .gt. epoch_limit) then
             call loadapxsh(coeff_file, epoch)
             epoch_old = epoch
          endif
-!        convert geocentric coordinates to geodetic coordinates
+!        Convert geocentric coordinates to geodetic coordinates
          call convrt(4, gdlat, gdalt, sngl(gclat(i)), sngl(gcrad(i)))
          gdlon = gclon(i)
-!        calculate QD-latitude and QD-longitude
+!        Calculate QD-latitude and QD-longitude
          call apxg2q(gdlat, gdlon, gdalt, vecflag, xqdlat, xqdlon, &
                      xf1, xf2, xf)
          qdlat(i) = xqdlat
