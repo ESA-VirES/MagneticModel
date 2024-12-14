@@ -9,12 +9,19 @@ run_test() {
     EXPECTED_RESULT="$1"
     shift
     echo -n "$@" " "
-    RESULT="$("$@" | diff - "$EXPECTED_RESULT")"
-
-    if [ "$?" != "0" -o -n "$RESULT" ]
+    TEST_OUTPUT="$( "$@" 2>&1 )"
+    if [ "$?" != "0" ]
     then
         echo "FAILED"
-        echo $RESULT
+        echo $TEST_OUTPUT
+        return 1
+    fi
+
+    TEST_OUTPUT_DIFF="$( echo "$TEST_OUTPUT" | diff - "$EXPECTED_RESULT" )"
+    if [ "$?" != "0" -o -n "$TEST_OUTPUT_DIFF" ]
+    then
+        echo "FAILED"
+        echo $TEST_OUTPUT_DIFF
         return 1
     fi
     echo "OK"

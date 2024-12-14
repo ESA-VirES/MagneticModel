@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
     status = c_eval_mlt(mlt, qdlon, time, n_data);
 
     if (status) {
-        fprintf(stderr, "Call to c_eval_mlt() failed with an error! error_code = %d", status);
+        fprintf(stderr, "ERROR: Call to c_eval_mlt() failed with an error! error_code = %d\n", status);
         return 1;
     }
 

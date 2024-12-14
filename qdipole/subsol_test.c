@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
     status = c_eval_subsol(sbsllat, sbsllon, time, n_data);
 
     if (status) {
-        fprintf(stderr, "Call to c_eval_subsol() failed with an error! error_code = %d", status);
+        fprintf(stderr, "ERROR: Call to c_eval_subsol() failed with an error! error_code = %d\n", status);
         return 1;
     }
 

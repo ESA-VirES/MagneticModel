@@ -64,6 +64,12 @@ int main(int argc, char* argv[])
     }
     printf("Using: %s\n", basename(fname));
 
+    if (strlen(fname) > get_max_fname_lenght())
+    {
+        fprintf(stderr, "ERROR: Filename is too long and exceeds the maximum allowed %d bytes! filename = %s\n", get_max_fname_lenght(), fname);
+        return 1;
+    }
+
     for (i = 0; i < N; ++i)
     {
         qdlon1[i] = 0.0;
@@ -80,7 +86,7 @@ int main(int argc, char* argv[])
     status = c_eval_qdlatlon(qdlat1, qdlon1, time, gcrad, gclat, gclon, n_data, fname);
 
     if (status) {
-        fprintf(stderr, "Call to c_eval_qdlatlon() failed with an error! error_code = %d", status);
+        fprintf(stderr, "ERROR: Call to c_eval_qdlatlon() failed with an error! error_code = %d\n", status);
         return 1;
     }
 
@@ -88,7 +94,7 @@ int main(int argc, char* argv[])
                time, gcrad, gclat, gclon, n_data, fname);
 
     if (status) {
-        fprintf(stderr, "Call to c_eval_qdlatlonvb() failed with an error! error_code = %d", status);
+        fprintf(stderr, "ERROR: Call to c_eval_qdlatlonvb() failed with an error! error_code = %d\n", status);
         return 1;
     }
 
