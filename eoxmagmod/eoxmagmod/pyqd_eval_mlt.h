@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2016-2022 EOX IT Services GmbH
+ * Copyright (C) 2016-2024 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,6 +47,7 @@
 
 static PyObject* eval_mlt(PyObject *self, PyObject *args, PyObject *kwdict)
 {
+    int status;
     static char *keywords[] = {"qdlon", "time", NULL};
 
     PyObject *obj_qdlon = NULL; // gclon object
@@ -83,12 +84,20 @@ static PyObject* eval_mlt(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     // evaluate the output values
-    c_eval_mlt(
+    status = c_eval_mlt(
         (double*) PyArray_DATA(arr_mlt),
         (double*) PyArray_DATA(arr_qdlon),
         (double*) PyArray_DATA(arr_time),
         ndim == 0 ? 1 : dims[0]
     );
+
+    if (status) {
+        PyErr_Format(
+            PyExc_RuntimeError,
+            "Call to c_eval_mlt() failed with an error! error_code = %d", status
+        );
+        goto exit;
+    }
 
     retval = (PyObject*) arr_mlt;
 
