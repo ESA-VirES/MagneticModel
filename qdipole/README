@@ -12,6 +12,12 @@ EOX IT Services GmbH, Vienna, Austria
 CHANGE LOG
 ----------
 
+2024-12-14 - 0.5.0 Update
+ - increasing the file path size limit to 256 characters
+ - removing the old, no longer used, make_apex subroutine
+ - removing need for QD-coefficient file for MLT calculation
+ - minor corrections
+
 2024-12-09 - 0.4.0 Update
  - update of the IGRF coefficients
 
