@@ -36,6 +36,7 @@ DATA=apexsh_1980-2030.txt \
  test_result.mlt.txt \
  test_result.subsol.txt
 MOD=alfbasismodule.mod apxshmodule.mod
+TEST=run_dipole_test
 
 %.o: %.c $(HDR)
 	$(CC) -c -o $@ $< $(CFLAGS)
@@ -47,18 +48,22 @@ all: build
 
 build: $(LIB_TARGET) $(BIN_TARGET)
 
-install: $(LIB_TARGET) $(BIN_TARGET) $(HDR) $(DOC) $(DATA)
+install: $(LIB_TARGET) $(BIN_TARGET) $(HDR) $(DOC) $(DATA) $(TEST)
 	mkdir -p $(INSTALL_LIB_DIR)
 	install -c -m 0755 $(LIB_TARGET) $(INSTALL_LIB_DIR)
 	[ "$(USER)" != "root" ] || ldconfig
 	mkdir -p $(INSTALL_BIN_DIR)
 	install -c -m 0755 $(BIN_TARGET) $(INSTALL_BIN_DIR)
+	install -c -m 0755 $(TEST) $(INSTALL_BIN_DIR)
 	mkdir -p $(INSTALL_INC_DIR)
 	install -c -m 0664 $(HDR) $(INSTALL_INC_DIR)
 	mkdir -p $(INSTALL_DOC_DIR)
 	install -c -m 0664 $(DOC) $(INSTALL_DOC_DIR)
 	mkdir -p $(INSTALL_DATA_DIR)
 	install -c -m 0644 $(DATA) $(INSTALL_DATA_DIR)
+
+test: $(TEST)
+	$(INSTALL_BIN_DIR)/$(TEST) $(INSTALL_BIN_DIR) $(INSTALL_DATA_DIR)
 
 clean:
 	$(RM_FILE) $(OBJ) $(LIB_TARGET) $(BIN_TARGET) $(MOD)

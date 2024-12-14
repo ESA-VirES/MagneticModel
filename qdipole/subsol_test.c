@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2016 EOX IT Services GmbH
+ * Copyright (C) 2016-2024 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,7 @@
 
 int main(int argc, char* argv[])
 {
+    int status;
     int i;
     int n_data = N;
     double time[N] = {
@@ -52,7 +53,12 @@ int main(int argc, char* argv[])
         sbsllat[i] = 0.0;
     }
 
-    c_eval_subsol(sbsllat, sbsllon, time, n_data);
+    status = c_eval_subsol(sbsllat, sbsllon, time, n_data);
+
+    if (status) {
+        fprintf(stderr, "Call to c_eval_subsol() failed with an error! error_code = %d", status);
+        return 1;
+    }
 
     for (i = 0; i < N; ++i)
     {
