@@ -29,7 +29,7 @@
 !    gclat    vector of geocentric latitudes (degrees)
 !    gdlon    vector of geocentric longitudes (degrees)
 !    n_data   number of points, i.e., vector size
-!    coeff_file  path to the coefficients (string up to 256 characters)
+!    coeff_file  path to the coefficients (string up to 1024 characters)
 !
 !  OUTPUT ARGUMENTS
 !    qdlat     array of Quasi-Dipole latitudes
@@ -50,7 +50,7 @@
 !    gclat    vector of geocentric latitudes (degrees)
 !    gdlon    vector of geocentric longitudes (degrees)
 !    n_data   number of points, i.e., vector size
-!    coeff_file  path to the coefficients (string up to 256 characters)
+!    coeff_file  path to the coefficients (string up to 1024 characters)
 !
 !  OUTPUT ARGUMENTS
 !    qdlat     array of Quasi-Dipole latitudes
@@ -72,7 +72,7 @@
       real*4  gdalt, gdlat, gdlon, xqdlat, xqdlon, xf1(2), xf2(2), xf
       real*4  epoch, epoch_limit, epoch_old
       integer*4  vecflag, n_data, i
-      character*256 coeff_file
+      character*1024 coeff_file
       parameter(epoch_limit = 1./365.25, vecflag = 0)
 
       epoch_old = -9999.9

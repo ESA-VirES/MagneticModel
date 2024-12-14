@@ -36,9 +36,6 @@
 #include <string.h>
 #include "cqdipole.h"
 
-#define MAX_PATH_LENGTH 256
-
-
 static int check_string_lenght(const char *srt, const size_t size)
 {
     return strlen(srt) > size;
@@ -50,12 +47,6 @@ static void copy_string(char *dst, const char *src, const size_t size)
     // copy string truncated to the given destination size
     strncpy(dst, src, size - 1);
     dst[size - 1] = '\0';
-}
-
-
-size_t get_max_fname_lenght()
-{
-    return MAX_PATH_LENGTH;
 }
 
 

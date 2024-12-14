@@ -31,12 +31,7 @@
 #ifndef CQDIPOLE_H
 #define CQDIPOLE_H
 
-/**
- * @brief Get filename size limit.
- * @returns maximum length of the filename path
- */
-
-size_t get_max_fname_lenght();
+#define MAX_PATH_LENGTH 1024
 
 
 /**

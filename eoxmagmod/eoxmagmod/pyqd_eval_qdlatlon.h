@@ -92,11 +92,11 @@ static PyObject* eval_qdlatlon(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     // check the filename length
-    if (strlen(model_fname) > get_max_fname_lenght()) {
+    if (strlen(model_fname) > MAX_PATH_LENGTH) {
         PyErr_Format(
             PyExc_RuntimeError,
             "Filename is too long and exceeds the maximum allowed %d bytes! filename = %s",
-            get_max_fname_lenght(), model_fname
+            MAX_PATH_LENGTH, model_fname
         );
         goto exit;
     }

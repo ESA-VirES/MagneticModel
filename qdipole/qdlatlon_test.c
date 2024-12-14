@@ -64,9 +64,9 @@ int main(int argc, char* argv[])
     }
     printf("Using: %s\n", basename(fname));
 
-    if (strlen(fname) > get_max_fname_lenght())
+    if (strlen(fname) > MAX_PATH_LENGTH)
     {
-        fprintf(stderr, "ERROR: Filename is too long and exceeds the maximum allowed %d bytes! filename = %s\n", get_max_fname_lenght(), fname);
+        fprintf(stderr, "ERROR: Filename is too long and exceeds the maximum allowed %d bytes! filename = %s\n", MAX_PATH_LENGTH, fname);
         return 1;
     }
 
