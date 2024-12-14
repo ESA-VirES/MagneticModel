@@ -32,11 +32,19 @@
 #define CQDIPOLE_H
 
 /**
+ * @brief Get filename size limit.
+ * @returns maximum length of the filename path
+ */
+
+size_t get_max_fname_lenght();
+
+
+/**
  * @brief Batch evaluation of the Quasi-Dipole apex coordinates
  *
  */
 
-void c_make_apex(
+int c_make_apex(
     double* qdlat, double* qdlon, double* xmlt,
     double* f11, double* f12, double* f21, double* f22,
     const double* time, const double* gcrad, const double* gclat,
@@ -45,40 +53,46 @@ void c_make_apex(
 
 /**
  * @brief Batch evaluation of the Quasi-Dipole apex coordinates with the vector base
+ * @returns 0 on success, non-zero on failure
  */
 
-void c_eval_qdlatlonvb(
+int c_eval_qdlatlonvb(
     double* qdlat, double* qdlon, double* f11, double* f12, double* f21,
     double* f22, double* f, const double* time_dy, const double* gcrad,
     const double* gclat, const double* gclon, const int n_data,
     const char* coeff_file
 );
 
+
 /**
  * @brief Batch evaluation of the Quasi-Dipole apex coordinates
+ * @returns 0 on success, non-zero on failure
  */
 
-void c_eval_qdlatlon(
+int c_eval_qdlatlon(
     double* qdlat, double* qdlon, const double* time_dy, const double* gcrad,
     const double* gclat, const double* gclon, const int n_data,
     const char* coeff_file
 );
 
+
 /**
  * @brief Batch evaluation of the Magnetic Local Time
+ * @returns 0 on success, non-zero on failure
  */
 
-void c_eval_mlt(
+int c_eval_mlt(
     double *t_mlt, const double *qdlon, const double *t_mjd2k, const int n_data,
     const char *coeff_file
 );
 
+
 /**
  * @brief Batch evaluation of the sub-solar point latitude and longitude
- *
+ * @returns 0 on success, non-zero on failure
  */
 
-void c_eval_subsol(
+int c_eval_subsol(
     double* sbsllat, double* sbsllon, const double* time_mjd2k, const int n_data
 );
 
