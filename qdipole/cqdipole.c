@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2015 EOX IT Services GmbH
+ * Copyright (C) 2015-2024 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -56,30 +56,6 @@ static void copy_string(char *dst, const char *src, const size_t size)
 size_t get_max_fname_lenght()
 {
     return MAX_PATH_LENGTH;
-}
-
-
-void make_apex_(
-    double*, double*, double*, double *, double *, double *, double*,
-    const double*, const double*, const double*, const double*,
-    const int*, const char*);
-
-int c_make_apex(
-    double *qdlat, double *qdlon, double *xmlt,
-    double *f11, double *f12, double *f21, double *f22,
-    const double *time, const double *gcrad, const double *gclat,
-    const double *gclon, const int n_data, const char *coeff_file)
-{
-    /* NOTE: Fortran code expects the file name as a sized size string. */
-    char filename[MAX_PATH_LENGTH + 1];
-    if (check_string_lenght(coeff_file, MAX_PATH_LENGTH)) return 1;
-    copy_string(filename, coeff_file, MAX_PATH_LENGTH + 1);
-
-    /* call the Fortran subroutine */
-    make_apex_(qdlat, qdlon, xmlt, f11, f12, f21, f22,
-               time, gcrad, gclat, gclon, &n_data, filename);
-
-    return 0;
 }
 
 

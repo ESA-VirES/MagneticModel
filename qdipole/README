@@ -56,10 +56,6 @@ Step 3 - install the software:
 TESTING
 -------
 
-  $ ./qdipole_test apexsh_1995-2015.txt | diff - test_result.apexsh_1995-2015.txt
-  $ ./qdipole_test apexsh_1980-2020.txt | diff - test_result.apexsh_1980-2020.txt
-  $ ./qdipole_test apexsh_1980-2025.txt | diff - test_result.apexsh_1980-2025.txt
-  $ ./qdipole_test apexsh_1980-2030.txt | diff - test_result.apexsh_1980-2030.txt
   $ ./qdlatlon_test apexsh_1995-2015.txt | diff - test_result.qdlatlon.apexsh_1995-2015.txt
   $ ./qdlatlon_test apexsh_1980-2020.txt | diff - test_result.qdlatlon.apexsh_1980-2020.txt
   $ ./qdlatlon_test apexsh_1980-2025.txt | diff - test_result.qdlatlon.apexsh_1980-2025.txt

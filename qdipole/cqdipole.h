@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2015 EOX IT Services GmbH
+ * Copyright (C) 2015-2024 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,18 +38,6 @@
 
 size_t get_max_fname_lenght();
 
-
-/**
- * @brief Batch evaluation of the Quasi-Dipole apex coordinates
- *
- */
-
-int c_make_apex(
-    double* qdlat, double* qdlon, double* xmlt,
-    double* f11, double* f12, double* f21, double* f22,
-    const double* time, const double* gcrad, const double* gclat,
-    const double* gclon, const int n_data, const char *fname
-);
 
 /**
  * @brief Batch evaluation of the Quasi-Dipole apex coordinates with the vector base
