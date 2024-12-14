@@ -85,21 +85,18 @@ def eval_qdlatlon_with_base_vectors(gclat, gclon, gcrad, time, fname=APEX_LATEST
     return _pyqd.eval_qdlatlon(gclat, gclon, gcrad, time, fname, True)
 
 
-def eval_mlt(qdlon, time, fname=APEX_LATEST):
+def eval_mlt(qdlon, time):
     """
           Evaluate magnetic local time for given quasi dipole longitudes.
 
           Inputs:
             qdlon - quasi-dipole longitudes(s).
             time  - MJD2000 time(s)
-            fname - file-name of the model text file.
 
           Outputs:
             mlt - magnetic local time(s).
     """
-    if not isfile(fname):
-        raise IOError(f"File not found! fname={fname!r}")
-    return _pyqd.eval_mlt(qdlon, time, fname)
+    return _pyqd.eval_mlt(qdlon, time)
 
 
 def eval_subsol(time):

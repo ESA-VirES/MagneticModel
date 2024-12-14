@@ -41,16 +41,14 @@
 "     Inputs:\n"\
 "       qdlon - quasi-dipole longitudes(s).\n"\
 "       time  - MJD2000 time(s)\n"\
-"       fname - file-name of the model text file.\n"\
 "     Outputs:\n"\
 "       mlt - magnetic local times (s).\n"\
 ""
 
 static PyObject* eval_mlt(PyObject *self, PyObject *args, PyObject *kwdict)
 {
-    static char *keywords[] = {"qdlon", "time", "fname", NULL};
+    static char *keywords[] = {"qdlon", "time", NULL};
 
-    const char *model_fname = NULL;
     PyObject *obj_qdlon = NULL; // gclon object
     PyObject *obj_time = NULL; // time object
     PyArrayObject *arr_qdlon = NULL; // qdlon array
@@ -60,8 +58,7 @@ static PyObject* eval_mlt(PyObject *self, PyObject *args, PyObject *kwdict)
 
     // parse input arguments
     if (!PyArg_ParseTupleAndKeywords(
-        args, kwdict, "OOs:eval_mlt", keywords,
-        &obj_qdlon, &obj_time, &model_fname
+        args, kwdict, "OO:eval_mlt", keywords, &obj_qdlon, &obj_time
     ))
         goto exit;
 
@@ -90,8 +87,7 @@ static PyObject* eval_mlt(PyObject *self, PyObject *args, PyObject *kwdict)
         (double*) PyArray_DATA(arr_mlt),
         (double*) PyArray_DATA(arr_qdlon),
         (double*) PyArray_DATA(arr_time),
-        ndim == 0 ? 1 : dims[0],
-        model_fname
+        ndim == 0 ? 1 : dims[0]
     );
 
     retval = (PyObject*) arr_mlt;
