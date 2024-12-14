@@ -7,7 +7,7 @@
 #       conda is not able to resolve version conflicts if the scipy and qdipole
 #       are compiled with different versions of the GFortran compiler.
 
-{% set version = "0.5.0" %}
+{% set version = "0.6.0" %}
 
 package:
   name: "qdipole"

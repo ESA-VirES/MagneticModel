@@ -1,4 +1,4 @@
-AC_INIT([qdipole],[0.5.0])
+AC_INIT([qdipole],[0.6.0])
 
 # get the C compiler
 AC_PROG_CC
