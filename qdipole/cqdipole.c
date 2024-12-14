@@ -78,6 +78,8 @@ int c_eval_subsol(double *sbsllat, double *sbsllon, const double *time_mjd2k,
 {
     /* call the Fortran subroutine */
     eval_subsol_(sbsllat, sbsllon, time_mjd2k, &n_data);
+
+    return 0;
 }
 
 
