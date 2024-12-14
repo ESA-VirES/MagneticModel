@@ -48,20 +48,13 @@ int main(int argc, char* argv[])
         0.0, 0.0, 0.0
     };
     double mlt[N];
-    const char *fname = "apexsh_1980-2030.txt";
-
-    if (argc > 1)
-    {
-        fname = argv[1];
-    }
-    printf("Using: %s\n", fname);
 
     for (i = 0; i < N; ++i)
     {
         mlt[i] = 0.0;
     }
 
-    c_eval_mlt(mlt, qdlon, time, n_data, fname);
+    c_eval_mlt(mlt, qdlon, time, n_data);
 
     for (i = 0; i < N; ++i)
     {

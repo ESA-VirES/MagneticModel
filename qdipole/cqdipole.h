@@ -70,8 +70,7 @@ int c_eval_qdlatlon(
  */
 
 int c_eval_mlt(
-    double *t_mlt, const double *qdlon, const double *t_mjd2k, const int n_data,
-    const char *coeff_file
+    double *t_mlt, const double *qdlon, const double *t_mjd2k, const int n_data
 );
 
 

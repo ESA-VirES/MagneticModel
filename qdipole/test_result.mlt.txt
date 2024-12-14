@@ -1,4 +1,3 @@
-Using: apexsh_1995-2015.txt
 #1
     time:  0
     qdlon: 0

@@ -59,18 +59,13 @@ size_t get_max_fname_lenght()
 }
 
 
-void eval_mlt_(double*, const double*, const double*, const int*, const char*);
+void eval_mlt_(double*, const double*, const double*, const int*);
 
 int c_eval_mlt(double *t_mlt, const double *qdlon, const double *t_mjd2k,
-                const int n_data, const char *coeff_file)
+                const int n_data)
 {
-    /* NOTE: Fortran code expects the file name as a sized size string. */
-    char filename[MAX_PATH_LENGTH + 1];
-    if (check_string_lenght(coeff_file, MAX_PATH_LENGTH)) return 1;
-    copy_string(filename, coeff_file, MAX_PATH_LENGTH + 1);
-
     /* call the Fortran subroutine */
-    eval_mlt_(t_mlt, qdlon, t_mjd2k, &n_data, filename);
+    eval_mlt_(t_mlt, qdlon, t_mjd2k, &n_data);
 
     return 0;
 }

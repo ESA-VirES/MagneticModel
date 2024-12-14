@@ -32,10 +32,7 @@ test:
     - qdlatlon_test apexsh_1980-2020.txt | diff - test_result.qdlatlon.apexsh_1980-2020.txt
     - qdlatlon_test apexsh_1980-2025.txt | diff - test_result.qdlatlon.apexsh_1980-2025.txt
     - qdlatlon_test apexsh_1980-2030.txt | diff - test_result.qdlatlon.apexsh_1980-2030.txt
-    - mlt_test apexsh_1995-2015.txt | diff - test_result.mlt.apexsh_1995-2015.txt
-    - mlt_test apexsh_1980-2020.txt | diff - test_result.mlt.apexsh_1980-2020.txt
-    - mlt_test apexsh_1980-2025.txt | diff - test_result.mlt.apexsh_1980-2025.txt
-    - mlt_test apexsh_1980-2030.txt | diff - test_result.mlt.apexsh_1980-2030.txt
+    - mlt_test | diff - test_result.mlt.txt
     - subsol_test | diff - test_result.subsol.txt
 
 about:
