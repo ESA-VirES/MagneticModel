@@ -20,9 +20,9 @@ INSTALL_INC_DIR=${INSTALL_PREFIX}${INC_DIR}
 INSTALL_DOC_DIR=${INSTALL_PREFIX}${DOC_DIR}
 INSTALL_DATA_DIR=${INSTALL_PREFIX}${DATA_DIR}
 LIB_TARGET=libqdipole.so
-BIN_TARGET=subsol_test qdlatlon_test mlt_test
+BIN_TARGET=subsol_test qdlatlon_test mlt_test qdipole_info
 INC=
-HDR=cqdipole.h
+HDR=cqdipole.h qdipole_conf.h
 OBJ=cqdipole.o apex.o apexsh.o makeapexsh.o eval_subsol.o eval_qdlatlon.o eval_mlt.o
 DOC=README
 DATA=apexsh_1980-2030.txt \
@@ -70,6 +70,9 @@ clean:
 
 $(LIB_TARGET): $(OBJ)
 	$(LD) -o $(LIB_TARGET) $(OBJ) -shared -lm $(LDFLAGS)
+
+qdipole_info: qdipole_info.c
+	$(CC) -o qdipole_info qdipole_info.c -L./ $(LDFLAGS)
 
 qdlatlon_test: $(LIB_TARGET) qdlatlon_test.c
 	$(CC) -o qdlatlon_test qdlatlon_test.c -lqdipole -L./ $(LDFLAGS)
