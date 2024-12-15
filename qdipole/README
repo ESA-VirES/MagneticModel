@@ -62,6 +62,12 @@ Step 3 - install the software:
 TESTING
 -------
 
+To test the build package run either
+
+  $ sudo make test
+
+or 
+
   $ ./qdlatlon_test apexsh_1995-2015.txt | diff - test_result.qdlatlon.apexsh_1995-2015.txt
   $ ./qdlatlon_test apexsh_1980-2020.txt | diff - test_result.qdlatlon.apexsh_1980-2020.txt
   $ ./qdlatlon_test apexsh_1980-2025.txt | diff - test_result.qdlatlon.apexsh_1980-2025.txt
