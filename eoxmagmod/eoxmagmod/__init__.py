@@ -60,6 +60,7 @@ try:
     from .quasi_dipole_coordinates import (
         eval_qdlatlon, eval_mlt, eval_subsol,
         eval_qdlatlon_with_base_vectors,
+        QDIPOLE_VERSION,
     )
     from .solar_position import sunpos, sunpos_original
     from .dipole_coords import (
@@ -115,6 +116,7 @@ try:
         'eval_qdlatlon_with_base_vectors',
         'eval_mlt',
         'eval_subsol',
+        'QDIPOLE_VERSION',
         'sunpos',
         'sunpos_original',
         'decimal_year_to_mjd2000',

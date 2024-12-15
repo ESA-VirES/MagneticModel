@@ -35,8 +35,10 @@ __all__ = [
     "eval_qdlatlon_with_base_vectors",
     "eval_mlt",
     "eval_subsol",
+    "QDIPOLE_VERSION",
 ]
 
+QDIPOLE_VERSION = _pyqd.QDIPOLE_VERSION
 
 def eval_qdlatlon(gclat, gclon, gcrad, time, fname=APEX_LATEST):
     """
