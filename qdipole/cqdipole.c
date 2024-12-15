@@ -35,6 +35,10 @@
 
 #include <string.h>
 #include "cqdipole.h"
+#include "qdipole_conf.h"
+
+#define MAX_PATH_LENGTH 1023
+
 
 static int check_string_lenght(const char *srt, const size_t size)
 {
@@ -47,6 +51,18 @@ static void copy_string(char *dst, const char *src, const size_t size)
     // copy string truncated to the given destination size
     strncpy(dst, src, size - 1);
     dst[size - 1] = '\0';
+}
+
+
+size_t get_qdipole_max_fname_lenght()
+{
+    return MAX_PATH_LENGTH;
+}
+
+
+const char* get_qdipole_version()
+{
+    return PACKAGE_VERSION;
 }
 
 

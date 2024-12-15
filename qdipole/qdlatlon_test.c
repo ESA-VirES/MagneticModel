@@ -64,9 +64,9 @@ int main(int argc, char* argv[])
     }
     printf("Using: %s\n", basename(fname));
 
-    if (strlen(fname) > MAX_PATH_LENGTH)
+    if (strlen(fname) > get_qdipole_max_fname_lenght())
     {
-        fprintf(stderr, "ERROR: Filename is too long and exceeds the maximum allowed %d bytes! filename = %s\n", MAX_PATH_LENGTH, fname);
+        fprintf(stderr, "ERROR: Filename is too long and exceeds the maximum allowed %d bytes! filename = %s\n", get_qdipole_max_fname_lenght(), fname);
         return 1;
     }
 

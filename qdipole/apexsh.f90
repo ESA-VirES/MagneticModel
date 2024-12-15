@@ -149,7 +149,7 @@
 !   Re = Mean radius of Earth in km
 !   ecc2 = squared eccentricity of ellipsoidal Earth
 
-       character(1024)          :: datafile
+       character(1023)          :: datafile
        real(4)                  :: epoch
        real(4)                  :: altlastq, altlastg
        logical                  :: loadflag = .true.
@@ -164,7 +164,7 @@
 
     implicit none
 
-    character(1024)             :: datafilenew, datafilelast=''
+    character(1023)             :: datafilenew, datafilelast=''
     real(4)                     :: epochnew, epochlast=-999.0
     real(8)                     :: we0, we1
     integer(4)                  :: iepoch0, iepoch1, iterm, icoord

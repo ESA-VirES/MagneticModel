@@ -31,7 +31,20 @@
 #ifndef CQDIPOLE_H
 #define CQDIPOLE_H
 
-#define MAX_PATH_LENGTH 1024
+/**
+ * @brief Get filename size limit.
+ * @returns maximum length of the filename path
+ */
+
+size_t get_qdipole_max_fname_lenght();
+
+
+/**
+ * @brief Get library version.
+ * @returns String containing version of the library
+ */
+
+const char* get_qdipole_version();
 
 
 /**
