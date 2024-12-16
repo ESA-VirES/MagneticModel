@@ -18,6 +18,7 @@
   :caption: Package Documentation
 
   Installation <installation>
+  Usage <usage>
   License <license>
 
 ..   Module Reference <api/modules>
