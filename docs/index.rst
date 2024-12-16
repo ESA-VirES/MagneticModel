@@ -1,27 +1,26 @@
-.. MagneticModel documentation master file, created by
-   sphinx-quickstart on Mon Oct 24 10:55:30 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
-Welcome to eoxmagmod documentation!
-===================================
+.. include:: introduction.rst
 
-The ``eoxmagmod``_ library collects low-level subroutines employed
-by the `VirES for Swarm`_ service to calculate:
+.. toctree::
+  :hidden:
+  :caption: VirES for Swarm
 
-- geomagnetic models (Spherical Harmonic expansion)
-- magnetic coordinates (quasi-dipole and dipole latitude and longitude, magnetic local time)
-- coordinate system conversions (geodetic, geocentric spherical, geocentric Cartesian coordinates)
-- time conversions (modified Julian date 2000, decimal year)
-- and perform other auxiliary calculations.
-
-.. _VirES for Swarm: https://vires.service
-.. _eoxmagmod: https://vires.service
+  Git Repository <https://github.com/ESA-VirES/MagneticModel>
+  VirES for Swarm Service <https://vires.services>
+  Swarm Virtual Research Environment (JupyterHub) <https://vre.vires.services>
+  Example Swarm Notebooks <https://notebooks.vires.services>
+  VirES Python Client Documentaion <https://viresclient.readthedocs.io>
 
 .. toctree::
    :maxdepth: 2
+.. toctree::
+  :hidden:
+  :caption: Package Documentation
 
-   Module Reference <api/modules>
+  Installation <installation>
+  License <license>
+
+..   Module Reference <api/modules>
 
 
 

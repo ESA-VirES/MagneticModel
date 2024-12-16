@@ -1,0 +1,13 @@
+dependencies:
+  - python >=3.11,<3.12
+  - pip
+  - numpy <2
+  - scipy
+  - matplotlib
+  - h5py
+  - conda-forge::c-compiler
+  - conda-forge::fortran-compiler
+  - local::qdipole
+  - local::cdf
+  - pip:
+      - SpacePy >0.5
