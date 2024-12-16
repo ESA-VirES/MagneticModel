@@ -1,22 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>eoxmagmod.quasi_dipole_coordinates &mdash; MagneticModel  documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -27,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> MagneticModel
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MagneticModel
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,9 +57,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>eoxmagmod.quasi_dipole_coordinates</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">eoxmagmod.quasi_dipole_coordinates</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -73,7 +76,7 @@
 <span class="c1"># Author: Martin Paces &lt;martin.paces@eox.at&gt;</span>
 <span class="c1">#</span>
 <span class="c1">#-------------------------------------------------------------------------------</span>
-<span class="c1"># Copyright (C) 2015 EOX IT Services GmbH</span>
+<span class="c1"># Copyright (C) 2015-2024 EOX IT Services GmbH</span>
 <span class="c1">#</span>
 <span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
 <span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
@@ -96,11 +99,20 @@
 
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isfile</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_pyqd</span>
-<span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">APEX</span>
+<span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">APEX_LATEST</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;eval_qdlatlon&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eval_qdlatlon_with_base_vectors&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eval_mlt&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eval_subsol&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;QDIPOLE_VERSION&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 
-<div class="viewcode-block" id="eval_qdlatlon"><a class="viewcode-back" href="../../api/eoxmagmod.html#eoxmagmod.quasi_dipole_coordinates.eval_qdlatlon">[docs]</a><span class="k">def</span> <span class="nf">eval_qdlatlon</span><span class="p">(</span><span class="n">gclat</span><span class="p">,</span> <span class="n">gclon</span><span class="p">,</span> <span class="n">gcrad</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="n">APEX</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="n">QDIPOLE_VERSION</span> <span class="o">=</span> <span class="n">_pyqd</span><span class="o">.</span><span class="n">QDIPOLE_VERSION</span>
+
+<div class="viewcode-block" id="eval_qdlatlon"><a class="viewcode-back" href="../../api/eoxmagmod.html#eoxmagmod.quasi_dipole_coordinates.eval_qdlatlon">[docs]</a><span class="k">def</span> <span class="nf">eval_qdlatlon</span><span class="p">(</span><span class="n">gclat</span><span class="p">,</span> <span class="n">gclon</span><span class="p">,</span> <span class="n">gcrad</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="n">APEX_LATEST</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">          Evaluate magnetic quasi-dipole coordinates a single or multiple input</span>
 <span class="sd">          points.</span>
 
@@ -116,12 +128,12 @@
 <span class="sd">            qdlon - quasi-dipole longitude(s).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">isfile</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;File not found! fname=</span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fname</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File not found! fname=</span><span class="si">{</span><span class="n">fname</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_pyqd</span><span class="o">.</span><span class="n">eval_qdlatlon</span><span class="p">(</span><span class="n">gclat</span><span class="p">,</span> <span class="n">gclon</span><span class="p">,</span> <span class="n">gcrad</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="eval_qdlatlon_with_base_vectors"><a class="viewcode-back" href="../../api/eoxmagmod.html#eoxmagmod.quasi_dipole_coordinates.eval_qdlatlon_with_base_vectors">[docs]</a><span class="k">def</span> <span class="nf">eval_qdlatlon_with_base_vectors</span><span class="p">(</span><span class="n">gclat</span><span class="p">,</span> <span class="n">gclon</span><span class="p">,</span> <span class="n">gcrad</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="n">APEX</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="eval_qdlatlon_with_base_vectors"><a class="viewcode-back" href="../../api/eoxmagmod.html#eoxmagmod.quasi_dipole_coordinates.eval_qdlatlon_with_base_vectors">[docs]</a><span class="k">def</span> <span class="nf">eval_qdlatlon_with_base_vectors</span><span class="p">(</span><span class="n">gclat</span><span class="p">,</span> <span class="n">gclon</span><span class="p">,</span> <span class="n">gcrad</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="n">APEX_LATEST</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">          Evaluate magnetic quasi-dipole coordinates a single or multiple input</span>
 <span class="sd">          coordinates.</span>
 
@@ -142,29 +154,26 @@
 <span class="sd">            f - | F1 x F2 | value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">isfile</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;File not found! fname=</span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fname</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File not found! fname=</span><span class="si">{</span><span class="n">fname</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_pyqd</span><span class="o">.</span><span class="n">eval_qdlatlon</span><span class="p">(</span><span class="n">gclat</span><span class="p">,</span> <span class="n">gclon</span><span class="p">,</span> <span class="n">gcrad</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="eval_mlt"><a class="viewcode-back" href="../../api/eoxmagmod.html#eoxmagmod.quasi_dipole_coordinates.eval_mlt">[docs]</a><span class="k">def</span> <span class="nf">eval_mlt</span><span class="p">(</span><span class="n">qdlon</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="n">APEX</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="eval_mlt"><a class="viewcode-back" href="../../api/eoxmagmod.html#eoxmagmod.quasi_dipole_coordinates.eval_mlt">[docs]</a><span class="k">def</span> <span class="nf">eval_mlt</span><span class="p">(</span><span class="n">qdlon</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">          Evaluate magnetic local time for given quasi dipole longitudes.</span>
 
 <span class="sd">          Inputs:</span>
 <span class="sd">            qdlon - quasi-dipole longitudes(s).</span>
 <span class="sd">            time  - MJD2000 time(s)</span>
-<span class="sd">            fname - file-name of the model text file.</span>
 
 <span class="sd">          Outputs:</span>
 <span class="sd">            mlt - magnetic local time(s).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">isfile</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;File not found! fname=</span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fname</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">_pyqd</span><span class="o">.</span><span class="n">eval_mlt</span><span class="p">(</span><span class="n">qdlon</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">_pyqd</span><span class="o">.</span><span class="n">eval_mlt</span><span class="p">(</span><span class="n">qdlon</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="eval_subsol"><a class="viewcode-back" href="../../api/eoxmagmod.html#eoxmagmod.quasi_dipole_coordinates.eval_subsol">[docs]</a><span class="k">def</span> <span class="nf">eval_subsol</span><span class="p">(</span><span class="n">time</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">          Evaluate sub-solar point coordinates.</span>
 
 <span class="sd">          Inputs:</span>

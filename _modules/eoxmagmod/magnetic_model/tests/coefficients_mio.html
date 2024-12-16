@@ -1,22 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>eoxmagmod.magnetic_model.tests.coefficients_mio &mdash; MagneticModel  documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/custom.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css" />
+
   
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/underscore.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -27,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../../index.html" class="icon icon-home"> MagneticModel
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MagneticModel
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,9 +57,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../../index.html">Module code</a> &raquo;</li>
-      <li>eoxmagmod.magnetic_model.tests.coefficients_mio</li>
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">eoxmagmod.magnetic_model.tests.coefficients_mio</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -96,7 +99,7 @@
 <span class="c1"># pylint: disable=missing-docstring</span>
 
 <span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span><span class="p">,</span> <span class="n">main</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">inf</span><span class="p">,</span> <span class="n">nan</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">inf</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">asarray</span><span class="p">,</span> <span class="n">stack</span>
 <span class="kn">from</span> <span class="nn">numpy.testing</span> <span class="kn">import</span> <span class="n">assert_allclose</span>
 <span class="kn">from</span> <span class="nn">eoxmagmod.time_util</span> <span class="kn">import</span> <span class="n">decimal_year_to_mjd2000</span>
 <span class="kn">from</span> <span class="nn">eoxmagmod.magnetic_time</span> <span class="kn">import</span> <span class="n">mjd2000_to_magnetic_universal_time</span>
@@ -105,7 +108,7 @@
 <span class="kn">from</span> <span class="nn">eoxmagmod.magnetic_model.parser_mio</span> <span class="kn">import</span> <span class="n">parse_swarm_mio_file</span>
 
 
-<div class="viewcode-block" id="MIOSHCoeffMixIn"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.MIOSHCoeffMixIn">[docs]</a><span class="k">class</span> <span class="nc">MIOSHCoeffMixIn</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="MIOSHCoeffMixIn"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.MIOSHCoeffMixIn">[docs]</a><span class="k">class</span> <span class="nc">MIOSHCoeffMixIn</span><span class="p">:</span>
     <span class="n">is_internal</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">degree</span> <span class="o">=</span> <span class="mi">2</span>
     <span class="n">min_degree</span> <span class="o">=</span> <span class="mi">1</span>
@@ -133,7 +136,36 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">mjd2000_to_magnetic_universal_time</span><span class="p">(</span>
             <span class="n">time</span><span class="p">,</span> <span class="n">lat_ngp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lat_ngp</span><span class="p">,</span> <span class="n">lon_ngp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lon_ngp</span><span class="p">,</span>
             <span class="n">lat_sol</span><span class="o">=</span><span class="n">lat_sol</span><span class="p">,</span> <span class="n">lon_sol</span><span class="o">=</span><span class="n">lon_sol</span><span class="p">,</span>
-        <span class="p">),</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span></div></div>
+        <span class="p">),</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MIOSHCoeffMixIn.eval_coeff_multitime_ref"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.MIOSHCoeffMixIn.eval_coeff_multitime_ref">[docs]</a>    <span class="k">def</span> <span class="nf">eval_coeff_multitime_ref</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">lat_sol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lon_sol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_get_item</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">parameter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">parameter</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">parameter</span>
+            <span class="k">return</span> <span class="n">parameter</span><span class="o">.</span><span class="n">ravel</span><span class="p">()[</span><span class="n">index</span><span class="p">]</span>
+
+        <span class="n">times</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+        <span class="n">coeff</span> <span class="o">=</span> <span class="n">stack</span><span class="p">([</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eval_coeff</span><span class="p">(</span>
+                <span class="n">time</span><span class="p">,</span>
+                <span class="n">lat_sol</span><span class="o">=</span><span class="n">_get_item</span><span class="p">(</span><span class="n">lat_sol</span><span class="p">,</span> <span class="n">idx</span><span class="p">),</span>
+                <span class="n">lon_sol</span><span class="o">=</span><span class="n">_get_item</span><span class="p">(</span><span class="n">lon_sol</span><span class="p">,</span> <span class="n">idx</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">options</span>
+            <span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">time</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+        <span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">coeff</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">*</span><span class="n">times</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="o">*</span><span class="n">coeff</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span></div>
+
+    <span class="k">def</span> <span class="nf">_test_callable_multitime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">expected_degree</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">expected_degree</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">expected_degree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">degree</span>
+        <span class="n">coeff</span><span class="p">,</span> <span class="n">degree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_coeff</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+        <span class="n">coeff_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_coeff_multitime_ref</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+        <span class="n">assert_allclose</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="n">coeff_ref</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span> <span class="n">expected_degree</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TestSparseSHCoefficientsMIOInternal"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.TestSparseSHCoefficientsMIOInternal">[docs]</a><span class="k">class</span> <span class="nc">TestSparseSHCoefficientsMIOInternal</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">MIOSHCoeffMixIn</span><span class="p">):</span>
@@ -160,8 +192,13 @@
         <span class="p">],</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="TestSparseSHCoefficientsMIOInternal.test_callable_multitime"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.TestSparseSHCoefficientsMIOInternal.test_callable_multitime">[docs]</a>    <span class="k">def</span> <span class="nf">test_callable_multitime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_callable_multitime</span><span class="p">(</span>
+            <span class="n">times</span><span class="o">=</span><span class="n">decimal_year_to_mjd2000</span><span class="p">([</span><span class="mf">2017.0</span><span class="p">,</span> <span class="mf">2018.5</span><span class="p">,</span> <span class="mf">2020.0</span><span class="p">]),</span>
+        <span class="p">)</span></div>
+
 <div class="viewcode-block" id="TestSparseSHCoefficientsMIOInternal.test_extra_sub_solar_point"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.TestSparseSHCoefficientsMIOInternal.test_extra_sub_solar_point">[docs]</a>    <span class="k">def</span> <span class="nf">test_extra_sub_solar_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">coeff</span><span class="p">,</span> <span class="n">degree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_coeff</span><span class="p">(</span>
+        <span class="n">coeff</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_coeff</span><span class="p">(</span>
             <span class="n">decimal_year_to_mjd2000</span><span class="p">(</span><span class="mf">2018.5</span><span class="p">),</span> <span class="n">lat_sol</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">lon_sol</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">assert_allclose</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="p">[</span>
@@ -171,8 +208,14 @@
             <span class="p">(</span><span class="o">-</span><span class="mf">0.2485487953382298</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
             <span class="p">(</span><span class="o">-</span><span class="mf">0.40755502000159416</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.7608326017305439</span><span class="p">),</span>
             <span class="p">(</span><span class="o">-</span><span class="mf">0.04181600178841578</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.16655581670562275</span><span class="p">),</span>
-        <span class="p">],</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">)</span></div>
+        <span class="p">],</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestSparseSHCoefficientsMIOInternal.test_callable_multitime_extra_sub_solar_point"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.TestSparseSHCoefficientsMIOInternal.test_callable_multitime_extra_sub_solar_point">[docs]</a>    <span class="k">def</span> <span class="nf">test_callable_multitime_extra_sub_solar_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_callable_multitime</span><span class="p">(</span>
+            <span class="n">times</span><span class="o">=</span><span class="n">decimal_year_to_mjd2000</span><span class="p">([</span><span class="mf">2017.0</span><span class="p">,</span> <span class="mf">2018.5</span><span class="p">,</span> <span class="mf">2020.0</span><span class="p">]),</span>
+            <span class="n">lat_sol</span><span class="o">=</span><span class="n">asarray</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
+            <span class="n">lon_sol</span><span class="o">=</span><span class="n">asarray</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="TestSparseSHCoefficientsMIOInternal.test_callable_max_degree"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.TestSparseSHCoefficientsMIOInternal.test_callable_max_degree">[docs]</a>    <span class="k">def</span> <span class="nf">test_callable_max_degree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">coeff</span><span class="p">,</span> <span class="n">degree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_coeff</span><span class="p">(</span>
@@ -183,6 +226,12 @@
             <span class="p">(</span><span class="mf">0.11415226</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.22361224</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.02624283</span><span class="p">),</span>
         <span class="p">],</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestSparseSHCoefficientsMIOInternal.test_callable_multitime_max_degree"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.TestSparseSHCoefficientsMIOInternal.test_callable_multitime_max_degree">[docs]</a>    <span class="k">def</span> <span class="nf">test_callable_multitime_max_degree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_callable_multitime</span><span class="p">(</span>
+            <span class="n">times</span><span class="o">=</span><span class="n">decimal_year_to_mjd2000</span><span class="p">([</span><span class="mf">2017.0</span><span class="p">,</span> <span class="mf">2018.5</span><span class="p">,</span> <span class="mf">2020.0</span><span class="p">]),</span>
+            <span class="n">expected_degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="TestSparseSHCoefficientsMIOInternal.test_callable_min_degree"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.TestSparseSHCoefficientsMIOInternal.test_callable_min_degree">[docs]</a>    <span class="k">def</span> <span class="nf">test_callable_min_degree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">coeff</span><span class="p">,</span> <span class="n">degree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_coeff</span><span class="p">(</span>
@@ -195,6 +244,13 @@
         <span class="p">],</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="TestSparseSHCoefficientsMIOInternal.test_callable_multitime_min_degree"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.TestSparseSHCoefficientsMIOInternal.test_callable_multitime_min_degree">[docs]</a>    <span class="k">def</span> <span class="nf">test_callable_multitime_min_degree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_callable_multitime</span><span class="p">(</span>
+            <span class="n">times</span><span class="o">=</span><span class="n">decimal_year_to_mjd2000</span><span class="p">([</span><span class="mf">2017.0</span><span class="p">,</span> <span class="mf">2018.5</span><span class="p">,</span> <span class="mf">2020.0</span><span class="p">]),</span>
+            <span class="c1">#expected_degree=1,</span>
+            <span class="n">min_degree</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
 <div class="viewcode-block" id="TestSparseSHCoefficientsMIOInternal.test_callable_min_max_degree"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.TestSparseSHCoefficientsMIOInternal.test_callable_min_max_degree">[docs]</a>    <span class="k">def</span> <span class="nf">test_callable_min_max_degree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">coeff</span><span class="p">,</span> <span class="n">degree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_coeff</span><span class="p">(</span>
             <span class="n">decimal_year_to_mjd2000</span><span class="p">(</span><span class="mf">2018.5</span><span class="p">),</span> <span class="n">max_degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">min_degree</span><span class="o">=</span><span class="mi">1</span>
@@ -205,6 +261,12 @@
         <span class="p">],</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="TestSparseSHCoefficientsMIOInternal.test_callable_multitime_min_max_degree"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.TestSparseSHCoefficientsMIOInternal.test_callable_multitime_min_max_degree">[docs]</a>    <span class="k">def</span> <span class="nf">test_callable_multitime_min_max_degree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_callable_multitime</span><span class="p">(</span>
+            <span class="n">times</span><span class="o">=</span><span class="n">decimal_year_to_mjd2000</span><span class="p">([</span><span class="mf">2017.0</span><span class="p">,</span> <span class="mf">2018.5</span><span class="p">,</span> <span class="mf">2020.0</span><span class="p">]),</span>
+            <span class="n">expected_degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">min_degree</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span></div>
+
 <div class="viewcode-block" id="TestSparseSHCoefficientsMIOInternal.test_callable_all_zero"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.TestSparseSHCoefficientsMIOInternal.test_callable_all_zero">[docs]</a>    <span class="k">def</span> <span class="nf">test_callable_all_zero</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">coeff</span><span class="p">,</span> <span class="n">degree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_coeff</span><span class="p">(</span>
             <span class="n">decimal_year_to_mjd2000</span><span class="p">(</span><span class="mf">2018.5</span><span class="p">),</span> <span class="n">min_degree</span><span class="o">=</span><span class="mi">3</span>
@@ -212,7 +274,13 @@
         <span class="n">assert_allclose</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="p">[</span>
             <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
         <span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestSparseSHCoefficientsMIOInternal.test_callable_multitime_all_zero"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.TestSparseSHCoefficientsMIOInternal.test_callable_multitime_all_zero">[docs]</a>    <span class="k">def</span> <span class="nf">test_callable_multitime_all_zero</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_callable_multitime</span><span class="p">(</span>
+            <span class="n">times</span><span class="o">=</span><span class="n">decimal_year_to_mjd2000</span><span class="p">([</span><span class="mf">2017.0</span><span class="p">,</span> <span class="mf">2018.5</span><span class="p">,</span> <span class="mf">2020.0</span><span class="p">]),</span>
+            <span class="n">expected_degree</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">min_degree</span><span class="o">=</span><span class="mi">3</span>
+        <span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="TestSparseSHCoefficientsMIOExternal"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.TestSparseSHCoefficientsMIOExternal">[docs]</a><span class="k">class</span> <span class="nc">TestSparseSHCoefficientsMIOExternal</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">MIOSHCoeffMixIn</span><span class="p">):</span>
@@ -237,7 +305,12 @@
             <span class="p">(</span><span class="o">-</span><span class="mf">1.44080531</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.27711333</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.25918073</span><span class="p">),</span>
             <span class="p">(</span><span class="o">-</span><span class="mf">0.63645813</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.22583255</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.02305245</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.05941826</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.24358544</span><span class="p">),</span>
         <span class="p">],</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">)</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestSparseSHCoefficientsMIOExternal.test_callable_multitime"><a class="viewcode-back" href="../../../../api/eoxmagmod.magnetic_model.tests.html#eoxmagmod.magnetic_model.tests.coefficients_mio.TestSparseSHCoefficientsMIOExternal.test_callable_multitime">[docs]</a>    <span class="k">def</span> <span class="nf">test_callable_multitime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_callable_multitime</span><span class="p">(</span>
+            <span class="n">times</span><span class="o">=</span><span class="n">decimal_year_to_mjd2000</span><span class="p">([</span><span class="mf">2017.0</span><span class="p">,</span> <span class="mf">2018.5</span><span class="p">,</span> <span class="mf">2020.0</span><span class="p">]),</span>
+        <span class="p">)</span></div></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>

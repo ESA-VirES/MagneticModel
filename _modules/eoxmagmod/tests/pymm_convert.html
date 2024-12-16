@@ -1,22 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>eoxmagmod.tests.pymm_convert &mdash; MagneticModel  documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> MagneticModel
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MagneticModel
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,9 +57,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>eoxmagmod.tests.pymm_convert</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">eoxmagmod.tests.pymm_convert</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -112,7 +115,7 @@
 <span class="n">RAD2DEG</span> <span class="o">=</span> <span class="mf">180.0</span> <span class="o">/</span> <span class="n">pi</span>
 
 
-<div class="viewcode-block" id="ConvertTestMixIn"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.ConvertTestMixIn">[docs]</a><span class="k">class</span> <span class="nc">ConvertTestMixIn</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="ConvertTestMixIn"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.ConvertTestMixIn">[docs]</a><span class="k">class</span> <span class="nc">ConvertTestMixIn</span><span class="p">:</span>
     <span class="n">source_coordinate_system</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">target_coordinate_system</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -185,7 +188,7 @@
 
 <div class="viewcode-block" id="ConvertTestMixIn.to_geodetic"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.ConvertTestMixIn.to_geodetic">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">to_geodetic</span><span class="p">(</span><span class="n">z_coord</span><span class="p">,</span> <span class="n">hypot_xy</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Get geodetic coordinates calculated by the Ferrarri&#39;s solution. &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Get geodetic coordinates calculated by the Ferrarri&#39;s solution. &quot;&quot;&quot;</span>
         <span class="n">ee4</span> <span class="o">=</span> <span class="n">WGS84_EPS2</span><span class="o">**</span><span class="mi">2</span>
         <span class="n">pa2</span> <span class="o">=</span> <span class="p">(</span><span class="n">hypot_xy</span> <span class="o">/</span> <span class="n">WGS84_A</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
         <span class="n">zt</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">WGS84_EPS2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">z_coord</span> <span class="o">/</span> <span class="n">WGS84_A</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
@@ -244,7 +247,7 @@
 <span class="c1">#-------------------------------------------------------------------------------</span>
 <span class="c1"># sources</span>
 
-<div class="viewcode-block" id="SourceSpherical"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.SourceSpherical">[docs]</a><span class="k">class</span> <span class="nc">SourceSpherical</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="SourceSpherical"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.SourceSpherical">[docs]</a><span class="k">class</span> <span class="nc">SourceSpherical</span><span class="p">:</span>
     <span class="n">source_coordinate_system</span> <span class="o">=</span> <span class="n">GEOCENTRIC_SPHERICAL</span>
 
     <span class="nd">@property</span>
@@ -255,7 +258,7 @@
         <span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="SourceGeodetic"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.SourceGeodetic">[docs]</a><span class="k">class</span> <span class="nc">SourceGeodetic</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="SourceGeodetic"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.SourceGeodetic">[docs]</a><span class="k">class</span> <span class="nc">SourceGeodetic</span><span class="p">:</span>
     <span class="n">source_coordinate_system</span> <span class="o">=</span> <span class="n">GEODETIC_ABOVE_WGS84</span>
 
     <span class="nd">@property</span>
@@ -266,7 +269,7 @@
         <span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="SourceCartesian"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.SourceCartesian">[docs]</a><span class="k">class</span> <span class="nc">SourceCartesian</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="SourceCartesian"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.SourceCartesian">[docs]</a><span class="k">class</span> <span class="nc">SourceCartesian</span><span class="p">:</span>
     <span class="n">source_coordinate_system</span> <span class="o">=</span> <span class="n">GEOCENTRIC_CARTESIAN</span>
 
     <span class="nd">@property</span>
@@ -279,7 +282,7 @@
 <span class="c1">#-------------------------------------------------------------------------------</span>
 <span class="c1"># generic targets</span>
 
-<div class="viewcode-block" id="TargetIndetical"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TargetIndetical">[docs]</a><span class="k">class</span> <span class="nc">TargetIndetical</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="TargetIndetical"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TargetIndetical">[docs]</a><span class="k">class</span> <span class="nc">TargetIndetical</span><span class="p">:</span>
 
 <div class="viewcode-block" id="TargetIndetical.reference_convert"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_convert.TargetIndetical.reference_convert">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">reference_convert</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>

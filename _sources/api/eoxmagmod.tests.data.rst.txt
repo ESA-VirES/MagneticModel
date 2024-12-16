@@ -4,6 +4,22 @@ eoxmagmod.tests.data package
 Submodules
 ----------
 
+eoxmagmod.tests.data.chaos\_core module
+---------------------------------------
+
+.. automodule:: eoxmagmod.tests.data.chaos_core
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.tests.data.chaos\_mma module
+--------------------------------------
+
+.. automodule:: eoxmagmod.tests.data.chaos_mma
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 eoxmagmod.tests.data.generate\_quasi\_dipole\_test\_data module
 ---------------------------------------------------------------
 
@@ -16,6 +32,14 @@ eoxmagmod.tests.data.generate\_solar\_position\_test\_data module
 -----------------------------------------------------------------
 
 .. automodule:: eoxmagmod.tests.data.generate_solar_position_test_data
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.tests.data.mio module
+-------------------------------
+
+.. automodule:: eoxmagmod.tests.data.mio
    :members:
    :undoc-members:
    :show-inheritance:

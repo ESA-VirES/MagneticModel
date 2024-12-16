@@ -1,22 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>eoxmagmod.magnetic_model.loader_mma &mdash; MagneticModel  documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> MagneticModel
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MagneticModel
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,9 +57,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>eoxmagmod.magnetic_model.loader_mma</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">eoxmagmod.magnetic_model.loader_mma</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -96,6 +99,7 @@
 <span class="c1"># pylint: disable=invalid-name</span>
 
 <span class="kn">from</span> <span class="nn">spacepy</span> <span class="kn">import</span> <span class="n">pycdf</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">concatenate</span><span class="p">,</span> <span class="n">array_equal</span>
 <span class="kn">from</span> <span class="nn">.model</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">SphericalHarmomicGeomagneticModel</span><span class="p">,</span>
     <span class="n">DipoleSphericalHarmomicGeomagneticModel</span><span class="p">,</span>
@@ -109,125 +113,144 @@
     <span class="n">read_swarm_mma_2f_sm_internal</span><span class="p">,</span> <span class="n">read_swarm_mma_2f_sm_external</span><span class="p">,</span>
 <span class="p">)</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;load_model_swarm_mma_2c_internal&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_model_swarm_mma_2c_external&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_model_swarm_mma_2f_geo_internal&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_model_swarm_mma_2f_geo_external&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_model_swarm_mma_2f_sm_internal&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_model_swarm_mma_2f_sm_external&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_coeff_swarm_mma_2c_internal&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_coeff_swarm_mma_2c_external&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_coeff_swarm_mma_2f_geo_internal&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_coeff_swarm_mma_2f_geo_external&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_coeff_swarm_mma_2f_sm_internal&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_coeff_swarm_mma_2f_sm_external&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
 <span class="c1"># North geomagnetic coordinates used by the MMA products (IGRF-11, 2010.0)</span>
 <span class="n">MMA2C_NGP_LATITUDE</span> <span class="o">=</span> <span class="mi">90</span> <span class="o">-</span> <span class="mf">9.92</span>   <span class="c1"># deg.</span>
 <span class="n">MMA2C_NGP_LONGITUDE</span> <span class="o">=</span> <span class="mf">287.78</span> <span class="o">-</span> <span class="mf">360.0</span>  <span class="c1"># deg.</span>
 
 
-<div class="viewcode-block" id="load_model_swarm_mma_2c_internal"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_model_swarm_mma_2c_internal">[docs]</a><span class="k">def</span> <span class="nf">load_model_swarm_mma_2c_internal</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">lat_ngp</span><span class="o">=</span><span class="n">MMA2C_NGP_LATITUDE</span><span class="p">,</span>
+<div class="viewcode-block" id="load_model_swarm_mma_2c_internal"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_model_swarm_mma_2c_internal">[docs]</a><span class="k">def</span> <span class="nf">load_model_swarm_mma_2c_internal</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">,</span> <span class="n">lat_ngp</span><span class="o">=</span><span class="n">MMA2C_NGP_LATITUDE</span><span class="p">,</span>
                                      <span class="n">lon_ngp</span><span class="o">=</span><span class="n">MMA2C_NGP_LONGITUDE</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load internal (secondary field) model from a Swarm MMA_SHA_2C product.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load internal (secondary field) model from a Swarm MMA_SHA_2C product.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">DipoleSphericalHarmomicGeomagneticModel</span><span class="p">(</span>
-        <span class="n">load_coeff_swarm_mma_2c_internal</span><span class="p">(</span><span class="n">path</span><span class="p">),</span>
+        <span class="n">load_coeff_swarm_mma_2c_internal</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">),</span>
         <span class="n">north_pole</span><span class="o">=</span><span class="p">(</span><span class="n">lat_ngp</span><span class="p">,</span> <span class="n">lon_ngp</span><span class="p">),</span>
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="load_model_swarm_mma_2c_external"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_model_swarm_mma_2c_external">[docs]</a><span class="k">def</span> <span class="nf">load_model_swarm_mma_2c_external</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">lat_ngp</span><span class="o">=</span><span class="n">MMA2C_NGP_LATITUDE</span><span class="p">,</span>
+<div class="viewcode-block" id="load_model_swarm_mma_2c_external"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_model_swarm_mma_2c_external">[docs]</a><span class="k">def</span> <span class="nf">load_model_swarm_mma_2c_external</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">,</span> <span class="n">lat_ngp</span><span class="o">=</span><span class="n">MMA2C_NGP_LATITUDE</span><span class="p">,</span>
                                      <span class="n">lon_ngp</span><span class="o">=</span><span class="n">MMA2C_NGP_LONGITUDE</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load external (primary field) model from a Swarm MMA_SHA_2C product.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load external (primary field) model from a Swarm MMA_SHA_2C product.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">DipoleSphericalHarmomicGeomagneticModel</span><span class="p">(</span>
-        <span class="n">load_coeff_swarm_mma_2c_external</span><span class="p">(</span><span class="n">path</span><span class="p">),</span>
+        <span class="n">load_coeff_swarm_mma_2c_external</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">),</span>
         <span class="n">north_pole</span><span class="o">=</span><span class="p">(</span><span class="n">lat_ngp</span><span class="p">,</span> <span class="n">lon_ngp</span><span class="p">),</span>
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="load_model_swarm_mma_2f_geo_internal"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_model_swarm_mma_2f_geo_internal">[docs]</a><span class="k">def</span> <span class="nf">load_model_swarm_mma_2f_geo_internal</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load geographic frame internal (secondary field) model from a Swarm</span>
+<div class="viewcode-block" id="load_model_swarm_mma_2f_geo_internal"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_model_swarm_mma_2f_geo_internal">[docs]</a><span class="k">def</span> <span class="nf">load_model_swarm_mma_2f_geo_internal</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load geographic frame internal (secondary field) model from a Swarm</span>
 <span class="sd">    MMA_SHA_2F product.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">SphericalHarmomicGeomagneticModel</span><span class="p">(</span>
-        <span class="n">load_coeff_swarm_mma_2f_geo_internal</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">load_coeff_swarm_mma_2f_geo_internal</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">)</span>
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="load_model_swarm_mma_2f_geo_external"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_model_swarm_mma_2f_geo_external">[docs]</a><span class="k">def</span> <span class="nf">load_model_swarm_mma_2f_geo_external</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load geographic frame internal (primary field) model from a Swarm</span>
+<div class="viewcode-block" id="load_model_swarm_mma_2f_geo_external"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_model_swarm_mma_2f_geo_external">[docs]</a><span class="k">def</span> <span class="nf">load_model_swarm_mma_2f_geo_external</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load geographic frame internal (primary field) model from a Swarm</span>
 <span class="sd">    MMA_SHA_2F product.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">SphericalHarmomicGeomagneticModel</span><span class="p">(</span>
-        <span class="n">load_coeff_swarm_mma_2f_geo_external</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">load_coeff_swarm_mma_2f_geo_external</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">)</span>
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="load_model_swarm_mma_2f_sm_internal"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_model_swarm_mma_2f_sm_internal">[docs]</a><span class="k">def</span> <span class="nf">load_model_swarm_mma_2f_sm_internal</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load solar magnetic frame internal (secondary field) model from a Swarm</span>
-<span class="sd">    MMA_SHA_2F product.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># FIXME: solar-magnetic frame model</span>
-    <span class="k">return</span> <span class="n">SphericalHarmomicGeomagneticModel</span><span class="p">(</span>
-        <span class="n">load_coeff_swarm_mma_2f_sm_internal</span><span class="p">(</span><span class="n">path</span><span class="p">),</span>
-    <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="load_model_swarm_mma_2f_sm_external"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_model_swarm_mma_2f_sm_external">[docs]</a><span class="k">def</span> <span class="nf">load_model_swarm_mma_2f_sm_external</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load solar magnetic frame internal (primary field) model from a Swarm</span>
+<div class="viewcode-block" id="load_model_swarm_mma_2f_sm_internal"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_model_swarm_mma_2f_sm_internal">[docs]</a><span class="k">def</span> <span class="nf">load_model_swarm_mma_2f_sm_internal</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load solar magnetic frame internal (secondary field) model from a Swarm</span>
 <span class="sd">    MMA_SHA_2F product.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># FIXME: solar-magnetic frame model</span>
     <span class="k">return</span> <span class="n">SphericalHarmomicGeomagneticModel</span><span class="p">(</span>
-        <span class="n">load_coeff_swarm_mma_2f_sm_external</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">load_coeff_swarm_mma_2f_sm_internal</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">),</span>
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="load_coeff_swarm_mma_2c_internal"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_coeff_swarm_mma_2c_internal">[docs]</a><span class="k">def</span> <span class="nf">load_coeff_swarm_mma_2c_internal</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load internal model coefficients from a Swarm MMA_SHA_2C product file.</span>
+<div class="viewcode-block" id="load_model_swarm_mma_2f_sm_external"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_model_swarm_mma_2f_sm_external">[docs]</a><span class="k">def</span> <span class="nf">load_model_swarm_mma_2f_sm_external</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load solar magnetic frame internal (primary field) model from a Swarm</span>
+<span class="sd">    MMA_SHA_2F product.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># FIXME: solar-magnetic frame model</span>
+    <span class="k">return</span> <span class="n">SphericalHarmomicGeomagneticModel</span><span class="p">(</span>
+        <span class="n">load_coeff_swarm_mma_2f_sm_external</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_coeff_swarm_mma_2c_internal"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_coeff_swarm_mma_2c_internal">[docs]</a><span class="k">def</span> <span class="nf">load_coeff_swarm_mma_2c_internal</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load internal model coefficients from one or more Swarm MMA_SHA_2C product files.</span>
+<span class="sd">    Note that the models are loaded and merged in the order of the arguments.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_load_coeff_mma_multi_set</span><span class="p">(</span>
-        <span class="n">path</span><span class="p">,</span> <span class="n">read_swarm_mma_2c_internal</span><span class="p">,</span> <span class="s2">&quot;gh&quot;</span><span class="p">,</span> <span class="n">is_internal</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">paths</span><span class="p">,</span> <span class="n">read_swarm_mma_2c_internal</span><span class="p">,</span> <span class="s2">&quot;gh&quot;</span><span class="p">,</span> <span class="n">is_internal</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="load_coeff_swarm_mma_2c_external"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_coeff_swarm_mma_2c_external">[docs]</a><span class="k">def</span> <span class="nf">load_coeff_swarm_mma_2c_external</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load external model coefficients from a Swarm MMA_SHA_2C product file.</span>
+<div class="viewcode-block" id="load_coeff_swarm_mma_2c_external"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_coeff_swarm_mma_2c_external">[docs]</a><span class="k">def</span> <span class="nf">load_coeff_swarm_mma_2c_external</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load external model coefficients from one or more Swarm MMA_SHA_2C product files.</span>
+<span class="sd">    Note that the models are loaded and merged in the order of the arguments.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_load_coeff_mma_multi_set</span><span class="p">(</span>
-        <span class="n">path</span><span class="p">,</span> <span class="n">read_swarm_mma_2c_external</span><span class="p">,</span> <span class="s2">&quot;qs&quot;</span><span class="p">,</span> <span class="n">is_internal</span><span class="o">=</span><span class="kc">False</span>
+        <span class="n">paths</span><span class="p">,</span> <span class="n">read_swarm_mma_2c_external</span><span class="p">,</span> <span class="s2">&quot;qs&quot;</span><span class="p">,</span> <span class="n">is_internal</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="load_coeff_swarm_mma_2f_geo_internal"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_coeff_swarm_mma_2f_geo_internal">[docs]</a><span class="k">def</span> <span class="nf">load_coeff_swarm_mma_2f_geo_internal</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load internal geographic frame model coefficients from a Swarm</span>
+<div class="viewcode-block" id="load_coeff_swarm_mma_2f_geo_internal"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_coeff_swarm_mma_2f_geo_internal">[docs]</a><span class="k">def</span> <span class="nf">load_coeff_swarm_mma_2f_geo_internal</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load internal geographic frame model coefficients from a Swarm</span>
 <span class="sd">    MMA_SHA_2F product file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_load_coeff_mma_single_set</span><span class="p">(</span>
-        <span class="n">path</span><span class="p">,</span> <span class="n">read_swarm_mma_2f_geo_internal</span><span class="p">,</span> <span class="s2">&quot;gh&quot;</span><span class="p">,</span> <span class="n">is_internal</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">paths</span><span class="p">,</span> <span class="n">read_swarm_mma_2f_geo_internal</span><span class="p">,</span> <span class="s2">&quot;gh&quot;</span><span class="p">,</span> <span class="n">is_internal</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="load_coeff_swarm_mma_2f_geo_external"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_coeff_swarm_mma_2f_geo_external">[docs]</a><span class="k">def</span> <span class="nf">load_coeff_swarm_mma_2f_geo_external</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load external geographic frame model coefficients from a Swarm</span>
+<div class="viewcode-block" id="load_coeff_swarm_mma_2f_geo_external"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_coeff_swarm_mma_2f_geo_external">[docs]</a><span class="k">def</span> <span class="nf">load_coeff_swarm_mma_2f_geo_external</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load external geographic frame model coefficients from a Swarm</span>
 <span class="sd">    MMA_SHA_2F product file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_load_coeff_mma_single_set</span><span class="p">(</span>
-        <span class="n">path</span><span class="p">,</span> <span class="n">read_swarm_mma_2f_geo_external</span><span class="p">,</span> <span class="s2">&quot;qs&quot;</span><span class="p">,</span> <span class="n">is_internal</span><span class="o">=</span><span class="kc">False</span>
+        <span class="n">paths</span><span class="p">,</span> <span class="n">read_swarm_mma_2f_geo_external</span><span class="p">,</span> <span class="s2">&quot;qs&quot;</span><span class="p">,</span> <span class="n">is_internal</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="load_coeff_swarm_mma_2f_sm_internal"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_coeff_swarm_mma_2f_sm_internal">[docs]</a><span class="k">def</span> <span class="nf">load_coeff_swarm_mma_2f_sm_internal</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load internal solar magnetic frame model coefficients from a Swarm</span>
+<div class="viewcode-block" id="load_coeff_swarm_mma_2f_sm_internal"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_coeff_swarm_mma_2f_sm_internal">[docs]</a><span class="k">def</span> <span class="nf">load_coeff_swarm_mma_2f_sm_internal</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load internal solar magnetic frame model coefficients from a Swarm</span>
 <span class="sd">    MMA_SHA_2F product file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_load_coeff_mma_single_set</span><span class="p">(</span>
-        <span class="n">path</span><span class="p">,</span> <span class="n">read_swarm_mma_2f_sm_internal</span><span class="p">,</span> <span class="s2">&quot;gh&quot;</span><span class="p">,</span> <span class="n">is_internal</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">paths</span><span class="p">,</span> <span class="n">read_swarm_mma_2f_sm_internal</span><span class="p">,</span> <span class="s2">&quot;gh&quot;</span><span class="p">,</span> <span class="n">is_internal</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="load_coeff_swarm_mma_2f_sm_external"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_coeff_swarm_mma_2f_sm_external">[docs]</a><span class="k">def</span> <span class="nf">load_coeff_swarm_mma_2f_sm_external</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load external solar magnetic frame model coefficients from a Swarm</span>
+<div class="viewcode-block" id="load_coeff_swarm_mma_2f_sm_external"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_coeff_swarm_mma_2f_sm_external">[docs]</a><span class="k">def</span> <span class="nf">load_coeff_swarm_mma_2f_sm_external</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load external solar magnetic frame model coefficients from a Swarm</span>
 <span class="sd">    MMA_SHA_2F product file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_load_coeff_mma_single_set</span><span class="p">(</span>
-        <span class="n">path</span><span class="p">,</span> <span class="n">read_swarm_mma_2f_sm_external</span><span class="p">,</span> <span class="s2">&quot;qs&quot;</span><span class="p">,</span> <span class="n">is_internal</span><span class="o">=</span><span class="kc">False</span>
+        <span class="n">paths</span><span class="p">,</span> <span class="n">read_swarm_mma_2f_sm_external</span><span class="p">,</span> <span class="s2">&quot;qs&quot;</span><span class="p">,</span> <span class="n">is_internal</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_load_coeff_mma_multi_set</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cdf_reader</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">is_internal</span><span class="p">):</span>
-    <span class="k">with</span> <span class="n">pycdf</span><span class="o">.</span><span class="n">CDF</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">cdf</span><span class="p">:</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">cdf_reader</span><span class="p">(</span><span class="n">cdf</span><span class="p">)</span>
-
+<span class="k">def</span> <span class="nf">_load_coeff_mma_multi_set</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">cdf_reader</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">is_internal</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">_read_data</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cdf_reader</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">_merge_coefficients</span><span class="p">(</span><span class="o">*</span><span class="n">items</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="n">variable</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">items</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="p">)</span>
+    <span class="p">]</span>
     <span class="k">return</span> <span class="n">CombinedSHCoefficients</span><span class="p">(</span><span class="o">*</span><span class="p">[</span>
         <span class="n">SparseSHCoefficientsTimeDependent</span><span class="p">(</span>
             <span class="n">item</span><span class="p">[</span><span class="s2">&quot;nm&quot;</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="n">variable</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;t&quot;</span><span class="p">],</span> <span class="n">is_internal</span><span class="o">=</span><span class="n">is_internal</span>
@@ -235,13 +258,43 @@
     <span class="p">])</span>
 
 
-<span class="k">def</span> <span class="nf">_load_coeff_mma_single_set</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cdf_reader</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">is_internal</span><span class="p">):</span>
-    <span class="k">with</span> <span class="n">pycdf</span><span class="o">.</span><span class="n">CDF</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">cdf</span><span class="p">:</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">cdf_reader</span><span class="p">(</span><span class="n">cdf</span><span class="p">)</span>
-
+<span class="k">def</span> <span class="nf">_load_coeff_mma_single_set</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">cdf_reader</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">is_internal</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">_read_data</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cdf_reader</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">_merge_coefficients</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="n">variable</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">SparseSHCoefficientsTimeDependent</span><span class="p">(</span>
         <span class="n">data</span><span class="p">[</span><span class="s2">&quot;nm&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">variable</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;t&quot;</span><span class="p">],</span> <span class="n">is_internal</span><span class="o">=</span><span class="n">is_internal</span>
     <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_read_data</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cdf_reader</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">pycdf</span><span class="o">.</span><span class="n">CDF</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">cdf</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cdf_reader</span><span class="p">(</span><span class="n">cdf</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_merge_coefficients</span><span class="p">(</span><span class="o">*</span><span class="n">sets</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+    <span class="n">head</span><span class="p">,</span> <span class="o">*</span><span class="n">tail</span> <span class="o">=</span> <span class="n">sets</span>
+
+    <span class="c1"># sanity check</span>
+    <span class="n">previous_item</span> <span class="o">=</span> <span class="n">head</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">tail</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">previous_item</span><span class="p">[</span><span class="s2">&quot;degree_min&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;degree_min&quot;</span><span class="p">]</span> <span class="ow">or</span>
+            <span class="n">previous_item</span><span class="p">[</span><span class="s2">&quot;degree_max&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;degree_max&quot;</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Degree range mismatch!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">array_equal</span><span class="p">(</span><span class="n">previous_item</span><span class="p">[</span><span class="s2">&quot;nm&quot;</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;nm&quot;</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Incompatible sets of coefficients!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">previous_item</span><span class="p">[</span><span class="s2">&quot;t&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;t&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unordered sets of coefficients!&quot;</span><span class="p">)</span>
+        <span class="n">previous_item</span> <span class="o">=</span> <span class="n">item</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;degree_min&quot;</span><span class="p">:</span> <span class="n">head</span><span class="p">[</span><span class="s2">&quot;degree_min&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;degree_max&quot;</span><span class="p">:</span> <span class="n">head</span><span class="p">[</span><span class="s2">&quot;degree_max&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;nm&quot;</span><span class="p">:</span> <span class="n">head</span><span class="p">[</span><span class="s2">&quot;nm&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="n">concatenate</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;t&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sets</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+        <span class="n">variable</span><span class="p">:</span> <span class="n">concatenate</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sets</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+    <span class="p">}</span>
 </pre></div>
 
            </div>

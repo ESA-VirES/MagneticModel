@@ -1,22 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>eoxmagmod.tests.time_util &mdash; MagneticModel  documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> MagneticModel
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MagneticModel
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,9 +57,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>eoxmagmod.tests.time_util</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">eoxmagmod.tests.time_util</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -96,14 +99,37 @@
 <span class="c1"># pylint: disable=missing-docstring, invalid-name, too-few-public-methods</span>
 
 <span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span><span class="p">,</span> <span class="n">main</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span><span class="p">,</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">vectorize</span><span class="p">,</span> <span class="n">inf</span><span class="p">,</span> <span class="n">nan</span>
 <span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">uniform</span>
 <span class="kn">from</span> <span class="nn">numpy.testing</span> <span class="kn">import</span> <span class="n">assert_allclose</span>
+<span class="kn">from</span> <span class="nn">eoxmagmod.tests.util</span> <span class="kn">import</span> <span class="n">FunctionTestMixIn</span>
 <span class="kn">from</span> <span class="nn">eoxmagmod.time_util</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">decimal_year_to_mjd2000_simple</span><span class="p">,</span>
     <span class="n">mjd2000_to_decimal_year_simple</span><span class="p">,</span>
     <span class="n">mjd2000_to_year_fraction_simple</span><span class="p">,</span>
+    <span class="n">datetime_to_decimal_year</span><span class="p">,</span>
 <span class="p">)</span>
+
+
+<div class="viewcode-block" id="TestDatetimeToDecimalYear"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.time_util.TestDatetimeToDecimalYear">[docs]</a><span class="k">class</span> <span class="nc">TestDatetimeToDecimalYear</span><span class="p">(</span><span class="n">FunctionTestMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+    <span class="n">NAME</span> <span class="o">=</span> <span class="s2">&quot;datetime_to_decimal_year&quot;</span>
+
+<div class="viewcode-block" id="TestDatetimeToDecimalYear.eval"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.time_util.TestDatetimeToDecimalYear.eval">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="n">input_</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">datetime_to_decimal_year</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span></div>
+
+    <span class="n">ACCEPTED</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2001</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span> <span class="mf">2001.0301369863014</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2012</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span> <span class="mf">2012.6639344262296</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2014</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span> <span class="mf">2014.66301369863</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">999</span><span class="p">),</span> <span class="mf">2024.9999999684085</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="n">REJECTED</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2001</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span> <span class="ne">TypeError</span><span class="p">),</span>
+    <span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="TestMjd2000ToYearFractionSimple"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.time_util.TestMjd2000ToYearFractionSimple">[docs]</a><span class="k">class</span> <span class="nc">TestMjd2000ToYearFractionSimple</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
@@ -199,19 +225,19 @@
 <span class="c1"># reference implementation</span>
 
 <span class="k">def</span> <span class="nf">_mjd2000_to_year_fraction_simple</span><span class="p">(</span><span class="n">mjd2k</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Convert Modified Julian Date 2000 to (Julian) year fraction.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Convert Modified Julian Date 2000 to (Julian) year fraction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">mjd2k</span> <span class="o">/</span> <span class="mf">365.25</span><span class="p">)</span> <span class="o">%</span> <span class="mi">1</span>
 
 
 <span class="k">def</span> <span class="nf">_mjd2000_to_decimal_year_simple</span><span class="p">(</span><span class="n">mjd2k</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Convert Modified Julian Date 2000 to decimal year.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Convert Modified Julian Date 2000 to decimal year.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="mf">2000.0</span> <span class="o">+</span> <span class="n">mjd2k</span> <span class="o">/</span> <span class="mf">365.25</span>
 
 
 <span class="k">def</span> <span class="nf">_decimal_year_to_mjd2000_simple</span><span class="p">(</span><span class="n">decimal_year</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Covert decimal year to Modified Julian Date 2000.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Covert decimal year to Modified Julian Date 2000.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">decimal_year</span> <span class="o">-</span> <span class="mf">2000.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">365.25</span>
 

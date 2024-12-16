@@ -12,6 +12,14 @@ Subpackages
 Submodules
 ----------
 
+eoxmagmod.tests.dipole module
+-----------------------------
+
+.. automodule:: eoxmagmod.tests.dipole
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 eoxmagmod.tests.dipole\_coords module
 -------------------------------------
 
@@ -28,10 +36,34 @@ eoxmagmod.tests.magnetic\_time module
    :undoc-members:
    :show-inheritance:
 
+eoxmagmod.tests.pymm\_bisect module
+-----------------------------------
+
+.. automodule:: eoxmagmod.tests.pymm_bisect
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 eoxmagmod.tests.pymm\_convert module
 ------------------------------------
 
 .. automodule:: eoxmagmod.tests.pymm_convert
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.tests.pymm\_fourier2d module
+--------------------------------------
+
+.. automodule:: eoxmagmod.tests.pymm_fourier2d
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.tests.pymm\_interp module
+-----------------------------------
+
+.. automodule:: eoxmagmod.tests.pymm_interp
    :members:
    :undoc-members:
    :show-inheritance:
@@ -44,10 +76,10 @@ eoxmagmod.tests.pymm\_legendre module
    :undoc-members:
    :show-inheritance:
 
-eoxmagmod.tests.pymm\_lonsincos module
+eoxmagmod.tests.pymm\_loncossin module
 --------------------------------------
 
-.. automodule:: eoxmagmod.tests.pymm_lonsincos
+.. automodule:: eoxmagmod.tests.pymm_loncossin
    :members:
    :undoc-members:
    :show-inheritance:
@@ -64,6 +96,22 @@ eoxmagmod.tests.pymm\_sheval module
 -----------------------------------
 
 .. automodule:: eoxmagmod.tests.pymm_sheval
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.tests.pymm\_sheval2dfs module
+---------------------------------------
+
+.. automodule:: eoxmagmod.tests.pymm_sheval2dfs
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eoxmagmod.tests.pymm\_shevaltemp module
+---------------------------------------
+
+.. automodule:: eoxmagmod.tests.pymm_shevaltemp
    :members:
    :undoc-members:
    :show-inheritance:
@@ -104,14 +152,6 @@ eoxmagmod.tests.quasi\_dipole\_coordinates module
 -------------------------------------------------
 
 .. automodule:: eoxmagmod.tests.quasi_dipole_coordinates
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-eoxmagmod.tests.sheval\_dipole module
--------------------------------------
-
-.. automodule:: eoxmagmod.tests.sheval_dipole
    :members:
    :undoc-members:
    :show-inheritance:

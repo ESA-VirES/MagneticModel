@@ -44,6 +44,14 @@ eoxmagmod.magnetic\_model.tests.field\_lines module
    :undoc-members:
    :show-inheritance:
 
+eoxmagmod.magnetic\_model.tests.mma\_merge module
+-------------------------------------------------
+
+.. automodule:: eoxmagmod.magnetic_model.tests.mma_merge
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 eoxmagmod.magnetic\_model.tests.model\_loaders module
 -----------------------------------------------------
 

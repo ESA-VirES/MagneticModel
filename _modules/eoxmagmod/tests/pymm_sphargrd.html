@@ -1,22 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>eoxmagmod.tests.pymm_sphargrd &mdash; MagneticModel  documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> MagneticModel
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MagneticModel
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,9 +57,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>eoxmagmod.tests.pymm_sphargrd</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">eoxmagmod.tests.pymm_sphargrd</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -99,7 +102,7 @@
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">product</span>
 <span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">random</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">sqrt</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span> <span class="n">zeros</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">asarray</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">empty</span><span class="p">,</span> <span class="n">stack</span>
 <span class="kn">from</span> <span class="nn">numpy.testing</span> <span class="kn">import</span> <span class="n">assert_allclose</span>
 <span class="kn">from</span> <span class="nn">eoxmagmod._pymm</span> <span class="kn">import</span> <span class="n">sphargrd</span>
 <span class="kn">from</span> <span class="nn">eoxmagmod.tests.pymm_spharpot</span> <span class="kn">import</span> <span class="n">SphericalHarmonicsCommonMixIn</span>
@@ -109,26 +112,54 @@
 
 <div class="viewcode-block" id="SphericalHarmonicsGradientTestMixIn"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_sphargrd.SphericalHarmonicsGradientTestMixIn">[docs]</a><span class="k">class</span> <span class="nc">SphericalHarmonicsGradientTestMixIn</span><span class="p">(</span><span class="n">SphericalHarmonicsCommonMixIn</span><span class="p">):</span>
 
-<div class="viewcode-block" id="SphericalHarmonicsGradientTestMixIn.reference_gradient"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_sphargrd.SphericalHarmonicsGradientTestMixIn.reference_gradient">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">reference_gradient</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">coef_g</span><span class="p">,</span> <span class="n">coef_h</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
-        <span class="n">rad_series</span><span class="p">,</span> <span class="n">sin_series</span><span class="p">,</span> <span class="n">cos_series</span><span class="p">,</span> <span class="n">p_series</span><span class="p">,</span> <span class="n">dp_series</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_series</span><span class="p">(</span>
+<div class="viewcode-block" id="SphericalHarmonicsGradientTestMixIn.eval_gradient"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_sphargrd.SphericalHarmonicsGradientTestMixIn.eval_gradient">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">eval_gradient</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="n">rad_series</span><span class="p">,</span> <span class="n">cos_sin_series</span><span class="p">,</span> <span class="n">p_series</span><span class="p">,</span> <span class="n">dp_series</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_series</span><span class="p">(</span>
             <span class="n">degree</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
         <span class="p">)</span>
-        <span class="n">m_idx</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span>
+        <span class="k">return</span> <span class="n">sphargrd</span><span class="p">(</span>
+            <span class="n">latitude</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">p_series</span><span class="p">,</span> <span class="n">dp_series</span><span class="p">,</span> <span class="n">rad_series</span><span class="p">,</span>
+            <span class="n">cos_sin_series</span><span class="p">,</span> <span class="n">is_internal</span><span class="o">=</span><span class="bp">cls</span><span class="o">.</span><span class="n">is_internal</span><span class="p">,</span>
+            <span class="n">degree</span><span class="o">=</span><span class="n">degree</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="SphericalHarmonicsGradientTestMixIn.reference_gradient"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_sphargrd.SphericalHarmonicsGradientTestMixIn.reference_gradient">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">reference_gradient</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="p">(</span>
+            <span class="n">shape</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_ravel_inputs</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">empty</span><span class="p">((</span><span class="n">size</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">reference_gradient_scalar</span><span class="p">(</span>
+                <span class="n">degree</span><span class="p">,</span> <span class="n">coeff</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">latitude</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">longitude</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">radius</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">*</span><span class="n">shape</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="SphericalHarmonicsGradientTestMixIn.reference_gradient_scalar"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_sphargrd.SphericalHarmonicsGradientTestMixIn.reference_gradient_scalar">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">reference_gradient_scalar</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="n">rad_series</span><span class="p">,</span> <span class="n">cos_sin_series</span><span class="p">,</span> <span class="n">p_series</span><span class="p">,</span> <span class="n">dp_series</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_series</span><span class="p">(</span>
+            <span class="n">degree</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
+        <span class="p">)</span>
+        <span class="n">m_idx</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span>
             <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">degree</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
         <span class="p">)))</span>
-        <span class="n">n_idx</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span>
+        <span class="n">n_idx</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span>
             <span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>  <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">degree</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
         <span class="p">)))</span>
 
         <span class="n">grad_lat</span> <span class="o">=</span> <span class="p">(</span><span class="n">rad_series</span><span class="p">[</span><span class="n">n_idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">dp_series</span> <span class="o">*</span> <span class="p">(</span>
-            <span class="n">coef_g</span> <span class="o">*</span> <span class="n">cos_series</span><span class="p">[</span><span class="n">m_idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">coef_h</span> <span class="o">*</span> <span class="n">sin_series</span><span class="p">[</span><span class="n">m_idx</span><span class="p">]</span>
+            <span class="n">coeff</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_sin_series</span><span class="p">[</span><span class="n">m_idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
+            <span class="n">coeff</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_sin_series</span><span class="p">[</span><span class="n">m_idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
         <span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
         <span class="n">cos_lat</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">latitude</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">cos_lat</span> <span class="o">&gt;</span> <span class="mf">1e-10</span><span class="p">:</span>
             <span class="n">grad_lon</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">m_idx</span> <span class="o">*</span> <span class="n">rad_series</span><span class="p">[</span><span class="n">n_idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">p_series</span> <span class="o">*</span> <span class="p">(</span>
-                <span class="n">coef_g</span> <span class="o">*</span> <span class="n">sin_series</span><span class="p">[</span><span class="n">m_idx</span><span class="p">]</span> <span class="o">-</span> <span class="n">coef_h</span> <span class="o">*</span> <span class="n">cos_series</span><span class="p">[</span><span class="n">m_idx</span><span class="p">]</span>
+                <span class="n">coeff</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_sin_series</span><span class="p">[</span><span class="n">m_idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span>
+                <span class="n">coeff</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_sin_series</span><span class="p">[</span><span class="n">m_idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
             <span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">cos_lat</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sin_lat</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">latitude</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span><span class="p">)</span>
@@ -140,35 +171,25 @@
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">degree</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="c1"># evaluate ratio between the Gauss-normalised and Schmidt</span>
                 <span class="c1"># quasi-normalised associated Legendre functions.</span>
-                <span class="n">n</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-                <span class="n">tmp</span> <span class="o">=</span> <span class="p">((</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">((</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">-</span><span class="mi">3</span><span class="p">))</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="p">((</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">((</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">-</span><span class="mi">3</span><span class="p">))</span>
                 <span class="n">ps1</span><span class="p">,</span> <span class="n">ps0</span> <span class="o">=</span> <span class="n">ps0</span><span class="p">,</span> <span class="n">ps0</span><span class="o">*</span><span class="n">sin_lat</span> <span class="o">-</span> <span class="n">ps1</span><span class="o">*</span><span class="n">tmp</span>
-                <span class="n">sqn1</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">n</span>
-                <span class="n">scale</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ps0</span> <span class="o">*</span> <span class="n">sqn1</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">n</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>
-            <span class="n">scale</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">scale</span><span class="p">[:(</span><span class="n">degree</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span>
-            <span class="n">idx</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span>
-                <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span><span class="o">//</span><span class="mi">2</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">degree</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">sqn1</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">i</span>
+                <span class="n">scale</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ps0</span> <span class="o">*</span> <span class="n">sqn1</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">i</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="n">scale</span><span class="p">[:(</span><span class="n">degree</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">([</span>
+                <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span><span class="o">//</span><span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">degree</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
             <span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">)</span>
             <span class="n">grad_lon</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">rad_series</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="p">(</span>
-                <span class="n">coef_g</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">*</span><span class="n">sin_lon</span> <span class="o">-</span> <span class="n">coef_h</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">*</span><span class="n">cos_lon</span>
+                <span class="n">coeff</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">sin_lon</span> <span class="o">-</span> <span class="n">coeff</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">cos_lon</span>
             <span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
         <span class="n">rad_scale</span> <span class="o">=</span> <span class="n">n_idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">is_internal</span> <span class="k">else</span> <span class="o">-</span><span class="n">n_idx</span>
         <span class="n">grad_rad</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">rad_scale</span> <span class="o">*</span> <span class="n">rad_series</span><span class="p">[</span><span class="n">n_idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">p_series</span> <span class="o">*</span> <span class="p">(</span>
-            <span class="n">coef_g</span> <span class="o">*</span> <span class="n">cos_series</span><span class="p">[</span><span class="n">m_idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">coef_h</span> <span class="o">*</span> <span class="n">sin_series</span><span class="p">[</span><span class="n">m_idx</span><span class="p">]</span>
+            <span class="n">coeff</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_sin_series</span><span class="p">[</span><span class="n">m_idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
+            <span class="n">coeff</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_sin_series</span><span class="p">[</span><span class="n">m_idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
         <span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">array</span><span class="p">([</span><span class="n">grad_lat</span><span class="p">,</span> <span class="n">grad_lon</span><span class="p">,</span> <span class="n">grad_rad</span><span class="p">])</span></div>
-
-<div class="viewcode-block" id="SphericalHarmonicsGradientTestMixIn.eval_gradient"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_sphargrd.SphericalHarmonicsGradientTestMixIn.eval_gradient">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">eval_gradient</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">coef_g</span><span class="p">,</span> <span class="n">coef_h</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
-        <span class="n">rad_series</span><span class="p">,</span> <span class="n">sin_series</span><span class="p">,</span> <span class="n">cos_series</span><span class="p">,</span> <span class="n">p_series</span><span class="p">,</span> <span class="n">dp_series</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_series</span><span class="p">(</span>
-            <span class="n">degree</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="n">sphargrd</span><span class="p">(</span>
-            <span class="n">latitude</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">coef_g</span><span class="p">,</span> <span class="n">coef_h</span><span class="p">,</span> <span class="n">p_series</span><span class="p">,</span> <span class="n">dp_series</span><span class="p">,</span> <span class="n">rad_series</span><span class="p">,</span>
-            <span class="n">sin_series</span><span class="p">,</span> <span class="n">cos_series</span><span class="p">,</span> <span class="n">is_internal</span><span class="o">=</span><span class="bp">cls</span><span class="o">.</span><span class="n">is_internal</span>
-        <span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">asarray</span><span class="p">([</span><span class="n">grad_lat</span><span class="p">,</span> <span class="n">grad_lon</span><span class="p">,</span> <span class="n">grad_rad</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="SphericalHarmonicsGradientTestMixIn.test_coefficients"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_sphargrd.SphericalHarmonicsGradientTestMixIn.test_coefficients">[docs]</a>    <span class="k">def</span> <span class="nf">test_coefficients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">max_degree</span> <span class="o">=</span> <span class="mi">3</span>
@@ -181,34 +202,33 @@
             <span class="n">size</span> <span class="o">=</span> <span class="p">((</span><span class="n">degree</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">degree</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span><span class="o">//</span><span class="mi">2</span>
             <span class="n">offset</span> <span class="o">=</span> <span class="p">(</span><span class="n">degree</span><span class="o">*</span><span class="p">(</span><span class="n">degree</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span><span class="o">//</span><span class="mi">2</span>
             <span class="k">for</span> <span class="n">order</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">degree</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="n">coef_g</span><span class="p">,</span> <span class="n">coef_h</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">size</span><span class="p">),</span> <span class="n">zeros</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
-                <span class="n">coef_g</span><span class="p">[</span><span class="n">order</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="n">coeff</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">size</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="n">coeff</span><span class="p">[</span><span class="n">order</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
 
                 <span class="k">for</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
                     <span class="n">assert_allclose</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">eval_gradient</span><span class="p">(</span>
-                            <span class="n">degree</span><span class="p">,</span> <span class="n">coef_g</span><span class="p">,</span> <span class="n">coef_h</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
+                            <span class="n">degree</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
                         <span class="p">),</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">reference_gradient</span><span class="p">(</span>
-                            <span class="n">degree</span><span class="p">,</span> <span class="n">coef_g</span><span class="p">,</span> <span class="n">coef_h</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
+                            <span class="n">degree</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
                         <span class="p">),</span>
                         <span class="n">atol</span><span class="o">=</span><span class="mf">1e-14</span>
                     <span class="p">)</span>
 
-                <span class="n">coef_g</span><span class="p">,</span> <span class="n">coef_h</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">size</span><span class="p">),</span> <span class="n">zeros</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
-                <span class="n">coef_h</span><span class="p">[</span><span class="n">order</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="n">coeff</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">size</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="n">coeff</span><span class="p">[</span><span class="n">order</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
 
                 <span class="k">for</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
                     <span class="n">assert_allclose</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">eval_gradient</span><span class="p">(</span>
-                            <span class="n">degree</span><span class="p">,</span> <span class="n">coef_g</span><span class="p">,</span> <span class="n">coef_h</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
+                            <span class="n">degree</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
                         <span class="p">),</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">reference_gradient</span><span class="p">(</span>
-                            <span class="n">degree</span><span class="p">,</span> <span class="n">coef_g</span><span class="p">,</span> <span class="n">coef_h</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
+                            <span class="n">degree</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
                         <span class="p">),</span>
                         <span class="n">atol</span><span class="o">=</span><span class="mf">1e-14</span>
                     <span class="p">)</span></div>
-
 
 <div class="viewcode-block" id="SphericalHarmonicsGradientTestMixIn.test_gradient"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_sphargrd.SphericalHarmonicsGradientTestMixIn.test_gradient">[docs]</a>    <span class="k">def</span> <span class="nf">test_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span>
@@ -216,24 +236,40 @@
             <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">91</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">181</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
         <span class="p">]</span>
 
-        <span class="k">for</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">[:</span><span class="mi">1</span><span class="p">]:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">assert_allclose</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">eval_gradient</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_g</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_h</span><span class="p">,</span>
-                        <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coeff</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
                     <span class="p">),</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">reference_gradient</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_g</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_h</span><span class="p">,</span>
-                        <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coeff</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
                     <span class="p">),</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
-                    <span class="s2">&quot;point coordinates: (</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">)</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span></div>
+                    <span class="sa">f</span><span class="s2">&quot;point coordinates: (</span><span class="si">{</span><span class="n">latitude</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">longitude</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">radius</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
+            <span class="k">break</span></div>
+
+<div class="viewcode-block" id="SphericalHarmonicsGradientTestMixIn.test_gradient_array_input"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_sphargrd.SphericalHarmonicsGradientTestMixIn.test_gradient_array_input">[docs]</a>    <span class="k">def</span> <span class="nf">test_gradient_array_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">([</span>
+            <span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="mf">6371.2</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">random</span><span class="p">()))</span> <span class="k">for</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span>
+            <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">91</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">181</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+        <span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">37</span><span class="p">,</span> <span class="mi">37</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+        <span class="n">latitude</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">longitude</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">assert_allclose</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eval_gradient</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coeff</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
+            <span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reference_gradient</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coeff</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span>
+            <span class="p">),</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="SphericalHarmonicsGradientTestMixIn.test_gradient_compared_with_finite_differences"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_sphargrd.SphericalHarmonicsGradientTestMixIn.test_gradient_compared_with_finite_differences">[docs]</a>    <span class="k">def</span> <span class="nf">test_gradient_compared_with_finite_differences</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Compare gradient with the calculated finite differences.</span>
@@ -245,23 +281,23 @@
 
         <span class="k">def</span> <span class="nf">_compare_with_findiff</span><span class="p">(</span><span class="n">coord_centre</span><span class="p">,</span> <span class="n">coord_lat</span><span class="p">,</span> <span class="n">coord_lon</span><span class="p">,</span> <span class="n">coord_rad</span><span class="p">):</span>
             <span class="n">pot0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_potential</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_g</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_h</span><span class="p">,</span> <span class="o">*</span><span class="n">coord_centre</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coeff</span><span class="p">,</span> <span class="o">*</span><span class="n">coord_centre</span>
             <span class="p">)</span>
             <span class="n">pot_lat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_potential</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_g</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_h</span><span class="p">,</span> <span class="o">*</span><span class="n">coord_lat</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coeff</span><span class="p">,</span> <span class="o">*</span><span class="n">coord_lat</span>
             <span class="p">)</span>
             <span class="n">pot_lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_potential</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_g</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_h</span><span class="p">,</span> <span class="o">*</span><span class="n">coord_lon</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coeff</span><span class="p">,</span> <span class="o">*</span><span class="n">coord_lon</span>
             <span class="p">)</span>
             <span class="n">pot_rad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_potential</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_g</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_h</span><span class="p">,</span> <span class="o">*</span><span class="n">coord_rad</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coeff</span><span class="p">,</span> <span class="o">*</span><span class="n">coord_rad</span>
             <span class="p">)</span>
 
-            <span class="n">grad_approx</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span>
+            <span class="n">grad_approx</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">([</span>
                 <span class="p">(</span><span class="n">pot_lat</span> <span class="o">-</span> <span class="n">pot0</span><span class="p">)</span><span class="o">/</span><span class="n">eps</span><span class="p">,</span> <span class="p">(</span><span class="n">pot_lon</span> <span class="o">-</span> <span class="n">pot0</span><span class="p">)</span><span class="o">/</span><span class="n">eps</span><span class="p">,</span> <span class="p">(</span><span class="n">pot_rad</span> <span class="o">-</span> <span class="n">pot0</span><span class="p">)</span><span class="o">/</span><span class="n">eps</span>
             <span class="p">])</span>
             <span class="n">grad_spharm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_gradient</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_g</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_h</span><span class="p">,</span> <span class="o">*</span><span class="n">coord_centre</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coeff</span><span class="p">,</span> <span class="o">*</span><span class="n">coord_centre</span>
             <span class="p">)</span>
 
             <span class="k">try</span><span class="p">:</span>
@@ -269,10 +305,8 @@
             <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
                 <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span> <span class="o">=</span> <span class="n">coord_centre</span>
                 <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
-                    <span class="s2">&quot;point coordinates: (</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">)</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
+                    <span class="sa">f</span><span class="s2">&quot;point coordinates: (</span><span class="si">{</span><span class="n">latitude</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">longitude</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">radius</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
 
         <span class="n">coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">80</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">20</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
@@ -304,15 +338,14 @@
 <div class="viewcode-block" id="TestSphericalHarmonicsGradientInternal"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_sphargrd.TestSphericalHarmonicsGradientInternal">[docs]</a><span class="k">class</span> <span class="nc">TestSphericalHarmonicsGradientInternal</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">SphericalHarmonicsGradientTestMixIn</span><span class="p">):</span>
     <span class="n">is_internal</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">degree</span> <span class="o">=</span> <span class="n">sifm</span><span class="o">.</span><span class="n">DEGREE</span>
-    <span class="n">coef_g</span> <span class="o">=</span> <span class="n">sifm</span><span class="o">.</span><span class="n">COEF_G</span>
-    <span class="n">coef_h</span> <span class="o">=</span> <span class="n">sifm</span><span class="o">.</span><span class="n">COEF_H</span></div>
+    <span class="n">coeff</span> <span class="o">=</span> <span class="n">stack</span><span class="p">((</span><span class="n">sifm</span><span class="o">.</span><span class="n">COEF_G</span><span class="p">,</span> <span class="n">sifm</span><span class="o">.</span><span class="n">COEF_H</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="TestSphericalHarmonicsGradientExternal"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_sphargrd.TestSphericalHarmonicsGradientExternal">[docs]</a><span class="k">class</span> <span class="nc">TestSphericalHarmonicsGradientExternal</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">SphericalHarmonicsGradientTestMixIn</span><span class="p">):</span>
     <span class="n">is_internal</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">degree</span> <span class="o">=</span> <span class="n">mma_external</span><span class="o">.</span><span class="n">DEGREE</span>
-    <span class="n">coef_g</span> <span class="o">=</span> <span class="n">mma_external</span><span class="o">.</span><span class="n">COEF_Q</span>
-    <span class="n">coef_h</span> <span class="o">=</span> <span class="n">mma_external</span><span class="o">.</span><span class="n">COEF_S</span></div>
+    <span class="n">coeff</span> <span class="o">=</span> <span class="n">stack</span><span class="p">((</span><span class="n">mma_external</span><span class="o">.</span><span class="n">COEF_Q</span><span class="p">,</span> <span class="n">mma_external</span><span class="o">.</span><span class="n">COEF_S</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>

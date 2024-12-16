@@ -1,22 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>eoxmagmod.magnetic_model.field_lines &mdash; MagneticModel  documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> MagneticModel
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MagneticModel
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,9 +57,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>eoxmagmod.magnetic_model.field_lines</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">eoxmagmod.magnetic_model.field_lines</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -98,6 +101,8 @@
 <span class="kn">from</span> <span class="nn">.._pymm</span> <span class="kn">import</span> <span class="n">GEOCENTRIC_CARTESIAN</span><span class="p">,</span> <span class="n">GEOCENTRIC_SPHERICAL</span><span class="p">,</span> <span class="n">convert</span>
 <span class="kn">from</span> <span class="nn">..util</span> <span class="kn">import</span> <span class="n">vnorm</span><span class="p">,</span> <span class="n">vrotate</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;trace_field_line&quot;</span><span class="p">]</span>
+
 <span class="n">EARTH_RADIUS</span> <span class="o">=</span> <span class="mf">6371.2</span>
 <span class="n">DEFAULT_MIN_RADIUS</span> <span class="o">=</span> <span class="mf">0.9977</span> <span class="o">*</span> <span class="n">EARTH_RADIUS</span>
 <span class="n">DEFAULT_MAX_RADIUS</span> <span class="o">=</span> <span class="mf">1e6</span> <span class="o">*</span> <span class="n">EARTH_RADIUS</span>
@@ -109,7 +114,7 @@
                      <span class="n">input_coordinate_system</span><span class="o">=</span><span class="n">GEOCENTRIC_SPHERICAL</span><span class="p">,</span>
                      <span class="n">output_coordinate_system</span><span class="o">=</span><span class="n">GEOCENTRIC_SPHERICAL</span><span class="p">,</span>
                      <span class="n">trace_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Trace field line passing trough the given point.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Trace field line passing trough the given point.</span>
 <span class="sd">    Output:</span>
 <span class="sd">        coords - array of field line Cartesian coordinates.</span>
 <span class="sd">        field - array of field vectors in the requested in the Cartesian</span>
@@ -184,7 +189,7 @@
 
 <span class="k">def</span> <span class="nf">_trace_field_line</span><span class="p">(</span><span class="n">eval_model</span><span class="p">,</span> <span class="n">did_converge</span><span class="p">,</span> <span class="n">start_point</span><span class="p">,</span>
                       <span class="n">step</span><span class="o">=</span><span class="n">DEFAULT_STEP</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="n">DEFAULT_MAX_STEPS</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Low level line tracing. &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Low level line tracing. &quot;&quot;&quot;</span>
     <span class="n">vectors</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">start_point</span><span class="p">)]</span>
     <span class="n">point</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">start_point</span><span class="p">)</span>

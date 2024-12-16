@@ -1,22 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>eoxmagmod.magnetic_model.loader_shc &mdash; MagneticModel  documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> MagneticModel
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MagneticModel
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,9 +57,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>eoxmagmod.magnetic_model.loader_shc</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">eoxmagmod.magnetic_model.loader_shc</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -73,7 +76,7 @@
 <span class="c1"># Author: Martin Paces &lt;martin.paces@eox.at&gt;</span>
 <span class="c1">#</span>
 <span class="c1">#-------------------------------------------------------------------------------</span>
-<span class="c1"># Copyright (C) 2018 EOX IT Services GmbH</span>
+<span class="c1"># Copyright (C) 2018-2022 EOX IT Services GmbH</span>
 <span class="c1">#</span>
 <span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
 <span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
@@ -107,23 +110,35 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.parser_shc</span> <span class="kn">import</span> <span class="n">parse_shc_file</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;load_model_shc_combined&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_model_shc&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_coeff_shc_combined&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_coeff_shc_composed&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;load_coeff_shc&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
 
 <div class="viewcode-block" id="load_model_shc_combined"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_model_shc_combined">[docs]</a><span class="k">def</span> <span class="nf">load_model_shc_combined</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load model with coefficients combined from multiple SHC files. &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load model with coefficients combined from multiple SHC files.</span>
+<span class="sd">    E.g., combining core and lithospheric models.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">SphericalHarmomicGeomagneticModel</span><span class="p">(</span>
         <span class="n">load_coeff_shc_combined</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="load_model_shc"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_model_shc">[docs]</a><span class="k">def</span> <span class="nf">load_model_shc</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load model from an SHC file. &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load composed model from one or more SHC files.</span>
+<span class="sd">    E.g., composing multiple core models, each with a different time extent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">SphericalHarmomicGeomagneticModel</span><span class="p">(</span>
         <span class="n">load_coeff_shc_composed</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="load_coeff_shc_combined"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_coeff_shc_combined">[docs]</a><span class="k">def</span> <span class="nf">load_coeff_shc_combined</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load coefficients combined from multiple SHC files.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load coefficients combined from multiple SHC files.</span>
 <span class="sd">    To be used for a combination of complementing models (core + lithosphere).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">CombinedSHCoefficients</span><span class="p">(</span><span class="o">*</span><span class="p">[</span>
@@ -132,7 +147,7 @@
 
 
 <div class="viewcode-block" id="load_coeff_shc_composed"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_coeff_shc_composed">[docs]</a><span class="k">def</span> <span class="nf">load_coeff_shc_composed</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load coefficients composed of multiple SHC files.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load coefficients composed of multiple SHC files.</span>
 <span class="sd">    To be used for a temporal sequence of models.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">ComposedSHCoefficients</span><span class="p">(</span><span class="o">*</span><span class="p">[</span>
@@ -147,7 +162,7 @@
 
 
 <div class="viewcode-block" id="load_coeff_shc"><a class="viewcode-back" href="../../../api/eoxmagmod.magnetic_model.html#eoxmagmod.load_coeff_shc">[docs]</a><span class="k">def</span> <span class="nf">load_coeff_shc</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">interpolate_in_decimal_years</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load coefficients from an SHC file.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load coefficients from an SHC file.</span>
 
 <span class="sd">    The `interpolate_in_decimal_years` flag forces interpolation</span>
 <span class="sd">    of time dependent models to be performed in the decimal years</span>
@@ -155,9 +170,12 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">parse_file</span><span class="p">(</span><span class="n">parse_shc_file</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
 
+
+    <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;validity_start&quot;</span><span class="p">,</span> <span class="s2">&quot;validity_end&quot;</span><span class="p">]</span>
+
     <span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">key</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;validity_start&quot;</span><span class="p">,</span> <span class="s2">&quot;validity_end&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span>
     <span class="p">}</span>
     <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="c1"># extend or override the default model options</span>
 
@@ -165,19 +183,22 @@
         <span class="n">options</span><span class="p">[</span><span class="s2">&quot;to_mjd2000&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decimal_year_to_mjd2000</span>
 
     <span class="n">times</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;t&quot;</span><span class="p">]</span>
+
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;spline_oder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;spline_oder&quot;</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;spline_order&quot;</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span>
+
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">SparseSHCoefficientsConstant</span><span class="p">(</span>
             <span class="n">data</span><span class="p">[</span><span class="s2">&quot;nm&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;gh&quot;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="n">options</span>
         <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">interpolate_in_decimal_years</span><span class="p">:</span>
-            <span class="n">coeff_class</span> <span class="o">=</span> <span class="n">SparseSHCoefficientsTimeDependentDecimalYear</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">coeff_class</span> <span class="o">=</span> <span class="n">SparseSHCoefficientsTimeDependent</span>
 
-        <span class="k">return</span> <span class="n">coeff_class</span><span class="p">(</span>
-            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;nm&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;gh&quot;</span><span class="p">],</span> <span class="n">times</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span>
-        <span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">interpolate_in_decimal_years</span><span class="p">:</span>
+        <span class="n">coeff_class</span> <span class="o">=</span> <span class="n">SparseSHCoefficientsTimeDependentDecimalYear</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">coeff_class</span> <span class="o">=</span> <span class="n">SparseSHCoefficientsTimeDependent</span>
+
+    <span class="k">return</span> <span class="n">coeff_class</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;nm&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;gh&quot;</span><span class="p">],</span> <span class="n">times</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span>
+    <span class="p">)</span></div>
 </pre></div>
 
            </div>

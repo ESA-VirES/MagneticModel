@@ -14,6 +14,14 @@ Subpackages
 Submodules
 ----------
 
+eoxmagmod.dipole module
+-----------------------
+
+.. automodule:: eoxmagmod.dipole
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 eoxmagmod.dipole\_coords module
 -------------------------------
 
@@ -34,14 +42,6 @@ eoxmagmod.quasi\_dipole\_coordinates module
 -------------------------------------------
 
 .. automodule:: eoxmagmod.quasi_dipole_coordinates
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-eoxmagmod.sheval\_dipole module
--------------------------------
-
-.. automodule:: eoxmagmod.sheval_dipole
    :members:
    :undoc-members:
    :show-inheritance:

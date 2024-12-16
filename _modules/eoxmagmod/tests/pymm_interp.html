@@ -1,0 +1,373 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eoxmagmod.tests.pymm_interp &mdash; MagneticModel  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MagneticModel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Module Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MagneticModel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">eoxmagmod.tests.pymm_interp</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for eoxmagmod.tests.pymm_interp</h1><div class="highlight"><pre>
+<span></span><span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1">#</span>
+<span class="c1">#  Coefficients time interpolation - tests</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Martin Paces &lt;martin.paces@eox.at&gt;</span>
+<span class="c1">#</span>
+<span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1"># Copyright (C) 2022 EOX IT Services GmbH</span>
+<span class="c1">#</span>
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c1"># in the Software without restriction, including without limitation the rights</span>
+<span class="c1"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c1"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+<span class="c1">#</span>
+<span class="c1"># The above copyright notice and this permission notice shall be included in</span>
+<span class="c1"># all copies of this Software or works derived from this Software.</span>
+<span class="c1">#</span>
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c1"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</span>
+<span class="c1"># THE SOFTWARE.</span>
+<span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1"># pylint: disable=missing-docstring, invalid-name, too-few-public-methods</span>
+
+<span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span><span class="p">,</span> <span class="n">main</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">nan</span><span class="p">,</span> <span class="n">inf</span><span class="p">,</span> <span class="n">linspace</span><span class="p">,</span> <span class="n">asarray</span><span class="p">,</span> <span class="n">prod</span><span class="p">,</span> <span class="n">full</span><span class="p">,</span> <span class="n">empty</span>
+<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">random</span>
+<span class="kn">from</span> <span class="nn">numpy.testing</span> <span class="kn">import</span> <span class="n">assert_allclose</span>
+<span class="kn">from</span> <span class="nn">eoxmagmod._pymm</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">bisect</span><span class="p">,</span> <span class="n">BISECT_SIDE_RIGHT</span><span class="p">,</span> <span class="n">interp</span><span class="p">,</span> <span class="n">INTERP_C0</span><span class="p">,</span> <span class="n">INTERP_C1</span><span class="p">,</span> <span class="n">INTERP_C1D1</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="InterpTestMixIn"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn">[docs]</a><span class="k">class</span> <span class="nc">InterpTestMixIn</span><span class="p">:</span>
+
+<div class="viewcode-block" id="InterpTestMixIn.call_interp"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.call_interp">[docs]</a>    <span class="k">def</span> <span class="nf">call_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.call_interp_ref"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.call_interp_ref">[docs]</a>    <span class="k">def</span> <span class="nf">call_interp_ref</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="k">def</span> <span class="nf">_test_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">):</span>
+        <span class="n">assert_allclose</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">call_interp</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">call_interp_ref</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">),</span>
+            <span class="n">atol</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-15</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_special_values"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_special_values">[docs]</a>    <span class="k">def</span> <span class="nf">test_special_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">([</span><span class="n">nan</span><span class="p">,</span> <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_dimension_mismatch1"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_dimension_mismatch1">[docs]</a>    <span class="k">def</span> <span class="nf">test_dimension_mismatch1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">([],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_dimension_mismatch2"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_dimension_mismatch2">[docs]</a>    <span class="k">def</span> <span class="nf">test_dimension_mismatch2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">([],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">]])</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_wrong_time_dimenion1"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_wrong_time_dimenion1">[docs]</a>    <span class="k">def</span> <span class="nf">test_wrong_time_dimenion1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">([],</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_wrong_coeff_dimenion1"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_wrong_coeff_dimenion1">[docs]</a>    <span class="k">def</span> <span class="nf">test_wrong_coeff_dimenion1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">([],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_wrong_time_dimenion2"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_wrong_time_dimenion2">[docs]</a>    <span class="k">def</span> <span class="nf">test_wrong_time_dimenion2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">([],</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">]],</span> <span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">]])</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_border_values"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_border_values">[docs]</a>    <span class="k">def</span> <span class="nf">test_border_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_dicontinuity"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_dicontinuity">[docs]</a>    <span class="k">def</span> <span class="nf">test_dicontinuity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_shape_scalar_time_2d_coeff"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_shape_scalar_time_2d_coeff">[docs]</a>    <span class="k">def</span> <span class="nf">test_shape_scalar_time_2d_coeff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">(</span>
+            <span class="mi">1</span><span class="p">,</span>
+            <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+            <span class="p">[[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]],</span> <span class="p">[[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]]</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_shape_empty_1d_time_2d_coeff"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_shape_empty_1d_time_2d_coeff">[docs]</a>    <span class="k">def</span> <span class="nf">test_shape_empty_1d_time_2d_coeff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">(</span>
+            <span class="p">[],</span>
+            <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+            <span class="p">[[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]],</span> <span class="p">[[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]]</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_shape_2d_time_2d_coeff"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_shape_2d_time_2d_coeff">[docs]</a>    <span class="k">def</span> <span class="nf">test_shape_2d_time_2d_coeff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">(</span>
+            <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]],</span>
+            <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+            <span class="p">[[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]],</span> <span class="p">[[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]]</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_shape_2d_time_1d_coeff"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_shape_2d_time_1d_coeff">[docs]</a>    <span class="k">def</span> <span class="nf">test_shape_2d_time_1d_coeff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">(</span>
+            <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]],</span>
+            <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+            <span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_shape_2d_time_empty_1d_coeff"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_shape_2d_time_empty_1d_coeff">[docs]</a>    <span class="k">def</span> <span class="nf">test_shape_2d_time_empty_1d_coeff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">(</span>
+            <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]],</span>
+            <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+            <span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="c1"># note the last dimension matching the times</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_shape_2d_time_scalar_coeff"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_shape_2d_time_scalar_coeff">[docs]</a>    <span class="k">def</span> <span class="nf">test_shape_2d_time_scalar_coeff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">(</span>
+            <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]],</span>
+            <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_array_0d"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_array_0d">[docs]</a>    <span class="k">def</span> <span class="nf">test_array_0d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">coeff</span> <span class="o">=</span> <span class="n">random</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="n">times</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">(</span><span class="n">random</span><span class="p">(()),</span> <span class="n">times</span><span class="p">,</span> <span class="n">coeff</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_array_1d"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_array_1d">[docs]</a>    <span class="k">def</span> <span class="nf">test_array_1d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">coeff</span> <span class="o">=</span> <span class="n">random</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="n">times</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">(</span><span class="n">random</span><span class="p">((</span><span class="mi">5</span><span class="p">,)),</span> <span class="n">times</span><span class="p">,</span> <span class="n">coeff</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InterpTestMixIn.test_array_2d"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.InterpTestMixIn.test_array_2d">[docs]</a>    <span class="k">def</span> <span class="nf">test_array_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">coeff</span> <span class="o">=</span> <span class="n">random</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="n">times</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_interp</span><span class="p">(</span><span class="n">random</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span> <span class="n">times</span><span class="p">,</span> <span class="n">coeff</span><span class="p">)</span></div></div>
+
+<span class="c1">#-------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="TestInterpPiecewiseConstant"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseConstant">[docs]</a><span class="k">class</span> <span class="nc">TestInterpPiecewiseConstant</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">InterpTestMixIn</span><span class="p">):</span>
+<div class="viewcode-block" id="TestInterpPiecewiseConstant.call_interp"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseConstant.call_interp">[docs]</a>    <span class="k">def</span> <span class="nf">call_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">interp</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">INTERP_C0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestInterpPiecewiseConstant.call_interp_ref"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseConstant.call_interp_ref">[docs]</a>    <span class="k">def</span> <span class="nf">call_interp_ref</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">interpolate_c0</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestInterpPiecewiseLinear"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseLinear">[docs]</a><span class="k">class</span> <span class="nc">TestInterpPiecewiseLinear</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">InterpTestMixIn</span><span class="p">):</span>
+<div class="viewcode-block" id="TestInterpPiecewiseLinear.call_interp"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseLinear.call_interp">[docs]</a>    <span class="k">def</span> <span class="nf">call_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">interp</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">INTERP_C1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestInterpPiecewiseLinear.call_interp_ref"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseLinear.call_interp_ref">[docs]</a>    <span class="k">def</span> <span class="nf">call_interp_ref</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">interpolate_c1</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestInterpPiecewiseDefault"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseDefault">[docs]</a><span class="k">class</span> <span class="nc">TestInterpPiecewiseDefault</span><span class="p">(</span><span class="n">TestInterpPiecewiseLinear</span><span class="p">):</span>
+<div class="viewcode-block" id="TestInterpPiecewiseDefault.call_interp"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseDefault.call_interp">[docs]</a>    <span class="k">def</span> <span class="nf">call_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">interp</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestInterpPiecewiseLinearD1"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseLinearD1">[docs]</a><span class="k">class</span> <span class="nc">TestInterpPiecewiseLinearD1</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">InterpTestMixIn</span><span class="p">):</span>
+<div class="viewcode-block" id="TestInterpPiecewiseLinearD1.call_interp"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseLinearD1.call_interp">[docs]</a>    <span class="k">def</span> <span class="nf">call_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">interp</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">INTERP_C1D1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestInterpPiecewiseLinearD1.call_interp_ref"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseLinearD1.call_interp_ref">[docs]</a>    <span class="k">def</span> <span class="nf">call_interp_ref</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">interpolate_c1d1</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestInterpPiecewiseLinearExtrapolated"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseLinearExtrapolated">[docs]</a><span class="k">class</span> <span class="nc">TestInterpPiecewiseLinearExtrapolated</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">InterpTestMixIn</span><span class="p">):</span>
+<div class="viewcode-block" id="TestInterpPiecewiseLinearExtrapolated.call_interp"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseLinearExtrapolated.call_interp">[docs]</a>    <span class="k">def</span> <span class="nf">call_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">interp</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">INTERP_C1</span><span class="p">,</span> <span class="n">extrapolate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestInterpPiecewiseLinearExtrapolated.call_interp_ref"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseLinearExtrapolated.call_interp_ref">[docs]</a>    <span class="k">def</span> <span class="nf">call_interp_ref</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">interpolate_c1</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="n">extrapolate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestInterpPiecewiseLinearD1Extrapolated"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseLinearD1Extrapolated">[docs]</a><span class="k">class</span> <span class="nc">TestInterpPiecewiseLinearD1Extrapolated</span><span class="p">(</span><span class="n">TestCase</span><span class="p">,</span> <span class="n">InterpTestMixIn</span><span class="p">):</span>
+<div class="viewcode-block" id="TestInterpPiecewiseLinearD1Extrapolated.call_interp"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseLinearD1Extrapolated.call_interp">[docs]</a>    <span class="k">def</span> <span class="nf">call_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">interp</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">INTERP_C1D1</span><span class="p">,</span> <span class="n">extrapolate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestInterpPiecewiseLinearD1Extrapolated.call_interp_ref"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.TestInterpPiecewiseLinearD1Extrapolated.call_interp_ref">[docs]</a>    <span class="k">def</span> <span class="nf">call_interp_ref</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">interpolate_c1d1</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="n">extrapolate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
+
+<span class="c1">#-------------------------------------------------------------------------------</span>
+<span class="c1"># reference Python implementation</span>
+
+
+<div class="viewcode-block" id="interpolate_c0"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.interpolate_c0">[docs]</a><span class="k">def</span> <span class="nf">interpolate_c0</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_basis</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,)</span>
+    <span class="k">return</span> <span class="n">_interpolate</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">get_basis</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="interpolate_c1"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.interpolate_c1">[docs]</a><span class="k">def</span> <span class="nf">interpolate_c1</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_basis</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span> <span class="o">-</span> <span class="n">time0</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">time0</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">time0</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_interpolate</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">get_basis</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="interpolate_c1d1"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.interpolate_c1d1">[docs]</a><span class="k">def</span> <span class="nf">interpolate_c1d1</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_basis</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">time</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">time0</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">time0</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="n">alpha</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_interpolate</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">get_basis</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_interpolate</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">get_basis</span><span class="p">,</span> <span class="n">extrapolate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">)</span>
+    <span class="n">time</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="n">t_shape</span><span class="p">,</span> <span class="n">c_shape</span> <span class="o">=</span> <span class="n">_simplify_shape</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">time0</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="n">order</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">full</span><span class="p">(</span><span class="n">t_shape</span> <span class="o">+</span> <span class="n">c_shape</span><span class="p">,</span> <span class="n">nan</span><span class="p">)</span>
+
+    <span class="c1"># lookup spline segment</span>
+    <span class="n">idx0</span> <span class="o">=</span> <span class="n">bisect</span><span class="p">(</span><span class="n">time0</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="n">BISECT_SIDE_RIGHT</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">clip</span><span class="p">(</span><span class="n">idx0</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">time0</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="n">order</span><span class="p">)</span>
+
+    <span class="c1"># get basis and perform its products with the coefficients</span>
+    <span class="n">basis</span> <span class="o">=</span> <span class="n">get_basis</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time0</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+
+    <span class="n">coeff</span> <span class="o">=</span> <span class="n">basis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">coeff0</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">offset</span><span class="p">,</span> <span class="n">basis_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">basis</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">coeff</span> <span class="o">+=</span> <span class="n">basis_i</span> <span class="o">*</span> <span class="n">coeff0</span><span class="p">[:,</span> <span class="n">idx</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span>
+
+    <span class="c1"># clear out of bounds values</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">extrapolate</span><span class="p">:</span>
+        <span class="n">coeff</span><span class="p">[:,</span> <span class="p">(</span><span class="n">idx0</span> <span class="o">!=</span> <span class="n">idx</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">time</span> <span class="o">!=</span> <span class="n">time0</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span> <span class="o">=</span> <span class="n">nan</span>
+
+    <span class="k">return</span> <span class="n">_restore_shape</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="n">t_shape</span><span class="p">,</span> <span class="n">c_shape</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_restore_shape</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="n">t_shape</span><span class="p">,</span> <span class="n">c_shape</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">asarray</span><span class="p">(</span><span class="n">coeff</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">t_shape</span> <span class="o">+</span> <span class="n">c_shape</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_simplify_shape</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">):</span>
+    <span class="n">t_shape</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+    <span class="n">c_shape</span> <span class="o">=</span> <span class="n">coeff0</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">coeff0</span> <span class="o">=</span> <span class="n">coeff0</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">prod</span><span class="p">(</span><span class="n">c_shape</span><span class="p">)</span> <span class="k">if</span> <span class="n">c_shape</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span> <span class="n">coeff0</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span>  <span class="n">time</span><span class="p">,</span> <span class="n">coeff0</span><span class="p">,</span> <span class="n">t_shape</span><span class="p">,</span> <span class="n">c_shape</span>
+
+
+<div class="viewcode-block" id="to_array"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.to_array">[docs]</a><span class="k">def</span> <span class="nf">to_array</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">asarray</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="clip"><a class="viewcode-back" href="../../../api/eoxmagmod.tests.html#eoxmagmod.tests.pymm_interp.clip">[docs]</a><span class="k">def</span> <span class="nf">clip</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">value_min</span><span class="p">,</span> <span class="n">value_max</span><span class="p">):</span>
+    <span class="n">values</span><span class="p">[</span><span class="n">values</span> <span class="o">&lt;</span> <span class="n">value_min</span><span class="p">]</span> <span class="o">=</span> <span class="n">value_min</span>
+    <span class="n">values</span><span class="p">[</span><span class="n">values</span> <span class="o">&gt;</span> <span class="n">value_max</span><span class="p">]</span> <span class="o">=</span> <span class="n">value_max</span>
+    <span class="k">return</span> <span class="n">values</span></div>
+
+<span class="c1">#-------------------------------------------------------------------------------</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, dolezalovat.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
