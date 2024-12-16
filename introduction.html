@@ -3,25 +3,23 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Search &mdash; VirES for Swarm - Magnetic Models, Coordinates and Other Utilities  documentation</title>
+  <title>Introduction &mdash; VirES for Swarm - Magnetic Models, Coordinates and Other Utilities  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
 
   
-    
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="_static/js/theme.js"></script>
-    <script src="_static/searchtools.js"></script>
-    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="#" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -36,7 +34,7 @@
             VirES for Swarm - Magnetic Models, Coordinates and Other Utilities
           </a>
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -71,8 +69,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Search</li>
+      <li class="breadcrumb-item active">Introduction</li>
       <li class="wy-breadcrumbs-aside">
+            <a href="_sources/introduction.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -80,18 +79,36 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <noscript>
-  <div id="fallback" class="admonition warning">
-    <p class="last">
-      Please activate JavaScript to enable the search functionality.
-    </p>
-  </div>
-  </noscript>
+  <section id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h1>
+<p>This is the documentation of the <code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> utility Python package used by
+the <em>VirES for Swarm</em> (<a class="reference external" href="https://vires.services">https://vires.services</a>) service for the calculation
+of:</p>
+<ul class="simple">
+<li><p>geomagnetic models (Spherical Harmonic expansion)</p></li>
+<li><p>magnetic coordinates (quasi-dipole and dipole latitude and longitude, magnetic local time)</p></li>
+<li><p>coordinate system conversions (geodetic, geocentric spherical, geocentric Cartesian coordinates)</p></li>
+<li><p>time conversions (modified Julian date 2000, decimal year)</p></li>
+<li><p>and other auxiliary calculations.</p></li>
+</ul>
+<p>This package has been developed and maintained as a collection of various
+performance-optimized support algorithms serving the VirES for Swarm service,
+usability and portability being our prime objective.</p>
+<p>Nonetheless, this packages if freely available to anybody under the terms of
+the <a class="reference internal" href="license.html"><span class="doc">MIT license</span></a>. This documentation then provides information
+about the installation and use of the module.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> is pre-installed in the <em>Swarm Virtual Research Environment</em>
+(<a class="reference external" href="https://vre.vires.services">https://vre.vires.services</a>), a JupyterHub instance dedicated to exploration
+of data provided by the VirES for Swarm service.
+See an <a class="reference external" href="https://notebooks.vires.services/notebooks/04b1_geomag-models-eoxmagmod">example Jupyter notebook</a>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> package may include 3rd party datasets. The package shall not
+be used as the primary source of these data. These datasets are added for
+for testing and may not be up-to-date.
+The package itself currently does not provide any means for the synchronization
+of these datasets.</p>
+<p>To report an issue create a ticket in the <a class="reference external" href="https://github.com/ESA-VirES/MagneticModel">Git repository</a>.</p>
+</section>
 
-  
-  <div id="search-results">
-  
-  </div>
 
            </div>
           </div>
@@ -117,14 +134,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-  <script>
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
-  </script>
-  
-  <script id="searchindexloader"></script>
-   
-
+  </script> 
 
 </body>
 </html>

@@ -1,0 +1,268 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; VirES for Swarm - Magnetic Models, Coordinates and Other Utilities  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="License" href="license.html" />
+    <link rel="prev" title="Introduction" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            VirES for Swarm - Magnetic Models, Coordinates and Other Utilities
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">VirES for Swarm</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/ESA-VirES/MagneticModel">Git Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://vires.services">VirES for Swarm Service</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://vre.vires.services">Swarm Virtual Research Environment (JupyterHub)</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://notebooks.vires.services">Example Swarm Notebooks</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://viresclient.readthedocs.io">VirES Python Client Documentaion</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#conda-installation">Conda Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generic-source-installation">Generic Source Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-installation">Test Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">VirES for Swarm - Magnetic Models, Coordinates and Other Utilities</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> packages is installed from sources. The sources can be
+obtained either from the <a class="reference external" href="https://github.com/ESA-VirES/MagneticModel/releases">releases</a> (<code class="docutils literal notranslate"><span class="pre">eoxmagmod-&lt;version&gt;.tar.gz</span></code>) or by
+cloning the <a class="reference external" href="https://github.com/ESA-VirES/MagneticModel">git repository</a> (latest development version).</p>
+<p>The sources contain these directories:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> -  containing the sources of the <code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> Python package</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">qdipole</span></code> - containing sources of the shared library calculating
+Quasi-Dipole apex coordinates (QD-latitude, QD-longitude, and Magnetic Local
+Time). This shared library is a dependency of the <code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> package.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">libcdf</span></code> - containing installator of the <a class="reference external" href="https://cdf.gsfc.nasa.gov/">NASA CDF library</a>.
+The installator script downloads its sources, builds and installs the shared
+library.  This shared library is a dependency of the <code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> package.</p></li>
+</ul>
+<p>The installation requires C and Fortran compilers and Make build tool.</p>
+<p>The package is tested to work on x86_64 GNU/Linux using GCC and GFortran
+compilers. Porting to other platforms should be technically possible, although
+formally not supported.</p>
+<section id="conda-installation">
+<h2>Conda Installation<a class="headerlink" href="#conda-installation" title="Permalink to this heading"></a></h2>
+<p><cite>Conda</cite> is package management system used for distribution of Python packages
+and their dependencies. Conda is part of the <a class="reference external" href="https://docs.anaconda.com/anaconda/">Anaconda</a> and <a class="reference external" href="https://docs.anaconda.com/miniconda/">Miniconda</a>
+installers.</p>
+<p>Due to the automatic handling of dependencies the Conda installation is simpler
+than the generic source installation.</p>
+<p>To install  <code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> in a Conda environment follow these steps:</p>
+<p>Before the start, change to the root source directory <code class="docutils literal notranslate"><span class="pre">MagneticModel/</span></code>.</p>
+<ol class="arabic">
+<li><p>Build the shared libraries:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="n">conda</span><span class="o">-</span><span class="n">build</span>  <span class="c1"># install build tools</span>
+<span class="n">conda</span> <span class="n">build</span> <span class="o">./</span><span class="n">qdipole</span>      <span class="c1"># build qdipole local binary installation package</span>
+<span class="n">conda</span> <span class="n">build</span> <span class="o">./</span><span class="n">libcdf</span>       <span class="c1"># build cdf local binary installation package</span>
+<span class="n">conda</span> <span class="n">build</span> <span class="n">purge</span>          <span class="c1"># remove build tools and artefacts</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p>The built packages can be listed with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">search</span> <span class="o">--</span><span class="n">use</span><span class="o">-</span><span class="n">local</span> <span class="o">--</span><span class="n">offline</span>
+</pre></div>
+</div>
+<p>The output may look like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Loading</span> <span class="n">channels</span><span class="p">:</span> <span class="n">done</span>
+<span class="c1"># Name                       Version           Build  Channel</span>
+<span class="n">cdf</span>                            <span class="mf">3.9.0</span>      <span class="n">h3218e01_0</span>  <span class="o">.../</span><span class="n">conda</span><span class="o">/</span><span class="n">conda</span><span class="o">-</span><span class="n">bld</span>
+<span class="n">qdipole</span>                        <span class="mf">0.6.0</span>      <span class="n">h3218e01_0</span>  <span class="o">.../</span><span class="n">conda</span><span class="o">/</span><span class="n">conda</span><span class="o">-</span><span class="n">bld</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Create a new Conda environment with the <code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> dependencies:</p></li>
+</ol>
+<p>The sources contain Conda environment file <code class="docutils literal notranslate"><span class="pre">conda_env.yaml</span></code>  defining all
+required dependencies. Its content may look like:</p>
+<div class="highlight-YAML notranslate"><div class="highlight"><pre><span></span><span class="nt">dependencies</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python &gt;=3.11,&lt;3.12</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">numpy &lt;2</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">scipy</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">matplotlib</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">h5py</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">conda-forge::c-compiler</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">conda-forge::fortran-compiler</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local::qdipole</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local::cdf</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">pip</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SpacePy &gt;0.5</span>
+</pre></div>
+</div>
+<p>Create a new Conda environment from the provided <code class="docutils literal notranslate"><span class="pre">conda_env.yaml</span></code> file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="o">&lt;</span><span class="n">environment</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">f</span> <span class="n">conda_env</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+<ol class="arabic" start="3">
+<li><p>Activate the new Conda environment and install the <code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> package:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="o">&lt;</span><span class="n">environment</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">./</span><span class="n">eoxmagmod</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="generic-source-installation">
+<h2>Generic Source Installation<a class="headerlink" href="#generic-source-installation" title="Permalink to this heading"></a></h2>
+<p>The installation requires the C (GCC) and Fortran (GFortran) compilers and
+the <cite>make</cite> build command.</p>
+<p>Before the start, change to the root source directory <code class="docutils literal notranslate"><span class="pre">MagneticModel/</span></code>.</p>
+<ol class="arabic">
+<li><p>Build and install CDF library:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">libcdf</span><span class="o">/</span>
+<span class="n">make</span> <span class="n">build</span>
+<span class="n">make</span> <span class="n">test</span>
+<span class="n">make</span> <span class="n">install</span>
+<span class="n">make</span> <span class="n">clean</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p>By default, the library is installed in <code class="docutils literal notranslate"><span class="pre">/usr/local/cdf</span></code> directory.
+To install it to a different path override the <code class="docutils literal notranslate"><span class="pre">INSTALLDIR</span></code> variable:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">install</span> <span class="n">INSTALLDIR</span><span class="o">=&lt;</span><span class="n">install</span> <span class="n">directory</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<ol class="arabic" start="2">
+<li><p>Build and install <code class="docutils literal notranslate"><span class="pre">qdipole</span></code> library:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">qdipole</span><span class="o">/</span>
+<span class="o">./</span><span class="n">configure</span>
+<span class="n">make</span> <span class="n">build</span>
+<span class="n">make</span> <span class="n">install</span>
+<span class="n">make</span> <span class="n">clean</span>
+<span class="n">make</span> <span class="n">test</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p>By default the <code class="docutils literal notranslate"><span class="pre">qdipole</span></code> library is installed in the <code class="docutils literal notranslate"><span class="pre">/usr</span></code> system directory.
+To install the library in a custom location use configuration with a custom prefix:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">configure</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=&lt;</span><span class="n">install</span> <span class="n">prefix</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<ol class="arabic" start="3">
+<li><p>Install other <code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> dependencies (assuming pure <code class="docutils literal notranslate"><span class="pre">pip</span></code> installation):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="s1">&#39;numpy&lt;2&#39;</span>
+<span class="n">pip3</span> <span class="n">install</span> <span class="n">scipy</span>
+<span class="n">pip3</span> <span class="n">install</span> <span class="s1">&#39;SpacePy&gt;0.5&#39;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<ol class="arabic" start="3">
+<li><p>Finally install <code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> package:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="o">./</span><span class="n">eoxmagmod</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="test-installation">
+<h2>Test Installation<a class="headerlink" href="#test-installation" title="Permalink to this heading"></a></h2>
+<p>To test the installation, leave the <code class="docutils literal notranslate"><span class="pre">MagneticModel</span></code> directory and run the
+test command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">..</span>      <span class="c1"># make sure you leave the MagneticModel directory!</span>
+<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">unittest</span> <span class="n">discover</span> <span class="o">-</span><span class="n">p</span> <span class="s1">&#39;[a-z]*.py&#39;</span> <span class="o">-</span><span class="n">v</span> <span class="n">eoxmagmod</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="license.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2024, EOX IT Services GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

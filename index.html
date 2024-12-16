@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to eoxmagmod documentation! &mdash; MagneticModel  documentation</title>
+  <title>Introduction &mdash; VirES for Swarm - Magnetic Models, Coordinates and Other Utilities  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
@@ -20,7 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="eoxmagmod" href="api/modules.html" /> 
+    <link rel="next" title="Installation" href="installation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -32,7 +32,7 @@
           
           
           <a href="#" class="icon icon-home">
-            MagneticModel
+            VirES for Swarm - Magnetic Models, Coordinates and Other Utilities
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -42,8 +42,18 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/modules.html">Module Reference</a></li>
+              <p class="caption" role="heading"><span class="caption-text">VirES for Swarm</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/ESA-VirES/MagneticModel">Git Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://vires.services">VirES for Swarm Service</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://vre.vires.services">Swarm Virtual Research Environment (JupyterHub)</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://notebooks.vires.services">Example Swarm Notebooks</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://viresclient.readthedocs.io">VirES Python Client Documentaion</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 </ul>
 
         </div>
@@ -52,7 +62,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">MagneticModel</a>
+          <a href="#">VirES for Swarm - Magnetic Models, Coordinates and Other Utilities</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -60,7 +70,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Welcome to eoxmagmod documentation!</li>
+      <li class="breadcrumb-item active">Introduction</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -70,24 +80,39 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="welcome-to-eoxmagmod-documentation">
-<h1>Welcome to eoxmagmod documentation!<a class="headerlink" href="#welcome-to-eoxmagmod-documentation" title="Permalink to this heading"></a></h1>
-<p>The <a href="#id1"><span class="problematic" id="id2">``</span></a>eoxmagmod``_ library collects low-level subroutines employed
-by the <a class="reference external" href="https://vires.service">VirES for Swarm</a> service to calculate:</p>
+  <section id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h1>
+<p>This is the documentation of the <code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> utility Python package used by
+the <em>VirES for Swarm</em> (<a class="reference external" href="https://vires.services">https://vires.services</a>) service for the calculation
+of:</p>
 <ul class="simple">
 <li><p>geomagnetic models (Spherical Harmonic expansion)</p></li>
 <li><p>magnetic coordinates (quasi-dipole and dipole latitude and longitude, magnetic local time)</p></li>
 <li><p>coordinate system conversions (geodetic, geocentric spherical, geocentric Cartesian coordinates)</p></li>
 <li><p>time conversions (modified Julian date 2000, decimal year)</p></li>
-<li><p>and perform other auxiliary calculations.</p></li>
+<li><p>and other auxiliary calculations.</p></li>
 </ul>
+<p>This package has been developed and maintained as a collection of various
+performance-optimized support algorithms serving the VirES for Swarm service,
+usability and portability being our prime objective.</p>
+<p>Nonetheless, this packages if freely available to anybody under the terms of
+the <a class="reference internal" href="license.html"><span class="doc">MIT license</span></a>. This documentation then provides information
+about the installation and use of the module.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> is pre-installed in the <em>Swarm Virtual Research Environment</em>
+(<a class="reference external" href="https://vre.vires.services">https://vre.vires.services</a>), a JupyterHub instance dedicated to exploration
+of data provided by the VirES for Swarm service.
+See an <a class="reference external" href="https://notebooks.vires.services/notebooks/04b1_geomag-models-eoxmagmod">example Jupyter notebook</a>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">eoxmagmod</span></code> package may include 3rd party datasets. The package shall not
+be used as the primary source of these data. These datasets are added for
+for testing and may not be up-to-date.
+The package itself currently does not provide any means for the synchronization
+of these datasets.</p>
+<p>To report an issue create a ticket in the <a class="reference external" href="https://github.com/ESA-VirES/MagneticModel">Git repository</a>.</p>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="api/modules.html">Module Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/eoxmagmod.html">eoxmagmod package</a></li>
-</ul>
-</li>
-</ul>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
 </div>
 </section>
 <section id="indices-and-tables">
@@ -103,13 +128,13 @@ by the <a class="reference external" href="https://vires.service">VirES for Swar
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="api/modules.html" class="btn btn-neutral float-right" title="eoxmagmod" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, dolezalovat.</p>
+    <p>&#169; Copyright 2022-2024, EOX IT Services GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
