@@ -39,7 +39,7 @@ jobs:
           mkdir -p ./test && cd ./test
           pip3 show -f eoxmagmod
           python3 -c 'import eoxmagmod' && python3 -m unittest discover -p '[a-z]*.py' -v eoxmagmod
-  notification:
+  testing-notification:
     runs-on: ubuntu-20.04
     if: ${{ always() }}
     needs: testing
@@ -53,24 +53,42 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         if: always()
-  deploy:
+  documentation-deployment:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - name: prepare docs
+      - name: Install
         run: |
           python3 --version
           sudo apt-get install gfortran
           sudo apt-get install libhdf5-dev
           ( cd libcdf && make build && sudo make install )
-          ( cd qdipole && ./configure && make build && sudo make install )
+          ( cd qdipole && ./configure && make build && sudo make install && make test )
+          pip3 install --upgrade pip
+          pip3 install wheel
           pip3 install scipy
+          pip3 install spacepy --no-build-isolation
           pip3 install ./eoxmagmod/
           pip3 install -r requirements-docs.txt
+      - name: Build Documentation
+        run: |
           make html BUILDDIR=../public -C docs
           mv ./public/html/* ./public/
-      - name: Deploy github pages
+      - name: Deploy GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: public
-  note:
+  documentation-deployment-notification:
+    runs-on: ubuntu-20.04
+    if: ${{ always() }}
+    needs: documentation-deployment
+    steps:
+      # send Slack notifications to the eox organization
+      - name: action-slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ needs.testing.result }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()
