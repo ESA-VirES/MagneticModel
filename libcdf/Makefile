@@ -2,11 +2,11 @@
 # install CDF library from sources
 #
 
-VERSION = 39_0
+VERSION = 39_1
 DIRNAME = ./cdf$(VERSION)-dist/
 FILENAME = ./cdf$(VERSION)-dist-cdf.tar.gz
 SOURCE_URL = https://spdf.gsfc.nasa.gov/pub/software/cdf/dist/cdf$(VERSION)/linux/cdf$(VERSION)-dist-cdf.tar.gz
-MD5CHECKSUM = 7c6489017be3aee20d6d99f562f952f6
+MD5CHECKSUM = 484cfdba8c93dbb1f7ad42b0b0df679b
 INSTALLDIR ?= /usr/local/cdf
 
 all: build
@@ -15,19 +15,19 @@ clean:
 	-rm -fR $(DIRNAME)
 
 install: build test
-	-make -C $(DIRNAME) INSTALLDIR=$(INSTALLDIR) install
+	make -C $(DIRNAME) INSTALLDIR=$(INSTALLDIR) install
 
 test: build
-	-make -C $(DIRNAME) test
+	make -C $(DIRNAME) test
 
 build: $(DIRNAME)
-	-make -C $(DIRNAME) OS=linux ENV=gnu CURSES=no all
+	make -C $(DIRNAME) OS=linux ENV=gnu CURSES=no all
 
 $(DIRNAME): $(FILENAME) md5check
-	-tar -xzf $(FILENAME)
+	tar -xzf $(FILENAME)
 
 md5check: $(FILENAME)
-	-echo $(MD5CHECKSUM) $(FILENAME) | md5sum -c
+	echo $(MD5CHECKSUM) $(FILENAME) | md5sum -c
 
 $(FILENAME):
-	-curl $(SOURCE_URL) > $(FILENAME)
+	curl $(SOURCE_URL) > $(FILENAME)
