@@ -3,4 +3,4 @@ recursive-exclude eoxmagmod *.pyc *.o
 recursive-include eoxmagmod *.c *.h
 recursive-include eoxmagmod/data *.txt *.shc *.cof *.COF
 recursive-include eoxmagmod/tests/data *.txt *.tsv
-recursive-include eoxmagmod/magnetic_models/tests/data *.txt *.cdf
+recursive-include eoxmagmod/magnetic_model/tests/data *.txt *.cdf

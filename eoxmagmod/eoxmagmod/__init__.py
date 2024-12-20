@@ -5,7 +5,7 @@
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
-# Copyright (C) 2014-2022 EOX IT Services GmbH
+# Copyright (C) 2014-2024 EOX IT Services GmbH
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -60,6 +60,7 @@ try:
     from .quasi_dipole_coordinates import (
         eval_qdlatlon, eval_mlt, eval_subsol,
         eval_qdlatlon_with_base_vectors,
+        QDIPOLE_VERSION,
     )
     from .solar_position import sunpos, sunpos_original
     from .dipole_coords import (
@@ -115,6 +116,7 @@ try:
         'eval_qdlatlon_with_base_vectors',
         'eval_mlt',
         'eval_subsol',
+        'QDIPOLE_VERSION',
         'sunpos',
         'sunpos_original',
         'decimal_year_to_mjd2000',
@@ -140,7 +142,7 @@ try:
 except ImportError:
     pass
 
-__version__ = '0.12.1'
+__version__ = '0.14.0'
 __author__ = 'Martin Paces (martin.paces@eox.at)'
-__copyright__ = 'Copyright (C) 2014-2022 EOX IT Services GmbH'
+__copyright__ = 'Copyright (C) 2014-2024 EOX IT Services GmbH'
 __licence__ = 'EOX licence (MIT style)'

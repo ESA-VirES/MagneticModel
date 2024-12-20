@@ -20,23 +20,23 @@ INSTALL_INC_DIR=${INSTALL_PREFIX}${INC_DIR}
 INSTALL_DOC_DIR=${INSTALL_PREFIX}${DOC_DIR}
 INSTALL_DATA_DIR=${INSTALL_PREFIX}${DATA_DIR}
 LIB_TARGET=libqdipole.so
-BIN_TARGET=qdipole_test subsol_test qdlatlon_test mlt_test
+BIN_TARGET=subsol_test qdlatlon_test mlt_test qdipole_info
 INC=
-HDR=cqdipole.h
-OBJ=cqdipole.o qdipole.o apex.o apexsh.o makeapexsh.o eval_subsol.o eval_qdlatlon.o eval_mlt.o
+HDR=cqdipole.h qdipole_conf.h
+OBJ=cqdipole.o apex.o apexsh.o makeapexsh.o eval_subsol.o eval_qdlatlon.o eval_mlt.o
 DOC=README
-DATA=apexsh_1980-2025.txt apexsh_1980-2020.txt apexsh_1995-2015.txt \
- test_result.apexsh_1980-2025.txt \
- test_result.apexsh_1980-2020.txt \
- test_result.apexsh_1995-2015.txt \
+DATA=apexsh_1980-2030.txt \
+ apexsh_1980-2025.txt \
+ apexsh_1980-2020.txt \
+ apexsh_1995-2015.txt \
+ test_result.qdlatlon.apexsh_1980-2030.txt \
  test_result.qdlatlon.apexsh_1980-2025.txt \
  test_result.qdlatlon.apexsh_1980-2020.txt \
  test_result.qdlatlon.apexsh_1995-2015.txt \
- test_result.mlt.apexsh_1980-2025.txt \
- test_result.mlt.apexsh_1980-2020.txt \
- test_result.mlt.apexsh_1995-2015.txt \
+ test_result.mlt.txt \
  test_result.subsol.txt
 MOD=alfbasismodule.mod apxshmodule.mod
+TEST=run_dipole_test
 
 %.o: %.c $(HDR)
 	$(CC) -c -o $@ $< $(CFLAGS)
@@ -48,12 +48,13 @@ all: build
 
 build: $(LIB_TARGET) $(BIN_TARGET)
 
-install: $(LIB_TARGET) $(BIN_TARGET) $(HDR) $(DOC) $(DATA)
+install: $(LIB_TARGET) $(BIN_TARGET) $(HDR) $(DOC) $(DATA) $(TEST)
 	mkdir -p $(INSTALL_LIB_DIR)
 	install -c -m 0755 $(LIB_TARGET) $(INSTALL_LIB_DIR)
 	[ "$(USER)" != "root" ] || ldconfig
 	mkdir -p $(INSTALL_BIN_DIR)
 	install -c -m 0755 $(BIN_TARGET) $(INSTALL_BIN_DIR)
+	install -c -m 0755 $(TEST) $(INSTALL_BIN_DIR)
 	mkdir -p $(INSTALL_INC_DIR)
 	install -c -m 0664 $(HDR) $(INSTALL_INC_DIR)
 	mkdir -p $(INSTALL_DOC_DIR)
@@ -61,14 +62,17 @@ install: $(LIB_TARGET) $(BIN_TARGET) $(HDR) $(DOC) $(DATA)
 	mkdir -p $(INSTALL_DATA_DIR)
 	install -c -m 0644 $(DATA) $(INSTALL_DATA_DIR)
 
+test: $(TEST)
+	$(INSTALL_BIN_DIR)/$(TEST) $(INSTALL_BIN_DIR) $(INSTALL_DATA_DIR)
+
 clean:
 	$(RM_FILE) $(OBJ) $(LIB_TARGET) $(BIN_TARGET) $(MOD)
 
 $(LIB_TARGET): $(OBJ)
 	$(LD) -o $(LIB_TARGET) $(OBJ) -shared -lm $(LDFLAGS)
 
-qdipole_test: $(LIB_TARGET) qdipole_test.c
-	$(CC) -o qdipole_test qdipole_test.c -lqdipole -L./ $(LDFLAGS)
+qdipole_info: qdipole_info.c
+	$(CC) -o qdipole_info qdipole_info.c -L./ $(LDFLAGS)
 
 qdlatlon_test: $(LIB_TARGET) qdlatlon_test.c
 	$(CC) -o qdlatlon_test qdlatlon_test.c -lqdipole -L./ $(LDFLAGS)

@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2016-2022 EOX IT Services GmbH
+ * Copyright (C) 2016-2024 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,6 +47,7 @@
 
 static PyObject* eval_subsol(PyObject *self, PyObject *args, PyObject *kwdict)
 {
+    int status;
     static char *keywords[] = {"time", NULL};
 
     PyObject *obj_time = NULL; // time object
@@ -78,12 +79,20 @@ static PyObject* eval_subsol(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     // evaluate the output values
-    c_eval_subsol(
+    status = c_eval_subsol(
         (double*) PyArray_DATA(arr_gdlat),
         (double*) PyArray_DATA(arr_gdlon),
         (double*) PyArray_DATA(arr_time),
         ndim == 0 ? 1 : dims[0]
     );
+
+    if (status) {
+        PyErr_Format(
+            PyExc_RuntimeError,
+            "Call to c_eval_subsol() failed with an error! error_code = %d", status
+        );
+        goto exit;
+    }
 
     if (NULL == (retval = Py_BuildValue("NN", (PyObject*) arr_gdlat, (PyObject*) arr_gdlon)))
         goto exit;

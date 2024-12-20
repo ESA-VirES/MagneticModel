@@ -3,7 +3,7 @@
 !  File Name: eval_subsol.f90
 !  Authors: Martin Paces <martin.paces@eox.at>
 !
-!  Date: 13-05-2016
+!  Date: 14-12-2024
 !  Version: 1.0
 !  Description:
 !      Evaluate sub-solar geographic latitude and longitude.
@@ -20,6 +20,7 @@
 !
 ! Latest changes:
 ! 13-05-2016: First version of the subroutine.
+! 14-12-2024: Correcting documentation.
 !
 !***********************************************************************
 !
@@ -50,13 +51,13 @@
       integer       iyr, imon, iday, idoy, ihour, imin
 
       do i = 1, n_data
-!        1. calculate civil date
+!        1. Calculate civil date
          call tmjd(iyr, imon, iday, ihour, imin, sec, t_mjd2k(i), -1)
-!        2. calculate mjd = nint(t_0) of first day of year 'iyr'
+!        2. Calculate mjd = nint(t_0) of first day of year 'iyr'
          call tmjd(iyr, 1, 1, 0, 0, 0.d0, t_0, 1)
-!        3. get day of year (doy)
+!        3. Get day of year (doy)
          idoy = int(t_mjd2k(i)) - nint(t_0) + 1
-!        4. evaluate the sub-solar lat/lon
+!        4. Evaluate the sub-solar lat/lon
          ssec = sec
          call subsol(iyr, idoy, ihour, imin, ssec, lat, lon)
          sbsllat(i) = lat

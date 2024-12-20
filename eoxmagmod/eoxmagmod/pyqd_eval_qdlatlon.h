@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2016-2022 EOX IT Services GmbH
+ * Copyright (C) 2016-2024 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,6 +57,7 @@
 
 static PyObject* eval_qdlatlon(PyObject *self, PyObject *args, PyObject *kwdict)
 {
+    int status;
     static char *keywords[] = {
         "gclat", "gclon", "gcrad", "time", "fname", "eval_base", NULL
     };
@@ -89,6 +90,16 @@ static PyObject* eval_qdlatlon(PyObject *self, PyObject *args, PyObject *kwdict)
         &obj_gclat, &obj_gclon, &obj_gcrad, &obj_time, &model_fname, &obj_flag
     ))
         goto exit;
+
+    // check the filename length
+    if (strlen(model_fname) > get_qdipole_max_fname_lenght()) {
+        PyErr_Format(
+            PyExc_RuntimeError,
+            "Filename is too long and exceeds the maximum allowed %d bytes! filename = %s",
+            get_qdipole_max_fname_lenght(), model_fname
+        );
+        goto exit;
+    }
 
     eval_base = obj_flag ? (1 == PyObject_IsTrue(obj_flag)) : 0;
 
@@ -148,7 +159,7 @@ static PyObject* eval_qdlatlon(PyObject *self, PyObject *args, PyObject *kwdict)
     // evaluate the output values
     if (eval_base)
     {
-        c_eval_qdlatlonvb(
+        status = c_eval_qdlatlonvb(
             (double*) PyArray_DATA(arr_qdlat),
             (double*) PyArray_DATA(arr_qdlon),
             (double*) PyArray_DATA(arr_f11),
@@ -163,10 +174,26 @@ static PyObject* eval_qdlatlon(PyObject *self, PyObject *args, PyObject *kwdict)
             ndim == 0 ? 1 : dims[0],
             model_fname
         );
+
+        if (status) {
+            PyErr_Format(
+                PyExc_RuntimeError,
+                "Call to c_eval_qdlatlonvb() failed with an error! error_code = %d", status
+            );
+            goto exit;
+        }
+
+        retval = Py_BuildValue(
+            "NNNNNNN", (PyObject*) arr_qdlat, (PyObject*) arr_qdlon,
+            (PyObject*) arr_f11, (PyObject*) arr_f12,
+            (PyObject*) arr_f21, (PyObject*) arr_f22,
+            (PyObject*) arr_f
+        );
+
     }
     else
     {
-        c_eval_qdlatlon(
+        status = c_eval_qdlatlon(
             (double*) PyArray_DATA(arr_qdlat),
             (double*) PyArray_DATA(arr_qdlon),
             (double*) PyArray_DATA(arr_time),
@@ -176,19 +203,15 @@ static PyObject* eval_qdlatlon(PyObject *self, PyObject *args, PyObject *kwdict)
             ndim == 0 ? 1 : dims[0],
             model_fname
         );
-    }
 
-    if (eval_base)
-    {
-        retval = Py_BuildValue(
-            "NNNNNNN", (PyObject*) arr_qdlat, (PyObject*) arr_qdlon,
-            (PyObject*) arr_f11, (PyObject*) arr_f12,
-            (PyObject*) arr_f21, (PyObject*) arr_f22,
-            (PyObject*) arr_f
-        );
-    }
-    else
-    {
+        if (status) {
+            PyErr_Format(
+                PyExc_RuntimeError,
+                "Call to c_eval_qdlatlon() failed with an error! error_code = %d", status
+            );
+            goto exit;
+        }
+
         retval = Py_BuildValue(
             "NN", (PyObject*) arr_qdlat, (PyObject*) arr_qdlon
         );

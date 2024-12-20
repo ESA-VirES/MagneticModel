@@ -33,7 +33,7 @@ from numpy.testing import assert_equal
 from eoxmagmod.magnetic_model.parser_shc import parse_shc_file, parse_shc_header
 from eoxmagmod.data import (
     CHAOS_CORE_LATEST, CHAOS_CORE_PREDICTION_LATEST, CHAOS_STATIC_LATEST,
-    IGRF12, IGRF13, SIFM, LCS1, MF7,
+    IGRF12, IGRF13, IGRF14, IGRF_LATEST, SIFM, LCS1, MF7,
 )
 
 
@@ -103,6 +103,26 @@ class TestSHCParser(TestCase):
             "nstep": 1,
         })
 
+    def test_parse_shc_file_igrf14(self):
+        data = self.parse(IGRF14)
+        self._assert_valid(data, {
+            "degree_min": 1,
+            "degree_max": 13,
+            "spline_order": 2,
+            "ntime": 27,
+            "nstep": 1,
+        })
+
+    def test_parse_shc_file_igrf_last(self):
+        data = self.parse(IGRF_LATEST)
+        self._assert_valid(data, {
+            "degree_min": 1,
+            "degree_max": 13,
+            "spline_order": 2,
+            "ntime": 27,
+            "nstep": 1,
+        })
+
     def test_parse_shc_header_igrf12(self):
         self._test_header(IGRF12)
 
@@ -112,7 +132,7 @@ class TestSHCParser(TestCase):
             "degree_min": 1,
             "degree_max": 20,
             "spline_order": 6,
-            "ntime": 251,
+            "ntime": 281,
             "nstep": 5,
         })
 
@@ -139,7 +159,7 @@ class TestSHCParser(TestCase):
             "degree_max": 185,
             "spline_order": 1,
             "ntime": 1,
-            "nstep": 1,
+            "nstep": 0,
         })
 
     def test_parse_shc_header_chaos_static(self):

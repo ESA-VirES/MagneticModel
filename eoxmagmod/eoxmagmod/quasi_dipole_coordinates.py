@@ -5,7 +5,7 @@
 # Author: Martin Paces <martin.paces@eox.at>
 #
 #-------------------------------------------------------------------------------
-# Copyright (C) 2015 EOX IT Services GmbH
+# Copyright (C) 2015-2024 EOX IT Services GmbH
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -28,17 +28,19 @@
 
 from os.path import isfile
 from . import _pyqd
-from .data import APEX
+from .data import APEX_LATEST
 
 __all__ = [
     "eval_qdlatlon",
     "eval_qdlatlon_with_base_vectors",
     "eval_mlt",
     "eval_subsol",
+    "QDIPOLE_VERSION",
 ]
 
+QDIPOLE_VERSION = _pyqd.QDIPOLE_VERSION
 
-def eval_qdlatlon(gclat, gclon, gcrad, time, fname=APEX):
+def eval_qdlatlon(gclat, gclon, gcrad, time, fname=APEX_LATEST):
     """
           Evaluate magnetic quasi-dipole coordinates a single or multiple input
           points.
@@ -59,7 +61,7 @@ def eval_qdlatlon(gclat, gclon, gcrad, time, fname=APEX):
     return _pyqd.eval_qdlatlon(gclat, gclon, gcrad, time, fname)
 
 
-def eval_qdlatlon_with_base_vectors(gclat, gclon, gcrad, time, fname=APEX):
+def eval_qdlatlon_with_base_vectors(gclat, gclon, gcrad, time, fname=APEX_LATEST):
     """
           Evaluate magnetic quasi-dipole coordinates a single or multiple input
           coordinates.
@@ -85,21 +87,18 @@ def eval_qdlatlon_with_base_vectors(gclat, gclon, gcrad, time, fname=APEX):
     return _pyqd.eval_qdlatlon(gclat, gclon, gcrad, time, fname, True)
 
 
-def eval_mlt(qdlon, time, fname=APEX):
+def eval_mlt(qdlon, time):
     """
           Evaluate magnetic local time for given quasi dipole longitudes.
 
           Inputs:
             qdlon - quasi-dipole longitudes(s).
             time  - MJD2000 time(s)
-            fname - file-name of the model text file.
 
           Outputs:
             mlt - magnetic local time(s).
     """
-    if not isfile(fname):
-        raise IOError(f"File not found! fname={fname!r}")
-    return _pyqd.eval_mlt(qdlon, time, fname)
+    return _pyqd.eval_mlt(qdlon, time)
 
 
 def eval_subsol(time):

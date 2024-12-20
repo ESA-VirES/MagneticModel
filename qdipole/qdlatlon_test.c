@@ -6,7 +6,7 @@
  * Author: Martin Paces <martin.paces@eox.at>
  *
  *-----------------------------------------------------------------------------
- * Copyright (C) 2016 EOX IT Services GmbH
+ * Copyright (C) 2016-2024 EOX IT Services GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,28 +28,47 @@
  *-----------------------------------------------------------------------------
 */
 #include <stdio.h>
+#include <string.h>
 #include "cqdipole.h"
 
-#define N 3
+#define N 6
+
+const char *basename(char const *path)
+{
+    const char *position = strrchr(path, '/');
+    if (position != NULL)
+    {
+        return position + 1;
+    }
+    return path;
+}
+
 
 int main(int argc, char* argv[])
 {
+    int status;
     int i;
     int n_data = N;
-    double time[N] = { 2012.5, 2013.5, 2014.5 };
-    double gclat[N] = { 0.0, 30.0, 75.0 };
-    double gclon[N] = { 0.0, 45.0, -90.0 };
-    double gcrad[N] = { 7000.0, 6371.0, 6371.0 };
+    double time[N] = { 2012.5, 2013.5, 2014.5, 2019.5, 2024.5, 2029.5 };
+    double gclat[N] = { 0.0, 30.0, 75.0, -70.0, -30.0, 80.0 };
+    double gclon[N] = { 0.0, 45.0, -90.0, 90.0, -45.0, 120.0 };
+    double gcrad[N] = { 7000.0, 6371.0, 6371.0, 6371.0, 6371.0, 7371.0 };
     double qdlon1[N], qdlat1[N];
     double qdlon2[N], qdlat2[N];
     double f11[N], f12[N], f21[N], f22[N], f[N];
-    const char *fname = "apexsh_1980-2025.txt";
+    const char *fname = "apexsh_1980-2030.txt";
 
     if (argc > 1)
     {
         fname = argv[1];
     }
-    printf("Using: %s\n", fname);
+    printf("Using: %s\n", basename(fname));
+
+    if (strlen(fname) > get_qdipole_max_fname_lenght())
+    {
+        fprintf(stderr, "ERROR: Filename is too long and exceeds the maximum allowed %d bytes! filename = %s\n", get_qdipole_max_fname_lenght(), fname);
+        return 1;
+    }
 
     for (i = 0; i < N; ++i)
     {
@@ -64,9 +83,20 @@ int main(int argc, char* argv[])
         f[i] = 0.0;
     }
 
-    c_eval_qdlatlon(qdlat1, qdlon1, time, gcrad, gclat, gclon, n_data, fname);
-    c_eval_qdlatlonvb(qdlat2, qdlon2, f11, f12, f21, f22, f,
+    status = c_eval_qdlatlon(qdlat1, qdlon1, time, gcrad, gclat, gclon, n_data, fname);
+
+    if (status) {
+        fprintf(stderr, "ERROR: Call to c_eval_qdlatlon() failed with an error! error_code = %d\n", status);
+        return 1;
+    }
+
+    status = c_eval_qdlatlonvb(qdlat2, qdlon2, f11, f12, f21, f22, f,
                time, gcrad, gclat, gclon, n_data, fname);
+
+    if (status) {
+        fprintf(stderr, "ERROR: Call to c_eval_qdlatlonvb() failed with an error! error_code = %d\n", status);
+        return 1;
+    }
 
     for (i = 0; i < N; ++i)
     {

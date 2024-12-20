@@ -1,0 +1,40 @@
+#!/bin/bash
+#
+#  Execute qdipole tests.
+
+BIN_PATH="$1${1:+/}"
+DATA_PATH="$2${2:+/}"
+
+run_test() {
+    EXPECTED_RESULT="$1"
+    shift
+    echo -n "$@" " "
+    TEST_OUTPUT="$( "$@" 2>&1 )"
+    if [ "$?" != "0" ]
+    then
+        echo "FAILED"
+        echo $TEST_OUTPUT
+        return 1
+    fi
+
+    TEST_OUTPUT_DIFF="$( echo "$TEST_OUTPUT" | diff - "$EXPECTED_RESULT" )"
+    if [ "$?" != "0" -o -n "$TEST_OUTPUT_DIFF" ]
+    then
+        echo "FAILED"
+        echo $TEST_OUTPUT_DIFF
+        return 1
+    fi
+    echo "OK"
+    return 0
+}
+
+STATUS="0"
+qdipole_info ; STATUS=$((STATUS + $?))
+run_test "${DATA_PATH}test_result.qdlatlon.apexsh_1995-2015.txt" "${BIN_PATH}qdlatlon_test" "${DATA_PATH}apexsh_1995-2015.txt" ; STATUS=$((STATUS + $?))
+run_test "${DATA_PATH}test_result.qdlatlon.apexsh_1980-2020.txt" "${BIN_PATH}qdlatlon_test" "${DATA_PATH}apexsh_1980-2020.txt" ; STATUS=$((STATUS + $?))
+run_test "${DATA_PATH}test_result.qdlatlon.apexsh_1980-2025.txt" "${BIN_PATH}qdlatlon_test" "${DATA_PATH}apexsh_1980-2025.txt" ; STATUS=$((STATUS + $?))
+run_test "${DATA_PATH}test_result.qdlatlon.apexsh_1980-2030.txt" "${BIN_PATH}qdlatlon_test" "${DATA_PATH}apexsh_1980-2030.txt" ; STATUS=$((STATUS + $?))
+run_test "${DATA_PATH}test_result.mlt.txt" "${BIN_PATH}mlt_test" ; STATUS=$((STATUS + $?))
+run_test "${DATA_PATH}test_result.subsol.txt" "${BIN_PATH}subsol_test" ; STATUS=$((STATUS + $?))
+
+exit $STATUS

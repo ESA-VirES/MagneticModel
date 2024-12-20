@@ -46,6 +46,9 @@
 /* sub-solar point coordinates evaluation */
 #include "pyqd_eval_subsol.h"
 
+/* qdipole API */
+#include "qdipole/cqdipole.h"
+
 /*---------------------------------------------------------------------------*/
 /* module's doc string */
 
@@ -80,9 +83,10 @@ static PyObject* init_module(void)
 
     /* metadata */
     set_dict_item_str_str(dict, "__author__", "Martin Paces (martin.paces@eox.at)");
-    set_dict_item_str_str(dict, "__copyright__", "Copyright (C) 2015-2022 EOX IT Services GmbH");
+    set_dict_item_str_str(dict, "__copyright__", "Copyright (C) 2015-2024 EOX IT Services GmbH");
     set_dict_item_str_str(dict, "__licence__", "EOX licence (MIT style)");
     set_dict_item_str_str(dict, "__version__", VERSION);
+    set_dict_item_str_str(dict, "QDIPOLE_VERSION", get_qdipole_version());
 
   exit:
     return module;

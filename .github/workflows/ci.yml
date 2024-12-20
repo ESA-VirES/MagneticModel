@@ -27,7 +27,7 @@ jobs:
       - name: Install
         run: |
           ( cd libcdf && make build && sudo make install )
-          ( cd qdipole && ./configure && make build && sudo make install )
+          ( cd qdipole && ./configure && make build && sudo make install && make test )
           pip3 install --upgrade pip
           pip3 install wheel
           pip3 install scipy
