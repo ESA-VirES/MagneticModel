@@ -6,7 +6,7 @@ VERSION = 39_1
 DIRNAME = ./cdf$(VERSION)-dist/
 FILENAME = ./cdf$(VERSION)-dist-cdf.tar.gz
 SOURCE_URL = https://spdf.gsfc.nasa.gov/pub/software/cdf/dist/cdf$(VERSION)/linux/cdf$(VERSION)-dist-cdf.tar.gz
-MD5CHECKSUM = 484cfdba8c93dbb1f7ad42b0b0df679b
+MD5CHECKSUM = 88fbb3f612ba802e5846a00bcae0632a
 INSTALLDIR ?= /usr/local/cdf
 
 all: build
