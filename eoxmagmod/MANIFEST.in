@@ -1,4 +1,5 @@
 include MANIFEST.in
+prune */__pycache__
 recursive-exclude eoxmagmod *.pyc *.o
 recursive-include eoxmagmod *.c *.h
 recursive-include eoxmagmod/data *.txt *.shc *.cof *.COF
