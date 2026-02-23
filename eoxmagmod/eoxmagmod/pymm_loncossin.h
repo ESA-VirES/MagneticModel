@@ -75,7 +75,6 @@ static PyObject* loncossin(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
     }
 
-
     // cast the input object to an array
     if (NULL == (arr_lon = _get_as_double_array(obj_lon, 0, 0, NPY_ARRAY_ALIGNED, keywords[0])))
         goto exit;

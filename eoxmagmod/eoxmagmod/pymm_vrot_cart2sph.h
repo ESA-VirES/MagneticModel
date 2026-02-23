@@ -92,6 +92,7 @@ static void _vrot_cart2sph(ARRAY_DATA ad_i, ARRAY_DATA ad_lat,
 static PyObject* vrot_cart2sph(PyObject *self, PyObject *args, PyObject *kwdict)
 {
     static char *keywords[] = {"arr_in", "arr_lat", "arr_lon", NULL};
+
     PyObject *obj_in = NULL; // input object
     PyObject *obj_lat = NULL; // input object
     PyObject *obj_lon = NULL; // input object

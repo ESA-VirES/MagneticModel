@@ -241,4 +241,3 @@ static PyObject* eval_qdlatlon(PyObject *self, PyObject *args, PyObject *kwdict)
 }
 
 #endif  /* PYQD_EVAL_QDLATLON_H */
-

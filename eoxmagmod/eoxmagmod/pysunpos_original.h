@@ -169,22 +169,22 @@ static PyObject* pysunpos_sunpos_original(PyObject *self, PyObject *args, PyObje
     if (NULL == (arr_mjd = _get_as_double_array(obj_mjd, 0, 0, NPY_ARRAY_ALIGNED, keywords[0])))
         goto exit;
 
-    if (NULL == (arr_lat = _get_as_double_array(obj_lat, 0, 0, NPY_ARRAY_ALIGNED, keywords[0])))
+    if (NULL == (arr_lat = _get_as_double_array(obj_lat, 0, 0, NPY_ARRAY_ALIGNED, keywords[1])))
         goto exit;
 
-    if (NULL == (arr_lon = _get_as_double_array(obj_lon, 0, 0, NPY_ARRAY_ALIGNED, keywords[0])))
+    if (NULL == (arr_lon = _get_as_double_array(obj_lon, 0, 0, NPY_ARRAY_ALIGNED, keywords[2])))
         goto exit;
 
-    if (NULL == (arr_rad = _get_as_double_array(obj_rad, 0, 0, NPY_ARRAY_ALIGNED, keywords[0])))
+    if (NULL == (arr_rad = _get_as_double_array(obj_rad, 0, 0, NPY_ARRAY_ALIGNED, keywords[3])))
         goto exit;
 
-    if (NULL == (arr_dtt = _get_as_double_array(obj_dtt, 0, 0, NPY_ARRAY_ALIGNED, keywords[0])))
+    if (NULL == (arr_dtt = _get_as_double_array(obj_dtt, 0, 0, NPY_ARRAY_ALIGNED, keywords[4])))
         goto exit;
 
-    if (NULL == (arr_pres = _get_as_double_array(obj_pres, 0, 0, NPY_ARRAY_ALIGNED, keywords[0])))
+    if (NULL == (arr_pres = _get_as_double_array(obj_pres, 0, 0, NPY_ARRAY_ALIGNED, keywords[5])))
         goto exit;
 
-    if (NULL == (arr_temp = _get_as_double_array(obj_temp, 0, 0, NPY_ARRAY_ALIGNED, keywords[0])))
+    if (NULL == (arr_temp = _get_as_double_array(obj_temp, 0, 0, NPY_ARRAY_ALIGNED, keywords[6])))
         goto exit;
 
     // check the array dimensions and allocate the output array

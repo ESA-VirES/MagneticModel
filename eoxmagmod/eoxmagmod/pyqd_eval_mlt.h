@@ -66,17 +66,17 @@ static PyObject* eval_mlt(PyObject *self, PyObject *args, PyObject *kwdict)
     #define NPY_REQ (NPY_ARRAY_ALIGNED|NPY_ARRAY_C_CONTIGUOUS)
 
     // cast the objects to arrays
-    if (NULL == (arr_qdlon = _get_as_double_array(obj_qdlon, 0, 1, NPY_REQ, keywords[1])))
+    if (NULL == (arr_qdlon = _get_as_double_array(obj_qdlon, 0, 1, NPY_REQ, keywords[0])))
         goto exit;
 
-    if (NULL == (arr_time = _get_as_double_array(obj_time, 0, 1, NPY_REQ, keywords[3])))
+    if (NULL == (arr_time = _get_as_double_array(obj_time, 0, 1, NPY_REQ, keywords[1])))
         goto exit;
 
     // check the dimensions
     npy_intp ndim = PyArray_NDIM(arr_qdlon);
     npy_intp *dims = PyArray_DIMS(arr_qdlon);
 
-    if(_check_arr_dims_all_eq(arr_time, ndim, dims, keywords[3]))
+    if(_check_arr_dims_all_eq(arr_time, ndim, dims, keywords[1]))
         goto exit;
 
     // create the output arrays

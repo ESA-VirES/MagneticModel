@@ -178,21 +178,21 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
     is_internal = (obj_is_internal == NULL) || PyObject_IsTrue(obj_is_internal);
 
     // check the type of the coordinate transformation
-    if (CT_INVALID == _check_coord_type(ct_in, keywords[4]))
+    if (CT_INVALID == _check_coord_type(ct_in, keywords[2]))
         goto exit;
 
-    if (CT_INVALID == _check_coord_type(ct_out, keywords[5]))
+    if (CT_INVALID == _check_coord_type(ct_out, keywords[3]))
         goto exit;
 
     // check the operation mode
-    if (SM_INVALID == _check_sheval_mode(mode, keywords[6]))
+    if (SM_INVALID == _check_sheval_mode(mode, keywords[4]))
         goto exit;
 
     // cast the objects to arrays
     if (NULL == (arr_x = _get_as_double_array(obj_x, 1, 0, NPY_ARRAY_ALIGNED, keywords[0])))
         goto exit;
 
-    if (NULL == (arr_coef = _get_as_double_array(obj_coef, 2, 0, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_IN_ARRAY, keywords[2])))
+    if (NULL == (arr_coef = _get_as_double_array(obj_coef, 2, 0, NPY_ARRAY_C_CONTIGUOUS|NPY_ARRAY_IN_ARRAY, keywords[1])))
         goto exit;
 
     // extract degree from the array dimensions
@@ -205,14 +205,14 @@ static PyObject* sheval(PyObject *self, PyObject *args, PyObject *kwdict)
         npy_intp max_degree;
         int arg_idx;
 
-         _get_max_degree(&arg_idx, &max_degree, degrees, ndegrees);
+        _get_max_degree(&arg_idx, &max_degree, degrees, ndegrees);
 
         if (max_degree < 0)
         {
             PyErr_Format(
                 PyExc_ValueError,
                 "Negative degree due to empty %s array!",
-                keywords[arg_idx+1]
+                keywords[1]
             );
             goto exit;
         }
@@ -504,7 +504,7 @@ static void _model_eval(
     const double (*coeff)[2], MODEL *model, const int mode
 )
 {
-    double glat, glon, ghgt;
+    double glat = NAN, glon, ghgt;
     double clat, clon, crad;
     double flat, flon, frad;
     double tmp;

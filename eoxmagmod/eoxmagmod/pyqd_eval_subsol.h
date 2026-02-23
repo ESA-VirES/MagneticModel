@@ -111,5 +111,3 @@ static PyObject* eval_subsol(PyObject *self, PyObject *args, PyObject *kwdict)
 }
 
 #endif  /* PYQD_EVAL_SUBSOL_H */
-
-
