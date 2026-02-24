@@ -30,10 +30,12 @@
 
 import sys
 from os.path import join
-from distutils.core import setup
-from distutils.extension import Extension
-import eoxmagmod
+from setuptools import setup, Extension
+import numpy
 
+
+# NOTE: currently, there seems to be no way how to dynamically
+#       generate include paths with setuptools and pyproject.toml
 
 COMMON_INCLUDE_DIRS = [
     './eoxmagmod',
@@ -41,55 +43,14 @@ COMMON_INCLUDE_DIRS = [
     join(sys.prefix, 'include'),
 ]
 
-try:
-    import numpy
-    COMMON_INCLUDE_DIRS.append(numpy.get_include())
-except ImportError:
-    pass
+COMMON_LIBRARY_DIRS = [
+    join(sys.prefix, 'lib'),
+]
+
+COMMON_INCLUDE_DIRS.append(numpy.get_include())
+
 
 setup(
-    name="eoxmagmod",
-    description="Earth magnetic field utilities.",
-    author="Martin Paces",
-    author_email="martin.paces@eox.at",
-    classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Intended Audience :: Science/Research',
-        'Operating System :: POSIX',
-        'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: Implementation :: CPython',
-        'Topic :: Scientific/Engineering :: Physics',
-        'Topic :: Utilities',
-    ],
-    install_requires=[
-        'numpy>=1.13.0',
-        'spacepy',
-    ],
-    packages=[
-        'eoxmagmod',
-        'eoxmagmod.data',
-        'eoxmagmod.tests',
-        'eoxmagmod.tests.data',
-        'eoxmagmod.magnetic_model',
-        'eoxmagmod.magnetic_model.tests',
-        'eoxmagmod.magnetic_model.tests.data',
-    ],
-    license='EOX licence (MIT style)',
-    version=eoxmagmod.__version__,
-    package_data={
-        'eoxmagmod': [
-            'data/*',
-            'tests/data/*.tsv',
-            'magnetic_model/tests/data/*.txt',
-            'magnetic_model/tests/data/*.cdf',
-        ],
-    },
     ext_modules=[
         Extension(
             'eoxmagmod._pymm',
@@ -106,7 +67,7 @@ setup(
                 'eoxmagmod/pyqd.c',
             ],
             libraries=['qdipole'],
-            library_dirs=[],
+            library_dirs=COMMON_LIBRARY_DIRS,
             include_dirs=COMMON_INCLUDE_DIRS,
         ),
         Extension(
