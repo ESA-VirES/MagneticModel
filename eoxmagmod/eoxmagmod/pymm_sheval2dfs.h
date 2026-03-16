@@ -240,9 +240,8 @@ static PyObject* sheval2dfs(PyObject *self, PyObject *args, PyObject *kwdict)
     }
 
     // check the last dimension of the position array
-    if (_check_array_dim_eq(arr_x, -1, 3, keywords[0]))
+    if (_check_array_dim_eq(arr_x, -1, 3, keywords[2]))
         goto exit;
-
 
     // parse coefficient set
     _f2d_coefset_parse(&coefset, keywords[3], obj_coef_set);

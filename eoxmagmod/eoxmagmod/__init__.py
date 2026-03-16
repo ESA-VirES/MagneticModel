@@ -142,7 +142,7 @@ try:
 except ImportError:
     pass
 
-__version__ = '0.14.0'
+__version__ = '0.15.0'
 __author__ = 'Martin Paces (martin.paces@eox.at)'
-__copyright__ = 'Copyright (C) 2014-2024 EOX IT Services GmbH'
+__copyright__ = 'Copyright (C) 2014-2026 EOX IT Services GmbH'
 __licence__ = 'EOX licence (MIT style)'

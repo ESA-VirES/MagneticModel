@@ -162,8 +162,8 @@ static PyObject* convert(PyObject *self, PyObject *args, PyObject *kwdict)
         goto exit;
 
     // check the type of the coordinate transformation
-    if (CT_INVALID == _check_coord_type(ct_in, keywords[0])) goto exit;
-    if (CT_INVALID == _check_coord_type(ct_out, keywords[1])) goto exit;
+    if (CT_INVALID == _check_coord_type(ct_in, keywords[1])) goto exit;
+    if (CT_INVALID == _check_coord_type(ct_out, keywords[2])) goto exit;
 
     // cast the input object to an array
     if (NULL == (arr_in=_get_as_double_array(obj_in, 1, 0, NPY_ARRAY_ALIGNED, keywords[0])))

@@ -88,6 +88,7 @@ static void _vrot_sph2geod(ARRAY_DATA ad_i, ARRAY_DATA ad_dlat,
 static PyObject* vrot_sph2geod(PyObject *self, PyObject *args, PyObject *kwdict)
 {
     static char *keywords[] = {"arr_in", "arr_dlat", NULL};
+
     PyObject *obj_in = NULL; // input object
     PyObject *obj_dlat = NULL; // input object
     PyArrayObject *arr_in = NULL; // input array

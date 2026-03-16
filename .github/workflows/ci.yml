@@ -2,20 +2,17 @@ name: CI
 on: push
 jobs:
   testing:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          - python: '3.6'
-          - python: '3.7'
-          - python: '3.8'
-          - python: '3.9'
           - python: '3.10'
           - python: '3.11'
-          #- python: '3.12' # broken - no distutils - test again with SpacePy >= 0.5.0
+          - python: '3.12'
+          - python: '3.13'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python }}
@@ -30,8 +27,9 @@ jobs:
           ( cd qdipole && ./configure && make build && sudo make install && make test )
           pip3 install --upgrade pip
           pip3 install wheel
+          pip3 install numpy
           pip3 install scipy
-          pip3 install spacepy --no-build-isolation
+          pip3 install spacepy
           pip3 install ./eoxmagmod/
       - name: Scripts
         run: |
@@ -40,16 +38,20 @@ jobs:
           pip3 show -f eoxmagmod
           python3 -c 'import eoxmagmod' && python3 -m unittest discover -p '[a-z]*.py' -v eoxmagmod
   notification:
-    runs-on: ubuntu-20.04
-    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    permissions: {}
     needs: testing
     steps:
-      # send Slack notifications to the eox organization
+      # send Slack notifications
       - name: action-slack
-        uses: 8398a7/action-slack@v3
+        uses: slackapi/slack-github-action@v2.1.1
         with:
-          status: ${{ needs.testing.result }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: always()
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "Workflow ${{ github.workflow }} completed with status: ${{ needs.testing.result }}"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "*Repo:* ${{ github.repository }}\n*Commit:* ${{ github.sha }}\n*Author:* ${{ github.actor }}\n*Ref:* ${{ github.ref }}\n*Status:* ${{ needs.testing.result }}"

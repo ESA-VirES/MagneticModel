@@ -237,7 +237,7 @@ static PyObject* shevaltemp(PyObject *self, PyObject *args, PyObject *kwdict)
 
         for (i = 0; i < n; ++i)
         {
-            if(parse_coefset(&coefsets[i], keywords[3], i, PyList_GetItem(obj_coef_list, i)))
+            if(parse_coefset(&coefsets[i], keywords[2], i, PyList_GetItem(obj_coef_list, i)))
                 goto exit;
 
             ncoefset += 1;
