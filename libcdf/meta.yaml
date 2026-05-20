@@ -17,7 +17,7 @@ package:
 
 source:
   - url: https://spdf.gsfc.nasa.gov/pub/software/cdf/dist/{{ file_version }}/unix/{{ file_version }}-dist-cdf.tar.gz
-    sha256: d548789117c52fcd4d08be5f432c86ae927e182d3876e800cd4ca98e5f7fa5e7
+    sha256: f9574315a028e8f71257fd55c375639c95fea607a5df70fb6629dc1e22adc68b
 
 requirements:
   build:
