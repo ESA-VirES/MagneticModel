@@ -2,11 +2,11 @@
 # install CDF library from sources
 #
 
-VERSION = 39_1
-DIRNAME = ./cdf$(VERSION)-dist/
+VERSION = 39_2
+DIRNAME = ./cdf$(VERSION)-dist-main/
 FILENAME = ./cdf$(VERSION)-dist-cdf.tar.gz
 SOURCE_URL = https://spdf.gsfc.nasa.gov/pub/software/cdf/dist/cdf$(VERSION)/linux/cdf$(VERSION)-dist-cdf.tar.gz
-MD5CHECKSUM = 866ab89015bbafccde576714f9530e7b
+MD5CHECKSUM = dc4bae18dd035ed7bcdeeca9ebc5f639
 INSTALLDIR ?= /usr/local/cdf
 
 all: build
@@ -15,13 +15,14 @@ clean:
 	-rm -fR $(DIRNAME)
 
 install: build test
-	make -C $(DIRNAME) INSTALLDIR=$(INSTALLDIR) install
+	touch $(DIRNAME)/README_cdf_tools.txt # 3.9.2 error - missing file
+	make -C $(DIRNAME) INSTALLDIR=$(INSTALLDIR) install -f Makefile-classic
 
 test: build
-	make -C $(DIRNAME) test
+	make -C $(DIRNAME) test -f Makefile-classic
 
 build: $(DIRNAME)
-	make -C $(DIRNAME) OS=linux ENV=gnu CURSES=no all
+	make -C $(DIRNAME) OS=linux ENV=gnu CURSES=no all -f Makefile-classic
 
 $(DIRNAME): $(FILENAME) md5check
 	tar -xzf $(FILENAME)
